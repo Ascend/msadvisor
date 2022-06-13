@@ -105,58 +105,77 @@ function collect_profiling() {
     done
 }
 
-function collect_inference_data() {
-    if [ -z "$model_convert_cmd" ]; then
-        # check .om and .cce
-        model_path="${data_out}/project/*.om"
-        if [ ! -f "$model_path" ]; then
-            print_log $ERROR "model not exist, "
-            exit 1
-        fi
-        cce_dir="${data_out}/project/kernel_meta"
-        if [ ! -d "$cce_dir" ]; then
-            print_log $ERROR "cce directory not exist."
-            exit 1
-        fi
-    fi
-    convert_model2om 1
+function check_profiling_data() {
+    local _prof_metrics="$@"
 
-    local _prof_metrics=(PipeUtilization Memory MemoryUB MemoryL0)
-    if [ -z "$app_cmd" ]; then
-        # check profiling
-        local _prof_path="${data_out}/profiling"
-        local _prof_dirs=$(ls "$_prof_path")
-        if [ ! -z ${_prof_dirs} ]; then
-        	print_log $ERROR "profiling data not fullly."
-        	exit 1
+    # check profiling
+    local _prof_path="${output_path}/profiling"
+    local _prof_dirs=$(ls "$_prof_path")
+        if [ -z "${_prof_dirs}" ]; then
+            print_log $ERROR "profiling data not fullly."
+            return 1
         fi
         for metric in ${_prof_metrics[@]}; do
             local _match_flag=0
             for dir in ${_prof_dirs[@]}; do
-                cat "$_prof_path/$dir/device_*/sample.json" | grep -o "\"ai_core_metrics\":\"$metric\""
-                [ $? -ne 0 ] && _match_flag=1 && break
+                [ ! -f "$_prof_path/$dir"/device_*/sample.json ] && continue
+                cat "$_prof_path/$dir"/device_*/sample.json | grep -o "\"ai_core_metrics\":\"$metric\""
+                [ $? -eq 0 ] && _match_flag=1 && break
             done
-            if [ $_match_flag -ne 0 ]; then
+            if [ $_match_flag -eq 0 ]; then
                 print_log $ERROR "profiling data not exist for metric=$metric."
-                exit 1
+                return 1
             fi
         done
+    return 0
+}
+
+function check_model() {
+    local _need_cce=$1
+
+    # check .om and .cce
+        model_path=$(ls "${output_path}"/project/*.om 2>/dev/null)
+        if [ -z "$model_path" ]; then
+            print_log $ERROR "model not exist, please specify model convert command."
+            exit 1
+        fi
+    if [ ${_need_cce} -eq 1 ]; then
+        cce_dir=$(ls "${output_path}/project/kernel_meta" 2>/dev/null)
+        if [ -z "$cce_dir" ]; then
+            print_log $ERROR "cce directory not exist."
+            exit 1
+        fi
     fi
-    collect_profiling ${_prof_metrics[@]}
+}
+
+function collect_inference_data() {
+    if [ -z "$model_convert_cmd" ]; then
+        # check .om and .cce
+        check_model 1
+	[ $? -ne 0 ] && exit 1
+    else
+        convert_model2om 1
+    fi
+
+    local _prof_metrics=(PipeUtilization Memory MemoryUB MemoryL0)
+    if [ -z "$app_cmd" ]; then
+        # check profiling
+        check_profiling_data ${_prof_metrics[@]}
+        [ $? -ne 0 ] && exit 1
+    else
+        collect_profiling ${_prof_metrics[@]}
+    fi
 }
 
 function collect_train_data() {
     local _prof_metrics=(PipeUtilization)
     if [ -z "$app_cmd" ]; then
         # check profiling
-        local _prof_path="${data_out}/profiling"
-        local _prof_dirs=$(ls "$_prof_path")
-        if [ ! -z ${_prof_dirs} ]; then
-            print_log $ERROR "profiling data not fullly."
-            exit 1
-        fi
+        check_profiling_data ${_prof_metrics[@]}
+        [ $? -ne 0 ] && exit 1
+    else
+        collect_profiling ${_prof_metrics[@]}
     fi
-    collect_profiling ${_prof_metrics[@]}
 }
 
 function collect_operator_data() {
@@ -259,13 +278,31 @@ function collect_echosystem_data() {
         _type_map[$data_type]=1
     done
     if [ ${_type_map['cce']} == 1 ]; then
-        convert_model2om 1
+        if [ -z "$model_convert_cmd" ]; then
+            # check .om and .cce
+            check_model 1
+            [ $? -ne 0 ] && exit 1	
+        else
+            convert_model2om 1
+        fi
     elif [ ${_type_map['om']} == 1 ]; then
-        convert_model2om 0
+        if [ -z "$model_convert_cmd" ]; then
+            # check .om and .cce
+            check_model 0
+            [ $? -ne 0 ] && exit 1
+        else
+            convert_model2om 0
+        fi
     fi
     if [ ${_type_map['profiling']} == 1 ]; then
         local _prof_metrics=(PipeUtilization Memory MemoryUB MemoryL0)
-        collect_profiling ${_prof_metrics[@]}
+        if [ -z "$app_cmd" ]; then
+            # check profiling
+            check_profiling_data ${_prof_metrics[@]}
+            [ $? -ne 0 ] && exit 1
+        else
+	    collect_profiling ${_prof_metrics[@]}
+        fi
     fi
 }
 
@@ -301,6 +338,16 @@ function run_advisor() {
 }
 
 function collect_data() {
+    if [ -z "$output_path" ]; then
+        print_log $ERROR "output path is empty, please specify output path."
+	help_info
+	exit 1
+    fi
+    if [ ! -d "$output_path" ]; then
+        print_log $INFO "output path not exist, auto create."
+	mkdir -p $output_path
+	[ $? -ne 0 ] && exit 1
+    fi
     # support scene type: 0: inference; 1: train; 2: operator; 3: echosystem
     if [ $scene_type -eq 0 ]; then
         collect_inference_data && return
