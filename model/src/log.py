@@ -6,7 +6,7 @@ Copyright Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 
 import msadvisor as m
 import sys
-import op
+import os
 
 # msadvisor提供的打印公共接口
 def ad_print(log_level, log_info):
