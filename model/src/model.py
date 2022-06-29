@@ -15,11 +15,12 @@ EXTEND_DATA_TYPE = {'str': '0', 'int': '1', 'double': '2'}
 
 # msadvisor调用函数接口，调用时传入工程文件夹路径(传入绝对路径)
 # 需要用户自行修改具体profiling数据的位置
-def Evaluate(datapath):
+def evaluate(datapath, parameter):
     """
     interface function called by msadvisor
     Args:
-        data_path: string data_path
+        datapath: string datapath
+        parameter: string parameter
     Returns:
         json string of result info
         result must be ad_result
@@ -217,5 +218,5 @@ def result_parse(cpu_tasks, count_and_record):
 # 主函数接口，在本地调试试使用
 if __name__ == "__main__":
     datapath = './'
-    ret = Evaluate(datapath)
+    ret = evaluate(datapath, parameter)
     print(ret)
