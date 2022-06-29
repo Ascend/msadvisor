@@ -218,5 +218,5 @@ def result_parse(cpu_tasks, count_and_record):
 # 主函数接口，在本地调试试使用
 if __name__ == "__main__":
     datapath = './'
-    ret = evaluate(datapath, parameter)
+    ret = evaluate(datapath, "")
     print(ret)
