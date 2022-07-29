@@ -29,5 +29,3 @@ class KnowlegeExample(KnowlegeBase):
 
 
 KnowlegeFactory.add_knowlege("KnowlegeExample", KnowlegeExample())
-
-

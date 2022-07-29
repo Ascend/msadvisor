@@ -16,6 +16,7 @@
 from typing import Dict
 from .knowleges.knowlege_base import KnowlegeBase
 
+
 class KnowlegeFactory(object):
     _knowlege_pool: Dict[str, KnowlegeBase] = {}
 
@@ -30,4 +31,3 @@ class KnowlegeFactory(object):
     @classmethod
     def get_knowlege_pool(cls) -> Dict[str, KnowlegeBase]:
         return cls._knowlege_pool
-

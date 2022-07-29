@@ -17,10 +17,10 @@ import os
 import importlib
 import platform
 
-class Register():
+
+class Register:
     def __init__(self, path_name: str):
         self.path_name = path_name
-
 
     def _handle_errors(self, errors):
         if not errors:
@@ -29,8 +29,8 @@ class Register():
         for name, err in errors:
             raise RuntimeError("Module {} import failed: {}".format(name, err))
 
-
-    def _path_to_module_format(self, path: str):
+    @staticmethod
+    def _path_to_module_format(path: str):
         if path.endswith(".py"):
             if platform.system().lower() == 'windows':
                 return path.replace("\\", ".").rstrip(".py").replace(".", "", 1)
@@ -38,7 +38,6 @@ class Register():
                 return path.replace("/", ".").rstrip(".py").replace("/", "", 1)
 
         return ""
-
 
     def _add_modules(self, modules: list):
         pwd_dir = os.getcwd()

@@ -19,6 +19,7 @@ import unittest
 from src.register import Register
 from src.pattern import KnowlegeFactory
 
+
 class TestKnowlege(unittest.TestCase):
     def setUp(self) -> None:
         sys.path.append("..")
@@ -29,7 +30,6 @@ class TestKnowlege(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
-
     def test_knowlege_pattern(self):
         for name, knowlege in KnowlegeFactory.get_knowlege_pool().items():
             knowlege.pattern()
@@ -38,6 +38,7 @@ class TestKnowlege(unittest.TestCase):
         for name, knowlege in KnowlegeFactory.get_knowlege_pool().items():
             ret = knowlege.apply(None)
             self.assertEqual(True, ret)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -33,5 +33,6 @@ class TestRegister(unittest.TestCase):
         ret = register.import_modules()
         self.assertEqual(None, ret)
 
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
