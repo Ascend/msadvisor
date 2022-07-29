@@ -24,9 +24,10 @@ class KnowlegeExample(KnowlegeBase):
     def pattern(self):
         pass
 
-    def apply(self, graph):
-        pass
+    def apply(self, graph) -> bool:
+        return True
 
 
 KnowlegeFactory.add_knowlege("KnowlegeExample", KnowlegeExample())
+
 

@@ -12,14 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..src.register import Register
-from ..src.pattern import KnowlegeFactory
+import os
+import sys
+import unittest
+
+from src.register import Register
 
 
-register = Register("knowleges")
-register.import_modules()
+class TestRegister(unittest.TestCase):
 
-for name, knowlege in KnowlegeFactory.get_knowlege_pool().items():
-    print(name, knowlege)
+    def setUp(self) -> None:
+        sys.path.append("..")
+        os.chdir("..")
 
+    def tearDown(self) -> None:
+        pass
 
+    def test_register(self):
+        register = Register("knowleges")
+        ret = register.import_modules()
+        self.assertEqual(None, ret)
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

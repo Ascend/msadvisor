@@ -27,8 +27,7 @@ class Register():
             return
 
         for name, err in errors:
-            print("Module {} import failed: {}".format(name, err))
-        print("Please check modules")
+            raise RuntimeError("Module {} import failed: {}".format(name, err))
 
 
     def _path_to_module_format(self, path: str):
@@ -52,7 +51,10 @@ class Register():
 
     def import_modules(self):
         modules = []
-        self._add_modules(modules)
+        try:
+            self._add_modules(modules)
+        except Exception as error:
+            print("add_modules failed, {}".format(error))
 
         errors = []
         for module in modules:

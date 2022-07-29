@@ -26,5 +26,5 @@ class KnowlegeBase(object):
         pass
 
     @abstractmethod
-    def apply(self, graph):
+    def apply(self, graph) -> bool:
         pass
