@@ -29,9 +29,10 @@ class TestRegister(unittest.TestCase):
         pass
 
     def test_register(self):
-        register = Register("knowleges")
+        register = Register(os.path.join(os.getcwd(), "src", "pattern", "knowleges"))
         ret = register.import_modules()
         self.assertEqual(None, ret)
+
 
 
 if __name__ == "__main__":

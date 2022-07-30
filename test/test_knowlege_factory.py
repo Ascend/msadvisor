@@ -24,7 +24,7 @@ class TestKnowlege(unittest.TestCase):
     def setUp(self) -> None:
         sys.path.append("..")
         os.chdir("..")
-        register = Register("knowleges")
+        register = Register(os.path.join(os.getcwd(), "src", "pattern", "knowleges"))
         register.import_modules()
 
     def tearDown(self) -> None:

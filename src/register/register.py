@@ -20,9 +20,17 @@ import platform
 
 class Register:
     def __init__(self, path_name: str):
-        self.path_name = path_name
+        """
+        path_name: 待注册文件夹的绝对路径
+        """
+        try:
+            real_path = os.path.realpath(path_name)
+            self.path_name = real_path
+        except Exception as err:
+            raise RuntimeError("Invalid file error={}".format(err))
 
-    def _handle_errors(self, errors):
+    @staticmethod
+    def _handle_errors(errors):
         if not errors:
             return
 
@@ -32,21 +40,20 @@ class Register:
     @staticmethod
     def _path_to_module_format(path: str):
         if path.endswith(".py"):
-            if platform.system().lower() == 'windows':
-                return path.replace("\\", ".").rstrip(".py").replace(".", "", 1)
-            else:
+            if platform.system().lower() == 'linux':
                 return path.replace("/", ".").rstrip(".py").replace("/", "", 1)
+            else:
+                return path.replace("\\", ".").rstrip(".py").replace(".", "", 1)
 
         return ""
 
     def _add_modules(self, modules: list):
         pwd_dir = os.getcwd()
 
-        for root, dirs, files in os.walk(pwd_dir, topdown=False):
-            if root.endswith(self.path_name):
-                modules += [
-                    self._path_to_module_format(os.path.join(root.split(pwd_dir)[1], file)) for file in files
-                ]
+        for root, dirs, files in os.walk(self.path_name, topdown=False):
+            modules += [
+                self._path_to_module_format(os.path.join(root.split(pwd_dir)[1], file)) for file in files
+            ]
 
     def import_modules(self):
         modules = []
@@ -57,6 +64,9 @@ class Register:
 
         errors = []
         for module in modules:
+            if not module:
+                continue
+
             try:
                 importlib.import_module(module)
             except ImportError as error:

@@ -22,6 +22,7 @@ class KnowlegeExample(KnowlegeBase):
         pass
 
     def pattern(self):
+        print("KnowlegeExample pattern")
         pass
 
     def apply(self, graph) -> bool:
