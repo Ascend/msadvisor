@@ -39,11 +39,14 @@ class Register:
 
     @staticmethod
     def _path_to_module_format(path: str):
+        """
+        路径转换，把文件相对路径转换成python的import路径
+        """
         if path.endswith(".py"):
             if platform.system().lower() == 'linux':
-                return path.replace("/", ".").rstrip(".py").replace("/", "", 1)
+                return path.replace("/", ".").replace(".", "", 1)[:-3]
             else:
-                return path.replace("\\", ".").rstrip(".py").replace(".", "", 1)
+                return path.replace("\\", ".").replace(".", "", 1)[:-3]
 
         return ""
 

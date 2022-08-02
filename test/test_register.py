@@ -22,6 +22,8 @@ from src.register import Register
 class TestRegister(unittest.TestCase):
 
     def setUp(self) -> None:
+        # import pdb;   pdb.set_strace()
+        print("pwd=", os.getcwd())
         sys.path.append("..")
         os.chdir("..")
 
@@ -33,7 +35,20 @@ class TestRegister(unittest.TestCase):
         ret = register.import_modules()
         self.assertEqual(None, ret)
 
+    def test_register_invalid_path(self):
+        register = Register(os.path.join(os.getcwd(), "hello"))
+        ret = register.import_modules()
+        self.assertEqual(None, ret)
+
+
+def test_suite():
+    suite = unittest.TestSuite()
+
+    suite.addTest(TestRegister("test_register"))
+    suite.addTest(TestRegister("test_register_invalid_path"))
+
+    return suite
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main(defaultTest=test_suite)
