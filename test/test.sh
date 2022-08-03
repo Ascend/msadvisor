@@ -1,7 +1,8 @@
 #!/bin/bash
 
-cd ..
-python3 setup.py install
 
-cd -
-python3 -m unittest
+cp ../auto_optimizer ./ -rf
+
+coverage3 run -p -m unittest
+coverage3 combine
+coverage3 report -m
