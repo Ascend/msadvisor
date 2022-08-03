@@ -16,15 +16,15 @@ import os
 import sys
 import unittest
 
-from src.register import Register
-from src.pattern import KnowlegeFactory
+from auto_optimizer.register import Register
+from auto_optimizer.pattern import KnowlegeFactory
 
 
 class TestKnowlege(unittest.TestCase):
     def setUp(self) -> None:
         sys.path.append("..")
         os.chdir("..")
-        register = Register(os.path.join(os.getcwd(), "src", "pattern", "knowleges"))
+        register = Register(os.path.join(os.getcwd(), "auto_optimizer", "pattern", "knowleges"))
         register.import_modules()
 
     def tearDown(self) -> None:

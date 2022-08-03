@@ -16,14 +16,12 @@ import os
 import sys
 import unittest
 
-from src.register import Register
+from auto_optimizer.register import Register
 
 
 class TestRegister(unittest.TestCase):
 
     def setUp(self) -> None:
-        # import pdb;   pdb.set_strace()
-        print("pwd=", os.getcwd())
         sys.path.append("..")
         os.chdir("..")
 
@@ -31,7 +29,7 @@ class TestRegister(unittest.TestCase):
         pass
 
     def test_register(self):
-        register = Register(os.path.join(os.getcwd(), "src", "pattern", "knowleges"))
+        register = Register(os.path.join(os.getcwd(), "auto_optimizer", "pattern", "knowleges"))
         ret = register.import_modules()
         self.assertEqual(None, ret)
 
