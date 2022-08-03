@@ -1,5 +1,6 @@
 #!/bin/bash
 
+pip3 install coverage
 
 cp ../auto_optimizer ./ -rf
 
