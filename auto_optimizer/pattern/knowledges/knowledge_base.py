@@ -17,7 +17,7 @@ from typing import Dict, Tuple, List
 from ..pattern import Pattern
 
 
-class KnowlegeBase(object):
+class KnowledgeBase(object):
     def __init__(self):
         pass
 

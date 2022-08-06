@@ -29,7 +29,7 @@ class TestRegister(unittest.TestCase):
         pass
 
     def test_register(self):
-        register = Register(os.path.join(os.getcwd(), "auto_optimizer", "pattern", "knowleges"))
+        register = Register(os.path.join(os.getcwd(), "auto_optimizer", "pattern", "knowledges"))
         ret = register.import_modules()
         self.assertEqual(None, ret)
 

@@ -13,20 +13,21 @@
 # limitations under the License.
 
 
-from .knowlege_base import KnowlegeBase
-from ..knowlege_factory import KnowlegeFactory
+from typing import Dict
+from .knowledges.knowledge_base import KnowledgeBase
 
 
-class KnowlegeExample(KnowlegeBase):
-    def __init__(self):
+class KnowledgeFactory(object):
+    _knowledge_pool: Dict[str, KnowledgeBase] = {}
+
+    @classmethod
+    def add_knowledge(cls, name, knowledge: KnowledgeBase):
+        cls._knowledge_pool[name] = knowledge
+
+    @classmethod
+    def get_knowledge(cls, name) -> KnowledgeBase:
         pass
 
-    def pattern(self):
-        print("KnowlegeExample pattern")
-        pass
-
-    def apply(self, graph) -> bool:
-        return True
-
-
-KnowlegeFactory.add_knowlege("KnowlegeExample", KnowlegeExample())
+    @classmethod
+    def get_knowledge_pool(cls) -> Dict[str, KnowledgeBase]:
+        return cls._knowledge_pool

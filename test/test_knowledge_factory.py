@@ -17,26 +17,26 @@ import sys
 import unittest
 
 from auto_optimizer.register import Register
-from auto_optimizer.pattern import KnowlegeFactory
+from auto_optimizer.pattern import KnowledgeFactory
 
 
-class TestKnowlege(unittest.TestCase):
+class TestKnowledge(unittest.TestCase):
     def setUp(self) -> None:
         sys.path.append("..")
         os.chdir("..")
-        register = Register(os.path.join(os.getcwd(), "auto_optimizer", "pattern", "knowleges"))
+        register = Register(os.path.join(os.getcwd(), "auto_optimizer", "pattern", "knowledges"))
         register.import_modules()
 
     def tearDown(self) -> None:
         pass
 
-    def test_knowlege_pattern(self):
-        for name, knowlege in KnowlegeFactory.get_knowlege_pool().items():
-            knowlege.pattern()
+    def test_knowledge_pattern(self):
+        for name, knowledge in KnowledgeFactory.get_knowledge_pool().items():
+            knowledge.pattern()
 
-    def test_knowlege_apply(self):
-        for name, knowlege in KnowlegeFactory.get_knowlege_pool().items():
-            ret = knowlege.apply(None)
+    def test_knowledge_apply(self):
+        for name, knowledge in KnowledgeFactory.get_knowledge_pool().items():
+            ret = knowledge.apply(None)
             self.assertEqual(True, ret)
 
 

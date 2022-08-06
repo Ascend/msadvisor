@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .knowleges.knowlege_base import KnowlegeBase
-from .knowlege_factory import KnowlegeFactory
+from .knowledges.knowledge_base import KnowledgeBase
+from .knowledge_factory import KnowledgeFactory
 from .pattern import Pattern
 
-__all__ = ["KnowlegeBase", "KnowlegeFactory", "Pattern"]
+__all__ = ["KnowledgeBase", "KnowledgeFactory", "Pattern"]
