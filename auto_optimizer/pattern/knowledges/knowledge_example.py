@@ -13,20 +13,20 @@
 # limitations under the License.
 
 
-from .knowlege_base import KnowlegeBase
-from ..knowlege_factory import KnowlegeFactory
+from .knowledge_base import KnowledgeBase
+from ..knowledge_factory import KnowledgeFactory
 
 
-class KnowlegeExample(KnowlegeBase):
+class KnowledgeExample(KnowledgeBase):
     def __init__(self):
         pass
 
     def pattern(self):
-        print("KnowlegeExample pattern")
+        print("KnowledgeExample pattern")
         pass
 
     def apply(self, graph) -> bool:
         return True
 
 
-KnowlegeFactory.add_knowlege("KnowlegeExample", KnowlegeExample())
+KnowledgeFactory.add_knowledge("KnowledgeExample", KnowledgeExample())

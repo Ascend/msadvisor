@@ -14,20 +14,20 @@
 
 
 from typing import Dict
-from .knowleges.knowlege_base import KnowlegeBase
+from .knowledges.knowledge_base import KnowledgeBase
 
 
-class KnowlegeFactory(object):
-    _knowlege_pool: Dict[str, KnowlegeBase] = {}
-
-    @classmethod
-    def add_knowlege(cls, name, knowlege: KnowlegeBase):
-        cls._knowlege_pool[name] = knowlege
+class KnowledgeFactory(object):
+    _knowledge_pool: Dict[str, KnowledgeBase] = {}
 
     @classmethod
-    def get_knowlege(cls, name) -> KnowlegeBase:
+    def add_knowledge(cls, name, knowledge: KnowledgeBase):
+        cls._knowledge_pool[name] = knowledge
+
+    @classmethod
+    def get_knowledge(cls, name) -> KnowledgeBase:
         pass
 
     @classmethod
-    def get_knowlege_pool(cls) -> Dict[str, KnowlegeBase]:
-        return cls._knowlege_pool
+    def get_knowledge_pool(cls) -> Dict[str, KnowledgeBase]:
+        return cls._knowledge_pool
