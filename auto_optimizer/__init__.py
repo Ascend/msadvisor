@@ -12,5 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .register import Register
-from .pattern.knowlege_factory import KnowlegeFactory
+from .common import Register
+from .common.config import Config
+from .pattern.knowledge_factory import KnowledgeFactory
