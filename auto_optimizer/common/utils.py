@@ -1,0 +1,39 @@
+# Copyright 2022 Huawei Technologies Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import os
+import platform
+
+
+def path_to_module_format(path: str):
+    """
+    路径转换，把文件相对路径转换成python的import路径
+    """
+    format_path = ""
+    if path.endswith(".py"):
+        if platform.system().lower() == 'linux':
+            format_path = path.replace("/", ".")[:-3]
+        else:
+            format_path = path.replace("\\", ".")[:-3]
+
+    if format_path.startswith("."):
+        format_path = format_path.replace(".", "", 1)
+
+    return format_path
+
+
+def check_file_exist(file, msg='file "{}" does not exist'):
+    if not os.path.isfile(file):
+        raise FileNotFoundError(msg.format(file))
+
