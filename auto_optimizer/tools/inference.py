@@ -12,30 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 
-model = dict(
-    name='Resnet50',
-    type='classification',
-    batch_size=4,
-    engine=dict(
-        pre_process=dict(
-            type='ImageNet',
-            resize=256,
-            centercrop=256,
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225],
-        ),
-        inference=dict(
-            type='acl',
-        ),
-        model_convert=dict(
-            type='atc',
-        ),
-        post_process=dict(
-            type='classification',
-        ),
-        evaluate=dict(
-            type='classification',
-        ),
-    )
-)
+from auto_optimizer.common.config import Config
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='model inference')
+    parser.add_argument('config', help='inference config file path')
+
+    args = parser.parse_args()
+
+    return args
+
+
+def main():
+    args = parse_args()
+
+    cfg = Config.read_by_file(args.config)
+
+    print(cfg["engine"]["pre_process"])
+
+
+if __name__ == '__main__':
+    main()

@@ -32,19 +32,19 @@ class ConfigDict(Dict):
 
 
 class Config:
-    def __init__(self, config_dict):
-        if config_dict is None:
-            config_dict = dict()
-        elif not isinstance(config_dict, dict):
+    def __init__(self, config_dict={}):
+        if not isinstance(config_dict, dict):
             raise TypeError('config_dict must be dict')
 
         super().__setattr__('_config_dict', ConfigDict(config_dict))
 
     @staticmethod
-    def read_by_file(file):
-
+    def read_by_file(file_name):
+        """
+        读取模型配置文件，返回模型相关配置参数及推理流程
+        """
         try:
-            format_path = path_to_module_format(file)
+            format_path = path_to_module_format(file_name)
             model_dict = Register.import_module(format_path)
             config_dict = model_dict.model
         except Exception as err:
@@ -62,7 +62,7 @@ class Config:
         return getattr(self._config_dict, item)
 
     def __getitem__(self, item):
-        return self._config_dict.__getitem__(item)
+        return self._config_dict[item]
 
     def __iter__(self):
         return iter(self._config_dict)

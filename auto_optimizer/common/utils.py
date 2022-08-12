@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os
-import platform
 
 
 def path_to_module_format(path: str):
@@ -22,10 +21,8 @@ def path_to_module_format(path: str):
     """
     format_path = ""
     if path.endswith(".py"):
-        if platform.system().lower() == 'linux':
-            format_path = path.replace("/", ".")[:-3]
-        else:
-            format_path = path.replace("\\", ".")[:-3]
+        # [:-3]： 删除.py
+        format_path = path.replace(os.sep, ".")[:-3]
 
     if format_path.startswith("."):
         format_path = format_path.replace(".", "", 1)
