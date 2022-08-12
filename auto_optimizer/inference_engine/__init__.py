@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .common import Register
-from .common.config import Config
-from .pattern.knowledge_factory import KnowledgeFactory
+from .pre_process.pre_process_base import PreProcessBase
+from .post_process.post_process_base import PostProcessBase
+from .evaluate.evaluate_base import EvaluateBase
+
+
+__all__ = ["PreProcessBase", "PostProcessBase", "EvaluateBase"]

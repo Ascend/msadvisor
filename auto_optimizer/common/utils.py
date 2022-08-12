@@ -12,6 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .common import Register
-from .common.config import Config
-from .pattern.knowledge_factory import KnowledgeFactory
+import os
+
+
+def path_to_module_format(path: str):
+    """
+    路径转换，把文件相对路径转换成python的import路径
+    """
+    format_path = ""
+    if path.endswith(".py"):
+        # [:-3]： 删除.py
+        format_path = path.replace(os.sep, ".")[:-3]
+
+    if format_path.startswith("."):
+        format_path = format_path.replace(".", "", 1)
+
+    return format_path
+
+
+def check_file_exist(file, msg='file "{}" does not exist'):
+    if not os.path.isfile(file):
+        raise FileNotFoundError(msg.format(file))
+

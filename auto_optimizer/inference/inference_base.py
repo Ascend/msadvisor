@@ -13,6 +13,11 @@
 # limitations under the License.
 
 
-from .register import Register
+from abc import abstractmethod
 
-__all__ = ["Register"]
+
+class InferenceBase(object):
+
+    @abstractmethod
+    def inference(self):
+        pass

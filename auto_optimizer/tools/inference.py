@@ -12,6 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .common import Register
-from .common.config import Config
-from .pattern.knowledge_factory import KnowledgeFactory
+import argparse
+
+from auto_optimizer.common.config import Config
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='model inference')
+    parser.add_argument('config', help='inference config file path')
+
+    args = parser.parse_args()
+
+    return args
+
+
+def main():
+    args = parse_args()
+
+    cfg = Config.read_by_file(args.config)
+
+    print(cfg["engine"]["pre_process"])
+
+
+if __name__ == '__main__':
+    main()

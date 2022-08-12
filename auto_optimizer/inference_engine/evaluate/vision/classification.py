@@ -11,7 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from abc import ABC
 
-from .common import Register
-from .common.config import Config
-from .pattern.knowledge_factory import KnowledgeFactory
+from ..evaluate_base import EvaluateBase
+from ...data_process_factory import EvaluateFactory
+
+
+class ClassificationEvaluate(EvaluateBase, ABC):
+    def __init__(self):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        print("evaluate")
+        return True
+
+    def acc_1(self, *args, **kwargs):
+        print("acc_1")
+        return True
+
+    def acc_k(self, *args, **kwargs):
+        print("evaluate")
+        pass
+
+EvaluateFactory.add_evaluate("Classification", ClassificationEvaluate())

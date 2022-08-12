@@ -11,7 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from abc import ABC
 
-from .common import Register
-from .common.config import Config
-from .pattern.knowledge_factory import KnowledgeFactory
+from ..post_process_base import PostProcessBase
+from ...data_process_factory import PostProcessFactory
+
+
+class ClassificationPostProcess(PostProcessBase, ABC):
+    def __init__(self):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        print("post_process")
+        return True
+
+
+PostProcessFactory.add_post_process("Classification", ClassificationPostProcess())

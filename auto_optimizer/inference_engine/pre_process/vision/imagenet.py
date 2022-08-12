@@ -12,6 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .common import Register
-from .common.config import Config
-from .pattern.knowledge_factory import KnowledgeFactory
+import multiprocessing
+# import numpy as np
+
+from abc import ABC
+
+# from PIL import Image
+
+from ..pre_process_base import PreProcessBase
+from ...data_process_factory import PreProcessFactory
+
+
+class ImageNetPreProcess(PreProcessBase, ABC):
+    def __init__(self):
+        print("test init")
+        pass
+
+    def __call__(self, *args, **kwargs):
+        print("pre_process")
+        for key, value in kwargs.items():
+            print(key, value)
+        return True
+
+
+
+
+PreProcessFactory.add_pre_process("ImageNet", ImageNetPreProcess())

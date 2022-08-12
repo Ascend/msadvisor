@@ -16,7 +16,7 @@ import os
 import sys
 import unittest
 
-from auto_optimizer.register import Register
+from auto_optimizer.common import Register
 from auto_optimizer.pattern import KnowledgeFactory
 
 

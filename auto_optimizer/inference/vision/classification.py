@@ -12,6 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .common import Register
-from .common.config import Config
-from .pattern.knowledge_factory import KnowledgeFactory
+from abc import ABC
+
+from ...inference_engine.data_process_factory import PreProcessFactory
+from ...inference_engine.data_process_factory import PostProcessFactory
+from ...inference_engine.data_process_factory import EvaluateFactory
+
+from ..inference_base import InferenceBase
+
+
+class Classification(InferenceBase):
+
+    def inference(self):
+        pass

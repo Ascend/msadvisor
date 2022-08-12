@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .common import Register
-from .common.config import Config
-from .pattern.knowledge_factory import KnowledgeFactory
+from .register import Register
+from .config import Config
+from .utils import path_to_module_format
+
+__all__ = ["Register", "Config", "path_to_module_format"]

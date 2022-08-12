@@ -12,6 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .common import Register
-from .common.config import Config
-from .pattern.knowledge_factory import KnowledgeFactory
+
+model = dict(
+    name='Resnet50',
+    type='classification',
+    batch_size=4,
+    engine=dict(
+        pre_process=dict(
+            type='ImageNet',
+            resize=256,
+            centercrop=256,
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+        ),
+        inference=dict(
+            type='acl',
+        ),
+        model_convert=dict(
+            type='atc',
+        ),
+        post_process=dict(
+            type='classification',
+        ),
+        evaluate=dict(
+            type='classification',
+        ),
+    )
+)
