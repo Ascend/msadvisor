@@ -14,7 +14,7 @@
 
 from abc import abstractmethod
 from typing import Dict, Tuple, List
-from ..pattern import Pattern
+#from ..pattern import Pattern
 
 
 class KnowledgeBase(object):
