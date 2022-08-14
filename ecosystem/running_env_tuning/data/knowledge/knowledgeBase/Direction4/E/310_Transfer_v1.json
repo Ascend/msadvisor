@@ -1,0 +1,125 @@
+{"v1_VPC":[
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"During the VPC image processing on the Ascend 710, the width and height of the image will be verified. If the image does not meet the requirements, an error message will be intercepted. Therefore, you need to send the image that meets the requirements to the VPC. After the user modifies the code, it needs to be recompiled. For example, JPEGD+VPC is used in series: Jpeg (444) source code image decoded into YUV420SP output image, when the WIDTH/height of JPEG (444) source image is odd, the width/height of the output image decoded out of YUV420SP format should be odd in theory, but YUV420SP format itself requires that the image width/height are even, JPEGD will align 2 down on the odd width/height. The image processed by JPEGD meets the VPC requirements. You need to obtain the width and height of the image decoded by JPEGD, and then set the width and height of the image input from THE VPC. You cannot directly send the original odd resolution to the VPC; otherwise, an error message will be intercepted.",
+        "Ascend 310 implementation":"If the width or height of the input image is odd, the VPC image processing will be trimmed down 2 aligned. ",
+        "Ascend 310pV1 implementation":"Based on the input image format, the width and height alignment requirements are as follows. If the requirements are not met, an error message is directly intercepted during VPC image processing. For YUV420SP format, both width and height need to be 2 aligned; For YUV422SP or YUV422Packed format, the width needs to be 2 aligned and the height is unlimited; For yuV440SP format, the width is unlimited and the height needs to be 2 aligned.",
+        "The AscendCL interface involved":"acldvppSetPicDescWidth,acldvppSetPicDescHeight",
+        "function or constraint":"In VPC image processing, the width and height of input images are restricted by 2"
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"If the user is not explicitly call acldvppSetResizeConfigInterpolation interface Settings scaling algorithm, then you need to note that Ascend to 710 and the support of Ascend 310 default zoom is different, The default scaling algorithm supported by Ascend 710 is the Bilinear algorithm commonly used in the industry (similar to the calculation process of OpenCV algorithm), and Ascend 710 does not support huawei's own nearest Neighbor interpolation algorithm. Users need to evaluate whether the default algorithm is applicable. If not, You can explicitly call acldvppSetResizeConfigInterpolation interface set Ascend 710 support of other algorithms. After modifying the code, you need to recompile it. If the user explicitly call acldvppSetResizeConfigInterpolation interface Settings scaling algorithm, the user needs to support scaling algorithm to adjust the code of 710, according to Ascend. After modifying the code, you need to recompile it. It should be noted that different scaling algorithms for the same chip will lead to inconsistent scaling accuracy. Different chips, even with the same scaling algorithm, may have different binary output images.",
+        "Ascend 310 implementation":"Five algorithms are supported: 0: default value. Indicates the advanced filtering algorithm developed by Huawei. 1: industry-common Bilinear algorithm (similar to the calculation process of OpenCV algorithm) 2: industry-common Nearest neighbor algorithm (similar to the calculation process of OpenCV algorithm) 3: industry-common Bilinear algorithm (similar to the calculation process of Tensorflow algorithm) 4: Common Nearest neighbor algorithm in the industry (similar to the computational precision of Tensorflow algorithm).",
+        "Ascend 310pV1 implementation":"Two algorithms are supported: 0: default value. If the value is set to 0, the system automatically adopts 1. 1: Industry-common Bilinear algorithm (similar to the calculation process of OpenCV algorithm) 2: Industry-common Nearest neighbor algorithm (similar to the calculation process of OpenCV algorithm)",
+        "The AscendCL interface involved":"acldvppSetResizeConfigInterpolation",
+        "function or constraint":"Set scaling algorithm"
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"With the Ascend 710, users can continue to implement YUV400 in a \"y-component from YUV420 format\" manner without changing code or recompiling. In addition, since the Ascend 710 extension supports the YUV400 format, if users choose to directly use the YUV400 format, they need to modify the code, set the output format to YUV400, and set the memory size to the \"widthStride*heightStride\" formula. Otherwise, the system will report an error for parameter interception. After modifying the code, users need to recompile it.",
+        "Ascend 310 implementation":"Ascend 310 does not support YUV400 image processing and uses YUV420 image processing (Y part of the data), so you need to set the input image format to YUV420 and memory size to widthStride*heightStride*3/2. The VPC verifies the memory size based on the image format",
+        "Ascend 310pV1 implementation":"Ascend 710 supports YUV400 image processing, so directly set the input image format to YUV400 and the memory size to widthStride*heightStride. VPC will verify the memory size according to the image format",
+        "The AscendCL interface involved":"acldvppSetPicDescSize",
+        "function or constraint":"YUV400 format image processing"
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"Create channels, if you do not specify a channel model, Vpc + Jpegd + Jpege + PNGD four patterns of channel will be created at the same time, so it is necessary to explicitly call user code acldvppSetChannelDescMode interface to set the channel mode. After modifying the code, you need to recompile it. For example, 130 VPC channels need to be created on Ascend 710. The MAXIMUM NUMBER of Jpege channels is 128. Therefore, 130 VPC channels cannot be created.",
+        "Ascend 310 implementation":"Channel mode cannot be set.",
+        "Ascend 310pV1 implementation":"You can set the channel mode. If the channel mode is not set, Vpc+Jpegd+Jpege+PNGD channels will be created by default during channel creation, which may occupy resources.",
+        "The AscendCL interface involved":"acldvppSetChannelDescMode",
+        "function or constraint":"Set the channel mode. (Warning: Specify the functions of the image data processing channel (currently, the image data processing channel supports VPC, JPEGD, JPEGE, and PNGD). If you do not invoke this interface, the system will create all the channels in the four modes by default, which may occupy resources. You are advised to specify the channel mode based on actual functions.)"
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"You need to plan the number of channels for each module. For Ascend310 and Ascend710, VDEC will fail to create channels if the number of call-back threads in a single process exceeds 128 when the VDEC decodes (see the description of the aclvdecCreateChannel interface for details).",
+        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPC/JPEGD/JPEGE/VENC is not limited.",
+        "Ascend 310pV1 implementation":"VDEC and JPEGD share the same channel number. A maximum of 256 channels are supported. A VPC supports a maximum of 256 routes. JPEGE and VENC share a maximum of 128 channels.",
+        "The AscendCL interface involved":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
+        "function or constraint":"Limit the number of channels on each module"
+    }
+],"v1_VDEC":[
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"Ascend 710 use the formula to calculate the input stream buffer size, users need to modify the code calls aclvdecSetChannelDescOutPicWidth, high aclvdecSetChannelDescOutPicHeight interface set the correct width. After modifying the code, you need to recompile it.",
+        "Ascend 310 implementation":"Frame storage size of decoded image: the maximum width and height of decoded code stream will not be used to apply for frame storage for internal use when creating channels, but the real width and height of code stream will be obtained according to the code stream information in the decoding process, and frame storage will be applied. Input stream cache size: for input streams with a resolution of 1080P or lower, the default cache size is 6M. For input stream with resolution above 1080P, the default cache size of the input stream is 9M.",
+        "Ascend 310pV1 implementation":"Frame storage size of decoded image: the maximum width and height of decoded code stream will not be used to apply for frame storage for internal use when creating channels, but the real width and height of code stream will be obtained according to the code stream information in the decoding process, and frame storage will be applied. Input stream cache size: maximum width of decoded stream * maximum height of decoded stream *2.",
+        "The AscendCL interface involved":"aclvdecSetChannelDescOutPicWidth,aclvdecSetChannelDescOutPicHeight",
+        "function or constraint":"Sets the maximum width and height of the decoded stream."
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"Reference frame the default value is 8 compatible decoding digital flow mostly, but for the number of reference frames more stream, decoding may fail, requires the user to call aclvdecSetChannelDescRefFrameNum interface is set up according to the actual number of reference frames.",
+        "Ascend 310 implementation":"Setting reference frames is not supported.",
+        "Ascend 310pV1 implementation":"Reference frames can be set. If no reference frame is set, the default number of reference frames is 8. During channel creation, frame storage will be applied according to the default value, but in the decoding process, the real reference frame information of the code stream will be obtained according to the code stream information for frame storage self-adaptation.",
+        "The AscendCL interface involved":"aclvdecSetChannelDescRefFrameNum",
+        "function or constraint":"Set the number of reference frames."
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"For 10 Bit stream, if not set, could decode fails, you need to call aclvdecSetChannelDescBitDepth Bit a width of 10 Bit interface Settings.",
+        "Ascend 310 implementation":"The bitstream width is not supported.",
+        "Ascend 310pV1 implementation":"The bit-bit width can be set. If the bit-bit width is not set, the default bit-bit width is 8-bit.",
+        "The AscendCL interface involved":"aclvdecSetChannelDescBitDepth",
+        "function or constraint":"Set the bit width"
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"You need to plan the number of channels for each module. For Ascend310 and Ascend710, VDEC will fail to create channels if the number of call-back threads in a single process exceeds 128 when the VDEC decodes (see the description of the aclvdecCreateChannel interface for details).",
+        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPC/JPEGD/JPEGE/VENC is not limited.",
+        "Ascend 310pV1 implementation":"VDEC and JPEGD share the same channel number. A maximum of 256 channels are supported. A VPC supports a maximum of 256 routes. JPEGE and VENC share a maximum of 128 channels.",
+        "The AscendCL interface involved":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
+        "function or constraint":"Limit the number of channels on each module."
+    }
+],"v1_VENC":[
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"The set IP ratio feature is not available on the Ascend 710.",
+        "Ascend 310 implementation":"The IP address ratio can be set.",
+        "Ascend 310pV1 implementation":"The IP address ratio cannot be set.",
+        "The AscendCL interface involved":"aclvencSetChannelDescParam",
+        "function or constraint":"Set the ratio of the bits of a single I frame to the bits of a single P frame in a GOP (hereinafter described as setting the IP ratio)."
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"Need to call aclvencSetChannelDescBufAddr interfaces or aclvencSetChannelDescParam explicitly set the output buffer.",
+        "Ascend 310 implementation":"The user does not need to set the output buffer. During the callback, a memory copy is made to the user's output buffer.",
+        "Ascend 310pV1 implementation":"The user needs to set the output buffer, so there is no need to copy the encoded output results.",
+        "The AscendCL interface involved":"aclvencSetChannelDescBufAddr,aclvencSetChannelDescParam",
+        "function or constraint":"Set the VENC output buffer."
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"If the user does not explicitly call aclvencSetChannelDescMaxBitRate interface or aclvencSetChannelDescParam interface, the encoder will use the default output bit rate coding, migrated to Ascend after 710, Need to explicitly call aclvencSetChannelDescMaxBitRate interfaces or aclvencSetChannelDescParam sets the output bit rate to 300, otherwise the Ascend will use the default value of 2000, 710. After the user modifies the code, it needs to be recompiled. Note that the output bit rate is different, the encoding output bit stream size will be different.",
+        "Ascend 310 implementation":"The default output bit rate is 300.",
+        "Ascend 310pV1 implementation":"The default output bit rate is 2000.",
+        "The AscendCL interface involved":"aclvencSetChannelDescMaxBitRate,aclvencSetChannelDescParam",
+        "function or constraint":"Specify the output bit rate."
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"You need to plan the number of channels for each module. For Ascend310 and Ascend710, VDEC will fail to create channels if the number of call-back threads in a single process exceeds 128 when the VDEC decodes (see the description of the aclvdecCreateChannel interface for details).",
+        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPC/JPEGD/JPEGE/VENC is not limited.",
+        "Ascend 310pV1 implementation":"VDEC and JPEGD share the same channel number. A maximum of 256 channels are supported. A VPC supports a maximum of 256 routes. JPEGE and VENC share a maximum of 128 channels.",
+        "The AscendCL interface involved":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
+        "function or constraint":"Limit the number of channels on each module."
+    }
+],"v1_JPEGD":[
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"Create channels, if you do not specify a channel model, Vpc + Jpegd + Jpege + PNGD four patterns of channel will be created at the same time, so it is necessary to explicitly call user code acldvppSetChannelDescMode interface to set the channel mode. After modifying the code, you need to recompile it. For example, 130 VPC channels need to be created on Ascend 710. The MAXIMUM NUMBER of Jpege channels is 128. Therefore, 130 VPC channels cannot be created.",
+        "Ascend 310 implementation":"Channel mode cannot be set.",
+        "Ascend 310pV1 implementation":"You can set the channel mode. If the channel mode is not set, Vpc+Jpegd+Jpege+PNGD channels will be created by default during channel creation, which may occupy resources.",
+        "The AscendCL interface involved":"acldvppSetChannelDescMode",
+        "function or constraint":"Set the channel mode. (Warning: Specify the functions of the image data processing channel (currently, the image data processing channel supports VPC, JPEGD, JPEGE, and PNGD). If you do not invoke this interface, the system will create all the channels in the four modes by default, which may occupy resources. You are advised to specify the channel mode based on actual functions.)"
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"You need to plan the number of channels for each module. For Ascend310 and Ascend710, VDEC will fail to create channels if the number of call-back threads in a single process exceeds 128 when the VDEC decodes (see the description of the aclvdecCreateChannel interface for details).",
+        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPC/JPEGD/JPEGE/VENC is not limited.",
+        "Ascend 310pV1 implementation":"VDEC and JPEGD share the same channel number. A maximum of 256 channels are supported. A VPC supports a maximum of 256 routes. JPEGE and VENC share a maximum of 128 channels.",
+        "The AscendCL interface involved":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
+        "function or constraint":"Limit the number of channels on each module."
+    }
+],"v1_JPEGE":[
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"Create channels, if you do not specify a channel model, Vpc + Jpegd + Jpege + PNGD four patterns of channel will be created at the same time, so it is necessary to explicitly call user code acldvppSetChannelDescMode interface to set the channel mode. After modifying the code, you need to recompile it. For example, 130 VPC channels need to be created on Ascend 710. The MAXIMUM NUMBER of Jpege channels is 128. Therefore, 130 VPC channels cannot be created.",
+        "Ascend 310 implementation":"Channel mode cannot be set.",
+        "Ascend 310pV1 implementation":"You can set the channel mode. If the channel mode is not set, Vpc+Jpegd+Jpege+PNGD channels will be created by default during channel creation, which may occupy resources.",
+        "The AscendCL interface involved":"acldvppSetChannelDescMode",
+        "function or constraint":"Set the channel mode. (Warning: Specify the functions of the image data processing channel (currently, the image data processing channel supports VPC, JPEGD, JPEGE, and PNGD). If you do not invoke this interface, the system will create all the channels in the four modes by default, which may occupy resources. You are advised to specify the channel mode based on actual functions.)"
+    },
+    {
+        "310-> 310P Indicates the impact on users during V1 migration":"You need to plan the number of channels for each module. For Ascend310 and Ascend710, VDEC will fail to create channels if the number of call-back threads in a single process exceeds 128 when the VDEC decodes (see the description of the aclvdecCreateChannel interface for details).",
+        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPC/JPEGD/JPEGE/VENC is not limited.",
+        "Ascend 310pV1 implementation":"VDEC and JPEGD share the same channel number. A maximum of 256 channels are supported. A VPC supports a maximum of 256 routes. JPEGE and VENC share a maximum of 128 channels.",
+        "The AscendCL interface involved":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
+        "function or constraint":"Limit the number of channels on each module."
+    }
+]}

@@ -1,0 +1,28 @@
+{
+  "English": 1,
+  "direction_two": [
+    {
+      "servers_name": "Atlas800_Model3010",
+      "pcieCard_name": "MCX653105A-EFA"
+    }
+  ],
+  "direction_three": [
+    {
+      "inferenceCard_name": "os_data"
+    }
+  ],
+  "direction_four": [
+    {
+      "transfer_V1_file": "310_Transfer_v1",
+      "transfer_V2_file": "310_Transfer_v2"
+    },
+    {
+      "chip_type": "310"
+    }
+  ],
+  "direction_five": [
+    {
+      "inner_core": "Card_Os"
+    }
+  ]
+}
