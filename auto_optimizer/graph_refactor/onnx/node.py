@@ -60,7 +60,7 @@ class Node(BaseNode):
             inputs = list(node.input), 
             outputs = list(node.output), 
             attrs = attrs, 
-            domian = node.domain
+            domain = node.domain
         )
     
 
@@ -217,7 +217,7 @@ class PlaceHolder(BaseNode):
         return cls(
             name = node.name, 
             dtype = dtype,
-            dhape = shape
+            shape = shape
         )
     
     def to_proto(self) -> ValueInfoProto:
