@@ -53,17 +53,16 @@ class Node(BaseNode):
     def parse(cls, node:NodeProto):
         attrs = {}
         for attr in node.attribute:
-            if isinstance(helper.get_attribute_value(attr), str):
-                attrs[attr.name] = helper.get_attribute_value(attr).decode('utf-8')
-            else:
-                attrs[attr.name] = helper.get_attribute_value(attr)
-        cls.name = node.name
-        cls.op_type = node.op_type
-        cls.inputs = list(node.input)
-        cls.outputs = list(node.output)
-        cls.attrs = attrs
-        cls.domain = node.domain  
-        return cls()
+            attrs[attr.name] = helper.get_attribute_value(attr)
+        return cls(
+            name = node.name, 
+            op_type = node.op_type, 
+            inputs = list(node.input), 
+            outputs = list(node.output), 
+            attrs = attrs, 
+            domian = node.domain
+        )
+    
 
     def to_proto(self) -> NodeProto:
         return helper.make_node(
@@ -155,12 +154,14 @@ class Initializer(BaseNode):
 
     @classmethod
     def parse(cls, node:Union[NodeProto, TensorProto]):
-        cls.name = node.name
         if hasattr(node, 'op_type') and node.op_type == 'Constant':
-            cls.value = numpy_helper.to_array(node.attribute[0].t)
+            value = numpy_helper.to_array(node.attribute[0].t)
         else:
-            cls.value = numpy_helper.to_array(node)
-        return cls()
+            value = numpy_helper.to_array(node)
+        return cls(
+            name = node.name, 
+            value = value
+        )
     
     def to_proto(self) -> TensorProto:
         return helper.make_tensor(
@@ -208,13 +209,16 @@ class PlaceHolder(BaseNode):
     @classmethod
     def parse(cls, node:ValueInfoProto):
         tensor_type = node.type.tensor_type
-        cls.name = node.name
-        cls.dtype = TENSOR_TYPE_TO_NP_TYPE[tensor_type.elem_type]
-        cls.shape = [
+        dtype = TENSOR_TYPE_TO_NP_TYPE[tensor_type.elem_type]
+        shape = [
             dim.dim_value if dim.dim_value > 0 else -1
             for dim in tensor_type.shape.dim
         ]
-        return cls()
+        return cls(
+            name = node.name, 
+            dtype = dtype,
+            dhape = shape
+        )
     
     def to_proto(self) -> ValueInfoProto:
         return helper.make_tensor_value_info(
