@@ -173,9 +173,10 @@ def evaluate(data_path, parameter = None):
         return False
     onnx_file = parameter.get('file_name')
     onnx_path = data_path + '/' + onnx_file
-    print('onnx path: {}'.format(onnx_path))
+    action = parameter.get('action')
     from magiconnx import OnnxGraph
     graph = OnnxGraph(onnx_path)
+    graph_bak = graph
     conv1d2conv2d = KnowledgeConv1d2Conv2d()
     while conv1d2conv2d._has_next_pattern():
         conv1d2conv2d._next_pattern()
@@ -183,17 +184,29 @@ def evaluate(data_path, parameter = None):
         match_results = conv1d2conv2d.get_candidate_sub_graphs(graph)
         if match_results is None or len(match_results) == 0:
             continue
+        if op.eq(action, 'evaluate'):
+            print('Model has optimization.')
+            return True
         # 尝试不同的修改方法
         while conv1d2conv2d._has_next_apply():
             conv1d2conv2d._next_apply()
             for match_result in match_results:
                 res = conv1d2conv2d.apply(graph, match_result)
+    if op.eq(action, 'evaluate'):
+        return True
+    if op.eq(action, 'optimizer'):
+        if graph is not graph_bak:
+            graph.save('%s_new.onnx' % onnx_path)
+            print('graph optimize succeed, new model path: {}.'.format('%s_new.onnx' % onnx_path))
+        else:
+            print('graph does not optimize.')
     return True
 
 if __name__ == "__main__":
     import sys
     data_path = sys.argv[1]
     onnx_file = sys.argv[2]
-    parameter = {'file_name': onnx_file}
+    action = 'optimizer' if len(sys.argv) <= 3 else sys.argv[3]
+    parameter = {'file_name': onnx_file, 'action': action}
     ret = evaluate(data_path, parameter)
 
