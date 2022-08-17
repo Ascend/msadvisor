@@ -91,13 +91,13 @@ class TestGraphBasic(unittest.TestCase):
         self.assertTrue(is_graph_equal(parse_from_graph_proto, expected_graph))
         self.assertTrue(is_graph_equal(parse_from_model_proto, expected_graph))
     
-    def test_to_graph(self):
+    def test_to_proto(self):
         graph = create_graph()
-        self.assertIsInstance(graph.to_graph(), GraphProto)
+        self.assertIsInstance(graph.proto(), GraphProto)
     
     def test_to_model(self):
         graph = create_graph()
-        self.assertIsInstance(graph.to_model(), ModelProto)
+        self.assertIsInstance(graph.model(), ModelProto)
 
     def test_toposort(self):
         graph = create_graph()

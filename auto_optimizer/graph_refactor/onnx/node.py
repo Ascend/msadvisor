@@ -51,20 +51,18 @@ class Node(BaseNode):
     
     @classmethod
     def parse(cls, node:NodeProto):
-        attrs = {}
-        for attr in node.attribute:
-            attrs[attr.name] = helper.get_attribute_value(attr)
         return cls(
             name = node.name, 
             op_type = node.op_type, 
             inputs = list(node.input), 
             outputs = list(node.output), 
-            attrs = attrs, 
+            attrs = {attr.name: helper.get_attribute_value(attr)
+                     for attr in node.attribute}, 
             domain = node.domain
         )
     
 
-    def to_proto(self) -> NodeProto:
+    def proto(self) -> NodeProto:
         return helper.make_node(
             self.op_type, 
             self.inputs, 
@@ -163,7 +161,7 @@ class Initializer(BaseNode):
             value = value
         )
     
-    def to_proto(self) -> TensorProto:
+    def proto(self) -> TensorProto:
         return helper.make_tensor(
             self._name,
             NP_TYPE_TO_TENSOR_TYPE[self._value.dtype],
@@ -220,7 +218,7 @@ class PlaceHolder(BaseNode):
             shape = shape
         )
     
-    def to_proto(self) -> ValueInfoProto:
+    def proto(self) -> ValueInfoProto:
         return helper.make_tensor_value_info(
             self._name,
             NP_TYPE_TO_TENSOR_TYPE[self._dtype],
