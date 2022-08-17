@@ -194,12 +194,8 @@ def evaluate(data_path, parameter = None):
                 res = conv1d2conv2d.apply(graph, match_result)
     if op.eq(action, 'evaluate'):
         return True
-    if op.eq(action, 'optimizer'):
-        if graph is not graph_bak:
-            graph.save('%s_new.onnx' % onnx_path)
-            print('graph optimize succeed, new model path: {}.'.format('%s_new.onnx' % onnx_path))
-        else:
-            print('graph does not optimize.')
+    graph.save('%s_new.onnx' % onnx_path)
+    print('graph optimize succeed, new model path: {}.'.format('%s_new.onnx' % onnx_path))
     return True
 
 if __name__ == "__main__":
