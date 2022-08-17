@@ -78,8 +78,8 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         :param conv: 卷积算子，在该算子前面插入Unsqueeze算子
         :return: True： 操作成功； False： 操作失败
         """
-        us = graph.add_node('Unsqz_%d' % id, 'Unsqueeze', {'axes': [2]})
-        graph.insert_node(conv, us, mode=mode)
+        us = graph.add_node('Unsqueeze_%s_%s' % (mode, conv.name), 'Unsqueeze', {'axes': [2]})
+        graph.insert_node(conv.name, us, mode=mode)
         return True
 
     def _conv1d_to_conv2d(self, graph: GraphBase, conv: NodeBase) -> bool:
@@ -111,8 +111,8 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         :param node:
         :return: True：操作成功；False：操作失败
         """
-        sq = graph.add_node('Sqz_%d' % id, 'Squeeze', {'axes': [2]})
-        graph.insert_node(node, sq, mode=mode)
+        sq = graph.add_node('Squeeze_%s_%s' % (mode, node.name), 'Squeeze', {'axes': [2]})
+        graph.insert_node(node.name, sq, mode=mode)
         return True
 
     def __get_next_nodes(self, graph: GraphBase, cur_node: NodeBase):
@@ -132,13 +132,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
 
     def _conv1d2conv2d_apply(self, graph: GraphBase, match_result: MatchResult) -> bool:
         input_node = match_result.node_dicts[0].get('Conv')[0]
-        # print('insert node before {}'.format(input_node.name))
-        self.expand_conv_input_dims(graph, input_node, 'before')
-
-        for node_dict in match_result.node_dicts:
-            conv1d = node_dict.get('Conv')[0]
-            # print('modify conv1d {}.'.format(conv1d.name))
-            self._conv1d_to_conv2d(graph, conv1d)
+        self._expand_conv_input_dims(graph, input_node, 'before')
 
         # 考虑分叉的场景
         for node_dict in match_result.node_dicts:
@@ -150,19 +144,25 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
 
             conv_next_nodes = self.__get_next_nodes(graph, conv)
             for next_node in conv_next_nodes:
+                if op.eq(next_node.op_type, 'Reshape'):
+                    continue
                 if not conv_pattern.match(next_node, graph) and \
                     not element_wise_pattern.match(next_node, graph):
-                    # print('insert Squeeze before {}'.format(next_node.name))
                     self._reduce_output_dims(graph, next_node, 'before')
 
             if element_wises is not None:
                 for element_wise in element_wises:
                     next_nodes = self.__get_next_nodes(graph, element_wise)
                     for next_node in next_nodes:
+                        if op.eq(next_node.op_type, 'Reshape'):
+                            continue
                         if not conv_pattern.match(next_node, graph) and \
                             not element_wise_pattern.match(next_node, graph):
-                            # print('insert Squeeze before {}'.format(next_node.name))
                             self._reduce_output_dims(graph, next_node, 'before')
+
+        for node_dict in match_result.node_dicts:
+            conv1d = node_dict.get('Conv')[0]
+            self._conv1d_to_conv2d(graph, conv1d)
         return True
 
 KnowledgeFactory.add_knowledge('KnowledgeConv1d2Conv2d', KnowledgeConv1d2Conv2d())
