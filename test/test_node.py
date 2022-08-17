@@ -3,7 +3,7 @@ import unittest
 from onnx import helper
 
 from auto_optimizer.graph_refactor.onnx.node import Node
-from auto_optimizer.test.test_node_common import create_node
+from test_node_common import create_node
 
 class TestNode(unittest.TestCase):
 

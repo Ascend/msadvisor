@@ -14,6 +14,7 @@
 
 import copy
 from itertools import chain
+from collections import deque
 from typing import List, Dict, Union
 
 import numpy as np
@@ -48,7 +49,7 @@ class OnnxGraph(BaseGraph):
 
         self._meta = {'ir_version': kwargs.get('ir_version', 4),
                     'producer_name': kwargs.get('producer_name', 'AutoOptimizer'),
-                    'producer_version': kwargs.get('producer_version', 'beta'),
+                    'producer_version': kwargs.get('producer_version', 'alpha'),
                     'domain': kwargs.get('domain', ''),
                     'model_version': kwargs.get('model_version', 0),
                     'opset_imports': kwargs.get('opset_imports', None)
@@ -79,6 +80,7 @@ class OnnxGraph(BaseGraph):
         initializers = [Initializer.parse(i) for i in onnx_graph.initializer]
         value_infos = [PlaceHolder.parse(v) for v in onnx_graph.value_info]
 
+        # TODO: Constant Node to Initializer
         nodes = []
         for node in onnx_graph.node:
             nodes.append(Node.parse(node))
@@ -92,8 +94,7 @@ class OnnxGraph(BaseGraph):
         self._prev_map = {}
         self._next_map = {}
 
-        for n in chain(self._inputs, self._outputs, self._nodes, self._initializers, self._value_infos):
-            self._node_map[n.name] = n
+        self._node_map = {n.name: n for n in chain(self._inputs, self._outputs, self._nodes, self._initializers, self._value_infos)}
         # update prev node info
         for n in self._nodes:
             for o in n.outputs:
@@ -136,51 +137,68 @@ class OnnxGraph(BaseGraph):
         pass
 
     @property
-    def inputs(self):
-        pass
+    def inputs(self) -> List[PlaceHolder]:
+        return self._inputs
 
     @property
-    def outputs(self):
-        pass
+    def outputs(self) -> List[PlaceHolder]:
+        return self._outputs
 
-    def to_graph(self) -> GraphProto:
+    @property
+    def nodes(self) -> List[Node]:
+        return self._nodes
+
+    @property
+    def initializers(self) -> List[Initializer]:
+        return self._initializers
+
+    def proto(self) -> GraphProto:
         self.toposort()
-        return helper.make_graph(nodes=[node.to_proto() for node in self._nodes],
+        return helper.make_graph(nodes=[node.proto() for node in self._nodes],
                                 name=self.name,
-                                inputs=[input.to_proto() for input in self._inputs],
-                                outputs=[output.to_proto() for output in self._outputs],
-                                initializer=[ini.to_proto() for ini in self._initializers]
+                                inputs=[input.proto() for input in self._inputs],
+                                outputs=[output.proto() for output in self._outputs],
+                                initializer=[ini.proto() for ini in self._initializers],
+                                value_info=[val.proto() for val in self._value_infos]
         )
 
-    def to_model(self) -> ModelProto:
-        return helper.make_model(self.to_graph(), **self._meta)
+    def model(self) -> ModelProto:
+        return helper.make_model(self.proto(), **self._meta)
 
     def save(self, path: str):
-        onnx.save(self.to_model(), path)
+        onnx.save(self.model(), path)
+
+    def get_prev_node(self, input_name: str) -> Union[Node, PlaceHolder, Initializer]:
+        # TODO: raise exception
+        return self._prev_map.get(input_name, None)
+
+    def get_next_nodes(self, output_name: str) -> Union[List[Node], List[PlaceHolder], List[Initializer]]:
+        # TODO: raise exception
+        return self._next_map.get(output_name, [])
 
     def toposort(self):
         def visited_all_prev_nodes(node, visited):
             for input_name in node.inputs:
                 prev_node = self.get_prev_node(input_name)
-                if not visited.get(prev_node, False) and prev_node:
+                if prev_node not in visited and prev_node:
                     return False
             return True
 
-        queue = []
-        visited = {}
+        queue = deque()
+        visited = set()
         for node in self._nodes:
             if visited_all_prev_nodes(node, visited):
                 queue.append(node)
         
         sorted_nodes = []
         while queue:
-            node = queue.pop(0)
+            node = queue.popleft()
             if visited_all_prev_nodes(node, visited):
                 sorted_nodes.append(node)
-                visited[node] = True
+                visited.add(node)
                 for output_name in node.outputs:
                     for next_node in self.get_next_nodes(output_name):
-                        if next_node not in queue and not visited.get(next_node):
+                        if next_node not in queue and next_node not in visited:
                             queue.append(next_node)
             else:
                 queue.append(node)

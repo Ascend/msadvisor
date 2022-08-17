@@ -22,7 +22,7 @@ class BaseNode(ABC):
         pass
     
     @abstractmethod
-    def to_proto(self):
+    def proto(self):
         pass
     
     @property
