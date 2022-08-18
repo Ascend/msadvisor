@@ -29,7 +29,7 @@
     },
     {
         "310-> 310P Indicates the impact on users during V1 migration":"You need to plan the number of channels for each module. For Ascend310 and Ascend710, VDEC will fail to create channels if the number of call-back threads in a single process exceeds 128 when the VDEC decodes (see the description of the aclvdecCreateChannel interface for details).",
-        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPC/JPEGD/JPEGE/VENC is not limited.",
+        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPCJPEGDJPEGEVENC is not limited.",
         "Ascend 310pV1 implementation":"VDEC and JPEGD share the same channel number. A maximum of 256 channels are supported. A VPC supports a maximum of 256 routes. JPEGE and VENC share a maximum of 128 channels.",
         "The AscendCL interface involved":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
         "function or constraint":"Limit the number of channels on each module"
@@ -87,7 +87,7 @@
     },
     {
         "310-> 310P Indicates the impact on users during V1 migration":"You need to plan the number of channels for each module. For Ascend310 and Ascend710, VDEC will fail to create channels if the number of call-back threads in a single process exceeds 128 when the VDEC decodes (see the description of the aclvdecCreateChannel interface for details).",
-        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPC/JPEGD/JPEGE/VENC is not limited.",
+        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPCJPEGDJPEGEVENC is not limited.",
         "Ascend 310pV1 implementation":"VDEC and JPEGD share the same channel number. A maximum of 256 channels are supported. A VPC supports a maximum of 256 routes. JPEGE and VENC share a maximum of 128 channels.",
         "The AscendCL interface involved":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
         "function or constraint":"Limit the number of channels on each module."
@@ -102,7 +102,7 @@
     },
     {
         "310-> 310P Indicates the impact on users during V1 migration":"You need to plan the number of channels for each module. For Ascend310 and Ascend710, VDEC will fail to create channels if the number of call-back threads in a single process exceeds 128 when the VDEC decodes (see the description of the aclvdecCreateChannel interface for details).",
-        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPC/JPEGD/JPEGE/VENC is not limited.",
+        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPCJPEGDJPEGEVENC is not limited.",
         "Ascend 310pV1 implementation":"VDEC and JPEGD share the same channel number. A maximum of 256 channels are supported. A VPC supports a maximum of 256 routes. JPEGE and VENC share a maximum of 128 channels.",
         "The AscendCL interface involved":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
         "function or constraint":"Limit the number of channels on each module."
@@ -117,7 +117,7 @@
     },
     {
         "310-> 310P Indicates the impact on users during V1 migration":"You need to plan the number of channels for each module. For Ascend310 and Ascend710, VDEC will fail to create channels if the number of call-back threads in a single process exceeds 128 when the VDEC decodes (see the description of the aclvdecCreateChannel interface for details).",
-        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPC/JPEGD/JPEGE/VENC is not limited.",
+        "Ascend 310 implementation":"VDEC supports a maximum of 32 channels for a single process and no restrictions for multiple processes. VPCJPEGDJPEGEVENC is not limited.",
         "Ascend 310pV1 implementation":"VDEC and JPEGD share the same channel number. A maximum of 256 channels are supported. A VPC supports a maximum of 256 routes. JPEGE and VENC share a maximum of 128 channels.",
         "The AscendCL interface involved":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
         "function or constraint":"Limit the number of channels on each module."
