@@ -136,7 +136,8 @@ def result_generate(SuccessSummary, er, result, direction, OptimizedSummary, seq
         result.summary += SuccessSummary
         result.summary += ' '
         result.extend_result.append(er)
-    elif direction == 'Direction4_1' and er.extend_title != 'Port compatibility information for migrating to 310pV1:':
+    elif direction == 'Direction4_1' and er.extend_title != 'Port compatibility information for migrating to 310pV1:'\
+            and er.extend_title != 'Port compatibility information for migrating to 310pV2:':
         result.summary += OptimizedSummary
         result.summary += ' '
         result.extend_result.append(er)
