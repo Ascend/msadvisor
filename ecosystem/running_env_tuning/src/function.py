@@ -134,10 +134,10 @@ def IsCompatible(data):
     elif temp_npu_name == "d500":
         npu_name = getCard310P()
     else:
-        npu_name = ""
+        npu_name = "others"
     os_data = getSystem_all()
     # os_data = "Windows"  # 测试
-    if npu_name == "":
+    if npu_name == "others" or npu_name == "Atlas 300I":
         return RETURN_STATUS['overrange'], npu_name, os_data
     for key in data:
         if npu_name == key:
@@ -155,7 +155,7 @@ def IsInnerCoreAndOSCompatible(data):
     elif temp_npu_name == "d500":
         npu_name = getCard310P()
     else:
-        npu_name = ""
+        npu_name = "others"
     # npu_name = "Atlas 300I Pro"  # 测试
     os_Architecture, os_version, DISTRIB_ID = getSystemAndArch()  # 获取操作系统版本和架构和DISTRIB_ID(如Ubuntu)
     output = getInnerCoreVersion()  # 获取操作系统内核版本
@@ -164,7 +164,7 @@ def IsInnerCoreAndOSCompatible(data):
     else:
         InnerCore_version = output[1] + "." + output[2]
     # os_version = "Ubuntu 18.04.5"  # 测试
-    if npu_name == "" or npu_name == "Atlas 300I":
+    if npu_name == "others" or npu_name == "Atlas 300I":
         return RETURN_STATUS['overrange'], InnerCore_version
     else:
         data = data.get(npu_name)
@@ -174,7 +174,7 @@ def IsInnerCoreAndOSCompatible(data):
                     return RETURN_STATUS['success'], InnerCore_version
                 else:
                     return RETURN_STATUS['optimized'], tmp
-        return RETURN_STATUS['error'], InnerCore_version
+        return RETURN_STATUS['error'], npu_name
 
     # 方向五判断内核版本是否符合，并返回判断结果以及相关信息
 
@@ -186,7 +186,7 @@ def IsInnerCoreAndOSCompatible_E(data):
     elif temp_npu_name == "d500":
         npu_name = getCard310P()
     else:
-        npu_name = ""
+        npu_name = "others"
     # npu_name = "Atlas 300I Pro"  # 测试
     os_Architecture, os_version, DISTRIB_ID = getSystemAndArch()  # 获取操作系统版本和架构和DISTRIB_ID(如Ubuntu)
     output = getInnerCoreVersion()  # 获取操作系统内核版本
@@ -195,7 +195,7 @@ def IsInnerCoreAndOSCompatible_E(data):
     else:
         InnerCore_version = output[1] + "." + output[2]
     # os_version = "Ubuntu 18.04.5"  # 测试
-    if npu_name == "" or npu_name == "Atlas 300I":
+    if npu_name == "others" or npu_name == "Atlas 300I":
         return RETURN_STATUS['overrange'], InnerCore_version
     else:
         data = data.get(npu_name)
@@ -206,4 +206,4 @@ def IsInnerCoreAndOSCompatible_E(data):
                     return RETURN_STATUS['success'], InnerCore_version
                 else:
                     return RETURN_STATUS['optimized'], tmp
-        return RETURN_STATUS['error'], InnerCore_version
+        return RETURN_STATUS['error'], npu_name
