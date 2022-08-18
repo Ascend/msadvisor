@@ -71,46 +71,50 @@ def Evaluate(datapath):
     user_data = get_data(user_filename, datapath, target_path)  # 获取用户配置文件的数据UserEnvironmentConfig.json
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # 方向1
-    er1 = direction1_process(user_data)
-    SuccessSummary = "Inference card are well compatible with application scene"
-    OptimizedSummary = "Inference card need to be optimized"
-    sequence += 1
-    result = result_generate(SuccessSummary, er1, result, "Direction1", OptimizedSummary, sequence)
-    # 方向2
-    server_name, real_pcie, er2 = direction2_process(user_data, datapath, target_path)  # 方向二
-    sequence += 1
-    result = result_generate(server_name + " match " + real_pcie + "(Pcie) successfully", er2, result,
-                             "Direction2", server_name + " can't match " + real_pcie, sequence)
-    # 方向3
-    er3 = direction3_process(environment_data, datapath, target_path)
-    SuccessSummary = "InferenceCard are well compatible with operating systems"
-    OptimizedSummary = "OS need to be optimized"
-    sequence += 1
-    result = result_generate(SuccessSummary, er3, result, "Direction3", OptimizedSummary, sequence)
+    # er1 = direction1_process(user_data)
+    # SuccessSummary = "Inference card are well compatible with application scene"
+    # OptimizedSummary = "Inference card need to be optimized"
+    # sequence += 1
+    # result = result_generate(SuccessSummary, er1, result, "Direction1", OptimizedSummary, sequence)
+    # # 方向2
+    # server_name, real_pcie, er2 = direction2_process(user_data, datapath, target_path)  # 方向二
+    # sequence += 1
+    # result = result_generate(server_name + " match " + real_pcie + "(Pcie) successfully", er2, result,
+    #                          "Direction2", server_name + " can't match " + real_pcie, sequence)
+    # # 方向3
+    # er3 = direction3_process(environment_data, datapath, target_path)
+    # SuccessSummary = "InferenceCard are well compatible with operating systems"
+    # OptimizedSummary = "OS need to be optimized"
+    # sequence += 1
+    # result = result_generate(SuccessSummary, er3, result, "Direction3", OptimizedSummary, sequence)
     # 方向4_1
     transfer_version, er4_1 = direction4_1_process(environment_data, user_data, datapath, target_path)
-    if isinstance(er4_1, list):  # 迁移版本2的时候会出现返回两个ExtendResist
-        sequence += 1
-        result = result_generate("transfer to 310p_v1_acldvpp is reasonable", er4_1[0], result,
-                                 "Direction4-1", "", sequence)
-        sequence += 1
-        result = result_generate("transfer to " + transfer_version + " is reasonable", er4_1[1], result,
-                                 "Direction4_1", "", sequence)
-    else:
-        sequence += 1
-        result = result_generate("transfer to " + transfer_version + " is reasonable", er4_1, result,
-                                 "Direction4_1", "transfer to" + transfer_version + " is unreasonable,", sequence)
-    # 方向4_2
-    er4_2 = direction4_2_process(environment_data, datapath, target_path)
+    # if isinstance(er4_1, list):  # 迁移版本2的时候会出现返回两个ExtendResist
+    #     sequence += 1
+    #     result = result_generate("transfer to 310p_v1_acldvpp is reasonable", er4_1[0], result,
+    #                              "Direction4-1", "", sequence)
+    #     sequence += 1
+    #     result = result_generate("transfer to " + transfer_version + " is reasonable", er4_1[1], result,
+    #                              "Direction4_1", "", sequence)
+    # else:
+    #     sequence += 1
+    #     result = result_generate("transfer to " + transfer_version + " is reasonable", er4_1, result,
+    #                              "Direction4_1", "transfer to" + transfer_version + " is unreasonable,", sequence)
     sequence += 1
-    result = result_generate("Target chip identification succeeded", er4_2, result, "Direction4_2",
-                             "There's no chip match", sequence)
-    # 方向5
-    er5 = direction5_process(environment_data, datapath, target_path)
-    SuccessSummary = "The current operating system kernel version is recommended"
-    OptimizedSummary = "You need to change the software or hardware versions"
-    sequence += 1
-    result = result_generate(SuccessSummary, er5, result, "Direction5", OptimizedSummary, sequence)
+    result = result_generate("transfer to " + transfer_version + " is reasonable", er4_1, result,
+                             "Direction4_1", "transfer to" + transfer_version + " is unreasonable", sequence)
+
+    # # 方向4_2
+    # er4_2 = direction4_2_process(environment_data, datapath, target_path)
+    # sequence += 1
+    # result = result_generate("Target chip identification succeeded", er4_2, result, "Direction4_2",
+    #                          "There's no chip match", sequence)
+    # # 方向5
+    # er5 = direction5_process(environment_data, datapath, target_path)
+    # SuccessSummary = "The current operating system kernel version is recommended"
+    # OptimizedSummary = "You need to change the software or hardware versions"
+    # sequence += 1
+    # result = result_generate(SuccessSummary, er5, result, "Direction5", OptimizedSummary, sequence)
 
     return result.generate()
 
@@ -276,7 +280,7 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
         er1.data_type = EXTEND_DATA_TYPE['str']
         er1.value.append('Recommended transfer to 310p_v2')
         return transfer_version, er1
-    else:  # 为False的话说明迁移到310p_v1_acldvpp或者310p_v2版本满足了需求
+    elif transfer_version == '310p_v1_acldvpp':  # flag为False且转移的版本为V1版本的话说明迁移到310p_v1_acldvpp版本可以实现
         er1.extend_title = 'Port compatibility information for migrating to 310pV1:'
         er1.type = EXTEND_TYPE['table']
         er1.key = ['function or constraint', 'The AscendCL interface involved', 'Ascend 310 implementation',
@@ -301,7 +305,8 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
                 continue
         if er1.value:
             er1.data_type = [EXTEND_DATA_TYPE['str'] * 6]
-    if transfer_version == '310p_v2_hi_mpi':  # 如果是迁移到V2版本上,那么就要返回V1和V2的所有接口信息
+        return transfer_version, er1
+    elif transfer_version == '310p_v2_hi_mpi':  # flag为False且转移的版本为V2版本的话说明迁移到310p_v2_hi_mpi版本可以实现
         er2.extend_title = 'Port compatibility information for migrating to 310pV2:'
         er2.type = EXTEND_TYPE['table']
         er2.data_type = [EXTEND_DATA_TYPE['str'] * 5]
@@ -345,9 +350,7 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
                                           key])
             else:
                 continue
-        return transfer_version, [er1, er2]
-
-    return transfer_version, er1
+        return transfer_version, er2
 
 
 # 方向四_2:昇腾软件兼容性校验---目标芯片选项参数差异
