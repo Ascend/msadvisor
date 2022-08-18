@@ -7,7 +7,7 @@
   ],
   "direction_four": [
     {
-      "transfer_version": "310p_v2_hi_mpi",
+      "transfer_version": "310p_v1_acldvpp",
       "target_file_address": "../data/knowledge/knowledgeBase/TestFileProject,../data/knowledge/knowledgeBase/TestFileProject2"
     },
     {
