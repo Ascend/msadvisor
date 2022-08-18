@@ -292,7 +292,7 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
     elif transfer_version == '310p_v1_acldvpp':  # flag为False且转移的版本为V1版本的话说明迁移到310p_v1_acldvpp版本可以实现
         er1.extend_title = 'Port compatibility information for migrating to 310pV1:'
         er1.type = EXTEND_TYPE['table']
-        er2.data_type = [EXTEND_DATA_TYPE['str'] * 6]
+        er1.data_type = [EXTEND_DATA_TYPE['str'] * 6]
         er1.key = ['function or constraint', 'The AscendCL interface involved', 'Ascend 310 implementation',
                    'Ascend 310pV1 implementation', '310-> 310P Indicates the impact on users during V1 migration',
                    'Subordinate to the module']
