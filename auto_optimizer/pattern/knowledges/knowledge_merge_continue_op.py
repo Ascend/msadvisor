@@ -137,12 +137,20 @@ class KnowledgeMergeContinueOp(KnowledgeBase):
         print("optimize end ret:", flag)
         return graph, flag
 
-def evaluate(datapath, parameter):    
+def evaluate(datapath, parameter):
     # get parameter
     params = json.loads(parameter)
-    file_name = params.get("file_name", "origin.onnx")
-    action = params.get("action", "optimize")
+    mode = params.get("mode", "optimize")
+    if mode not in [ "optimize", "evaluate" ]:
+        raise RuntimeError('mode:{} invalid not in optimize or evaluate'.format(mode))
+
+    file_name = params.get("file_name")
+    if file_name == None:
+        raise RuntimeError('file_name:{} is none'.format(file_name))
     onnx_path = os.path.join("{}/{}".format(datapath, file_name))
+    if os.path.isfile(onnx_path) == False:
+        raise RuntimeError('onnx_path:{} is not exist'.format(onnx_path))
+
     print("evaluate datapath:{} parameter:{} onnx_path:{}".format(datapath, parameter, onnx_path))
 
     # fill result
@@ -150,7 +158,7 @@ def evaluate(datapath, parameter):
     result = msadvisor_adapter.Result()
     result.class_type = msadvisor_adapter.class_type['model']
     result.error_code = msadvisor_adapter.error_code['success']
-    result.summary = "model no need to optimize"
+    result.summary = "The current model are well optimized"
 
     # load model
     from magiconnx.graph import OnnxGraph
@@ -160,23 +168,24 @@ def evaluate(datapath, parameter):
     needflag =  knowledge.need_to_optimize(onnx_graph)
 
     if needflag == True:
-        if action == "evaluate":
-            result.summary = "model have optimize graph need to optimize"
-        elif action == "optimize":
+        if mode == "evaluate":
+            result.summary = "The current model need to be optimized"
+        elif mode == "optimize":
             optimiszer_graph, flag = knowledge.optimize(onnx_graph)
             if flag == True:
                 out_file = os.path.join(datapath, "{}_optimize.onnx".format(os.path.splitext(file_name)[0]))
                 optimiszer_graph.save(out_file)
                 result.error_code = msadvisor_adapter.error_code['optimized']
-                result.summary = "model have optimize graph,optimize OK result file:{}".format(out_file)
+                result.summary = "The current model need to be optimized,the optimized model path is:{}".format(out_file)
             else:
-                result.summary = "model have optimize graph,optimize failed"
+                raise RuntimeError('optimize failed file:{}'.format(onnx_path))
+
     return result.generate()
 
 if __name__ == "__main__":
     data_path, filename = os.path.split(sys.argv[1])
-    action = "optimize" if len(sys.argv) < 3 else sys.argv[2]
-    parameter= json.dumps({ "file_name" : filename, "action":action })
+    mode = "optimize" if len(sys.argv) < 3 else sys.argv[2]
+    parameter= json.dumps({ "file_name" : filename, "mode":mode })
     print("evaluate start data_path:{} parameter:{}".format(data_path, parameter))
     ret = evaluate(data_path, parameter)
     print("evaluate called ret:\n{}\n".format(ret))
