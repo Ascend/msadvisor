@@ -313,8 +313,8 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
                             break  # 如果当前module下的一个功能中有了用户代码中的接口 则输出一次这个temp即可，避免多次输出
             else:
                 continue
-        if er1.value:
-            er1.data_type = [EXTEND_DATA_TYPE['str'] * 6]
+        # if er1.value:
+        #     er1.data_type = [EXTEND_DATA_TYPE['str'] * 6]
         return transfer_version, er1
     elif transfer_version == '310p_v2_hi_mpi':  # flag为False且转移的版本为V2版本的话说明迁移到310p_v2_hi_mpi版本可以实现
         er2.extend_title = 'Port compatibility information for migrating to 310pV2:'
