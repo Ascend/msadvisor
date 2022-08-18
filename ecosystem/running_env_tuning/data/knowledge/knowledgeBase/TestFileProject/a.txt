@@ -4,4 +4,4 @@ dddacldvppSetPicDescWidthgggg
 
 aclvdecCreateChannel
 
-acldvppCreateChannel
+acldvppCreateChannel 'acldvppSetPicDescWidth'

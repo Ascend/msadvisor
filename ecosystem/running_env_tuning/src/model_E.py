@@ -132,14 +132,23 @@ def result_generate(SuccessSummary, er, result, direction, OptimizedSummary, seq
         result.summary += SuccessSummary
         result.summary += ' '
         result.extend_result.append(er)
-    elif not er.data_type:
-        result.summary += SuccessSummary
-        result.summary += ' '
-    elif er.extend_title == 'Port compatibility information for migrating to 310pV1:' or \
-            er.extend_title == 'Port compatibility information for migrating to 310pV2:':
+    elif direction == 'Direction4_1' and er.extend_title == 'Port compatibility information for migrating to 310pV1:':
         result.summary += SuccessSummary
         result.summary += ' '
         result.extend_result.append(er)
+    elif direction == 'Direction4_1' and er.extend_title != 'Port compatibility information for migrating to 310pV1:':
+        result.summary += OptimizedSummary
+        result.summary += ' '
+        result.extend_result.append(er)
+    elif direction == 'Direction4_1' and er.extend_title == 'Port compatibility information for migrating to 310pV2:':
+        result.summary += SuccessSummary
+        result.summary += ' '
+        result.extend_result.append(er)
+    # elif er.extend_title == 'Port compatibility information for migrating to 310pV1:' or \
+    #         er.extend_title == 'Port compatibility information for migrating to 310pV2:':
+    #     result.summary += SuccessSummary
+    #     result.summary += ' '
+    #     result.extend_result.append(er)
     else:
         result.summary += OptimizedSummary
         result.summary += ' '
@@ -283,6 +292,7 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
     elif transfer_version == '310p_v1_acldvpp':  # flag为False且转移的版本为V1版本的话说明迁移到310p_v1_acldvpp版本可以实现
         er1.extend_title = 'Port compatibility information for migrating to 310pV1:'
         er1.type = EXTEND_TYPE['table']
+        er2.data_type = [EXTEND_DATA_TYPE['str'] * 6]
         er1.key = ['function or constraint', 'The AscendCL interface involved', 'Ascend 310 implementation',
                    'Ascend 310pV1 implementation', '310-> 310P Indicates the impact on users during V1 migration',
                    'Subordinate to the module']
@@ -413,3 +423,8 @@ def direction5_process(environment_data, datapath, target_path):
         er.data_type.append(EXTEND_DATA_TYPE['str'])
         er.extend_title = "The tuning direction does not include this inference card"
         return er
+
+
+if __name__ == '__main__':
+    str1 = Evaluate("D://desktop//msadvisor_2//ecosystem//running_env_tuning//data//knowledge")
+    print(str1)
