@@ -342,7 +342,7 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
             if value == 1:
                 temps = transfer_V2_json['v2_' + key]
                 for temp in temps:
-                    if temp.get(er2.key[1])[0] == 'a' or 'r':
+                    if temp.get(er2.key[1])[0] == 'a' or temp.get(er2.key[1])[0] == 'r':  # 为a或者为r的话说明是一个接口列表
                         interface_temp_list = str.split(temp.get(er2.key[1]), ',')
                         for interface in interface_temp_list:
                             # if re.findall(interface,target_file_content) != []:
