@@ -320,19 +320,23 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
     elif transfer_version == '310p_v2_hi_mpi':  # flag为False且转移的版本为V2版本的话说明迁移到310p_v2_hi_mpi版本可以实现
         er2.extend_title = 'Port compatibility information for migrating to 310pV2:'
         er2.type = EXTEND_TYPE['table']
-        er2.data_type = [EXTEND_DATA_TYPE['str'] * 3]
+        er2.data_type = [EXTEND_DATA_TYPE['str'] * 5]
         er2.key = ['310->310Pv2 Migration Impact on Users', 'Ascend 310 acldvpp interface',
-                   'Subordinate to the module']
+                   'Ascend 710 hi_mpi interface', 'function or constraint', 'Subordinate to the module']
         # 对必须处理的头文件进行单独处理
         temps = transfer_V2_json['v2_library file']
         for temp in temps:
             er2.value.append([temp.get(er2.key[0]),
                               temp.get(er2.key[1]),
+                              temp.get(er2.key[2]),
+                              temp.get(er2.key[3]),
                               'header file'])
         temps = transfer_V2_json['v2_header file']
         for temp in temps:
             er2.value.append([temp.get(er2.key[0]),
                               temp.get(er2.key[1]),
+                              temp.get(er2.key[2]),
+                              temp.get(er2.key[3]),
                               'header file'])
         for key, value in needed_sketchy_function.items():
             if value == 1:
@@ -345,11 +349,15 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
                             if interface in target_file_content:
                                 er2.value.append([temp.get(er2.key[0]),
                                                   temp.get(er2.key[1]),
+                                                  temp.get(er2.key[2]),
+                                                  temp.get(er2.key[3]),
                                                   key])
                                 break
                     else:
                         er2.value.append([temp.get(er2.key[0]),
                                           temp.get(er2.key[1]),
+                                          temp.get(er2.key[2]),
+                                          temp.get(er2.key[3]),
                                           key])
             else:
                 continue
