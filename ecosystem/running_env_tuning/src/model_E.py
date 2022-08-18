@@ -293,19 +293,23 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
     elif transfer_version == '310p_v1_acldvpp':  # flag为False且转移的版本为V1版本的话说明迁移到310p_v1_acldvpp版本可以实现
         er1.extend_title = 'Port compatibility information for migrating to 310pV1:'
         er1.type = EXTEND_TYPE['table']
-        er1.data_type = [EXTEND_DATA_TYPE['str'] * 3]
-        er1.key = ['The AscendCL interface involved', '310-> 310P Indicates the impact on users during V1 migration',
+        er1.data_type = [EXTEND_DATA_TYPE['str'] * 6]
+        er1.key = ['function or constraint', 'The AscendCL interface involved', 'Ascend 310 implementation',
+                   'Ascend 310pV1 implementation', '310-> 310P Indicates the impact on users during V1 migration',
                    'Subordinate to the module']
         for key, value in needed_sketchy_function.items():
             if value == 1 and key != 'PNGD':  # v1版本中没有这个PNGD功能
                 temps = transfer_V1_json['v1_' + key]
                 for temp in temps:
-                    interface_temp_list = str.split(temp.get(er1.key[0]), ',')
+                    interface_temp_list = str.split(temp.get(er1.key[1]), ',')
                     for interface in interface_temp_list:
                         # if re.findall(interface,target_file_content) != []:
                         if interface in target_file_content:
                             er1.value.append([temp.get(er1.key[0]),
                                               temp.get(er1.key[1]),
+                                              temp.get(er1.key[2]),
+                                              temp.get(er1.key[3]),
+                                              temp.get(er1.key[4]),
                                               key])
                             break  # 如果当前module下的一个功能中有了用户代码中的接口 则输出一次这个temp即可，避免多次输出
             else:
