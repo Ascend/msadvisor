@@ -425,4 +425,3 @@ def direction5_process(environment_data, datapath, target_path):
         er.extend_title = "The tuning direction does not include this inference card"
         return er
 
-
