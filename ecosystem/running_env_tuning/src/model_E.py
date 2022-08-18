@@ -426,6 +426,3 @@ def direction5_process(environment_data, datapath, target_path):
         return er
 
 
-if __name__ == '__main__':
-    str1 = Evaluate("D://desktop//msadvisor_2//ecosystem//running_env_tuning//data//knowledge")
-    print(str1)
