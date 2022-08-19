@@ -263,7 +263,7 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
 
     if needed_sketchy_function['VPC'] + needed_sketchy_function['VDEC'] + needed_sketchy_function['VENC'] + \
             needed_sketchy_function['JPEGD'] + needed_sketchy_function['JPEGE'] == 0 \
-            and needed_sketchy_function['PNGD'] == 1 and transfer_version == '310p_v1_acldvpp':
+            and needed_sketchy_function['PNGD'] == 1 and transfer_version == '310pV1':
         er1.extend_title += 'PNGD'
         flag = True
 
@@ -296,7 +296,7 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
                 continue
         if er1.value:
             er1.data_type = [EXTEND_DATA_TYPE['str'] * 6]
-    if transfer_version == '310p_v2_hi_mpi':  # 如果是迁移到V2版本上,那么就要返回V1和V2的所有接口信息
+    if transfer_version == '310pV2':  # 如果是迁移到V2版本上,那么就要返回V1和V2的所有接口信息
         er2.extend_title = '迁移到310pV2版本的相关接口兼容性信息：'
         er2.type = EXTEND_TYPE['table']
         er2.data_type = [EXTEND_DATA_TYPE['str'] * 5]
