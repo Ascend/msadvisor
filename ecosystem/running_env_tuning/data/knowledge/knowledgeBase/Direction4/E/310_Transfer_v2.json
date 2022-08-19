@@ -1,591 +1,591 @@
 {"v2_VPC":[
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
-        "Ascend 310 acldvpp interface":"Media data processing module initialization is not required",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_init",
+        "The AscendCL interface name":"Media data processing module initialization is not required",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
         "function or constraint":"The media data processing module is initialized"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to declare variables of the hi_vpc_chn_attr structure directly.",
-        "Ascend 310 acldvpp interface":"acldvppCreateChannelDesc",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface, the hi_vpc_CHn_attr structure is used directly. The parameters of the hi_vpc_CHn_attr structure are reserved internally. You can set any value (except null pointer).",
+        "The AscendCL interface name":"acldvppCreateChannelDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to declare variables of the hi_vpc_chn_attr structure directly.",
         "function or constraint":"Create a structure for the channel description"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"You need to modify the code to create a channel using the HI_mPI_vpc_create_chn interface.",
-        "Ascend 310 acldvpp interface":"acldvppCreateChannel",
         "Ascend 710 hi_mpi interface":"Create channels:hi_mpi_vpc_create_chn",
+        "The AscendCL interface name":"acldvppCreateChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"You need to modify the code to create a channel using the HI_mPI_vpc_create_chn interface.",
         "function or constraint":"Create channels"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function.",
-        "Ascend 310 acldvpp interface":"acldvppMalloc",
         "Ascend 710 hi_mpi interface":"Memory application:hi_mpi_dvpp_malloc",
+        "The AscendCL interface name":"acldvppMalloc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function.",
         "function or constraint":"Memory application"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
-        "Ascend 310 acldvpp interface":"acldvppFree",
         "Ascend 710 hi_mpi interface":"memfree:hi_mpi_dvpp_free",
+        "The AscendCL interface name":"acldvppFree",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
         "function or constraint":"memfree"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_vpc_pic_info member of the structure to configure the parameters for the input image information.",
-        "Ascend 310 acldvpp interface":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidthacldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface, the hi_vpc_pic_info structure member is directly assigned when the input image parameters are configured:picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "The AscendCL interface name":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidthacldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_vpc_pic_info member of the structure to configure the parameters for the input image information.",
         "function or constraint":"Matting zoom map function (one picture in one box) Configures the input image information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign the dest_pic_info member in the hi_vpc_crop_resize_PASTE_region structure instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface, the dest_pic_info member in the hi_vpc_crop_resize_PASTE_region structure is directly assigned when the output image parameters are configured. The dest_PIC_INFO member is the hi_vpc_pic_INFO structure, and the members in the structure are as follows:picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "The AscendCL interface name":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign the dest_pic_info member in the hi_vpc_crop_resize_PASTE_region structure instead.",
         "function or constraint":"Image matting zoom mapping function (one picture in one box) Configures and outputs image information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the Crop_region member in the hi_vpc_crop_resize_PASTE_region structure instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface and the position information of image matting is configured, the value is directly assigned to the crop_region member in hi_vpc_crop_resize_PASTE_region structure. The crop_region member is the hi_vpc_crop_region structure, and the members in this structure are as follows:top_offset;left_offset;crop_width;crop_height;",
+        "The AscendCL interface name":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the Crop_region member in the hi_vpc_crop_resize_PASTE_region structure instead.",
         "function or constraint":"The matting zoom map function (one picture, one box) configures the matting position information from the input image"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the resize_INFO member within the hi_vpc_crop_resize_PASTE_region structure instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
         "Ascend 710 hi_mpi interface":"There is no corresponding interface. When scaling information is configured, values are directly assigned to the resize_INFO member in the hi_Vpc_CROp_resize_REGION structure. The resize_INFO member is the hi_Vpc_resize_INFO structure:resize_width;resize_height;interpolation;",
+        "The AscendCL interface name":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the resize_INFO member within the hi_vpc_crop_resize_PASTE_region structure instead.",
         "function or constraint":"Matting Zoom map function (one picture in one box) Configures the zoom algorithm information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign the dest_top_offset and dest_left_offset members in the hi_vpc_crop_resize_PASTE_region structure instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRightacldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface, the dest_top_offset and dest_left_offset members in the hi_vpc_crop_resize_PASTE_region structure are directly assigned when the mapping position information is configured.",
+        "The AscendCL interface name":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRightacldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign the dest_top_offset and dest_left_offset members in the hi_vpc_crop_resize_PASTE_region structure instead.",
         "function or constraint":"Matting zoom map function (one picture, one box) configures the position information of the map in the output picture"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to call the HI_mPI_vpc_crop_resize_paste interface instead. Note: the HI_MPI_Vpc_crop_resize_paste interface supports one picture with one box and one picture with multiple boxes. If you want to use one picture with multiple boxes, you need to configure the picture matting position information, scaling algorithm information and mapping position information of each box.",
-        "Ascend 310 acldvpp interface":"acldvppVpcCropResizePasteAsync",
         "Ascend 710 hi_mpi interface":"Matting zoom map function:hi_mpi_vpc_crop_resize_paste",
+        "The AscendCL interface name":"acldvppVpcCropResizePasteAsync",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to call the HI_mPI_vpc_crop_resize_paste interface instead. Note: the HI_MPI_Vpc_crop_resize_paste interface supports one picture with one box and one picture with multiple boxes. If you want to use one picture with multiple boxes, you need to configure the picture matting position information, scaling algorithm information and mapping position information of each box.",
         "function or constraint":"Matting zoom map function (one picture in one frame) Matting zoom map function"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_vpc_pic_info member of the structure to configure the parameters for the input image information.",
-        "Ascend 310 acldvpp interface":"acldvppCreateBatchPicDesc,acldvppGetPicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyBatchPicDesc",
         "Ascend 710 hi_mpi interface":"There is no corresponding interface. When configuring the input image parameters, assign values to the members of the hi_vpc_pic_info structure data, where each element of the array represents each input image and pic_num represents the batch size:picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "The AscendCL interface name":"acldvppCreateBatchPicDesc,acldvppGetPicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyBatchPicDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_vpc_pic_info member of the structure to configure the parameters for the input image information.",
         "function or constraint":"Batch Matting zoom map function - Configures batch image information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign the dest_pic_info member in the hi_vpc_crop_resize_PASTE_region structure instead.",
-        "Ascend 310 acldvpp interface":"roiNumssize",
         "Ascend 710 hi_mpi interface":"The data structure is as follows, and the array length is the same as pic_num:count[]",
+        "The AscendCL interface name":"roiNumssize",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign the dest_pic_info member in the hi_vpc_crop_resize_PASTE_region structure instead.",
         "function or constraint":"Batch matting zoom map function - Configures the number of matts per input image"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign the dest_pic_info member in the hi_vpc_crop_resize_PASTE_region structure instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreateBatchPicDesc,acldvppGetPicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyBatchPicDesc",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface, the dest_pic_info member in the hi_vpc_crop_resize_PASTE_region structure is directly assigned when the output image parameters are configured. The dest_PIC_INFO member is the hi_vpc_pic_INFO structure, and the members in the structure are as follows:picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "The AscendCL interface name":"acldvppCreateBatchPicDesc,acldvppGetPicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyBatchPicDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign the dest_pic_info member in the hi_vpc_crop_resize_PASTE_region structure instead.",
         "function or constraint":"Batch Matting zoom map function - Configures batch image information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the Crop_region member in the hi_vpc_crop_resize_PASTE_region structure instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface and the position information of image matting is configured, the value is directly assigned to the crop_region member in hi_vpc_crop_resize_PASTE_region structure. The crop_region member is the hi_vpc_crop_region structure, and the members in this structure are as follows:top_offset;left_offset;crop_width;crop_height;",
+        "The AscendCL interface name":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the Crop_region member in the hi_vpc_crop_resize_PASTE_region structure instead.",
         "function or constraint":"Batch matting zoom map function - configures matting position information from input images"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the resize_INFO member within the hi_vpc_crop_resize_PASTE_region structure instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
         "Ascend 710 hi_mpi interface":"There is no corresponding interface. When scaling information is configured, values are directly assigned to the resize_INFO member in the hi_Vpc_CROp_resize_REGION structure. The resize_INFO member is the hi_Vpc_resize_INFO structure:resize_width;resize_height;interpolation;",
+        "The AscendCL interface name":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the resize_INFO member within the hi_vpc_crop_resize_PASTE_region structure instead.",
         "function or constraint":"Batch matting zoom map function - Configures the zoom algorithm information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign the dest_top_offset and dest_left_offset members in the hi_vpc_crop_resize_PASTE_region structure instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface, the dest_top_offset and dest_left_offset members in the hi_vpc_crop_resize_PASTE_region structure are directly assigned when the mapping position information is configured.",
+        "The AscendCL interface name":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign the dest_top_offset and dest_left_offset members in the hi_vpc_crop_resize_PASTE_region structure instead.",
         "function or constraint":"Batch matting zoom map function - configures the texture position information in the output image"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to call the HI_mPI_vpc_batch_crop_resize_paste interface instead. Note: the original pic_num is the same as the length of the source_pic and count arrays.",
-        "Ascend 310 acldvpp interface":"acldvppVpcBatchCropResizePasteAsync",
         "Ascend 710 hi_mpi interface":"Batch matting zoom map function:hi_mpi_vpc_batch_crop_resize_paste",
+        "The AscendCL interface name":"acldvppVpcBatchCropResizePasteAsync",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to call the HI_mPI_vpc_batch_crop_resize_paste interface instead. Note: the original pic_num is the same as the length of the source_pic and count arrays.",
         "function or constraint":"Batch matting zoom map function - Batch matting zoom map function"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign to the source PIC instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSizeacldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
         "Ascend 710 hi_mpi interface":"There is no corresponding interface. When configuring input image parameters, the source_pic is directly assigned. The source_pic is the hi_vpc_pic_info structure:picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "The AscendCL interface name":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSizeacldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign to the source PIC instead.",
         "function or constraint":"Picture zoom function - Configures input picture information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign to dest PIC instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface, the dest_pic is directly assigned when you configure the output image parameters. The dest_pic is the hi_vpc_pic_info structure. The members of the structure are as follows:picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "The AscendCL interface name":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign to dest PIC instead.",
         "function or constraint":"Picture zoom - Configures the output picture information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign to Interpolation instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
         "Ascend 710 hi_mpi interface":"There is no corresponding interface, which can be directly assigned to interpolation",
+        "The AscendCL interface name":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign to Interpolation instead.",
         "function or constraint":"Image zoom function - Configures the zoom algorithm information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to call the hi_mPI_vpc_resize interface instead.",
-        "Ascend 310 acldvpp interface":"acldvppVpcResizeAsync",
         "Ascend 710 hi_mpi interface":"Image zoom function:hi_mpi_vpc_resize",
+        "The AscendCL interface name":"acldvppVpcResizeAsync",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to call the hi_mPI_vpc_resize interface instead.",
         "function or constraint":"Image zoom function"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"You need to modify the code to change the aclrtSynchronizeStream interface to the hi_mPI_vpc_get_process_result interface and to get the output image data directly from the corresponding member parameters.",
-        "Ascend 310 acldvpp interface":"acldvppVpcCropResizePasteAsync,aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat",
         "Ascend 710 hi_mpi interface":"After the task processing is completed, the output image data is obtained. The interface for waiting for the task to complete is as follows: hi_mPI_vpc_get_process_result The parameters for obtaining the output image data are as follows:When the hi_mPI_vpc_crop_resize_paste interface is used to implement the matting scaling function, the output image data is obtained from the hi_vpc_crop_resize_paste_region-dest_pic_info.picture_address parameter. When using hi_MPI_VPC_BATCH_CROp_resize_paste interface to realize the function of batch matting and scaling, Get the output picture data from the hi_vpc_crop_resize_paste_region.dest_pic_info.picture_address parameter. When scaling is implemented using the hi_mPI_vpc_resize interface, the output picture data is obtained from the dest_pic.picture_address parameter.",
+        "The AscendCL interface name":"acldvppVpcCropResizePasteAsync,aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat",
+        "The migration recommendations from 310_v1 to 310p_v2":"You need to modify the code to change the aclrtSynchronizeStream interface to the hi_mPI_vpc_get_process_result interface and to get the output image data directly from the corresponding member parameters.",
         "function or constraint":"Obtaining processing results"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"You need to modify the code to call the HI_mPI_vpc_DESTROY_chn interface instead.",
-        "Ascend 310 acldvpp interface":"acldvppDestroyChannel",
         "Ascend 710 hi_mpi interface":"Destruction of the channel:hi_mpi_vpc_destroy_chn",
+        "The AscendCL interface name":"acldvppDestroyChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"You need to modify the code to call the HI_mPI_vpc_DESTROY_chn interface instead.",
         "function or constraint":"Destruction of the channel"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
-        "Ascend 310 acldvpp interface":"No media data processing module is required to initialize",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_exit",
+        "The AscendCL interface name":"No media data processing module is required to initialize",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
         "function or constraint":"The media data processing module is deinitialized"
     }
 ],"v2_VDEC":[
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
-        "Ascend 310 acldvpp interface":"Media data processing module initialization is not required",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_init",
+        "The AscendCL interface name":"Media data processing module initialization is not required",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
         "function or constraint":"The media data processing module is initialized"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to declare variables of the hi_vdec_chn_attr structure directly.",
-        "Ascend 310 acldvpp interface":"aclvdecCreateChannelDesc",
         "Ascend 710 hi_mpi interface":"The hi VDEC CHN ATTR structure is used without corresponding interface",
+        "The AscendCL interface name":"aclvdecCreateChannelDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to declare variables of the hi_vdec_chn_attr structure directly.",
         "function or constraint":"Create a structure for the channel description"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_vdec_CHn_attr member to configure the parameters for the channel description. Note that hi_mpi also has an interface for these parameters only available in the ACL: the channel ID is not in the hi_vdec_chn_attr structure, but is passed in when the hi_mPI_vdec_create_chn interface is used to create the channel. The thread ID and Callback (which are related to the Callback function) are not in the hi_vdec_chn_attr structure, because the hi MPI interface does not need to set the Callback function. The hi_mPI_vDEC_get_frame interface is called by another thread to obtain the decoding result. The outPicFormat parameter is not in the hi_vdec_CHn_attr structure. It is specified by the hi_vdec_pic_info.pixel_format parameter when the hi_mPI_vdec_send_stream interface is called to send bitstream data. The hi_vdec_chn_attr structure is not used to set whether the outMode parameter (i.e., sending a frame and decoding a frame without relying on subsequent frames) is not used in the hi_vdec_CHn_attr structure. Is specified by the hi_vdec_chn_param.hi_vdec_video_param.hi_video_out_ORDER parameter when the hi_MPI_vdec_set_chn_param interface is called to set the channel properties, where the decoding sequence represents fast frame output.",
-        "Ascend 310 acldvpp interface":"aclvdecSetChannelDescEnType,aclvdecSetChannelDescOutWidth,aclvdecSetChannelDescOutHeight,aclvdecSetChannelDescRefFrameNum,aclvdecSetChannelDescChannelId,aclvdecSetChannelDescThreadId,aclvdecSetChannelDescCallback,aclvdecSetChannelDescOutPicFormat,aclvdecSetChannelDescOutMode",
         "Ascend 710 hi_mpi interface":"There is no corresponding interface, directly assign to the members of the hi_vdec_CHn_attr structure:hi_vdec_chn_attr.typehi_vdec_chn_attr.pic_widthhi_vdec_chn_attr.pic_heighthi_vdec_chn_attr.video_attr.ref_frame_numhi_vdec_chn_attr.mode(hi_mpi has only)hi_vdec_chn_attr.stream_buf_size（Hi mpi has only）hi_vdec_chn_attr.frame_buf_cnt(hi_mpi has only)hi_vdec_chn_attr.frame_buf_size(hi_mpi has only)hi_vdec_chn_attr.video_attr.temporal_mvp_en(hi_mpi has only)hi_vdec_chn_attr.video_attr.tmv_buf_size(hi_mpi has only)",
+        "The AscendCL interface name":"aclvdecSetChannelDescEnType,aclvdecSetChannelDescOutWidth,aclvdecSetChannelDescOutHeight,aclvdecSetChannelDescRefFrameNum,aclvdecSetChannelDescChannelId,aclvdecSetChannelDescThreadId,aclvdecSetChannelDescCallback,aclvdecSetChannelDescOutPicFormat,aclvdecSetChannelDescOutMode",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_vdec_CHn_attr member to configure the parameters for the channel description. Note that hi_mpi also has an interface for these parameters only available in the ACL: the channel ID is not in the hi_vdec_chn_attr structure, but is passed in when the hi_mPI_vdec_create_chn interface is used to create the channel. The thread ID and Callback (which are related to the Callback function) are not in the hi_vdec_chn_attr structure, because the hi MPI interface does not need to set the Callback function. The hi_mPI_vDEC_get_frame interface is called by another thread to obtain the decoding result. The outPicFormat parameter is not in the hi_vdec_CHn_attr structure. It is specified by the hi_vdec_pic_info.pixel_format parameter when the hi_mPI_vdec_send_stream interface is called to send bitstream data. The hi_vdec_chn_attr structure is not used to set whether the outMode parameter (i.e., sending a frame and decoding a frame without relying on subsequent frames) is not used in the hi_vdec_CHn_attr structure. Is specified by the hi_vdec_chn_param.hi_vdec_video_param.hi_video_out_ORDER parameter when the hi_MPI_vdec_set_chn_param interface is called to set the channel properties, where the decoding sequence represents fast frame output.",
         "function or constraint":"Sets the channel description parameters"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"To set the decoded frame mode, call the hi_mPI_vdec_set_CHn_param interface.",
-        "Ascend 310 acldvpp interface":"No corresponding interface",
         "Ascend 710 hi_mpi interface":"Setting channel Properties:hi_mpi_vdec_set_chn_param",
+        "The AscendCL interface name":"No corresponding interface",
+        "The migration recommendations from 310_v1 to 310p_v2":"To set the decoded frame mode, call the hi_mPI_vdec_set_CHn_param interface.",
         "function or constraint":"Create channels"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"You need to modify the code to create a channel using the HI_mPI_vdec_create_chn interface instead.",
-        "Ascend 310 acldvpp interface":"aclvdecCreateChannel",
         "Ascend 710 hi_mpi interface":"Create channels:hi_mpi_vdec_create_chn",
+        "The AscendCL interface name":"aclvdecCreateChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"You need to modify the code to create a channel using the HI_mPI_vdec_create_chn interface instead.",
         "function or constraint":"Create channels"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function.",
-        "Ascend 310 acldvpp interface":"acldvppMalloc",
         "Ascend 710 hi_mpi interface":"Memory application:hi_mpi_dvpp_malloc",
+        "The AscendCL interface name":"acldvppMalloc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function.",
         "function or constraint":"Memory application"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
-        "Ascend 310 acldvpp interface":"acldvppFree",
         "Ascend 710 hi_mpi interface":"free the memory:hi_mpi_dvpp_free",
+        "The AscendCL interface name":"acldvppFree",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
         "function or constraint":"free the memory"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_vdec_chn_attr member to configure the parameters for the input stream information. End_of_stream is set to HI_TRUE and hi_vdec_stream.end_OF_STREAM is set to HI_FALSE when other streams are sent.",
-        "Ascend 310 acldvpp interface":"acldvppSetStreamDescData,acldvppSetStreamDescSize,acldvppSetStreamDescEos",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface, the hi_vdec_STREAM structure member is directly assigned when the input stream parameter is configured:hi_vdec_stream.addrhi_vdec_stream.lenhi_vdec_stream.end_of_stream",
+        "The AscendCL interface name":"acldvppSetStreamDescData,acldvppSetStreamDescSize,acldvppSetStreamDescEos",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_vdec_chn_attr member to configure the parameters for the input stream information. End_of_stream is set to HI_TRUE and hi_vdec_stream.end_OF_STREAM is set to HI_FALSE when other streams are sent.",
         "function or constraint":"Configure input stream information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_vdec_pic_info member of the structure to configure the parameters for output image information. Note that in the ACL interface, if you do not want to obtain the decoding result of a certain frame, you can call the aclvdecSendSkippedFrame interface to achieve this, but in the HI_mpI interface, you can set hi_vdec_stream.need_display to achieve this.",
-        "Ascend 310 acldvpp interface":"acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface, the hi_vdec_pic_info structure member is directly assigned when the output image parameter is configured:hi_vdec_pic_info.vir_addrhi_vdec_pic_info.buffer_sizehi_vdec_pic_info.pixel_formathi_vdec_pic_info.widthhi_vdec_pic_info.heighthi_vdec_pic_info.width_stridehi_vdec_pic_info.height_stridehi_vdec_stream.need_display(hi_mpi has only)",
+        "The AscendCL interface name":"acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_vdec_pic_info member of the structure to configure the parameters for output image information. Note that in the ACL interface, if you do not want to obtain the decoding result of a certain frame, you can call the aclvdecSendSkippedFrame interface to achieve this, but in the HI_mpI interface, you can set hi_vdec_stream.need_display to achieve this.",
         "function or constraint":"Configure output image information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to call the hi_mPI_vdec_STARt_recv_STREAM interface.",
-        "Ascend 310 acldvpp interface":"There is no corresponding interface and no need to notify the decoder to start receiving stream data",
         "Ascend 710 hi_mpi interface":"Notifies the decoder to start receiving stream data (a channel only needs to call this interface once):hi_mpi_vdec_start_recv_stream",
+        "The AscendCL interface name":"There is no corresponding interface and no need to notify the decoder to start receiving stream data",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to call the hi_mPI_vdec_STARt_recv_STREAM interface.",
         "function or constraint":"Send a stream"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"In the ACL interface, if you do not want to obtain the decoding result of a certain frame, you can call the aclvdecSendSkippedFrame interface, but in the HI_MPI interface, you can set hi_vdec_stream.need_display.",
-        "Ascend 310 acldvpp interface":"aclvdecSendSkippedFrame",
         "Ascend 710 hi_mpi interface":"hi_vdec_stream.need_display(hi_mpi has only)",
+        "The AscendCL interface name":"aclvdecSendSkippedFrame",
+        "The migration recommendations from 310_v1 to 310p_v2":"In the ACL interface, if you do not want to obtain the decoding result of a certain frame, you can call the aclvdecSendSkippedFrame interface, but in the HI_MPI interface, you can set hi_vdec_stream.need_display.",
         "function or constraint":"Send a stream"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to call the hi_mPI_vdec_send_STREAM interface to send the code stream, passing in the channel number.",
-        "Ascend 310 acldvpp interface":"aclvdecSendFrame",
         "Ascend 710 hi_mpi interface":"Each frame calls the following interface to send the decoded stream:hi_mpi_vdec_send_stream",
+        "The AscendCL interface name":"aclvdecSendFrame",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to call the hi_mPI_vdec_send_STREAM interface to send the code stream, passing in the channel number.",
         "function or constraint":"Each frame calls the following interface to send the decoded stream"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to start another thread and call the hi_mPI_vdec_get_frame interface to actively obtain the decoding result.",
-        "Ascend 310 acldvpp interface":"acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
         "Ascend 710 hi_mpi interface":"Call the hi_mPI_VDEC_get_frame interface to get a frame decoding result, and then get the decoding data from the following members of the hi_video_frame_INFO structure:hi_video_frame_info.v_frame.virt_addr[0]hi_video_frame_info.v_frame.widthhi_video_frame_info.v_frame.heighthi_video_frame_info.v_frame.width_stridehi_video_frame_info.v_frame.height_stridehi_video_frame_info.v_frame.pixel_formathi_video_frame_info.v_frame.frame_flag(With retCode corresponding )",
+        "The AscendCL interface name":"acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to start another thread and call the hi_mPI_vdec_get_frame interface to actively obtain the decoding result.",
         "function or constraint":"The callback function was registered when the channel description was set"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the calling hi_mPI_vdec_STOP_recv_STREAM interface.",
-        "Ascend 310 acldvpp interface":"There is no corresponding interface and no need to notify the decoder to stop receiving stream data",
         "Ascend 710 hi_mpi interface":"Notifies the decoder to stop receiving stream data (a channel only needs to call this interface once):hi_mpi_vdec_stop_recv_stream",
+        "The AscendCL interface name":"There is no corresponding interface and no need to notify the decoder to stop receiving stream data",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the calling hi_mPI_vdec_STOP_recv_STREAM interface.",
         "function or constraint":"Receives the data stream"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"You need to modify the code to call the HI_mPI_vdec_DESTROY_chn interface instead. It should be noted that before calling the HI_MPI interface to destroy the channel, the hi_MPI_VDEC_query_STATUS interface can be called to obtain the decoder status and determine whether all codestream data has been decoded, and then the channel is destroyed.",
-        "Ascend 310 acldvpp interface":"aclvdecDestroyChannel",
         "Ascend 710 hi_mpi interface":"Destruction of the channel:hi_mpi_vdec_destroy_chn",
+        "The AscendCL interface name":"aclvdecDestroyChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"You need to modify the code to call the HI_mPI_vdec_DESTROY_chn interface instead. It should be noted that before calling the HI_MPI interface to destroy the channel, the hi_MPI_VDEC_query_STATUS interface can be called to obtain the decoder status and determine whether all codestream data has been decoded, and then the channel is destroyed.",
         "function or constraint":"Destruction of the channel"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
-        "Ascend 310 acldvpp interface":"No media data processing module is required to initialize",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_exit",
+        "The AscendCL interface name":"No media data processing module is required to initialize",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
         "function or constraint":"The media data processing module is deinitialized"
     }
 ],"v2_JPEGD":[
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
-        "Ascend 310 acldvpp interface":"Media data processing module initialization is not required",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_init",
+        "The AscendCL interface name":"Media data processing module initialization is not required",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
         "function or constraint":"The media data processing module is initialized"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to declare variables of the hi_vdec_chn_attr structure directly.",
-        "Ascend 310 acldvpp interface":"acldvppCreateChannelDesc",
         "Ascend 710 hi_mpi interface":"The hi VDEC CHN ATTR structure is used without corresponding interface.",
+        "The AscendCL interface name":"acldvppCreateChannelDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to declare variables of the hi_vdec_chn_attr structure directly.",
         "function or constraint":"Create a structure for the channel description"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_vdec_CHn_attr member to configure the parameters for the channel description. Note that hi_mpi also has interfaces for these parameters only available in acl",
-        "Ascend 310 acldvpp interface":"No corresponding interface",
         "Ascend 710 hi_mpi interface":"Assigns values directly to members of the hi vdec CHN attr structure:hi_vdec_chn_attr.type(hi_mpi has only)hi_vdec_chn_attr.pic_width(hi_mpi has only)hi_vdec_chn_attr.pic_height(hi_mpi has only)hi_vdec_chn_attr.mode(hi_mpi has only)hi_vdec_chn_attr.stream_buf_size(hi_mpi has only)hi_vdec_chn_attr.frame_buf_cnt(hi_mpi has only)hi_vdec_chn_attr.frame_buf_size(hi_mpi has only)",
+        "The AscendCL interface name":"No corresponding interface",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_vdec_CHn_attr member to configure the parameters for the channel description. Note that hi_mpi also has interfaces for these parameters only available in acl",
         "function or constraint":"Create channels"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"You need to modify the code to create a channel using the HI_mPI_vdec_create_chn interface instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreateChannel",
         "Ascend 710 hi_mpi interface":"Create channels:hi_mpi_vdec_create_chn",
+        "The AscendCL interface name":"acldvppCreateChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"You need to modify the code to create a channel using the HI_mPI_vdec_create_chn interface instead.",
         "function or constraint":"Create channels"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to use the HI_MPI_DVPP_GEt_image_info interface or use the calculation formula to obtain the output memory size after decoding the image. Note: For the values of width_stride and height_stride, see widthStride and heightStride of the output picture.",
-        "Ascend 310 acldvpp interface":"acldvppJpegPredictDecSize",
         "Ascend 710 hi_mpi interface":"In the hi_MPI_DVPP_GEt_image_info source format decoding scenario, the hi_MPI_DVPP_get_image_info interface can be called to obtain the decoding output memory size. If the output image format is YUV420SP, use the following formula to calculate the output memory size: hi_img_info.width_stride * hi_img_info.height_stride * 3/2",
+        "The AscendCL interface name":"acldvppJpegPredictDecSize",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to use the HI_MPI_DVPP_GEt_image_info interface or use the calculation formula to obtain the output memory size after decoding the image. Note: For the values of width_stride and height_stride, see widthStride and heightStride of the output picture.",
         "function or constraint":"Estimate the output memory size"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function.",
-        "Ascend 310 acldvpp interface":"acldvppMalloc",
         "Ascend 710 hi_mpi interface":"Memory application:hi_mpi_dvpp_malloc",
+        "The AscendCL interface name":"acldvppMalloc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function.",
         "function or constraint":"Memory application"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
-        "Ascend 310 acldvpp interface":"acldvppFree",
         "Ascend 710 hi_mpi interface":"free the memory:hi_mpi_dvpp_free",
+        "The AscendCL interface name":"acldvppFree",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
         "function or constraint":"free the memory"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_vdec_chn_attr member to configure the parameters for the input stream information.",
-        "Ascend 310 acldvpp interface":"acldvppJpegDecodeAsync",
         "Ascend 710 hi_mpi interface":"When configuring input stream parameters, assign values directly to members of the hi_vdec_STREAM structure:hi_vdec_stream.addrhi_vdec_stream.lenhi_vdec_stream.end_of_streamhi_vdec_stream.end_of_framehi_vdec_stream.display",
+        "The AscendCL interface name":"acldvppJpegDecodeAsync",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_vdec_chn_attr member to configure the parameters for the input stream information.",
         "function or constraint":"Incoming input picture information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_vdec_pic_info member of the structure to configure the parameters for output image information.",
-        "Ascend 310 acldvpp interface":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface, the hi_vdec_pic_info structure member is directly assigned when the output image parameter is configured:hi_vdec_pic_info.vir_addrhi_vdec_pic_info.buffer_sizehi_vdec_pic_info.pixel_formathi_vdec_pic_info.widthhi_vdec_pic_info.heighthi_vdec_pic_info.width_stridehi_vdec_pic_info.height_stride",
+        "The AscendCL interface name":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_vdec_pic_info member of the structure to configure the parameters for output image information.",
         "function or constraint":"Configure output image information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to call the hi_mPI_vdec_STARt_recv_STREAM interface.",
-        "Ascend 310 acldvpp interface":"There is no corresponding interface and no need to notify the decoder to start receiving stream data",
         "Ascend 710 hi_mpi interface":"Notifies the decoder to start receiving stream data (a channel only needs to call this interface once):hi_mpi_vdec_start_recv_stream",
+        "The AscendCL interface name":"There is no corresponding interface and no need to notify the decoder to start receiving stream data",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to call the hi_mPI_vdec_STARt_recv_STREAM interface.",
         "function or constraint":"Sending pictures"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to call the hi_mPI_vdec_send_STREAM interface to send the code stream, passing in the channel number.",
-        "Ascend 310 acldvpp interface":"acldvppJpegDecodeAsync",
         "Ascend 710 hi_mpi interface":"Each frame calls the following interface to send the decoded stream:hi_mpi_vdec_send_stream",
+        "The AscendCL interface name":"acldvppJpegDecodeAsync",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to call the hi_mPI_vdec_send_STREAM interface to send the code stream, passing in the channel number.",
         "function or constraint":"Sending pictures"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to start another thread and call the hi_mPI_vdec_get_frame interface to actively obtain the decoding result.",
-        "Ascend 310 acldvpp interface":"aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
         "Ascend 710 hi_mpi interface":"Call the hi_mPI_VDEC_get_frame interface to get a frame decoding result, and then get the decoding result from the following member of the hi_video_frame_info structure:hi_video_frame_info.v_frame.virt_addr[0]hi_video_frame_info.v_frame.widthhi_video_frame_info.v_frame.heighthi_video_frame_info.v_frame.width_stridehi_video_frame_info.v_frame.height_stridehi_video_frame_info.v_frame.pixel_formathi_video_frame_info.v_frame.frame_flag(hi_mpi has only)",
+        "The AscendCL interface name":"aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to start another thread and call the hi_mPI_vdec_get_frame interface to actively obtain the decoding result.",
         "function or constraint":"Synchronous interface, wait for the end of picture decoding, and then get the decoding result"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the calling hi_mPI_vdec_STOP_recv_STREAM interface.",
-        "Ascend 310 acldvpp interface":"There is no corresponding interface and no need to notify the decoder to stop receiving stream data",
         "Ascend 710 hi_mpi interface":"Notifies the decoder to stop receiving stream data (a channel only needs to call this interface once):hi_mpi_vdec_stop_recv_stream",
+        "The AscendCL interface name":"There is no corresponding interface and no need to notify the decoder to stop receiving stream data",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the calling hi_mPI_vdec_STOP_recv_STREAM interface.",
         "function or constraint":"Receive photos"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"You need to modify the code to call the HI_mPI_vdec_DESTROY_chn interface instead. It should be noted that before calling the HI_MPI interface to destroy the channel, the hi_MPI_VDEC_query_STATUS interface can be called to obtain the decoder state and determine whether all picture data has been decoded, and then the channel is destroyed.",
-        "Ascend 310 acldvpp interface":"acldvppDestroyChannel",
         "Ascend 710 hi_mpi interface":"Destruction of the channel:hi_mpi_vdec_destroy_chn",
+        "The AscendCL interface name":"acldvppDestroyChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"You need to modify the code to call the HI_mPI_vdec_DESTROY_chn interface instead. It should be noted that before calling the HI_MPI interface to destroy the channel, the hi_MPI_VDEC_query_STATUS interface can be called to obtain the decoder state and determine whether all picture data has been decoded, and then the channel is destroyed.",
         "function or constraint":"Destruction of the channel"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
-        "Ascend 310 acldvpp interface":"No media data processing module is required to initialize",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_exit",
+        "The AscendCL interface name":"No media data processing module is required to initialize",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
         "function or constraint":"The media data processing module is deinitialized"
     }
 ],"v2_JPEGE":[
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
-        "Ascend 310 acldvpp interface":"Media data processing module initialization is not required",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_init",
+        "The AscendCL interface name":"Media data processing module initialization is not required",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
         "function or constraint":"The media data processing module is initialized"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to declare variables of the hi_venc_chn_attr structure directly.",
-        "Ascend 310 acldvpp interface":"acldvppCreateChannelDesc",
         "Ascend 710 hi_mpi interface":"No corresponding interface. Use the hi_venc_chn_attr structure directly.",
+        "The AscendCL interface name":"acldvppCreateChannelDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to declare variables of the hi_venc_chn_attr structure directly.",
         "function or constraint":"Create a structure for the channel description"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_venc_CHn_attr member to configure the parameters for the channel description.",
-        "Ascend 310 acldvpp interface":"No related interface",
         "Ascend 710 hi_mpi interface":"Assigns values directly to members of the hi_venc_chn_attr structure:hi_venc_chn_attr.venc_attr.typehi_venc_chn_attr.venc_attr.pic_widthhi_venc_chn_attr.venc_attr.pic_height",
+        "The AscendCL interface name":"No related interface",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_venc_CHn_attr member to configure the parameters for the channel description.",
         "function or constraint":"Create channels"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to create a channel using the hi_mpi_venc_create_chn interface instead.",
-        "Ascend 310 acldvpp interface":"acldvppCreateChannel",
         "Ascend 710 hi_mpi interface":"Create channels:hi_mpi_venc_create_chn",
+        "The AscendCL interface name":"acldvppCreateChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to create a channel using the hi_mpi_venc_create_chn interface instead.",
         "function or constraint":"Create channels"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function. You do not need to apply for output memory.",
-        "Ascend 310 acldvpp interface":"acldvppMalloc,acldvppJpegPredictEncSize",
         "Ascend 710 hi_mpi interface":"Apply for memory:Hi_mpi_dvpp_malloc Output memory is managed by the system without user request.",
+        "The AscendCL interface name":"acldvppMalloc,acldvppJpegPredictEncSize",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function. You do not need to apply for output memory.",
         "function or constraint":"Apply for memory and estimate the size of output memory required after JPEG image encoding"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
-        "Ascend 310 acldvpp interface":"acldvppFree",
         "Ascend 710 hi_mpi interface":"free the memory:hi_mpi_dvpp_free",
+        "The AscendCL interface name":"acldvppFree",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
         "function or constraint":"free the memory"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_video_frame_info member of the structure to configure the parameters for the input image. The hi_MPI interface does not need to set the size of the input data. The system automatically calculates the input data based on the image resolution and format.",
-        "Ascend 310 acldvpp interface":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
         "Ascend 710 hi_mpi interface":"If there is no corresponding interface, assign values to members of the hi_video_frame_info structure directly when configuring the input image:hi_video_frame_info.v_frame.virt_addrhi_video_frame_info.v_frame.pixel_formathi_video_frame_info.v_frame.widthhi_video_frame_info.v_frame.heighthi_video_frame_info.v_frame.width_stridehi_video_frame_info.v_frame.height_stride",
+        "The AscendCL interface name":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_video_frame_info member of the structure to configure the parameters for the input image. The hi_MPI interface does not need to set the size of the input data. The system automatically calculates the input data based on the image resolution and format.",
         "function or constraint":"Configure input image information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to call hi_mPI_venc_set_jpeg_param instead to configure JPEGE's image encoding quality.",
-        "Ascend 310 acldvpp interface":"acldvppCreateJpegeConfig,acldvppSetJpegeConfigLevel",
         "Ascend 710 hi_mpi interface":"To configure the image encoding quality, directly modify hi_venc_jpeg_param.qfactor hi_mPI_venc_set_jpeg_param",
+        "The AscendCL interface name":"acldvppCreateJpegeConfig,acldvppSetJpegeConfigLevel",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to call hi_mPI_venc_set_jpeg_param instead to configure JPEGE's image encoding quality.",
         "function or constraint":"Configure the image encoding quality"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the call hi_mPI_venc_STARt_chn interface.",
-        "Ascend 310 acldvpp interface":"There is no corresponding interface and no need to notify the encoder to start receiving encoded pictures",
         "Ascend 710 hi_mpi interface":"Tell the encoder to start receiving input data (a channel only needs to call this interface once):hi_mpi_venc_start_chn",
+        "The AscendCL interface name":"There is no corresponding interface and no need to notify the encoder to start receiving encoded pictures",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the call hi_mPI_venc_STARt_chn interface.",
         "function or constraint":"Send coded picture"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to call the hi_mpi_venc_send_frame interface to send an encoded picture, passing in the channel number.",
-        "Ascend 310 acldvpp interface":"acldvppJpegEncodeAsync",
         "Ascend 710 hi_mpi interface":"Each frame needs to call the following interface to send the encoded picture, the user does not pass in the output memory address:hi_mpi_venc_send_frame",
+        "The AscendCL interface name":"acldvppJpegEncodeAsync",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to call the hi_mpi_venc_send_frame interface to send an encoded picture, passing in the channel number.",
         "function or constraint":"Send coded picture, passed in the user applied for a good output memory address"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to start another thread and call the hi_mPI_venc_get_STREAM interface to actively fetch the encoding result. Note that the user needs to get the number of encoded packets n by calling hi_mpi_venc_query_status, and then before calling hi_mPI_venc_get_STREAM, Pre-allocate memory not less than n * sizeof (hi_venc_stream.pack) for the parameter hi_venc_stream. After obtaining the encoding result successfully, the hi_mPI_venc_RELEase_stream interface is called to release the stream cache.",
-        "Ascend 310 acldvpp interface":"aclrtSynchronizeStream",
         "Ascend 710 hi_mpi interface":"Call the hi_mPI_venc_GEt_STREAM interface to get a frame encoding, and then get the encoding data from the following members of the HI_venc_STREAM structure:hi_venc_stream.pack[i].addrhi_venc_stream.pack[i].lenhi_venc_stream.pack[i].data_type(Get the output image format from the member structure.)hi_venc_stream.pack[i].pts",
+        "The AscendCL interface name":"aclrtSynchronizeStream",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to start another thread and call the hi_mPI_venc_get_STREAM interface to actively fetch the encoding result. Note that the user needs to get the number of encoded packets n by calling hi_mpi_venc_query_status, and then before calling hi_mPI_venc_get_STREAM, Pre-allocate memory not less than n * sizeof (hi_venc_stream.pack) for the parameter hi_venc_stream. After obtaining the encoding result successfully, the hi_mPI_venc_RELEase_stream interface is called to release the stream cache.",
         "function or constraint":"Synchronizes the interface, obtains the coding result"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the call hi_mPI_venc_stop_CHn interface.",
-        "Ascend 310 acldvpp interface":"There is no corresponding interface and no need to notify the encoder to stop receiving encoded data frames",
         "Ascend 710 hi_mpi interface":"Tell the encoder to stop receiving input data (a channel only needs to call this interface once):hi_mpi_venc_stop_chn",
+        "The AscendCL interface name":"There is no corresponding interface and no need to notify the encoder to stop receiving encoded data frames",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the call hi_mPI_venc_stop_CHn interface.",
         "function or constraint":"Get coded picture"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"You need to modify the code to call the hi_mPI_venc_DESTROy_chn interface instead. It should be noted that before calling the HI_MPI interface to destroy the channel, the hi_MPI_venc_query_STATUS interface can be called to obtain the encoder state and determine whether all input data have been encoded, and then the channel is destroyed.",
-        "Ascend 310 acldvpp interface":"acldvppDestroyChannel",
         "Ascend 710 hi_mpi interface":"Destruction of the channel:hi_mpi_venc_destroy_chn",
+        "The AscendCL interface name":"acldvppDestroyChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"You need to modify the code to call the hi_mPI_venc_DESTROy_chn interface instead. It should be noted that before calling the HI_MPI interface to destroy the channel, the hi_MPI_venc_query_STATUS interface can be called to obtain the encoder state and determine whether all input data have been encoded, and then the channel is destroyed.",
         "function or constraint":"Destruction of the channel"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
-        "Ascend 310 acldvpp interface":"No media data processing module is required to initialize",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_exit",
+        "The AscendCL interface name":"No media data processing module is required to initialize",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
         "function or constraint":"The media data processing module is deinitialized"
     }
 ],"v2_VENC":[
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
-        "Ascend 310 acldvpp interface":"Media data processing module initialization is not required",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_init",
+        "The AscendCL interface name":"Media data processing module initialization is not required",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
         "function or constraint":"The media data processing module is initialized"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to declare variables of the hi_venc_chn_attr structure directly.",
-        "Ascend 310 acldvpp interface":"aclvencCreateChannelDesc",
         "Ascend 710 hi_mpi interface":"No corresponding interface. Use the hi_venc_chn_attrstructure directly.",
+        "The AscendCL interface name":"aclvencCreateChannelDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to declare variables of the hi_venc_chn_attr structure directly.",
         "function or constraint":"Create a structure for the channel description"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_venc_CHn_attr member to configure the parameters for the channel description. Note that hi_mpi also has interfaces for these parameters only available in acl: The thread ID and Callback (which are related to the Callback function) are not in the hi_venc_chn_attr structure, because the hi mpi interface does not need to set the Callback function. The input image format is not in the hi_venc_CHn_attr structure and is specified by the hi_video_frame_inf.v_frame.pixel_format parameter when the hi_mpi_venc_send_frame interface is called to send the encoded data frame.",
-        "Ascend 310 acldvpp interface":"aclvencSetChannelDescEnType,aclvencSetChannelDescPicWidth,aclvencSetChannelDescPicHeight,aclvencSetChannelDescKeyFrameInterval,aclvencSetChannelDescThreadId,aclvencSetChannelDescCallback,aclvencSetChannelDescRcMode,aclvencSetChannelDescSrcRate,aclvencSetChannelDescMaxBitRate,aclvencSetChannelDescPicFormat",
         "Ascend 710 hi_mpi interface":"No corresponding interface, assigns values directly to members of the hi venc CHN attr structure:hi_venc_chn_attr.venc_attr.typehi_venc_chn_attr.venc_attr.pic_widthhi_venc_chn_attr.venc_attr.pic_heighthi_venc_chn_attr.rc_attr.h26x_xbr.gophi_venc_chn_attr.rc_attr.rc_modehi_venc_chn_attr.rc_attr.h26x_xbr.src_frame_ratehi_venc_chn_attr.rc_attr.h26x_xbr.bit_rate",
+        "The AscendCL interface name":"aclvencSetChannelDescEnType,aclvencSetChannelDescPicWidth,aclvencSetChannelDescPicHeight,aclvencSetChannelDescKeyFrameInterval,aclvencSetChannelDescThreadId,aclvencSetChannelDescCallback,aclvencSetChannelDescRcMode,aclvencSetChannelDescSrcRate,aclvencSetChannelDescMaxBitRate,aclvencSetChannelDescPicFormat",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_venc_CHn_attr member to configure the parameters for the channel description. Note that hi_mpi also has interfaces for these parameters only available in acl: The thread ID and Callback (which are related to the Callback function) are not in the hi_venc_chn_attr structure, because the hi mpi interface does not need to set the Callback function. The input image format is not in the hi_venc_CHn_attr structure and is specified by the hi_video_frame_inf.v_frame.pixel_format parameter when the hi_mpi_venc_send_frame interface is called to send the encoded data frame.",
         "function or constraint":"Sets the channel description parameters"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to create a channel using the hi_mpi_venc_create_chn interface instead.",
-        "Ascend 310 acldvpp interface":"aclvencCreateChannel",
         "Ascend 710 hi_mpi interface":"Create channels:hi_mpi_venc_create_chn",
+        "The AscendCL interface name":"aclvencCreateChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to create a channel using the hi_mpi_venc_create_chn interface instead.",
         "function or constraint":"Create channels"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function.",
-        "Ascend 310 acldvpp interface":"acldvppMalloc",
         "Ascend 710 hi_mpi interface":"Apply for memory:hi_mpi_dvpp_malloc",
+        "The AscendCL interface name":"acldvppMalloc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function.",
         "function or constraint":"Apply for memory"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
-        "Ascend 310 acldvpp interface":"acldvppFree",
         "Ascend 710 hi_mpi interface":"free the memory:hi_mpi_dvpp_free",
+        "The AscendCL interface name":"acldvppFree",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
         "function or constraint":"free the memory"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the structure member hi_video_frame_info to configure the parameters for the input video frame. The hi_MPI interface does not need to set the size of the input data. The system automatically calculates the input data based on the image resolution and format.",
-        "Ascend 310 acldvpp interface":"acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
         "Ascend 710 hi_mpi interface":"No corresponding interface, when configuring input video frames, assign values directly to members of the hi_video_frame_info structure:hi_video_frame_info.v_frame.virt_addrhi_video_frame_info.v_frame.pixel_formathi_video_frame_info.v_frame.widthhi_video_frame_info.v_frame.heighthi_video_frame_info.v_frame.width_stridehi_video_frame_info.v_frame.height_stride",
+        "The AscendCL interface name":"acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the structure member hi_video_frame_info to configure the parameters for the input video frame. The hi_MPI interface does not need to set the size of the input data. The system automatically calculates the input data based on the image resolution and format.",
         "function or constraint":"Configure input video frame information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the call hi_mPI_venc_STARt_chn interface.",
-        "Ascend 310 acldvpp interface":"There is no corresponding interface and no need to notify the encoder to start receiving encoded data frames",
         "Ascend 710 hi_mpi interface":"Notifies the encoder to start receiving encoded data frames (this interface needs to be called only once per channel):hi_mpi_venc_start_chn",
+        "The AscendCL interface name":"There is no corresponding interface and no need to notify the encoder to start receiving encoded data frames",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the call hi_mPI_venc_STARt_chn interface.",
         "function or constraint":"Sends encoded video frames"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to call the hi_mpi_venc_send_frame interface to send the encoded video frame, passing in the channel number.",
-        "Ascend 310 acldvpp interface":"aclvencSendFrame",
         "Ascend 710 hi_mpi interface":"Each frame calls the following interface to send an encoded video frame:hi_mpi_venc_send_frame",
+        "The AscendCL interface name":"aclvencSendFrame",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to call the hi_mpi_venc_send_frame interface to send the encoded video frame, passing in the channel number.",
         "function or constraint":"Sends encoded video frames"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to start another thread and call the hi_mPI_venc_get_STREAM interface to actively fetch the encoding result. Note that the user needs to get the number of encoded packets n by calling hi_mpi_venc_query_status, and then before calling hi_mPI_venc_get_STREAM, Pre-allocate memory not less than n * sizeof (hi_venc_stream.pack) for the parameter hi_venc_stream. After obtaining the encoding result successfully, the hi_mPI_venc_RELEase_stream interface is called to release the stream cache.",
-        "Ascend 310 acldvpp interface":"acldvppGetStreamDescData,acldvppGetStreamDescSize,acldvppGetStreamDescFormat,acldvppGetStreamDescTimestamp",
         "Ascend 710 hi_mpi interface":"Call the hi_mPI_venc_GEt_STREAM interface to get a frame encoding, and then get the encoding data from the following members of the HI_venc_STREAM structure:hi_venc_stream.pack[i].addrhi_venc_stream.pack[i].lenhi_venc_stream.pack[i].data_type(Gets the output image format from the member structure)hi_venc_stream.pack[i].pts",
+        "The AscendCL interface name":"acldvppGetStreamDescData,acldvppGetStreamDescSize,acldvppGetStreamDescFormat,acldvppGetStreamDescTimestamp",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to start another thread and call the hi_mPI_venc_get_STREAM interface to actively fetch the encoding result. Note that the user needs to get the number of encoded packets n by calling hi_mpi_venc_query_status, and then before calling hi_mPI_venc_get_STREAM, Pre-allocate memory not less than n * sizeof (hi_venc_stream.pack) for the parameter hi_venc_stream. After obtaining the encoding result successfully, the hi_mPI_venc_RELEase_stream interface is called to release the stream cache.",
         "function or constraint":"The callback function has been registered when setting channel description information. The callback function is automatically invoked for every encoded frame of data. The corresponding Get interface is invoked in the callback function to obtain the memory address and size of encoded data"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the call hi_mPI_venc_stop_CHn interface.",
-        "Ascend 310 acldvpp interface":"There is no corresponding interface and no need to notify the encoder to stop receiving encoded data frames",
         "Ascend 710 hi_mpi interface":"Tell the encoder to stop receiving encoded data frames (a channel only needs to call this interface once):hi_mpi_venc_stop_chn",
+        "The AscendCL interface name":"There is no corresponding interface and no need to notify the encoder to stop receiving encoded data frames",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the call hi_mPI_venc_stop_CHn interface.",
         "function or constraint":"Won the international access code flow"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"You need to modify the code to call the hi_mPI_venc_DESTROy_chn interface instead. It should be noted that before calling the HI_MPI interface to destroy the channel, the hi_MPI_venc_query_STATUS interface can be called to obtain the encoder state and determine whether all input data have been encoded, and then the channel is destroyed.",
-        "Ascend 310 acldvpp interface":"aclvencDestroyChannel",
         "Ascend 710 hi_mpi interface":"Destruction of the channel:hi_mpi_venc_destroy_chn",
+        "The AscendCL interface name":"aclvencDestroyChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"You need to modify the code to call the hi_mPI_venc_DESTROy_chn interface instead. It should be noted that before calling the HI_MPI interface to destroy the channel, the hi_MPI_venc_query_STATUS interface can be called to obtain the encoder state and determine whether all input data have been encoded, and then the channel is destroyed.",
         "function or constraint":"Destruction of the channel"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
-        "Ascend 310 acldvpp interface":"No media data processing module is required to initialize",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_exit",
+        "The AscendCL interface name":"No media data processing module is required to initialize",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
         "function or constraint":"The media data processing module is deinitialized"
     }
 ],"v2_PNGD":[
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
-        "Ascend 310 acldvpp interface":"Media data processing module initialization is not required",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_init",
+        "The AscendCL interface name":"Media data processing module initialization is not required",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add the interface hi_mPI_sys_init that calls the initialization of the media data processing module.",
         "function or constraint":"The media data processing module is initialized"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to declare variables of the hi_pngd_chn_attr structure directly.",
-        "Ascend 310 acldvpp interface":"acldvppCreateChannelDesc",
         "Ascend 710 hi_mpi interface":"No corresponding interface. Use the hi_pngd_chn_attr structure directly.",
+        "The AscendCL interface name":"acldvppCreateChannelDesc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to declare variables of the hi_pngd_chn_attr structure directly.",
         "function or constraint":"Create a structure for the channel description"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to create a channel using the hi_mPI_pngd_create_chn interface.",
-        "Ascend 310 acldvpp interface":"acldvppCreateChannel",
         "Ascend 710 hi_mpi interface":"Create channels:hi_mpi_pngd_create_chn",
+        "The AscendCL interface name":"acldvppCreateChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to create a channel using the hi_mPI_pngd_create_chn interface.",
         "function or constraint":"Create channels"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to use the HI_mPI_pNG_get_image_info interface or use the calculation formula to obtain the output memory size after decoding the image. Note: For width_stride and height_stride values, see widthStride, heightStride.",
-        "Ascend 310 acldvpp interface":"acldvppPngPredictDecSize",
         "Ascend 710 hi_mpi interface":"In the source format decoding scenario, the hi_mPI_pNG_get_image_info interface can be called to obtain the size of the decoding output memory. In other scenarios, use the following formula to calculate the output memory size:hi_img_info.width_stride * hi_img_info.height_stride",
+        "The AscendCL interface name":"acldvppPngPredictDecSize",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to use the HI_mPI_pNG_get_image_info interface or use the calculation formula to obtain the output memory size after decoding the image. Note: For width_stride and height_stride values, see widthStride, heightStride.",
         "function or constraint":"Estimate the output memory"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function.",
-        "Ascend 310 acldvpp interface":"acldvppMalloc",
         "Ascend 710 hi_mpi interface":"apply for memory:hi_mpi_dvpp_malloc",
+        "The AscendCL interface name":"acldvppMalloc",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code and use the HI_mPI_DVPP_MALloc interface to apply for memory for the media data processing function.",
         "function or constraint":"apply for memory"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
-        "Ascend 310 acldvpp interface":"acldvppFree",
         "Ascend 710 hi_mpi interface":"free the memory:hi_mpi_dvpp_free",
+        "The AscendCL interface name":"acldvppFree",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to use the HI_MPI_DVPP_free interface to free the memory.",
         "function or constraint":"free the memory"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_vdec_chn_attr member to configure the parameters for the input stream information.",
-        "Ascend 310 acldvpp interface":"acldvppPngDecodeAsync",
         "Ascend 710 hi_mpi interface":"When configuring the input stream parameters, assign values directly to members of the hi_img_stream structure:hi_img_stream.typehi_img_stream.addrhi_img_stream.lenhi_img_stream.pts",
+        "The AscendCL interface name":"acldvppPngDecodeAsync",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_vdec_chn_attr member to configure the parameters for the input stream information.",
         "function or constraint":"Configure input stream information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to assign a value to the hi_pic_info member of the structure to configure the parameters for output image information.",
-        "Ascend 310 acldvpp interface":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
         "Ascend 710 hi_mpi interface":"No corresponding interface. When configuring output image parameters, assign values directly to members of the hi_pic_info structure:hi_pic_info.picture_addresshi_pic_info.picture_buffer_sizehi_pic_info.picture_formathi_pic_info.picture_widthhi_pic_info.picture_heighthi_pic_info.picture_width_stridehi_pic_info.picture_height_stride",
+        "The AscendCL interface name":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to assign a value to the hi_pic_info member of the structure to configure the parameters for output image information.",
         "function or constraint":"Configure output image information"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to call the hi_mpi_pngd_send_STREAM interface to send the code stream, passing in the channel number.",
-        "Ascend 310 acldvpp interface":"acldvppPngDecodeAsync",
         "Ascend 710 hi_mpi interface":"Each frame calls the following interface to send the decoded stream:hi_mpi_pngd_send_stream",
+        "The AscendCL interface name":"acldvppPngDecodeAsync",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to call the hi_mpi_pngd_send_STREAM interface to send the code stream, passing in the channel number.",
         "function or constraint":"Sending pictures"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to start another thread and call the hi_mPI_pngD_get_image_data interface to actively obtain the decoding result. Note that in the HI_MPI interface, if the decoding data can be obtained, it means that the decoding is successful. If no decoding data is obtained, decoding fails.",
-        "Ascend 310 acldvpp interface":"aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
         "Ascend 710 hi_mpi interface":"Call the hi_mPI_pNGD_get_image_data interface to get a frame decoding result, and then get the decoding result from the following members of the hi_pic_INFO structure:hi_pic_info.picture_addresshi_pic_info.picture_widthhi_pic_info.picture_heighthi_pic_info.picture_width_stridehi_pic_info.picture_height_stridehi_pic_info.picture_formathi_pic_info.picture_buffer_size(hi_mpi has only)",
+        "The AscendCL interface name":"aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to start another thread and call the hi_mPI_pngD_get_image_data interface to actively obtain the decoding result. Note that in the HI_MPI interface, if the decoding data can be obtained, it means that the decoding is successful. If no decoding data is obtained, decoding fails.",
         "function or constraint":"Synchronous interface, wait for the end of picture decoding, and then get the decoding result"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"You need to modify the code to call the hi_mPI_pngD_DESTROy_chn interface instead. Note that before calling the HI_MPI interface to destroy the channel, you need to ensure that all image data has been decoded and then the channel is destroyed.",
-        "Ascend 310 acldvpp interface":"acldvppDestroyChannel",
         "Ascend 710 hi_mpi interface":"Destruction of the channel:hi_mpi_pngd_destroy_chn",
+        "The AscendCL interface name":"acldvppDestroyChannel",
+        "The migration recommendations from 310_v1 to 310p_v2":"You need to modify the code to call the hi_mPI_pngD_DESTROy_chn interface instead. Note that before calling the HI_MPI interface to destroy the channel, you need to ensure that all image data has been decoded and then the channel is destroyed.",
         "function or constraint":"Destruction of the channel"
     },
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
-        "Ascend 310 acldvpp interface":"No media data processing module is required to initialize",
         "Ascend 710 hi_mpi interface":"hi_mpi_sys_exit",
+        "The AscendCL interface name":"No media data processing module is required to initialize",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the code to add an interface hi_mPI_sys_exit that calls the media data processing module to initialize.",
         "function or constraint":"The media data processing module is deinitialized"
     }
 ],"v2_header file":[
     {
-        "310->310Pv2 Migration Impact on Users":"You need to modify the code, including the hi_dvpp.h file in CANN software installation directory /include/acl/ DVPP. ",
-        "Ascend 310 acldvpp interface":"CANN Software installation directory:/include/acl/ops/acl_dvpp.h",
         "Ascend 710 hi_mpi interface":"CANN A header file in the software installation directory /include/acl/ DVPP ",
+        "The AscendCL interface name":"CANN Software installation directory:/include/acl/ops/acl_dvpp.h",
+        "The migration recommendations from 310_v1 to 310p_v2":"You need to modify the code, including the hi_dvpp.h file in CANN software installation directory /include/acl/ DVPP. ",
         "function or constraint":"Header file migration"
     }
 ],"v2_library file":[
     {
-        "310->310Pv2 Migration Impact on Users":"The user needs to modify the script for compiling the application program and change the dependent library file to libacl_DVpp_mpi. so. ",
-        "Ascend 310 acldvpp interface":"CANN Software installation directory:/lib64/libacl_dvpp.so",
         "Ascend 710 hi_mpi interface":"CANN Software installation directory:/lib64/libacl_dvpp_mpi.so",
+        "The AscendCL interface name":"CANN Software installation directory:/lib64/libacl_dvpp.so",
+        "The migration recommendations from 310_v1 to 310p_v2":"The user needs to modify the script for compiling the application program and change the dependent library file to libacl_DVpp_mpi. so. ",
         "function or constraint":"Library file migration"
     }
 ]}
