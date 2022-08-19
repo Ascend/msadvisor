@@ -72,29 +72,23 @@ def Evaluate(datapath):
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # 方向1
     er1, optimizedsummary = direction1_process(user_data)
-    sequence += 1
-    result = result_generate(er1, result, "Direction1", optimizedsummary, sequence)
+    result, sequence = result_generate(er1, result, "Direction1", optimizedsummary, sequence)
     # 方向2
     er2, optimizedsummary = direction2_process(user_data, datapath, target_path)  # 方向二
-    sequence += 1
-    result = result_generate(er2, result, "Direction2", optimizedsummary, sequence)
+    result, sequence = result_generate(er2, result, "Direction2", optimizedsummary, sequence)
     # 方向3
     er3, optimizedsummary = direction3_process(environment_data, datapath, target_path)
-    sequence += 1
-    result = result_generate(er3, result, "Direction3", optimizedsummary, sequence)
+    result, sequence = result_generate(er3, result, "Direction3", optimizedsummary, sequence)
     # 方向4_1
     er4_1, optimizedsummary = direction4_1_process(environment_data, user_data, datapath, target_path)
-    sequence += 1
-    result = result_generate(er4_1, result, "Direction4_1", optimizedsummary, sequence)
+    result, sequence = result_generate(er4_1, result, "Direction4_1", optimizedsummary, sequence)
 
     # 方向4_2
     er4_2, optimizedsummary = direction4_2_process(environment_data, datapath, target_path)
-    sequence += 1
-    result = result_generate(er4_2, result, "Direction4_2", optimizedsummary, sequence)
+    result, sequence = result_generate(er4_2, result, "Direction4_2", optimizedsummary, sequence)
     # 方向5
     er5, optimizedsummary = direction5_process(environment_data, datapath, target_path)
-    sequence += 1
-    result = result_generate(er5, result, "Direction5", optimizedsummary, sequence)
+    result, sequence = result_generate(er5, result, "Direction5", optimizedsummary, sequence)
 
     return result.generate()
 
@@ -103,12 +97,12 @@ def Evaluate(datapath):
 # 处理各个方向的er   sequence序号
 def result_generate(er, result, direction, OptimizedSummary, sequence):
     # 处理各个方向的er
-    result.summary += str(sequence) + ". "
     if er.data_type != []:
-        result.summary += OptimizedSummary
+        sequence += 1
+        result.summary += str(sequence) + ". " + OptimizedSummary
         result.summary += ' '
         result.extend_result.append(er)
-    return result
+    return result, sequence
 
 
 # 根据路径获取解析数据json->python
