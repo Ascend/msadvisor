@@ -27,27 +27,28 @@ from auto_optimizer.graph_refactor.onnx.node import PlaceHolder, Initializer, No
 class OnnxGraph(BaseGraph):
     def __init__(
         self,
-        nodes: List[Node] = [],
-        inputs: List[PlaceHolder] = [],
-        outputs: List[PlaceHolder] = [],
-        initializers: List[Initializer] = [],
-        value_infos: List[PlaceHolder] = [],
+        nodes: List[Node] = None,
+        inputs: List[PlaceHolder] = None,
+        outputs: List[PlaceHolder] = None,
+        initializers: List[Initializer] = None,
+        value_infos: List[PlaceHolder] = None,
         name: str = None,
         **kwargs: Dict[str, object]
     ):
         super().__init__()
-        self._nodes = nodes
-        self._inputs = inputs
-        self._outputs = outputs
-        self._initializers = initializers
-        self._value_infos = value_infos
+        self._nodes = nodes if nodes else []
+        self._inputs = inputs if inputs else []
+        self._outputs = outputs if outputs else []
+        self._initializers = initializers if initializers else []
+        self._value_infos = value_infos if value_infos else []
         self.name = name
 
         self._node_map = {}
         self._prev_map = {}
         self._next_map = {}
 
-        self._meta = {'ir_version': kwargs.get('ir_version', 4),
+        self._meta = {
+                    'ir_version': kwargs.get('ir_version', 4),
                     'producer_name': kwargs.get('producer_name', 'AutoOptimizer'),
                     'producer_version': kwargs.get('producer_version', 'alpha'),
                     'domain': kwargs.get('domain', ''),
@@ -68,7 +69,8 @@ class OnnxGraph(BaseGraph):
             meta = {}
         else:
             onnx_graph = onnx_model.graph
-            meta = {'ir_version': onnx_model.ir_version,
+            meta = {
+                    'ir_version': onnx_model.ir_version,
                     'domain': onnx_model.domain,
                     'model_version': onnx_model.model_version,
                     'doc_string': onnx_model.doc_string,
@@ -94,7 +96,8 @@ class OnnxGraph(BaseGraph):
         self._prev_map = {}
         self._next_map = {}
 
-        self._node_map = {n.name: n for n in chain(self._inputs, self._outputs, self._nodes, self._initializers, self._value_infos)}
+        self._node_map = {n.name: n for n in 
+                        chain(self._inputs, self._outputs, self._nodes, self._initializers, self._value_infos)}
         # update prev node info
         for n in self._nodes:
             for o in n.outputs:
@@ -118,7 +121,7 @@ class OnnxGraph(BaseGraph):
     def add_initializer(self, name, value):
         pass
 
-    def add_node(self, name, op_type, attrs={}, domain=None):
+    def add_node(self, name, op_type, attrs=None, domain=None):
         pass
 
     def insert_node(self, refer_name, insert_node, refer_io_index=0, mode='after'):
@@ -127,7 +130,7 @@ class OnnxGraph(BaseGraph):
     def get_nodes(self, op_type):
         pass
 
-    def remove(self, name, maps={0:0}):
+    def remove(self, name, maps=None):
         pass
 
     def __getitem__(self, key):

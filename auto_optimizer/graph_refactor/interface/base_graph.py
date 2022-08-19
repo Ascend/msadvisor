@@ -30,7 +30,7 @@ class BaseGraph(ABC):
         pass
 
     @abstractmethod
-    def add_node(self, name, op_type, attrs={}, domain=None):
+    def add_node(self, name, op_type, attrs=None, domain=None):
         pass
 
     @abstractmethod
@@ -42,7 +42,7 @@ class BaseGraph(ABC):
         pass
 
     @abstractmethod
-    def remove(self, name, maps={0:0}):
+    def remove(self, name, maps=None):
         pass
 
     @abstractmethod

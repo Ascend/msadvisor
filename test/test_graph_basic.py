@@ -13,12 +13,12 @@
 # limitations under the License.
 
 import random
+import unittest
 from typing import List
 
 import numpy as np
 from onnx import helper, GraphProto, ModelProto
 from onnx.mapping import NP_TYPE_TO_TENSOR_TYPE
-import unittest
 
 from auto_optimizer.graph_refactor.onnx.node import PlaceHolder, Initializer, Node
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
@@ -67,7 +67,14 @@ def create_graph():
     output_0 = PlaceHolder('output_0', np.dtype('float32'), [3,4])
     ini_0 = Initializer('ini_0', np.array([1,4], dtype='int32'))
     ini_1 = Initializer('ini_1', np.array([1], dtype='int32'))
-    node_0 = Node('Node_0', 'Pad', inputs=['input_0', 'ini_0', 'ini_1'], outputs=['output_0'], attrs={'mode':b'constant'}, domain='')
+    node_0 = Node(
+                'Node_0', 
+                'Pad', 
+                inputs=['input_0', 'ini_0', 'ini_1'], 
+                outputs=['output_0'], 
+                attrs={'mode':b'constant'}, 
+                domain=''
+    )
     graph = OnnxGraph([node_0], [input_0], [output_0], [ini_0, ini_1], name='test_graph')
     return graph
 
@@ -79,14 +86,22 @@ class TestGraphBasic(unittest.TestCase):
         output_0 = PlaceHolder('output_0', np.dtype('float32'), [3,4])
         ini_0 = Initializer('ini_0', np.array([1,4], dtype='int32'))
         ini_1 = Initializer('ini_1', np.array([1], dtype='int32'))
-        node_0 = Node('Node_0', 'Pad', inputs=['input_0', 'ini_0', 'ini_1'], outputs=['output_0'], attrs={'mode':b'constant'}, domain='')
+        node_0 = Node(
+                    'Node_0', 
+                    'Pad', 
+                    inputs=['input_0', 'ini_0', 'ini_1'], 
+                    outputs=['output_0'], 
+                    attrs={'mode':b'constant'}, 
+                    domain=''
+        )
 
         graph = create_graph()
         self.assertTrue(is_list_equal(graph._nodes, [node_0]))
         self.assertTrue(is_list_equal(graph._inputs, [input_0]))
         self.assertTrue(is_list_equal(graph._outputs, [output_0]))
         self.assertTrue(is_list_equal(graph._initializers, [ini_0, ini_1]))
-        self.assertTrue(is_map_equal(graph._node_map, {'input_0':input_0, 'output_0':output_0, 'ini_0':ini_0, 'ini_1':ini_1, 'Node_0':node_0}))
+        self.assertTrue(is_map_equal(graph._node_map, 
+                                    {'input_0':input_0, 'output_0':output_0, 'ini_0':ini_0, 'ini_1':ini_1, 'Node_0':node_0}))
         self.assertTrue(is_map_equal(graph._prev_map, {'output_0':node_0}))
         self.assertTrue(is_map_equal(graph._next_map, {'input_0':[node_0], 'ini_0':[node_0], 'ini_1':[node_0]}))
 
