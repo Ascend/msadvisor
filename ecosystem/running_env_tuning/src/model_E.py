@@ -280,7 +280,7 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
 
     if needed_sketchy_function['VPC'] + needed_sketchy_function['VDEC'] + needed_sketchy_function['VENC'] + \
             needed_sketchy_function['JPEGD'] + needed_sketchy_function['JPEGE'] == 0 \
-            and needed_sketchy_function['PNGD'] == 1 and transfer_version == '310p_v1_acldvpp':
+            and needed_sketchy_function['PNGD'] == 1 and transfer_version == '310pV1':
         er1.extend_title += 'PNGD'
         flag = True
 
@@ -290,7 +290,7 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
         er1.data_type = EXTEND_DATA_TYPE['str']
         er1.value.append('Recommended transfer to 310p_v2')
         return transfer_version, er1
-    elif transfer_version == '310p_v1_acldvpp':  # flag为False且转移的版本为V1版本的话说明迁移到310p_v1_acldvpp版本可以实现
+    elif transfer_version == '310pV1':  # flag为False且转移的版本为V1版本的话说明迁移到310p_v1_acldvpp版本可以实现
         er1.extend_title = 'Port compatibility information for migrating to 310pV1:'
         er1.type = EXTEND_TYPE['table']
         er1.data_type = [EXTEND_DATA_TYPE['str'] * 3]
@@ -313,7 +313,7 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
         # if er1.value:
         #     er1.data_type = [EXTEND_DATA_TYPE['str'] * 6]
         return transfer_version, er1
-    elif transfer_version == '310p_v2_hi_mpi':  # flag为False且转移的版本为V2版本的话说明迁移到310p_v2_hi_mpi版本可以实现
+    elif transfer_version == '310pV2':  # flag为False且转移的版本为V2版本的话说明迁移到310p_v2_hi_mpi版本可以实现
         er2.extend_title = 'Port compatibility information for migrating to 310pV2:'
         er2.type = EXTEND_TYPE['table']
         er2.data_type = [EXTEND_DATA_TYPE['str'] * 3]
@@ -412,6 +412,6 @@ def direction5_process(environment_data, datapath, target_path):
         er.extend_title = "The tuning direction does not include this inference card"
         return er
 
-# if __name__ == '__main__':
-#     str1 = Evaluate("D://desktop//msadvisor_2//ecosystem//running_env_tuning//data//knowledge")
-#     print(str1)
+if __name__ == '__main__':
+    str1 = Evaluate("D://desktop//msadvisor_2//ecosystem//running_env_tuning//data//knowledge")
+    print(str1)
