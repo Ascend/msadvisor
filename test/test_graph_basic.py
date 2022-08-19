@@ -100,8 +100,13 @@ class TestGraphBasic(unittest.TestCase):
         self.assertTrue(is_list_equal(graph._inputs, [input_0]))
         self.assertTrue(is_list_equal(graph._outputs, [output_0]))
         self.assertTrue(is_list_equal(graph._initializers, [ini_0, ini_1]))
-        self.assertTrue(is_map_equal(graph._node_map, 
-                                    {'input_0':input_0, 'output_0':output_0, 'ini_0':ini_0, 'ini_1':ini_1, 'Node_0':node_0}))
+        self.assertTrue(is_map_equal(graph._node_map, {
+                                                    'input_0':input_0, 
+                                                    'output_0':output_0, 
+                                                    'ini_0':ini_0, 
+                                                    'ini_1':ini_1, 
+                                                    'Node_0':node_0
+        }))
         self.assertTrue(is_map_equal(graph._prev_map, {'output_0':node_0}))
         self.assertTrue(is_map_equal(graph._next_map, {'input_0':[node_0], 'ini_0':[node_0], 'ini_1':[node_0]}))
 
