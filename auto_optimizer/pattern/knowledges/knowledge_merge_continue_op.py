@@ -158,7 +158,7 @@ def evaluate(datapath, parameter):
     result = msadvisor_adapter.Result()
     result.class_type = msadvisor_adapter.class_type['model']
     result.error_code = msadvisor_adapter.error_code['success']
-    result.summary = "The current model are well optimized"
+    result.summary = "The current model is well optimized"
 
     # load model
     from magiconnx.graph import OnnxGraph
