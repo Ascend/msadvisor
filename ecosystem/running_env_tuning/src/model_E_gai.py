@@ -360,7 +360,7 @@ def direction4_2_process(environment_data, datapath, target_path):
             else:
                 er1.value.append([chip[er1.key[0]],
                                   chip[chip_type]])
-        optimizedsummary = "Target chip parameters need to be optimized"
+        optimizedsummary = chip_type + " chip parameters need to be optimized"
     else:
         er1.extend_title = "There are no chip information about " + chip_type
         er1.type = EXTEND_TYPE['table']
