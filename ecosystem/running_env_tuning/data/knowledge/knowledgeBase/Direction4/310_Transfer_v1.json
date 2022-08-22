@@ -1,125 +1,125 @@
 {"v1_VPC":[
     {
-        "310->310p_V1迁移时，对用户的影响":"Ascend 710上VPC图像处理时会对宽高进行校验，不符合要求会拦截报错，因此需要用户提供满足要求的图片送入VPC，如果不满足要求，则需要用户修改代码逻辑，手动裁剪图片。用户修改代码后，需要重新编译。典型举例，JPEGD+VPC串联使用的场景下：JPEGD处理：jpeg(444) 源码的图片解码成YUV420SP格式的输出图片时，当jpeg(444) 源码图片的宽/高为奇数时，解码出来的YUV420SP格式的输出图片的宽/高理论上应该为奇数，但是YUV420SP格式本身要求图片的宽/高都为偶数，这时JPEGD会对奇数宽/高做向下2对齐的操作。JPEGD处理后的图片已满足VPC要求，因为需要获取JPEGD解码后的图片的宽高，再设置VPC输入图片的宽高，而不能直接将原始的奇数分辨率直接送给VPC，否则会拦截报错。",
         "Ascend 310pV1的实现":"根据输入图片的格式，宽高对齐要求如下，如果不满足要求，VPC图像处理时直接拦截报错，不会进行对齐裁剪操作。对于yuv420sp格式，宽高均需要2对齐；对于yuv422sp或者yuv422packed格式，宽度需要2对齐，高度无限制；对于yuv440sp格式，宽度无限制，高度需要2对齐。",
         "Ascend 310的实现":"如果输入图片的宽或高为奇数，则VPC图像处理时会进行向下2对齐裁剪。",
-        "功能或约束":"VPC图像处理时对输入图片的宽高有2对齐的约束",
-        "涉及的AscendCL接口":"acldvppSetPicDescWidth,acldvppSetPicDescHeight"
+        "AscendCL接口名称":"acldvppSetPicDescWidth,acldvppSetPicDescHeight",
+        "从310_v1到310p_v1的迁移建议":"Ascend 710上VPC图像处理时会对宽高进行校验，不符合要求会拦截报错，因此需要用户提供满足要求的图片送入VPC，如果不满足要求，则需要用户修改代码逻辑，手动裁剪图片。用户修改代码后，需要重新编译。典型举例，JPEGD+VPC串联使用的场景下：JPEGD处理：jpeg(444) 源码的图片解码成YUV420SP格式的输出图片时，当jpeg(444) 源码图片的宽/高为奇数时，解码出来的YUV420SP格式的输出图片的宽/高理论上应该为奇数，但是YUV420SP格式本身要求图片的宽/高都为偶数，这时JPEGD会对奇数宽/高做向下2对齐的操作。JPEGD处理后的图片已满足VPC要求，因为需要获取JPEGD解码后的图片的宽高，再设置VPC输入图片的宽高，而不能直接将原始的奇数分辨率直接送给VPC，否则会拦截报错。",
+        "功能或约束":"VPC图像处理时对输入图片的宽高有2对齐的约束"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"如果用户没有显式调用acldvppSetResizeConfigInterpolation接口设置缩放算法，则需要注意，Ascend 710与Ascend 310支持的默认缩放不同，Ascend 710支持的默认缩放算法为业界通用的Bilinear算法（与OpenCV算法的计算过程类似），且Ascend 710还不支持设置华为自研的最近邻插值算法，需要用户评估下该默认算法是否适用，如果不适用，可以显式调用acldvppSetResizeConfigInterpolation接口设置Ascend 710支持的其它算法。修改代码后，需要重新编译。如果用户显式调用acldvppSetResizeConfigInterpolation接口设置缩放算法，用户需要根据Ascend 710支持的缩放算法调整代码。修改代码后，需要重新编译。需注意，同一个芯片，不同的缩放算法会导致缩放精度不一致；不同芯片，即使是同一个缩放算法，输出图片的二进制也有可能不完全相同。",
         "Ascend 310pV1的实现":"支持2种算法：0：默认值。设置为0时，系统内部也会自动采用1。1：业界通用的Bilinear算法（与OpenCV算法的计算过程类似）2：业界通用的Nearest neighbor 算法（与OpenCV算法的计算过程类似）",
         "Ascend 310的实现":"支持5种算法：0：默认值。表示华为自研的高阶滤波算法。1：业界通用的Bilinear算法（与OpenCV算法的计算过程类似）2：业界通用的Nearest neighbor 算法（与OpenCV算法的计算过程类似）3：业界通用的Bilinear算法（与Tensorflow算法的计算精过程类似）。4：业界通用的Nearest neighbor算法（与Tensorflow算法的计算精过程类似）。",
-        "功能或约束":"设置缩放算法。",
-        "涉及的AscendCL接口":"acldvppSetResizeConfigInterpolation"
+        "AscendCL接口名称":"acldvppSetResizeConfigInterpolation",
+        "从310_v1到310p_v1的迁移建议":"如果用户没有显式调用acldvppSetResizeConfigInterpolation接口设置缩放算法，则需要注意，Ascend 710与Ascend 310支持的默认缩放不同，Ascend 710支持的默认缩放算法为业界通用的Bilinear算法（与OpenCV算法的计算过程类似），且Ascend 710还不支持设置华为自研的最近邻插值算法，需要用户评估下该默认算法是否适用，如果不适用，可以显式调用acldvppSetResizeConfigInterpolation接口设置Ascend 710支持的其它算法。修改代码后，需要重新编译。如果用户显式调用acldvppSetResizeConfigInterpolation接口设置缩放算法，用户需要根据Ascend 710支持的缩放算法调整代码。修改代码后，需要重新编译。需注意，同一个芯片，不同的缩放算法会导致缩放精度不一致；不同芯片，即使是同一个缩放算法，输出图片的二进制也有可能不完全相同。",
+        "功能或约束":"设置缩放算法。"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"迁移到Ascend 710后，用户可以继续使用“从YUV420格式中取Y分量”来实现YUV400的方式，这样，就不涉及修改代码，也无需重新编译。另外，由于在Ascend 710上扩展支持了YUV400格式，所以如果用户选择直接使用YUV400格式，就需要修改代码，将输出格式设置为YUV400，将内存大小按“widthStride*heightStride”公式设置，否则系统会参数拦截报错。修改代码后，用户需要重新编译。",
         "Ascend 310pV1的实现":"Ascend 710支持YUV400格式图像处理，因此直接将输入图片的格式设置为YUV400，内存大小设置为 widthStride*heightStride，VPC会根据图片格式校验内存大小",
         "Ascend 310的实现":"Ascend 310不支持YUV400格式图像处理，使用YUV420格式进行处理(Y部分数据)，因此需要将输入图片的格式设置为YUV420，内存大小设置为 widthStride*heightStride*3/2，VPC会根据图片格式校验内存大小",
-        "功能或约束":"YUV400格式图像处理",
-        "涉及的AscendCL接口":"acldvppSetPicDescSize"
+        "AscendCL接口名称":"acldvppSetPicDescSize",
+        "从310_v1到310p_v1的迁移建议":"迁移到Ascend 710后，用户可以继续使用“从YUV420格式中取Y分量”来实现YUV400的方式，这样，就不涉及修改代码，也无需重新编译。另外，由于在Ascend 710上扩展支持了YUV400格式，所以如果用户选择直接使用YUV400格式，就需要修改代码，将输出格式设置为YUV400，将内存大小按“widthStride*heightStride”公式设置，否则系统会参数拦截报错。修改代码后，用户需要重新编译。",
+        "功能或约束":"YUV400格式图像处理"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"创建通道时，如果不指定通道模式，Vpc+Jpegd+Jpege+PNGD 四种模式的通道会同时创建，因此需要用户在代码中显式调用acldvppSetChannelDescMode接口设置通道模式。修改代码后，需要重新编译。典型举例：在Ascend 710上需创建130路VPC通道，由于Jpege通道号有最大128路的限制，这样会导致Vpc也无法创建130路。",
         "Ascend 310pV1的实现":"支持设置通道模式，如果不设置通道模式，则创建通道时默认会同时创建Vpc+Jpegd+Jpege+PNGD的通道，可能会占用资源。",
         "Ascend 310的实现":"不支持设置通道模式。",
-        "功能或约束":"设置通道模式。（提醒：明确图片数据处理通道用于实现哪种功能（目前支持VPC、JPEGD、JPEGE、PNGD功能），若不调用该接口，则系统默认四种模式的通道都创建，可能会占用资源，推荐用户根据实际功能指定通道模式。）",
-        "涉及的AscendCL接口":"acldvppSetChannelDescMode"
+        "AscendCL接口名称":"acldvppSetChannelDescMode",
+        "从310_v1到310p_v1的迁移建议":"创建通道时，如果不指定通道模式，Vpc+Jpegd+Jpege+PNGD 四种模式的通道会同时创建，因此需要用户在代码中显式调用acldvppSetChannelDescMode接口设置通道模式。修改代码后，需要重新编译。典型举例：在Ascend 710上需创建130路VPC通道，由于Jpege通道号有最大128路的限制，这样会导致Vpc也无法创建130路。",
+        "功能或约束":"设置通道模式。（提醒：明确图片数据处理通道用于实现哪种功能（目前支持VPC、JPEGD、JPEGE、PNGD功能），若不调用该接口，则系统默认四种模式的通道都创建，可能会占用资源，推荐用户根据实际功能指定通道模式。）"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"用户需要合理规划各模块的通道个数。对于Ascend310和Ascend710，VDEC解码时，单进程内调用回调函数线程数量如果超过128个，VDEC创建通道会失败（详情参见aclvdecCreateChannel接口的说明）。",
         "Ascend 310pV1的实现":"VDEC和JPEGD共用通道号，最大共支持256路。VPC最大支持256路。JPEGE与VENC共用通道且通道数最多128。",
         "Ascend 310的实现":"VDEC单进程最大支持32路，多进程无限制。VPC/JPEGD/JPEGE/VENC无限制，受限于内存是否足够。",
-        "功能或约束":"各模块通道个数限制。",
-        "涉及的AscendCL接口":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel"
+        "AscendCL接口名称":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
+        "从310_v1到310p_v1的迁移建议":"用户需要合理规划各模块的通道个数。对于Ascend310和Ascend710，VDEC解码时，单进程内调用回调函数线程数量如果超过128个，VDEC创建通道会失败（详情参见aclvdecCreateChannel接口的说明）。",
+        "功能或约束":"各模块通道个数限制。"
     }
 ],"v1_VDEC":[
     {
-        "310->310p_V1迁移时，对用户的影响":"Ascend 710使用公式计算输入码流缓存大小，用户需要修改代码调用aclvdecSetChannelDescOutPicWidth、aclvdecSetChannelDescOutPicHeight接口设置正确的宽高。修改代码后，需要重新编译。",
         "Ascend 310pV1的实现":"解码图像帧存大小：创建通道时不会使用解码码流最大宽度和高度申请内部使用的帧存，会在解码过程中根据码流信息获取码流的真实宽高，申请帧存。输入码流缓存大小：解码码流最大宽度*解码码流最大高度*2。",
         "Ascend 310的实现":"解码图像帧存大小：创建通道时不会使用解码码流最大宽度和高度申请内部使用的帧存，会在解码过程中根据码流信息获取码流的真实宽高，申请帧存。输入码流缓存大小：1080P分辨率及以下的输入码流，输入码流缓存大小默认为6M；1080P分辨率以上的输入码流，输入码流缓存大小默认为9M。",
-        "功能或约束":"设置解码码流最大宽度和高度。",
-        "涉及的AscendCL接口":"aclvdecSetChannelDescOutPicWidth,aclvdecSetChannelDescOutPicHeight"
+        "AscendCL接口名称":"aclvdecSetChannelDescOutPicWidth,aclvdecSetChannelDescOutPicHeight",
+        "从310_v1到310p_v1的迁移建议":"Ascend 710使用公式计算输入码流缓存大小，用户需要修改代码调用aclvdecSetChannelDescOutPicWidth、aclvdecSetChannelDescOutPicHeight接口设置正确的宽高。修改代码后，需要重新编译。",
+        "功能或约束":"设置解码码流最大宽度和高度。"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"参考帧默认值为8能兼容解码大多数码流，但对于参考帧个数比较多的码流，解码可能会失败，需要用户调用aclvdecSetChannelDescRefFrameNum接口根据实际参考帧个数进行设置。",
         "Ascend 310pV1的实现":"支持设置参考帧，如果不设置，默认参考帧数量是8。在创建通道时，会根据默认值申请帧存，但在解码过程中，会根据码流信息获取码流的真实参考帧信息，进行帧存自适应。",
         "Ascend 310的实现":"不支持设置参考帧。",
-        "功能或约束":"设置参考帧数量。",
-        "涉及的AscendCL接口":"aclvdecSetChannelDescRefFrameNum"
+        "AscendCL接口名称":"aclvdecSetChannelDescRefFrameNum",
+        "从310_v1到310p_v1的迁移建议":"参考帧默认值为8能兼容解码大多数码流，但对于参考帧个数比较多的码流，解码可能会失败，需要用户调用aclvdecSetChannelDescRefFrameNum接口根据实际参考帧个数进行设置。",
+        "功能或约束":"设置参考帧数量。"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"对于10bit码流，若不设置，可能会解码失败，需要调用aclvdecSetChannelDescBitDepth接口设置Bit位宽为10bit。",
         "Ascend 310pV1的实现":"支持设置码流位宽，如果不设置，默认码流位宽是8-bit。",
         "Ascend 310的实现":"不支持设置码流位宽。",
-        "功能或约束":"设置码流位宽。",
-        "涉及的AscendCL接口":"aclvdecSetChannelDescBitDepth"
+        "AscendCL接口名称":"aclvdecSetChannelDescBitDepth",
+        "从310_v1到310p_v1的迁移建议":"对于10bit码流，若不设置，可能会解码失败，需要调用aclvdecSetChannelDescBitDepth接口设置Bit位宽为10bit。",
+        "功能或约束":"设置码流位宽。"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"用户需要合理规划各模块的通道个数。对于Ascend310和Ascend710，VDEC解码时，单进程内调用回调函数线程数量如果超过128个，VDEC创建通道会失败（详情参见aclvdecCreateChannel接口的说明）。",
         "Ascend 310pV1的实现":"VDEC和JPEGD共用通道号，最大共支持256路。VPC最大支持256路。JPEGE与VENC共用通道且通道数最多128。",
         "Ascend 310的实现":"VDEC单进程最大支持32路，多进程无限制。VPC/JPEGD/JPEGE/VENC无限制，受限于内存是否足够。",
-        "功能或约束":"各模块通道个数限制。",
-        "涉及的AscendCL接口":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel"
+        "AscendCL接口名称":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
+        "从310_v1到310p_v1的迁移建议":"用户需要合理规划各模块的通道个数。对于Ascend310和Ascend710，VDEC解码时，单进程内调用回调函数线程数量如果超过128个，VDEC创建通道会失败（详情参见aclvdecCreateChannel接口的说明）。",
+        "功能或约束":"各模块通道个数限制。"
     }
 ],"v1_VENC":[
     {
-        "310->310p_V1迁移时，对用户的影响":"在Ascend 710上不能使用设置IP比例功能。",
         "Ascend 310pV1的实现":"不支持设置IP比例。",
         "Ascend 310的实现":"支持设置IP比例。",
-        "功能或约束":"设置一个GOP内单个I帧bit数和单个P帧bit数的比例（下文简述为设置IP比例）。",
-        "涉及的AscendCL接口":"aclvencSetChannelDescParam"
+        "AscendCL接口名称":"aclvencSetChannelDescParam",
+        "从310_v1到310p_v1的迁移建议":"在Ascend 710上不能使用设置IP比例功能。",
+        "功能或约束":"设置一个GOP内单个I帧bit数和单个P帧bit数的比例（下文简述为设置IP比例）。"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"需要调用aclvencSetChannelDescBufAddr接口或aclvencSetChannelDescParam接口显式设置输出buffer。",
         "Ascend 310pV1的实现":"需要用户设置输出buffer，编码输出结果无需多一次拷贝操作。",
         "Ascend 310的实现":"用户不需要设置输出buffer，回调时进行一次内存拷贝，拷贝至用户输出buffer。",
-        "功能或约束":"设置VENC输出buffer。",
-        "涉及的AscendCL接口":"aclvencSetChannelDescBufAddr,aclvencSetChannelDescParam"
+        "AscendCL接口名称":"aclvencSetChannelDescBufAddr,aclvencSetChannelDescParam",
+        "从310_v1到310p_v1的迁移建议":"需要调用aclvencSetChannelDescBufAddr接口或aclvencSetChannelDescParam接口显式设置输出buffer。",
+        "功能或约束":"设置VENC输出buffer。"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"如果用户未显式调用aclvencSetChannelDescMaxBitRate接口或aclvencSetChannelDescParam接口，编码器会使用默认输出码率进行编码，迁移到Ascend 710上之后，需要显式调用aclvencSetChannelDescMaxBitRate接口或aclvencSetChannelDescParam接口将输出码率设置为300，否则在Ascend 710上会使用默认值2000。用户修改代码后，需要重新编译。要注意，输出码率不一样，编码输出码流大小会不一样。",
         "Ascend 310pV1的实现":"输出码率默认值为2000。",
         "Ascend 310的实现":"输出码率默认值为300。",
-        "功能或约束":"指定输出码率。",
-        "涉及的AscendCL接口":"aclvencSetChannelDescMaxBitRate,aclvencSetChannelDescParam"
+        "AscendCL接口名称":"aclvencSetChannelDescMaxBitRate,aclvencSetChannelDescParam",
+        "从310_v1到310p_v1的迁移建议":"如果用户未显式调用aclvencSetChannelDescMaxBitRate接口或aclvencSetChannelDescParam接口，编码器会使用默认输出码率进行编码，迁移到Ascend 710上之后，需要显式调用aclvencSetChannelDescMaxBitRate接口或aclvencSetChannelDescParam接口将输出码率设置为300，否则在Ascend 710上会使用默认值2000。用户修改代码后，需要重新编译。要注意，输出码率不一样，编码输出码流大小会不一样。",
+        "功能或约束":"指定输出码率。"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"用户需要合理规划各模块的通道个数。对于Ascend310和Ascend710，VDEC解码时，单进程内调用回调函数线程数量如果超过128个，VDEC创建通道会失败（详情参见aclvdecCreateChannel接口的说明）。",
         "Ascend 310pV1的实现":"VDEC和JPEGD共用通道号，最大共支持256路。VPC最大支持256路。JPEGE与VENC共用通道且通道数最多128。",
         "Ascend 310的实现":"VDEC单进程最大支持32路，多进程无限制。VPC/JPEGD/JPEGE/VENC无限制，受限于内存是否足够。",
-        "功能或约束":"各模块通道个数限制。",
-        "涉及的AscendCL接口":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel"
+        "AscendCL接口名称":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
+        "从310_v1到310p_v1的迁移建议":"用户需要合理规划各模块的通道个数。对于Ascend310和Ascend710，VDEC解码时，单进程内调用回调函数线程数量如果超过128个，VDEC创建通道会失败（详情参见aclvdecCreateChannel接口的说明）。",
+        "功能或约束":"各模块通道个数限制。"
     }
 ],"v1_JPEGD":[
     {
-        "310->310p_V1迁移时，对用户的影响":"创建通道时，如果不指定通道模式，Vpc+Jpegd+Jpege+PNGD 四种模式的通道会同时创建，因此需要用户在代码中显式调用acldvppSetChannelDescMode接口设置通道模式。修改代码后，需要重新编译。典型举例：在Ascend 710上需创建130路VPC通道，由于Jpege通道号有最大128路的限制，这样会导致Vpc也无法创建130路。",
         "Ascend 310pV1的实现":"支持设置通道模式，如果不设置通道模式，则创建通道时默认会同时创建Vpc+Jpegd+Jpege+PNGD的通道，可能会占用资源。",
         "Ascend 310的实现":"不支持设置通道模式。",
-        "功能或约束":"设置通道模式。（提醒：明确图片数据处理通道用于实现哪种功能（目前支持VPC、JPEGD、JPEGE、PNGD功能），若不调用该接口，则系统默认四种模式的通道都创建，可能会占用资源，推荐用户根据实际功能指定通道模式。）",
-        "涉及的AscendCL接口":"acldvppSetChannelDescMode"
+        "AscendCL接口名称":"acldvppSetChannelDescMode",
+        "从310_v1到310p_v1的迁移建议":"创建通道时，如果不指定通道模式，Vpc+Jpegd+Jpege+PNGD 四种模式的通道会同时创建，因此需要用户在代码中显式调用acldvppSetChannelDescMode接口设置通道模式。修改代码后，需要重新编译。典型举例：在Ascend 710上需创建130路VPC通道，由于Jpege通道号有最大128路的限制，这样会导致Vpc也无法创建130路。",
+        "功能或约束":"设置通道模式。（提醒：明确图片数据处理通道用于实现哪种功能（目前支持VPC、JPEGD、JPEGE、PNGD功能），若不调用该接口，则系统默认四种模式的通道都创建，可能会占用资源，推荐用户根据实际功能指定通道模式。）"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"用户需要合理规划各模块的通道个数。对于Ascend310和Ascend710，VDEC解码时，单进程内调用回调函数线程数量如果超过128个，VDEC创建通道会失败（详情参见aclvdecCreateChannel接口的说明）。",
         "Ascend 310pV1的实现":"VDEC和JPEGD共用通道号，最大共支持256路。VPC最大支持256路。JPEGE与VENC共用通道且通道数最多128。",
         "Ascend 310的实现":"VDEC单进程最大支持32路，多进程无限制。VPC/JPEGD/JPEGE/VENC无限制，受限于内存是否足够。",
-        "功能或约束":"各模块通道个数限制。",
-        "涉及的AscendCL接口":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel"
+        "AscendCL接口名称":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
+        "从310_v1到310p_v1的迁移建议":"用户需要合理规划各模块的通道个数。对于Ascend310和Ascend710，VDEC解码时，单进程内调用回调函数线程数量如果超过128个，VDEC创建通道会失败（详情参见aclvdecCreateChannel接口的说明）。",
+        "功能或约束":"各模块通道个数限制。"
     }
 ],"v1_JPEGE":[
     {
-        "310->310p_V1迁移时，对用户的影响":"创建通道时，如果不指定通道模式，Vpc+Jpegd+Jpege+PNGD 四种模式的通道会同时创建，因此需要用户在代码中显式调用acldvppSetChannelDescMode接口设置通道模式。修改代码后，需要重新编译。典型举例：在Ascend 710上需创建130路VPC通道，由于Jpege通道号有最大128路的限制，这样会导致Vpc也无法创建130路。",
         "Ascend 310pV1的实现":"支持设置通道模式，如果不设置通道模式，则创建通道时默认会同时创建Vpc+Jpegd+Jpege+PNGD的通道，可能会占用资源。",
         "Ascend 310的实现":"不支持设置通道模式。",
-        "功能或约束":"设置通道模式。（提醒：明确图片数据处理通道用于实现哪种功能（目前支持VPC、JPEGD、JPEGE、PNGD功能），若不调用该接口，则系统默认四种模式的通道都创建，可能会占用资源，推荐用户根据实际功能指定通道模式。）",
-        "涉及的AscendCL接口":"acldvppSetChannelDescMode"
+        "AscendCL接口名称":"acldvppSetChannelDescMode",
+        "从310_v1到310p_v1的迁移建议":"创建通道时，如果不指定通道模式，Vpc+Jpegd+Jpege+PNGD 四种模式的通道会同时创建，因此需要用户在代码中显式调用acldvppSetChannelDescMode接口设置通道模式。修改代码后，需要重新编译。典型举例：在Ascend 710上需创建130路VPC通道，由于Jpege通道号有最大128路的限制，这样会导致Vpc也无法创建130路。",
+        "功能或约束":"设置通道模式。（提醒：明确图片数据处理通道用于实现哪种功能（目前支持VPC、JPEGD、JPEGE、PNGD功能），若不调用该接口，则系统默认四种模式的通道都创建，可能会占用资源，推荐用户根据实际功能指定通道模式。）"
     },
     {
-        "310->310p_V1迁移时，对用户的影响":"用户需要合理规划各模块的通道个数。对于Ascend310和Ascend710，VDEC解码时，单进程内调用回调函数线程数量如果超过128个，VDEC创建通道会失败（详情参见aclvdecCreateChannel接口的说明）。",
         "Ascend 310pV1的实现":"VDEC和JPEGD共用通道号，最大共支持256路。VPC最大支持256路。JPEGE与VENC共用通道且通道数最多128。",
         "Ascend 310的实现":"VDEC单进程最大支持32路，多进程无限制。VPC/JPEGD/JPEGE/VENC无限制，受限于内存是否足够。",
-        "功能或约束":"各模块通道个数限制。",
-        "涉及的AscendCL接口":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel"
+        "AscendCL接口名称":"acldvppCreateChannel,aclvdecCreateChannel,aclvencCreateChannel",
+        "从310_v1到310p_v1的迁移建议":"用户需要合理规划各模块的通道个数。对于Ascend310和Ascend710，VDEC解码时，单进程内调用回调函数线程数量如果超过128个，VDEC创建通道会失败（详情参见aclvdecCreateChannel接口的说明）。",
+        "功能或约束":"各模块通道个数限制。"
     }
 ]}

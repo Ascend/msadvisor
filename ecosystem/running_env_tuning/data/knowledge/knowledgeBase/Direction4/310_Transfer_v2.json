@@ -1,591 +1,591 @@
 {"v2_VPC":[
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_init",
+        "AscendCL接口名称":"无需进行媒体数据处理模块初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
         "功能或约束":"媒体数据处理模块初始化"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，直接声明hi_vpc_chn_attr结构体的变量。",
-        "Ascend 310 acldvpp接口":"acldvppCreateChannelDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，直接使用hi_vpc_chn_attr结构体，且该结构体参数内部保留，用户配置任意值（除空指针）即可。",
+        "AscendCL接口名称":"acldvppCreateChannelDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，直接声明hi_vpc_chn_attr结构体的变量。",
         "功能或约束":"创建通道描述信息的结构体"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_vpc_create_chn接口创建通道。",
-        "Ascend 310 acldvpp接口":"acldvppCreateChannel",
         "Ascend 710 hi_mpi接口":"创建通道：hi_mpi_vpc_create_chn",
+        "AscendCL接口名称":"acldvppCreateChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_vpc_create_chn接口创建通道。",
         "功能或约束":"创建通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。",
-        "Ascend 310 acldvpp接口":"acldvppMalloc",
         "Ascend 710 hi_mpi接口":"申请内存：hi_mpi_dvpp_malloc",
+        "AscendCL接口名称":"acldvppMalloc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。",
         "功能或约束":"内存申请"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
-        "Ascend 310 acldvpp接口":"acldvppFree",
         "Ascend 710 hi_mpi接口":"释放内存：hi_mpi_dvpp_free",
+        "AscendCL接口名称":"acldvppFree",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
         "功能或约束":"内存释放"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_vpc_pic_info成员赋值来配置输入图片信息的参数。",
-        "Ascend 310 acldvpp接口":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidthacldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输入图片参数时，直接对hi_vpc_pic_info结构体的成员赋值：picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "AscendCL接口名称":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidthacldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_vpc_pic_info成员赋值来配置输入图片信息的参数。",
         "功能或约束":"抠图缩放贴图功能（一图一框）配置输入图片信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的dest_pic_info成员赋值。",
-        "Ascend 310 acldvpp接口":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输出图片参数时，直接对hi_vpc_crop_resize_paste_region结构体内的dest_pic_info成员赋值，dest_pic_info成员是hi_vpc_pic_info结构体，该结构体内的成员如下：picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "AscendCL接口名称":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的dest_pic_info成员赋值。",
         "功能或约束":"抠图缩放贴图功能（一图一框）配置输出图片信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的crop_region成员赋值。",
-        "Ascend 310 acldvpp接口":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
         "Ascend 710 hi_mpi接口":"无对应接口，配置抠图位置信息时，直接对hi_vpc_crop_resize_paste_region结构体内的crop_region成员赋值，crop_region成员是hi_vpc_crop_region结构体，该结构体内的成员如下：top_offset;left_offset;crop_width;crop_height;",
+        "AscendCL接口名称":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的crop_region成员赋值。",
         "功能或约束":"抠图缩放贴图功能（一图一框）配置从输入图片中的抠图位置信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的resize_info成员赋值。",
-        "Ascend 310 acldvpp接口":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
         "Ascend 710 hi_mpi接口":"无对应接口，配置缩放信息时，直接对hi_vpc_crop_resize_paste_region结构体内的resize_info成员赋值，resize_info成员是 hi_vpc_resize_info结构体，该结构体内的成员如下：resize_width;resize_height;interpolation;",
+        "AscendCL接口名称":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的resize_info成员赋值。",
         "功能或约束":"抠图缩放贴图功能（一图一框）配置缩放算法信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的dest_top_offset成员、dest_left_offset成员赋值。",
-        "Ascend 310 acldvpp接口":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRightacldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
         "Ascend 710 hi_mpi接口":"无对应接口，配置贴图位置信息时，直接对hi_vpc_crop_resize_paste_region结构体内的dest_top_offset成员、dest_left_offset成员赋值。",
+        "AscendCL接口名称":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRightacldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的dest_top_offset成员、dest_left_offset成员赋值。",
         "功能或约束":"抠图缩放贴图功能（一图一框）配置输出图片中的贴图位置信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改成调用hi_mpi_vpc_crop_resize_paste接口。注意：hi_mpi_vpc_crop_resize_paste接口支持一图一框和一图多框，如果想使用一图多框功能，则需要配置每个框的抠图位置信息、缩放算法信息、贴图位置信息。",
-        "Ascend 310 acldvpp接口":"acldvppVpcCropResizePasteAsync",
         "Ascend 710 hi_mpi接口":"抠图缩放贴图功能：hi_mpi_vpc_crop_resize_paste",
+        "AscendCL接口名称":"acldvppVpcCropResizePasteAsync",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改成调用hi_mpi_vpc_crop_resize_paste接口。注意：hi_mpi_vpc_crop_resize_paste接口支持一图一框和一图多框，如果想使用一图多框功能，则需要配置每个框的抠图位置信息、缩放算法信息、贴图位置信息。",
         "功能或约束":"抠图缩放贴图功能（一图一框）抠图缩放贴图功能"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_vpc_pic_info成员赋值来配置输入图片信息的参数。",
-        "Ascend 310 acldvpp接口":"acldvppCreateBatchPicDesc,acldvppGetPicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyBatchPicDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输入图片参数时，直接对hi_vpc_pic_info结构体数据的成员赋值，其中数组的每一个元素代表每一个输入图片，pic_num代表batch大小：picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "AscendCL接口名称":"acldvppCreateBatchPicDesc,acldvppGetPicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyBatchPicDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_vpc_pic_info成员赋值来配置输入图片信息的参数。",
         "功能或约束":"批量抠图缩放贴图功能-配置输入batch的图片信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的dest_pic_info成员赋值。",
-        "Ascend 310 acldvpp接口":"roiNumssize",
         "Ascend 710 hi_mpi接口":"数据结构对应如下，数组长度跟输入pic_num长度一致：count[]",
+        "AscendCL接口名称":"roiNumssize",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的dest_pic_info成员赋值。",
         "功能或约束":"批量抠图缩放贴图功能-配置每个输入图片的抠图数量"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的dest_pic_info成员赋值。",
-        "Ascend 310 acldvpp接口":"acldvppCreateBatchPicDesc,acldvppGetPicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyBatchPicDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输出图片参数时，直接对hi_vpc_crop_resize_paste_region结构体内的dest_pic_info成员赋值，dest_pic_info成员是hi_vpc_pic_info结构体，该结构体内的成员如下：picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "AscendCL接口名称":"acldvppCreateBatchPicDesc,acldvppGetPicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyBatchPicDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的dest_pic_info成员赋值。",
         "功能或约束":"批量抠图缩放贴图功能-配置输出batch的图片信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的crop_region成员赋值。",
-        "Ascend 310 acldvpp接口":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
         "Ascend 710 hi_mpi接口":"无对应接口，配置抠图位置信息时，直接对hi_vpc_crop_resize_paste_region结构体内的crop_region成员赋值，crop_region成员是hi_vpc_crop_region结构体，该结构体内的成员如下：top_offset;left_offset;crop_width;crop_height;",
+        "AscendCL接口名称":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的crop_region成员赋值。",
         "功能或约束":"批量抠图缩放贴图功能-配置从输入图片中的抠图位置信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的resize_info成员赋值。",
-        "Ascend 310 acldvpp接口":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
         "Ascend 710 hi_mpi接口":"无对应接口，配置缩放信息时，直接对hi_vpc_crop_resize_paste_region结构体内的resize_info成员赋值，resize_info成员是 hi_vpc_resize_info结构体，该结构体内的成员如下：resize_width;resize_height;interpolation;",
+        "AscendCL接口名称":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的resize_info成员赋值。",
         "功能或约束":"批量抠图缩放贴图功能-配置缩放算法信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的dest_top_offset成员、dest_left_offset成员赋值。",
-        "Ascend 310 acldvpp接口":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
         "Ascend 710 hi_mpi接口":"无对应接口，配置贴图位置信息时，直接对hi_vpc_crop_resize_paste_region结构体内的dest_top_offset成员、dest_left_offset成员赋值。",
+        "AscendCL接口名称":"acldvppCreateRoiConfig,acldvppSetRoiConfig,acldvppSetRoiConfigLeft,acldvppSetRoiConfigRight,acldvppSetRoiConfigTop,acldvppSetRoiConfigBottom,acldvppDestroyRoiConfig",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对hi_vpc_crop_resize_paste_region结构体内的dest_top_offset成员、dest_left_offset成员赋值。",
         "功能或约束":"批量抠图缩放贴图功能-配置输出图片中的贴图位置信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改成调用hi_mpi_vpc_batch_crop_resize_paste接口。需注意：原始图片数量pic_num，与source_pic数组长度、count数组长度保持一致。",
-        "Ascend 310 acldvpp接口":"acldvppVpcBatchCropResizePasteAsync",
         "Ascend 710 hi_mpi接口":"批量抠图缩放贴图功能：hi_mpi_vpc_batch_crop_resize_paste",
+        "AscendCL接口名称":"acldvppVpcBatchCropResizePasteAsync",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改成调用hi_mpi_vpc_batch_crop_resize_paste接口。需注意：原始图片数量pic_num，与source_pic数组长度、count数组长度保持一致。",
         "功能或约束":"批量抠图缩放贴图功能-批量抠图缩放贴图功能"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对source_pic赋值。",
-        "Ascend 310 acldvpp接口":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSizeacldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输入图片参数时，直接对source_pic赋值，source_pic是hi_vpc_pic_info结构体，该结构体内的成员如下：picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "AscendCL接口名称":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSizeacldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对source_pic赋值。",
         "功能或约束":"图片缩放功能-配置输入图片信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对dest_pic赋值。",
-        "Ascend 310 acldvpp接口":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输出图片参数时，直接对dest_pic赋值，dest_pic是hi_vpc_pic_info结构体，该结构体内的成员如下：picture_address;picture_buffer_size;picture_width;picture_height;picture_width_stride;picture_height_stride;picture_format;",
+        "AscendCL接口名称":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride,acldvppSetPicDescFormat,acldvppDestroyPicDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对dest_pic赋值。",
         "功能或约束":"图片缩放功能-配置输出图片信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为对interpolation赋值。",
-        "Ascend 310 acldvpp接口":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
         "Ascend 710 hi_mpi接口":"无对应接口，直接对interpolation进行赋值",
+        "AscendCL接口名称":"acldvppCreateResizeConfig,acldvppSetResizeConfigInterpolation,acldvppDestroyResizeConfig",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为对interpolation赋值。",
         "功能或约束":"图片缩放功能-配置缩放算法信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改成调用hi_mpi_vpc_resize接口。",
-        "Ascend 310 acldvpp接口":"acldvppVpcResizeAsync",
         "Ascend 710 hi_mpi接口":"缩放功能：hi_mpi_vpc_resize",
+        "AscendCL接口名称":"acldvppVpcResizeAsync",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改成调用hi_mpi_vpc_resize接口。",
         "功能或约束":"图片缩放功能"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，将aclrtSynchronizeStream接口修改成hi_mpi_vpc_get_process_result接口，并改为直接从对应的成员参数中获取输出图片数据。",
-        "Ascend 310 acldvpp接口":"acldvppVpcCropResizePasteAsync,aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat",
         "Ascend 710 hi_mpi接口":"等待任务处理完成后，获取输出图片数据。等待任务完成的接口如下：hi_mpi_vpc_get_process_result针对不同功能，获取输出图片数据的参数如下：使用hi_mpi_vpc_crop_resize_paste接口实现抠图缩放贴图功能时，从hi_vpc_crop_resize_paste_region.dest_pic_info.picture_address参数获取输出图片数据。使用hi_mpi_vpc_batch_crop_resize_paste接口实现批量抠图缩放贴图功能时，从hi_vpc_crop_resize_paste_region.dest_pic_info.picture_address参数获取输出图片数据。使用hi_mpi_vpc_resize接口实现缩放功能时，从dest_pic.picture_address参数获取输出图片数据。",
+        "AscendCL接口名称":"acldvppVpcCropResizePasteAsync,aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，将aclrtSynchronizeStream接口修改成hi_mpi_vpc_get_process_result接口，并改为直接从对应的成员参数中获取输出图片数据。",
         "功能或约束":"获取处理结果"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_vpc_destroy_chn接口。",
-        "Ascend 310 acldvpp接口":"acldvppDestroyChannel",
         "Ascend 710 hi_mpi接口":"销毁通道：hi_mpi_vpc_destroy_chn",
+        "AscendCL接口名称":"acldvppDestroyChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_vpc_destroy_chn接口。",
         "功能或约束":"销毁通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块去初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_exit",
+        "AscendCL接口名称":"无需进行媒体数据处理模块去初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。",
         "功能或约束":"媒体数据处理模块去初始化"
     }
 ],"v2_VDEC":[
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_init",
+        "AscendCL接口名称":"无需进行媒体数据处理模块初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
         "功能或约束":"媒体数据处理模块初始化"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，直接声明hi_vdec_chn_attr结构体的变量。",
-        "Ascend 310 acldvpp接口":"aclvdecCreateChannelDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，直接使用hi_vdec_chn_attr结构体：",
+        "AscendCL接口名称":"aclvdecCreateChannelDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，直接声明hi_vdec_chn_attr结构体的变量。",
         "功能或约束":"创建通道描述信息的结构体"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_vdec_chn_attr成员赋值来配置通道描述的参数。需注意，对于仅acl有的这几个参数设置，在hi_mpi上也有对应的接口：通道ID，不在hi_vdec_chn_attr结构体中，而是在用hi_mpi_vdec_create_chn接口创建通道时传入。线程ID、Callback（这两个跟回调函数相关），不在hi_vdec_chn_attr结构体中，因为使用hi mpi接口时不需要设置回调函数，需要自行另起线程，调用hi_mpi_vdec_get_frame接口来获取解码结果。输出图片格式outPicFormat参数不在hi_vdec_chn_attr结构体内，是在调用hi_mpi_vdec_send_stream接口发送码流数据时通过hi_vdec_pic_info.pixel_format参数指定。设置是否实时出帧outMode参数（即发送一帧解码一帧，无需依赖后续帧的传入）不在hi_vdec_chn_attr结构体内，是在调用hi_mpi_vdec_set_chn_param接口设置通道属性时通过hi_vdec_chn_param.hi_vdec_video_param.hi_video_out_order参数指定的，其中，解码序表示快速出帧。",
-        "Ascend 310 acldvpp接口":"aclvdecSetChannelDescEnType,aclvdecSetChannelDescOutWidth,aclvdecSetChannelDescOutHeight,aclvdecSetChannelDescRefFrameNum,aclvdecSetChannelDescChannelId,aclvdecSetChannelDescThreadId,aclvdecSetChannelDescCallback,aclvdecSetChannelDescOutPicFormat,aclvdecSetChannelDescOutMode",
         "Ascend 710 hi_mpi接口":"无对应接口，直接对hi_vdec_chn_attr结构体的成员赋值：hi_vdec_chn_attr.typehi_vdec_chn_attr.pic_widthhi_vdec_chn_attr.pic_heighthi_vdec_chn_attr.video_attr.ref_frame_numhi_vdec_chn_attr.mode（仅hi_mpi有）hi_vdec_chn_attr.stream_buf_size（仅hi_mpi有）hi_vdec_chn_attr.frame_buf_cnt（仅hi_mpi有）hi_vdec_chn_attr.frame_buf_size（仅hi_mpi有）hi_vdec_chn_attr.video_attr.temporal_mvp_en（仅hi_mpi有）hi_vdec_chn_attr.video_attr.tmv_buf_size（仅hi_mpi有）",
+        "AscendCL接口名称":"aclvdecSetChannelDescEnType,aclvdecSetChannelDescOutWidth,aclvdecSetChannelDescOutHeight,aclvdecSetChannelDescRefFrameNum,aclvdecSetChannelDescChannelId,aclvdecSetChannelDescThreadId,aclvdecSetChannelDescCallback,aclvdecSetChannelDescOutPicFormat,aclvdecSetChannelDescOutMode",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_vdec_chn_attr成员赋值来配置通道描述的参数。需注意，对于仅acl有的这几个参数设置，在hi_mpi上也有对应的接口：通道ID，不在hi_vdec_chn_attr结构体中，而是在用hi_mpi_vdec_create_chn接口创建通道时传入。线程ID、Callback（这两个跟回调函数相关），不在hi_vdec_chn_attr结构体中，因为使用hi mpi接口时不需要设置回调函数，需要自行另起线程，调用hi_mpi_vdec_get_frame接口来获取解码结果。输出图片格式outPicFormat参数不在hi_vdec_chn_attr结构体内，是在调用hi_mpi_vdec_send_stream接口发送码流数据时通过hi_vdec_pic_info.pixel_format参数指定。设置是否实时出帧outMode参数（即发送一帧解码一帧，无需依赖后续帧的传入）不在hi_vdec_chn_attr结构体内，是在调用hi_mpi_vdec_set_chn_param接口设置通道属性时通过hi_vdec_chn_param.hi_vdec_video_param.hi_video_out_order参数指定的，其中，解码序表示快速出帧。",
         "功能或约束":"设置通道描述的参数"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"设置解码出帧模式时，需要调用hi_mpi_vdec_set_chn_param接口进行设置。",
-        "Ascend 310 acldvpp接口":"无对应接口",
         "Ascend 710 hi_mpi接口":"设置通道属性：hi_mpi_vdec_set_chn_param",
+        "AscendCL接口名称":"无对应接口",
+        "从310_v1到310p_v2的迁移建议":"设置解码出帧模式时，需要调用hi_mpi_vdec_set_chn_param接口进行设置。",
         "功能或约束":"创建通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_vdec_create_chn接口创建通道。",
-        "Ascend 310 acldvpp接口":"aclvdecCreateChannel",
         "Ascend 710 hi_mpi接口":"创建通道hi_mpi_vdec_create_chn",
+        "AscendCL接口名称":"aclvdecCreateChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_vdec_create_chn接口创建通道。",
         "功能或约束":"创建通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。",
-        "Ascend 310 acldvpp接口":"acldvppMalloc",
         "Ascend 710 hi_mpi接口":"申请内存：hi_mpi_dvpp_malloc",
+        "AscendCL接口名称":"acldvppMalloc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。",
         "功能或约束":"内存申请"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
-        "Ascend 310 acldvpp接口":"acldvppFree",
         "Ascend 710 hi_mpi接口":"释放内存：hi_mpi_dvpp_free",
+        "AscendCL接口名称":"acldvppFree",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
         "功能或约束":"释放内存"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_vdec_chn_attr成员赋值来配置输入码流信息的参数。hi_mpi接口需要在所有码流数据发送结束后主动发送eos帧，将hi_vdec_stream.end_of_stream设置为HI_TRUE，其他码流发送时将hi_vdec_stream.end_of_stream设置为HI_FALSE。",
-        "Ascend 310 acldvpp接口":"acldvppSetStreamDescData,acldvppSetStreamDescSize,acldvppSetStreamDescEos",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输入码流参数时，直接对hi_vdec_stream结构体的成员赋值：hi_vdec_stream.addrhi_vdec_stream.lenhi_vdec_stream.end_of_stream",
+        "AscendCL接口名称":"acldvppSetStreamDescData,acldvppSetStreamDescSize,acldvppSetStreamDescEos",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_vdec_chn_attr成员赋值来配置输入码流信息的参数。hi_mpi接口需要在所有码流数据发送结束后主动发送eos帧，将hi_vdec_stream.end_of_stream设置为HI_TRUE，其他码流发送时将hi_vdec_stream.end_of_stream设置为HI_FALSE。",
         "功能或约束":"配置输入码流信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_vdec_pic_info成员赋值来配置输出图片信息的参数。需注意，acl接口中，如果不想获取某一帧的解码结果，通过调用aclvdecSendSkippedFrame接口实现，但在hi_mpi接口中，是通过设置hi_vdec_stream.need_display来完成。",
-        "Ascend 310 acldvpp接口":"acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输出图片参数时，直接对hi_vdec_pic_info结构体的成员赋值：hi_vdec_pic_info.vir_addrhi_vdec_pic_info.buffer_sizehi_vdec_pic_info.pixel_formathi_vdec_pic_info.widthhi_vdec_pic_info.heighthi_vdec_pic_info.width_stridehi_vdec_pic_info.height_stridehi_vdec_stream.need_display（仅hi_mpi有）",
+        "AscendCL接口名称":"acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_vdec_pic_info成员赋值来配置输出图片信息的参数。需注意，acl接口中，如果不想获取某一帧的解码结果，通过调用aclvdecSendSkippedFrame接口实现，但在hi_mpi接口中，是通过设置hi_vdec_stream.need_display来完成。",
         "功能或约束":"配置输出图片信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用hi_mpi_vdec_start_recv_stream接口。",
-        "Ascend 310 acldvpp接口":"无对应接口，无需通知解码器开始接收码流数据",
         "Ascend 710 hi_mpi接口":"通知解码器开始接收码流数据（一个通道只需要调用一次该接口）：hi_mpi_vdec_start_recv_stream",
+        "AscendCL接口名称":"无对应接口，无需通知解码器开始接收码流数据",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用hi_mpi_vdec_start_recv_stream接口。",
         "功能或约束":"发送码流"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"acl接口中，如果不想获取某一帧的解码结果，通过调用aclvdecSendSkippedFrame接口实现，但在hi_mpi接口中，是通过设置hi_vdec_stream.need_display来完成。",
-        "Ascend 310 acldvpp接口":"aclvdecSendSkippedFrame",
         "Ascend 710 hi_mpi接口":"hi_vdec_stream.need_display（仅hi_mpi有）",
+        "AscendCL接口名称":"aclvdecSendSkippedFrame",
+        "从310_v1到310p_v2的迁移建议":"acl接口中，如果不想获取某一帧的解码结果，通过调用aclvdecSendSkippedFrame接口实现，但在hi_mpi接口中，是通过设置hi_vdec_stream.need_display来完成。",
         "功能或约束":"发送码流"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_vdec_send_stream接口发送码流，同时需要传入通道号。",
-        "Ascend 310 acldvpp接口":"aclvdecSendFrame",
         "Ascend 710 hi_mpi接口":"每一帧都需调用以下接口发送解码码流：hi_mpi_vdec_send_stream",
+        "AscendCL接口名称":"aclvdecSendFrame",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_vdec_send_stream接口发送码流，同时需要传入通道号。",
         "功能或约束":"每一帧都需调用以下接口发送解码码流"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为另起线程，调用hi_mpi_vdec_get_frame接口来主动获取解码结果。",
-        "Ascend 310 acldvpp接口":"acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
         "Ascend 710 hi_mpi接口":"调用hi_mpi_vdec_get_frame接口获取一帧解码结果，再从hi_video_frame_info结构体的以下成员中获取解码数据：hi_video_frame_info.v_frame.virt_addr[0]hi_video_frame_info.v_frame.widthhi_video_frame_info.v_frame.heighthi_video_frame_info.v_frame.width_stridehi_video_frame_info.v_frame.height_stridehi_video_frame_info.v_frame.pixel_formathi_video_frame_info.v_frame.frame_flag（与retCode对应）",
+        "AscendCL接口名称":"acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为另起线程，调用hi_mpi_vdec_get_frame接口来主动获取解码结果。",
         "功能或约束":"设置通道描述信息时已注册回调函数"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用hi_mpi_vdec_stop_recv_stream接口。",
-        "Ascend 310 acldvpp接口":"无对应接口，无需通知解码器停止接收码流数据",
         "Ascend 710 hi_mpi接口":"通知解码器停止接收码流数据（一个通道只需要调用一次该接口）：hi_mpi_vdec_stop_recv_stream",
+        "AscendCL接口名称":"无对应接口，无需通知解码器停止接收码流数据",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用hi_mpi_vdec_stop_recv_stream接口。",
         "功能或约束":"接收码流"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_vdec_destroy_chn接口。需注意，在调用hi_mpi接口销毁通道前，可以先调用hi_mpi_vdec_query_status接口获取解码器状态，判断是否所有码流数据都已完成解码，然后进行通道的销毁。",
-        "Ascend 310 acldvpp接口":"aclvdecDestroyChannel",
         "Ascend 710 hi_mpi接口":"销毁通道：hi_mpi_vdec_destroy_chn",
+        "AscendCL接口名称":"aclvdecDestroyChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_vdec_destroy_chn接口。需注意，在调用hi_mpi接口销毁通道前，可以先调用hi_mpi_vdec_query_status接口获取解码器状态，判断是否所有码流数据都已完成解码，然后进行通道的销毁。",
         "功能或约束":"销毁通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块去初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_exit",
+        "AscendCL接口名称":"无需进行媒体数据处理模块去初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。",
         "功能或约束":"媒体数据处理模块去初始化"
     }
 ],"v2_JPEGD":[
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_init",
+        "AscendCL接口名称":"无需进行媒体数据处理模块初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
         "功能或约束":"媒体数据处理模块初始化"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，直接声明hi_vdec_chn_attr结构体的变量。",
-        "Ascend 310 acldvpp接口":"acldvppCreateChannelDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，直接使用hi_vdec_chn_attr结构体。",
+        "AscendCL接口名称":"acldvppCreateChannelDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，直接声明hi_vdec_chn_attr结构体的变量。",
         "功能或约束":"创建通道描述信息的结构体"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_vdec_chn_attr成员赋值来配置通道描述的参数。需注意，对于仅acl有的这几个参数设置，在hi_mpi上也有对应的接口：",
-        "Ascend 310 acldvpp接口":"无对应接口",
         "Ascend 710 hi_mpi接口":"直接对hi_vdec_chn_attr结构体的成员赋值：hi_vdec_chn_attr.type（仅hi_mpi有）hi_vdec_chn_attr.pic_width（仅hi_mpi有）hi_vdec_chn_attr.pic_height（仅hi_mpi有）hi_vdec_chn_attr.mode（仅hi_mpi有）hi_vdec_chn_attr.stream_buf_size（仅hi_mpi有）hi_vdec_chn_attr.frame_buf_cnt（仅hi_mpi有）hi_vdec_chn_attr.frame_buf_size（仅hi_mpi有）",
+        "AscendCL接口名称":"无对应接口",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_vdec_chn_attr成员赋值来配置通道描述的参数。需注意，对于仅acl有的这几个参数设置，在hi_mpi上也有对应的接口：",
         "功能或约束":"创建通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_vdec_create_chn接口创建通道。",
-        "Ascend 310 acldvpp接口":"acldvppCreateChannel",
         "Ascend 710 hi_mpi接口":"创建通道hi_mpi_vdec_create_chn",
+        "AscendCL接口名称":"acldvppCreateChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_vdec_create_chn接口创建通道。",
         "功能或约束":"创建通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_get_image_info接口或使用计算公式获取图片解码后的输出内存大小。注意：width_stride 、height_stride的取值请参见输出图片的widthStride、heightS...。",
-        "Ascend 310 acldvpp接口":"acldvppJpegPredictDecSize",
         "Ascend 710 hi_mpi接口":"hi_mpi_dvpp_get_image_info源格式解码场景下，可调用hi_mpi_dvpp_get_image_info接口获取解码输出内存的大小；输出图片格式为YUV420SP的场景下，需使用计算公式计算输出内存大小：hi_img_info.width_stride * hi_img_info.height_stride * 3 /2",
+        "AscendCL接口名称":"acldvppJpegPredictDecSize",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_get_image_info接口或使用计算公式获取图片解码后的输出内存大小。注意：width_stride 、height_stride的取值请参见输出图片的widthStride、heightS...。",
         "功能或约束":"预估输出内存大小"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。",
-        "Ascend 310 acldvpp接口":"acldvppMalloc",
         "Ascend 710 hi_mpi接口":"申请内存：hi_mpi_dvpp_malloc",
+        "AscendCL接口名称":"acldvppMalloc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。",
         "功能或约束":"内存申请"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
-        "Ascend 310 acldvpp接口":"acldvppFree",
         "Ascend 710 hi_mpi接口":"释放内存：hi_mpi_dvpp_free",
+        "AscendCL接口名称":"acldvppFree",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
         "功能或约束":"释放内存"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_vdec_chn_attr成员赋值来配置输入码流信息的参数。",
-        "Ascend 310 acldvpp接口":"acldvppJpegDecodeAsync",
         "Ascend 710 hi_mpi接口":"配置输入码流参数时，直接对hi_vdec_stream结构体的成员赋值：hi_vdec_stream.addrhi_vdec_stream.lenhi_vdec_stream.end_of_streamhi_vdec_stream.end_of_framehi_vdec_stream.display",
+        "AscendCL接口名称":"acldvppJpegDecodeAsync",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_vdec_chn_attr成员赋值来配置输入码流信息的参数。",
         "功能或约束":"传入输入图片信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_vdec_pic_info成员赋值来配置输出图片信息的参数。",
-        "Ascend 310 acldvpp接口":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输出图片参数时，直接对hi_vdec_pic_info结构体的成员赋值：hi_vdec_pic_info.vir_addrhi_vdec_pic_info.buffer_sizehi_vdec_pic_info.pixel_formathi_vdec_pic_info.widthhi_vdec_pic_info.heighthi_vdec_pic_info.width_stridehi_vdec_pic_info.height_stride",
+        "AscendCL接口名称":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_vdec_pic_info成员赋值来配置输出图片信息的参数。",
         "功能或约束":"配置输出图片信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用hi_mpi_vdec_start_recv_stream接口。",
-        "Ascend 310 acldvpp接口":"无对应接口，无需通知解码器开始接收码流数据",
         "Ascend 710 hi_mpi接口":"通知解码器开始接收码流数据（一个通道只需要调用一次该接口）：hi_mpi_vdec_start_recv_stream",
+        "AscendCL接口名称":"无对应接口，无需通知解码器开始接收码流数据",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用hi_mpi_vdec_start_recv_stream接口。",
         "功能或约束":"发送图片"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_vdec_send_stream接口发送码流，同时需要传入通道号。",
-        "Ascend 310 acldvpp接口":"acldvppJpegDecodeAsync",
         "Ascend 710 hi_mpi接口":"每一帧都需调用以下接口发送解码码流：hi_mpi_vdec_send_stream",
+        "AscendCL接口名称":"acldvppJpegDecodeAsync",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_vdec_send_stream接口发送码流，同时需要传入通道号。",
         "功能或约束":"发送图片"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为另起线程，调用hi_mpi_vdec_get_frame接口来主动获取解码结果。",
-        "Ascend 310 acldvpp接口":"aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
         "Ascend 710 hi_mpi接口":"调用hi_mpi_vdec_get_frame接口获取一帧解码结果，再从hi_video_frame_info结构体的以下成员中获取解码结果：hi_video_frame_info.v_frame.virt_addr[0]hi_video_frame_info.v_frame.widthhi_video_frame_info.v_frame.heighthi_video_frame_info.v_frame.width_stridehi_video_frame_info.v_frame.height_stridehi_video_frame_info.v_frame.pixel_formathi_video_frame_info.v_frame.frame_flag（仅hi_mpi有）",
+        "AscendCL接口名称":"aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为另起线程，调用hi_mpi_vdec_get_frame接口来主动获取解码结果。",
         "功能或约束":"同步接口，等待图片解码结束，然后获取解码结果"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用hi_mpi_vdec_stop_recv_stream接口。",
-        "Ascend 310 acldvpp接口":"无对应接口，无需通知解码器停止接收码流数据",
         "Ascend 710 hi_mpi接口":"通知解码器停止接收码流数据（一个通道只需要调用一次该接口）：hi_mpi_vdec_stop_recv_stream",
+        "AscendCL接口名称":"无对应接口，无需通知解码器停止接收码流数据",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用hi_mpi_vdec_stop_recv_stream接口。",
         "功能或约束":"接收图片"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_vdec_destroy_chn接口。需注意，在调用hi_mpi接口销毁通道前，可以先调用hi_mpi_vdec_query_status接口获取解码器状态，判断是否所有图片数据都已完成解码，然后进行通道的销毁。",
-        "Ascend 310 acldvpp接口":"acldvppDestroyChannel",
         "Ascend 710 hi_mpi接口":"销毁通道：hi_mpi_vdec_destroy_chn",
+        "AscendCL接口名称":"acldvppDestroyChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_vdec_destroy_chn接口。需注意，在调用hi_mpi接口销毁通道前，可以先调用hi_mpi_vdec_query_status接口获取解码器状态，判断是否所有图片数据都已完成解码，然后进行通道的销毁。",
         "功能或约束":"销毁通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块去初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_exit",
+        "AscendCL接口名称":"无需进行媒体数据处理模块去初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。",
         "功能或约束":"媒体数据处理模块去初始化"
     }
 ],"v2_JPEGE":[
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_init",
+        "AscendCL接口名称":"无需进行媒体数据处理模块初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
         "功能或约束":"媒体数据处理模块初始化"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，直接声明hi_venc_chn_attr结构体的变量。",
-        "Ascend 310 acldvpp接口":"acldvppCreateChannelDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，直接使用hi_venc_chn_attr结构体。",
+        "AscendCL接口名称":"acldvppCreateChannelDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，直接声明hi_venc_chn_attr结构体的变量。",
         "功能或约束":"创建通道描述信息的结构体"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_venc_chn_attr成员赋值来配置通道描述的参数。",
-        "Ascend 310 acldvpp接口":"无相关接口",
         "Ascend 710 hi_mpi接口":"直接对hi_venc_chn_attr结构体的成员赋值：hi_venc_chn_attr.venc_attr.typehi_venc_chn_attr.venc_attr.pic_widthhi_venc_chn_attr.venc_attr.pic_height",
+        "AscendCL接口名称":"无相关接口",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_venc_chn_attr成员赋值来配置通道描述的参数。",
         "功能或约束":"创建通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_venc_create_chn接口创建通道。",
-        "Ascend 310 acldvpp接口":"acldvppCreateChannel",
         "Ascend 710 hi_mpi接口":"创建通道hi_mpi_venc_create_chn",
+        "AscendCL接口名称":"acldvppCreateChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_venc_create_chn接口创建通道。",
         "功能或约束":"创建通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。用户无需再申请输出内存。",
-        "Ascend 310 acldvpp接口":"acldvppMalloc,acldvppJpegPredictEncSize",
         "Ascend 710 hi_mpi接口":"申请内存：hi_mpi_dvpp_malloc输出内存由系统管理，无需用户申请。",
+        "AscendCL接口名称":"acldvppMalloc,acldvppJpegPredictEncSize",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。用户无需再申请输出内存。",
         "功能或约束":"申请内存,预估JPEG图片编码后所需的输出内存的大小"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
-        "Ascend 310 acldvpp接口":"acldvppFree",
         "Ascend 710 hi_mpi接口":"释放内存：hi_mpi_dvpp_free",
+        "AscendCL接口名称":"acldvppFree",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
         "功能或约束":"释放内存"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_video_frame_info成员赋值来配置输入图片的参数。hi_mpi接口无需设置输入数据的大小，系统内部会根据图片分辨率、格式等信息自行计算。",
-        "Ascend 310 acldvpp接口":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输入图片时，直接对hi_video_frame_info结构体的成员赋值：hi_video_frame_info.v_frame.virt_addrhi_video_frame_info.v_frame.pixel_formathi_video_frame_info.v_frame.widthhi_video_frame_info.v_frame.heighthi_video_frame_info.v_frame.width_stridehi_video_frame_info.v_frame.height_stride",
+        "AscendCL接口名称":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_video_frame_info成员赋值来配置输入图片的参数。hi_mpi接口无需设置输入数据的大小，系统内部会根据图片分辨率、格式等信息自行计算。",
         "功能或约束":"配置输入图片信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_venc_set_jpeg_param来配置JPEGE的图片编码质量。",
-        "Ascend 310 acldvpp接口":"acldvppCreateJpegeConfig,acldvppSetJpegeConfigLevel",
         "Ascend 710 hi_mpi接口":"配置图片编码质量，直接修改hi_venc_jpeg_param.qfactor的值hi_mpi_venc_set_jpeg_param",
+        "AscendCL接口名称":"acldvppCreateJpegeConfig,acldvppSetJpegeConfigLevel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_venc_set_jpeg_param来配置JPEGE的图片编码质量。",
         "功能或约束":"配置图片编码质量"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用hi_mpi_venc_start_chn接口。",
-        "Ascend 310 acldvpp接口":"无对应接口，无需通知编码器开始接收编码图片",
         "Ascend 710 hi_mpi接口":"通知编码器开始接收输入数据（一个通道只需要调用一次该接口）：hi_mpi_venc_start_chn",
+        "AscendCL接口名称":"无对应接口，无需通知编码器开始接收编码图片",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用hi_mpi_venc_start_chn接口。",
         "功能或约束":"发送编码图片"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_venc_send_frame接口发送编码图片，同时需要传入通道号。",
-        "Ascend 310 acldvpp接口":"acldvppJpegEncodeAsync",
         "Ascend 710 hi_mpi接口":"每一帧都需调用以下接口发送编码图片，用户不用传入输出内存地址：hi_mpi_venc_send_frame",
+        "AscendCL接口名称":"acldvppJpegEncodeAsync",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_venc_send_frame接口发送编码图片，同时需要传入通道号。",
         "功能或约束":"发送编码图片,传入用户申请好的输出内存地址"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为另起线程，调用hi_mpi_venc_get_stream接口来主动获取编码结果。需注意，用户需要通过调用hi_mpi_venc_query_status得到每次编码出的包数n，然后再调用hi_mpi_venc_get_stream前，提前给参数hi_venc_stream.pack分配不小于n * sizeof（hi_venc_pack）大小的内存。获取编码结果成功后，需调用hi_mpi_venc_release_stream接口释放码流缓存。",
-        "Ascend 310 acldvpp接口":"aclrtSynchronizeStream",
         "Ascend 710 hi_mpi接口":"调用hi_mpi_venc_get_stream接口获取一帧编码结果，再从hi_venc_stream结构体的以下成员中获取编码数据：hi_venc_stream.pack[i].addrhi_venc_stream.pack[i].lenhi_venc_stream.pack[i].data_type（从该成员结构体中获取输出图片格式）hi_venc_stream.pack[i].pts",
+        "AscendCL接口名称":"aclrtSynchronizeStream",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为另起线程，调用hi_mpi_venc_get_stream接口来主动获取编码结果。需注意，用户需要通过调用hi_mpi_venc_query_status得到每次编码出的包数n，然后再调用hi_mpi_venc_get_stream前，提前给参数hi_venc_stream.pack分配不小于n * sizeof（hi_venc_pack）大小的内存。获取编码结果成功后，需调用hi_mpi_venc_release_stream接口释放码流缓存。",
         "功能或约束":"同步接口,获取编码结果"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用hi_mpi_venc_stop_chn接口。",
-        "Ascend 310 acldvpp接口":"无对应接口，无需通知编码器停止接收编码数据帧",
         "Ascend 710 hi_mpi接口":"通知编码器停止接收输入数据（一个通道只需要调用一次该接口）：hi_mpi_venc_stop_chn",
+        "AscendCL接口名称":"无对应接口，无需通知编码器停止接收编码数据帧",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用hi_mpi_venc_stop_chn接口。",
         "功能或约束":"获取编码图片"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_venc_destroy_chn接口。需注意，在调用hi_mpi接口销毁通道前，可以先调用hi_mpi_venc_query_status接口获取编码器状态，判断是否所有输入数据都已完成编码，然后进行通道的销毁。",
-        "Ascend 310 acldvpp接口":"acldvppDestroyChannel",
         "Ascend 710 hi_mpi接口":"销毁通道：hi_mpi_venc_destroy_chn",
+        "AscendCL接口名称":"acldvppDestroyChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_venc_destroy_chn接口。需注意，在调用hi_mpi接口销毁通道前，可以先调用hi_mpi_venc_query_status接口获取编码器状态，判断是否所有输入数据都已完成编码，然后进行通道的销毁。",
         "功能或约束":"销毁通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块去初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_exit",
+        "AscendCL接口名称":"无需进行媒体数据处理模块去初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。",
         "功能或约束":"媒体数据处理模块去初始化"
     }
 ],"v2_VENC":[
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_init",
+        "AscendCL接口名称":"无需进行媒体数据处理模块初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
         "功能或约束":"媒体数据处理模块初始化"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，直接声明hi_venc_chn_attr结构体的变量。",
-        "Ascend 310 acldvpp接口":"aclvencCreateChannelDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，直接使用hi_venc_chn_attr结构体。",
+        "AscendCL接口名称":"aclvencCreateChannelDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，直接声明hi_venc_chn_attr结构体的变量。",
         "功能或约束":"创建通道描述信息的结构体"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_venc_chn_attr成员赋值来配置通道描述的参数。需注意，对于仅acl有的这几个参数设置，在hi_mpi上也有对应的接口：线程ID、Callback（这两个跟回调函数相关），不在hi_venc_chn_attr结构体中，因为使用hi mpi接口时不需要设置回调函数，需要自行另起线程，调用hi_mpi_venc_get_stream接口来获取编码结果。输入图片格式不在hi_venc_chn_attr结构体中，是在调用hi_mpi_venc_send_frame接口发送编码数据帧时通过hi_video_frame_info.v_frame.pixel_format参数指定。",
-        "Ascend 310 acldvpp接口":"aclvencSetChannelDescEnType,aclvencSetChannelDescPicWidth,aclvencSetChannelDescPicHeight,aclvencSetChannelDescKeyFrameInterval,aclvencSetChannelDescThreadId,aclvencSetChannelDescCallback,aclvencSetChannelDescRcMode,aclvencSetChannelDescSrcRate,aclvencSetChannelDescMaxBitRate,aclvencSetChannelDescPicFormat",
         "Ascend 710 hi_mpi接口":"无对应接口，直接对hi_venc_chn_attr结构体的成员赋值：hi_venc_chn_attr.venc_attr.typehi_venc_chn_attr.venc_attr.pic_widthhi_venc_chn_attr.venc_attr.pic_heighthi_venc_chn_attr.rc_attr.h26x_xbr.gophi_venc_chn_attr.rc_attr.rc_modehi_venc_chn_attr.rc_attr.h26x_xbr.src_frame_ratehi_venc_chn_attr.rc_attr.h26x_xbr.bit_rate",
+        "AscendCL接口名称":"aclvencSetChannelDescEnType,aclvencSetChannelDescPicWidth,aclvencSetChannelDescPicHeight,aclvencSetChannelDescKeyFrameInterval,aclvencSetChannelDescThreadId,aclvencSetChannelDescCallback,aclvencSetChannelDescRcMode,aclvencSetChannelDescSrcRate,aclvencSetChannelDescMaxBitRate,aclvencSetChannelDescPicFormat",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_venc_chn_attr成员赋值来配置通道描述的参数。需注意，对于仅acl有的这几个参数设置，在hi_mpi上也有对应的接口：线程ID、Callback（这两个跟回调函数相关），不在hi_venc_chn_attr结构体中，因为使用hi mpi接口时不需要设置回调函数，需要自行另起线程，调用hi_mpi_venc_get_stream接口来获取编码结果。输入图片格式不在hi_venc_chn_attr结构体中，是在调用hi_mpi_venc_send_frame接口发送编码数据帧时通过hi_video_frame_info.v_frame.pixel_format参数指定。",
         "功能或约束":"设置通道描述的参数"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_venc_create_chn接口创建通道。",
-        "Ascend 310 acldvpp接口":"aclvencCreateChannel",
         "Ascend 710 hi_mpi接口":"创建通道：hi_mpi_venc_create_chn",
+        "AscendCL接口名称":"aclvencCreateChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_venc_create_chn接口创建通道。",
         "功能或约束":"创建通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。",
-        "Ascend 310 acldvpp接口":"acldvppMalloc",
         "Ascend 710 hi_mpi接口":"申请内存：hi_mpi_dvpp_malloc",
+        "AscendCL接口名称":"acldvppMalloc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。",
         "功能或约束":"内存申请"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
-        "Ascend 310 acldvpp接口":"acldvppFree",
         "Ascend 710 hi_mpi接口":"释放内存：hi_mpi_dvpp_free",
+        "AscendCL接口名称":"acldvppFree",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
         "功能或约束":"释放内存"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_video_frame_info成员赋值来配置输入视频帧的参数。hi_mpi接口无需设置输入数据的大小，系统内部会根据图片分辨率、格式等信息自行计算。",
-        "Ascend 310 acldvpp接口":"acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输入视频帧时，直接对hi_video_frame_info结构体的成员赋值：hi_video_frame_info.v_frame.virt_addrhi_video_frame_info.v_frame.pixel_formathi_video_frame_info.v_frame.widthhi_video_frame_info.v_frame.heighthi_video_frame_info.v_frame.width_stridehi_video_frame_info.v_frame.height_stride",
+        "AscendCL接口名称":"acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_video_frame_info成员赋值来配置输入视频帧的参数。hi_mpi接口无需设置输入数据的大小，系统内部会根据图片分辨率、格式等信息自行计算。",
         "功能或约束":"配置输入视频帧信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用hi_mpi_venc_start_chn接口。",
-        "Ascend 310 acldvpp接口":"无对应接口，无需通知编码器开始接收编码数据帧",
         "Ascend 710 hi_mpi接口":"通知编码器开始接收编码数据帧（一个通道只需要调用一次该接口）：hi_mpi_venc_start_chn",
+        "AscendCL接口名称":"无对应接口，无需通知编码器开始接收编码数据帧",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用hi_mpi_venc_start_chn接口。",
         "功能或约束":"发送编码视频帧"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_venc_send_frame接口发送编码视频帧，同时需要传入通道号。",
-        "Ascend 310 acldvpp接口":"aclvencSendFrame",
         "Ascend 710 hi_mpi接口":"每一帧都需调用以下接口发送编码视频帧：hi_mpi_venc_send_frame",
+        "AscendCL接口名称":"aclvencSendFrame",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_venc_send_frame接口发送编码视频帧，同时需要传入通道号。",
         "功能或约束":"发送编码视频帧"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为另起线程，调用hi_mpi_venc_get_stream接口来主动获取编码结果。需注意，用户需要通过调用hi_mpi_venc_query_status得到每次编码出的包数n，然后再调用hi_mpi_venc_get_stream前，提前给参数hi_venc_stream.pack分配不小于n * sizeof（hi_venc_pack）大小的内存。获取编码结果成功后，需调用hi_mpi_venc_release_stream接口释放码流缓存。",
-        "Ascend 310 acldvpp接口":"acldvppGetStreamDescData,acldvppGetStreamDescSize,acldvppGetStreamDescFormat,acldvppGetStreamDescTimestamp",
         "Ascend 710 hi_mpi接口":"调用hi_mpi_venc_get_stream接口获取一帧编码结果，再从hi_venc_stream结构体的以下成员中获取编码数据：hi_venc_stream.pack[i].addrhi_venc_stream.pack[i].lenhi_venc_stream.pack[i].data_type（从该成员结构体中获取输出图片格式）hi_venc_stream.pack[i].pts",
+        "AscendCL接口名称":"acldvppGetStreamDescData,acldvppGetStreamDescSize,acldvppGetStreamDescFormat,acldvppGetStreamDescTimestamp",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为另起线程，调用hi_mpi_venc_get_stream接口来主动获取编码结果。需注意，用户需要通过调用hi_mpi_venc_query_status得到每次编码出的包数n，然后再调用hi_mpi_venc_get_stream前，提前给参数hi_venc_stream.pack分配不小于n * sizeof（hi_venc_pack）大小的内存。获取编码结果成功后，需调用hi_mpi_venc_release_stream接口释放码流缓存。",
         "功能或约束":"设置通道描述信息时已注册回调函数，每编码一帧数据会自动调用回调函数，在回调函数内调用对应的Get接口获取编码数据的内存地址、内存大小等"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用hi_mpi_venc_stop_chn接口。",
-        "Ascend 310 acldvpp接口":"无对应接口，无需通知编码器停止接收编码数据帧",
         "Ascend 710 hi_mpi接口":"通知编码器停止接收编码数据帧（一个通道只需要调用一次该接口）：hi_mpi_venc_stop_chn",
+        "AscendCL接口名称":"无对应接口，无需通知编码器停止接收编码数据帧",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用hi_mpi_venc_stop_chn接口。",
         "功能或约束":"获取码流"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_venc_destroy_chn接口。需注意，在调用hi_mpi接口销毁通道前，可以先调用hi_mpi_venc_query_status接口获取编码器状态，判断是否所有输入数据都已完成编码，然后进行通道的销毁。",
-        "Ascend 310 acldvpp接口":"aclvencDestroyChannel",
         "Ascend 710 hi_mpi接口":"销毁通道：hi_mpi_venc_destroy_chn",
+        "AscendCL接口名称":"aclvencDestroyChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_venc_destroy_chn接口。需注意，在调用hi_mpi接口销毁通道前，可以先调用hi_mpi_venc_query_status接口获取编码器状态，判断是否所有输入数据都已完成编码，然后进行通道的销毁。",
         "功能或约束":"销毁通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块去初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_exit",
+        "AscendCL接口名称":"无需进行媒体数据处理模块去初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。",
         "功能或约束":"媒体数据处理模块去初始化"
     }
 ],"v2_PNGD":[
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_init",
+        "AscendCL接口名称":"无需进行媒体数据处理模块初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块初始化的接口hi_mpi_sys_init。",
         "功能或约束":"媒体数据处理模块初始化"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，直接声明hi_pngd_chn_attr结构体的变量。",
-        "Ascend 310 acldvpp接口":"acldvppCreateChannelDesc",
         "Ascend 710 hi_mpi接口":"无对应接口，直接使用hi_pngd_chn_attr结构体。",
+        "AscendCL接口名称":"acldvppCreateChannelDesc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，直接声明hi_pngd_chn_attr结构体的变量。",
         "功能或约束":"创建通道描述信息的结构体"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_pngd_create_chn接口创建通道。",
-        "Ascend 310 acldvpp接口":"acldvppCreateChannel",
         "Ascend 710 hi_mpi接口":"创建通道：hi_mpi_pngd_create_chn",
+        "AscendCL接口名称":"acldvppCreateChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_pngd_create_chn接口创建通道。",
         "功能或约束":"创建通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_png_get_image_info接口或使用计算公式获取图片解码后的输出内存大小。注意：width_stride 、height_stride的取值请参见输出图片的widthStride、heightS...。",
-        "Ascend 310 acldvpp接口":"acldvppPngPredictDecSize",
         "Ascend 710 hi_mpi接口":"源格式解码场景下，可调用hi_mpi_png_get_image_info接口获取解码输出内存的大小；其它场景下，需使用计算公式计算输出内存大小：hi_img_info.width_stride * hi_img_info.height_stride",
+        "AscendCL接口名称":"acldvppPngPredictDecSize",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_png_get_image_info接口或使用计算公式获取图片解码后的输出内存大小。注意：width_stride 、height_stride的取值请参见输出图片的widthStride、heightS...。",
         "功能或约束":"预估输出内存"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。",
-        "Ascend 310 acldvpp接口":"acldvppMalloc",
         "Ascend 710 hi_mpi接口":"申请内存：hi_mpi_dvpp_malloc",
+        "AscendCL接口名称":"acldvppMalloc",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_malloc接口申请媒体数据处理功能需要的内存。",
         "功能或约束":"内存申请"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
-        "Ascend 310 acldvpp接口":"acldvppFree",
         "Ascend 710 hi_mpi接口":"释放内存：hi_mpi_dvpp_free",
+        "AscendCL接口名称":"acldvppFree",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改用hi_mpi_dvpp_free接口释放内存。",
         "功能或约束":"释放内存"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_vdec_chn_attr成员赋值来配置输入码流信息的参数。",
-        "Ascend 310 acldvpp接口":"acldvppPngDecodeAsync",
         "Ascend 710 hi_mpi接口":"配置输入码流参数时，直接对hi_img_stream结构体的成员赋值：hi_img_stream.typehi_img_stream.addrhi_img_stream.lenhi_img_stream.pts",
+        "AscendCL接口名称":"acldvppPngDecodeAsync",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_vdec_chn_attr成员赋值来配置输入码流信息的参数。",
         "功能或约束":"配置输入码流信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，对结构体hi_pic_info成员赋值来配置输出图片信息的参数。",
-        "Ascend 310 acldvpp接口":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
         "Ascend 710 hi_mpi接口":"无对应接口，配置输出图片参数时，直接对hi_pic_info结构体的成员赋值：hi_pic_info.picture_addresshi_pic_info.picture_buffer_sizehi_pic_info.picture_formathi_pic_info.picture_widthhi_pic_info.picture_heighthi_pic_info.picture_width_stridehi_pic_info.picture_height_stride",
+        "AscendCL接口名称":"acldvppCreatePicDesc,acldvppSetPicDescData,acldvppSetPicDescSize,acldvppSetPicDescFormat,acldvppSetPicDescWidth,acldvppSetPicDescHeight,acldvppSetPicDescWidthStride,acldvppSetPicDescHeightStride",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，对结构体hi_pic_info成员赋值来配置输出图片信息的参数。",
         "功能或约束":"配置输出图片信息"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_pngd_send_stream接口发送码流，同时需要传入通道号。",
-        "Ascend 310 acldvpp接口":"acldvppPngDecodeAsync",
         "Ascend 710 hi_mpi接口":"每一帧都需调用以下接口发送解码码流：hi_mpi_pngd_send_stream",
+        "AscendCL接口名称":"acldvppPngDecodeAsync",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_pngd_send_stream接口发送码流，同时需要传入通道号。",
         "功能或约束":"发送图片"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为另起线程，调用hi_mpi_pngd_get_image_data接口来主动获取解码结果。注意，hi_mpi接口中，如果能获取到解码数据，则表示解码成功；如果获取不到解码数据，则解码失败。",
-        "Ascend 310 acldvpp接口":"aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
         "Ascend 710 hi_mpi接口":"调用hi_mpi_pngd_get_image_data接口获取一帧解码结果，再从hi_pic_info结构体的以下成员中获取解码结果：hi_pic_info.picture_addresshi_pic_info.picture_widthhi_pic_info.picture_heighthi_pic_info.picture_width_stridehi_pic_info.picture_height_stridehi_pic_info.picture_formathi_pic_info.picture_buffer_size（仅himpi有）",
+        "AscendCL接口名称":"aclrtSynchronizeStream,acldvppGetPicDescData,acldvppGetPicDescWidth,acldvppGetPicDescHeight,acldvppGetPicDescWidthStride,acldvppGetPicDescHeightStride,acldvppGetPicDescFormat,acldvppGetPicDescRetCode",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为另起线程，调用hi_mpi_pngd_get_image_data接口来主动获取解码结果。注意，hi_mpi接口中，如果能获取到解码数据，则表示解码成功；如果获取不到解码数据，则解码失败。",
         "功能或约束":"同步接口，等待图片解码结束，然后获取解码结果"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，改为调用hi_mpi_pngd_destroy_chn接口。需注意，在调用hi_mpi接口销毁通道前，需要确保所有图片数据都已完成解码，然后进行通道的销毁。",
-        "Ascend 310 acldvpp接口":"acldvppDestroyChannel",
         "Ascend 710 hi_mpi接口":"销毁通道：hi_mpi_pngd_destroy_chn",
+        "AscendCL接口名称":"acldvppDestroyChannel",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，改为调用hi_mpi_pngd_destroy_chn接口。需注意，在调用hi_mpi接口销毁通道前，需要确保所有图片数据都已完成解码，然后进行通道的销毁。",
         "功能或约束":"销毁通道"
     },
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。\n",
-        "Ascend 310 acldvpp接口":"无需进行媒体数据处理模块去初始化",
         "Ascend 710 hi_mpi接口":"hi_mpi_sys_exit",
+        "AscendCL接口名称":"无需进行媒体数据处理模块去初始化",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，增加调用媒体数据处理模块去初始化的接口hi_mpi_sys_exit。\n",
         "功能或约束":"媒体数据处理模块去初始化"
     }
 ],"v2_header file":[
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改代码，include“CANN软件安装目录/include/acl/dvpp”目录下的hi_dvpp.h文件。",
-        "Ascend 310 acldvpp接口":"CANN软件安装目录/include/acl/ops/acl_dvpp.h",
         "Ascend 710 hi_mpi接口":"CANN软件安装目录/include/acl/dvpp下的头文件",
+        "AscendCL接口名称":"CANN软件安装目录/include/acl/ops/acl_dvpp.h",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改代码，include“CANN软件安装目录/include/acl/dvpp”目录下的hi_dvpp.h文件。",
         "功能或约束":"头文件迁移"
     }
 ],"v2_library file":[
     {
-        "310->310pV2迁移时，对用户的影响":"用户需要修改编译应用程序的脚本，修改依赖的库文件，改成libacl_dvpp_mpi.so。",
-        "Ascend 310 acldvpp接口":"CANN软件安装目录/lib64/libacl_dvpp.so",
         "Ascend 710 hi_mpi接口":"CANN软件安装目录/lib64/libacl_dvpp_mpi.so",
+        "AscendCL接口名称":"CANN软件安装目录/lib64/libacl_dvpp.so",
+        "从310_v1到310p_v2的迁移建议":"用户需要修改编译应用程序的脚本，修改依赖的库文件，改成libacl_dvpp_mpi.so。",
         "功能或约束":"库文件迁移"
     }
 ]}
