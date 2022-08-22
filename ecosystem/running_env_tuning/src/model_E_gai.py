@@ -129,7 +129,7 @@ def direction1_process(user_data):
         npu_name = "others"
     if npu_name == "others" or npu_name == "Atlas 300I":
         er.data_type.append(EXTEND_DATA_TYPE['str'])
-        er.extend_title = "Please replace the inference card with Atlas 300i Pro or Atlas 300V Pro"
+        er.extend_title = "Please replace the inference card with Atlas 300I Pro or Atlas 300V Pro"
         optimizedsummary = "The current inference card is not the target of migration or is not included in the expert system"
         return er, optimizedsummary
     else:
