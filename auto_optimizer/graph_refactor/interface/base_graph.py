@@ -22,7 +22,11 @@ class BaseGraph(ABC):
         pass
 
     @abstractmethod
-    def add_placeholder(self, name, dtype, shape, ph_type='input'):
+    def add_input(self, name, dtype, shape):
+        pass
+
+    @abstractmethod
+    def add_output(self, name, dtype, shape):
         pass
 
     @abstractmethod
