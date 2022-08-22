@@ -1,3 +1,17 @@
+# Copyright 2022 Huawei Technologies Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import unittest
 
 import numpy as np
@@ -58,7 +72,7 @@ class TestNodeCommon(unittest.TestCase):
 
     def test_node_to_proto(self):
         node = create_node('Node')
-        test_proto = Node.to_proto(node)
+        test_proto = Node.proto(node)
         self.assertEqual(test_proto, helper.make_node('Conv', ['0', '1'], ['2'], 'test_node', domain='', kernel_shape=3))
 
     def test_initializer_parse(self):
@@ -68,7 +82,7 @@ class TestNodeCommon(unittest.TestCase):
 
     def test_initializer_to_proto(self):
         ini = create_node('Initializer')
-        test_proto = Initializer.to_proto(ini)
+        test_proto = Initializer.proto(ini)
         self.assertEqual(test_proto, helper.make_tensor('test_ini', NP_TYPE_TO_TENSOR_TYPE[np.dtype('int32')], (1,5), np.array([1,2,3,4,5])))
 
     def test_placeholder_parse(self):
@@ -78,7 +92,7 @@ class TestNodeCommon(unittest.TestCase):
 
     def test_placeholder_to_proto(self):
         ph = create_node('PlaceHolder')
-        test_proto = PlaceHolder.to_proto(ph)
+        test_proto = PlaceHolder.proto(ph)
         self.assertEqual(test_proto, helper.make_tensor_value_info('test_ph', NP_TYPE_TO_TENSOR_TYPE[np.dtype('float32')], (1,3,224,224)))
 
 if __name__ == "__main__":

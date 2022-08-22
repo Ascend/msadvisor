@@ -51,21 +51,18 @@ class Node(BaseNode):
     
     @classmethod
     def parse(cls, node:NodeProto):
-        attrs = {}
-        for attr in node.attribute:
-            if isinstance(helper.get_attribute_value(attr), str):
-                attrs[attr.name] = helper.get_attribute_value(attr).decode('utf-8')
-            else:
-                attrs[attr.name] = helper.get_attribute_value(attr)
-        cls.name = node.name
-        cls.op_type = node.op_type
-        cls.inputs = list(node.input)
-        cls.outputs = list(node.output)
-        cls.attrs = attrs
-        cls.domain = node.domain  
-        return cls()
+        return cls(
+            name = node.name, 
+            op_type = node.op_type, 
+            inputs = list(node.input), 
+            outputs = list(node.output), 
+            attrs = {attr.name: helper.get_attribute_value(attr)
+                     for attr in node.attribute}, 
+            domain = node.domain
+        )
+    
 
-    def to_proto(self) -> NodeProto:
+    def proto(self) -> NodeProto:
         return helper.make_node(
             self.op_type, 
             self.inputs, 
@@ -155,14 +152,16 @@ class Initializer(BaseNode):
 
     @classmethod
     def parse(cls, node:Union[NodeProto, TensorProto]):
-        cls.name = node.name
         if hasattr(node, 'op_type') and node.op_type == 'Constant':
-            cls.value = numpy_helper.to_array(node.attribute[0].t)
+            value = numpy_helper.to_array(node.attribute[0].t)
         else:
-            cls.value = numpy_helper.to_array(node)
-        return cls()
+            value = numpy_helper.to_array(node)
+        return cls(
+            name = node.name, 
+            value = value
+        )
     
-    def to_proto(self) -> TensorProto:
+    def proto(self) -> TensorProto:
         return helper.make_tensor(
             self._name,
             NP_TYPE_TO_TENSOR_TYPE[self._value.dtype],
@@ -208,15 +207,18 @@ class PlaceHolder(BaseNode):
     @classmethod
     def parse(cls, node:ValueInfoProto):
         tensor_type = node.type.tensor_type
-        cls.name = node.name
-        cls.dtype = TENSOR_TYPE_TO_NP_TYPE[tensor_type.elem_type]
-        cls.shape = [
+        dtype = TENSOR_TYPE_TO_NP_TYPE[tensor_type.elem_type]
+        shape = [
             dim.dim_value if dim.dim_value > 0 else -1
             for dim in tensor_type.shape.dim
         ]
-        return cls()
+        return cls(
+            name = node.name, 
+            dtype = dtype,
+            shape = shape
+        )
     
-    def to_proto(self) -> ValueInfoProto:
+    def proto(self) -> ValueInfoProto:
         return helper.make_tensor_value_info(
             self._name,
             NP_TYPE_TO_TENSOR_TYPE[self._dtype],
