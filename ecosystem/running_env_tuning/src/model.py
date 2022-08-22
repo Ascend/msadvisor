@@ -10,6 +10,7 @@ import time
 import model_C
 import model_E
 import model_E_gai
+import model_C_gai
 # 根据路径获取解析数据json->python
 
 
@@ -28,7 +29,7 @@ def Evaluate(datapath):
     version = environment_data.get('English')
 
     if version == 0:
-        ret = model_C.Evaluate(datapath)
+        ret = model_C_gai.Evaluate(datapath)
     else:
         ret = model_E_gai.Evaluate(datapath)
 
