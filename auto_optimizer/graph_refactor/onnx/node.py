@@ -13,16 +13,15 @@
 # limitations under the License.
 
 from typing import List, Dict, Union
-import warnings
 
 import numpy as np
 from onnx import NodeProto, TensorProto, ValueInfoProto, helper, numpy_helper
 from onnx.mapping import TENSOR_TYPE_TO_NP_TYPE, NP_TYPE_TO_TENSOR_TYPE
 
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode
+from auto_optimizer.graph_refactor.interface.base_node import Node, PlaceHolder, Initializer
 
 
-class Node(BaseNode):
+class OnnxNode(Node):
     def __init__(
         self,
         name: str = None,
@@ -32,22 +31,7 @@ class Node(BaseNode):
         attrs: Dict[str, object] = {},
         domain: str = None
     ):
-        """
-        A node represents a computation operator in a graph.
-
-        Args:
-            name(str): The name of this node.
-            op_type(str): The operaton type of this node.
-            attrs (Dict[str, object]): A dictionary that maps attribute names to their values.
-            inputs (List[Tensor]): A list of zero or more input names.
-            outputs (List[Tensor]): A list of zero or more output names.
-        """
-        self._name = name
-        self._op_type = op_type
-        self._inputs = inputs
-        self._outputs = outputs
-        self._attrs = attrs
-        self._domain = domain  
+        super(OnnxNode, self).__init__(name, op_type, inputs, outputs, attrs, domain)
     
     @classmethod
     def parse(cls, node:NodeProto):
@@ -61,7 +45,6 @@ class Node(BaseNode):
             domain = node.domain
         )
     
-
     def proto(self) -> NodeProto:
         return helper.make_node(
             self.op_type, 
@@ -72,83 +55,14 @@ class Node(BaseNode):
             **self.attrs
         )
 
-    @property
-    def op_type(self):
-        return self._op_type
 
-    @property
-    def inputs(self):
-        return self._inputs
-    
-    @inputs.setter
-    def inputs(self, inputs:List[str]):
-        self._inputs = inputs
-    
-    def get_input_id(self, input:str):
-        if input not in self._inputs:
-            raise RuntimeError(
-                f'Name of input should be one of {self._inputs}')
-        else:
-            return self._inputs.index(input)
-
-    @property
-    def outputs(self):
-        return self._outputs
-    
-    @outputs.setter
-    def outputs(self, outputs:List[str]):
-        self._outputs = outputs
-    
-    def get_output_id(self, output:str):
-        if output not in self._outputs:
-            raise RuntimeError(
-                f'Name of output should be one of {self._outputs}')
-        else:
-            return self._outputs.index(output)
-    
-    @property
-    def attrs(self):
-        return self._attrs
-    
-    def __getitem__(self, key):
-        if key not in self._attrs:
-            raise KeyError(
-                f'Node({self.name}) do not have {key} attribute.')
-        return self._attrs[key]
-
-    def __setitem__(self, key, value):
-        if key not in self._attrs:
-            warnings.warn(
-                f'Node({self.name}) do not have {key} attribute.')
-        self._attrs[key] = value
-
-    @property
-    def domain(self):
-        return self._domain
-
-    def __str__(self) -> str:
-        return f'Node({self.name}): \n\tinputs={self.inputs}\n\toutputs={self.outputs}\n\tattrs = {self.attrs}\n'
-
-    def __repr__(self) -> str:
-        return self.__str__()
-
-
-class Initializer(BaseNode):
+class OnnxInitializer(Initializer):
     def __init__(
         self,
         name: str = None,
         value: np.ndarray = None
     ):
-        """
-        An initializer represents a tensor which specifies for a graph input or a constant node.
-
-        Args:
-            name(str): The name of this initializer.
-            value(np.ndarray): The constant value of this initializer.
-        """
-        self._name = name
-        self._op_type = 'Initializer'
-        self._value = value
+        super(OnnxInitializer, self).__init__(name, value)
 
     @classmethod
     def parse(cls, node:Union[NodeProto, TensorProto]):
@@ -169,40 +83,15 @@ class Initializer(BaseNode):
             self._value.flatten()
         )
 
-    @property
-    def value(self):
-        return self._value
-    
-    @value.setter
-    def value(self, value:np.ndarray):
-        self._value = value
-    
-    def __str__(self) -> str:
-        return f'{self.op_type}({self.name}): (shape={self._value.shape}, dtype={self._value.dtype})\n'
 
-    def __repr__(self) -> str:
-        return self.__str__()
-
-
-class PlaceHolder(BaseNode):
+class OnnxPlaceHolder(PlaceHolder):
     def __init__(
         self,
         name: str = None,
         dtype: np.dtype = None,
         shape: List[int] = None
     ):
-        """
-        A placeholder used to store the type and shape information.
-
-        Args:
-            name(str): The name of this placeHolder.
-            dtype(np.dtype): The data type of this placeHolder.
-            shape(List[int]): The shape of this placeHolder.
-        """
-        self._name = name
-        self._op_type = 'PlaceHolder'
-        self._dtype = dtype
-        self._shape = shape
+        super(OnnxPlaceHolder, self).__init__(name, dtype, shape)
 
     @classmethod
     def parse(cls, node:ValueInfoProto):
@@ -224,25 +113,3 @@ class PlaceHolder(BaseNode):
             NP_TYPE_TO_TENSOR_TYPE[self._dtype],
             self._shape
         )
-
-    @property
-    def dtype(self):
-        return self._dtype
-    
-    @dtype.setter
-    def dtype(self, dtype:np.dtype):
-        self._dtype = dtype
-
-    @property
-    def shape(self):
-        return self._shape
-    
-    @shape.setter
-    def shape(self, shape:List[int]):
-        self._shape = shape
-    
-    def __str__(self) -> str:
-        return f'{self.op_type}({self.name}): (shape={self.shape}, dtype={self.dtype})\n'
-
-    def __repr__(self) -> str:
-        return self.__str__()

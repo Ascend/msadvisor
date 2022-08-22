@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
-from itertools import chain
-from collections import deque
 from typing import List, Dict, Union
 
 import numpy as np
@@ -22,7 +19,8 @@ import onnx
 from onnx import helper, GraphProto, ModelProto, OperatorSetIdProto
 
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.onnx.node import PlaceHolder, Initializer, Node
+from auto_optimizer.graph_refactor.interface.base_node import PlaceHolder, Initializer, Node
+from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
 
 class OnnxGraph(BaseGraph):
 
@@ -57,58 +55,18 @@ class OnnxGraph(BaseGraph):
                     'opset_imports': onnx_model.opset_import
             }
 
-        inputs = [PlaceHolder.parse(i) for i in onnx_graph.input]
-        outputs = [PlaceHolder.parse(o) for o in onnx_graph.output]
-        initializers = [Initializer.parse(i) for i in onnx_graph.initializer]
-        value_infos = [PlaceHolder.parse(v) for v in onnx_graph.value_info]
+        inputs = [OnnxPlaceHolder.parse(i) for i in onnx_graph.input]
+        outputs = [OnnxPlaceHolder.parse(o) for o in onnx_graph.output]
+        initializers = [OnnxInitializer.parse(i) for i in onnx_graph.initializer]
+        value_infos = [OnnxPlaceHolder.parse(v) for v in onnx_graph.value_info]
 
         # TODO: Constant Node to Initializer
         nodes = []
         for node in onnx_graph.node:
-            nodes.append(Node.parse(node))
+            nodes.append(OnnxNode.parse(node))
 
         graph = cls(nodes, inputs, outputs, initializers, value_infos, onnx_graph.name, **meta)
         return graph
-
-    def add_placeholder(self, name, dtype, shape, ph_type='input'):
-        pass
-
-    def add_initializer(self, name, value):
-        pass
-
-    def add_node(self, name, op_type, attrs=None, domain=None):
-        pass
-
-    def insert_node(self, refer_name, insert_node, refer_io_index=0, mode='after'):
-        pass
-
-    def get_nodes(self, op_type):
-        pass
-
-    def remove(self, name, maps=None):
-        pass
-
-    def __getitem__(self, key):
-        pass
-
-    def __setitem__(self, key, value):
-        pass
-
-    @property
-    def inputs(self) -> List[PlaceHolder]:
-        return self._inputs
-
-    @property
-    def outputs(self) -> List[PlaceHolder]:
-        return self._outputs
-
-    @property
-    def nodes(self) -> List[Node]:
-        return self._nodes
-
-    @property
-    def initializers(self) -> List[Initializer]:
-        return self._initializers
 
     def proto(self) -> GraphProto:
         self.toposort()
@@ -126,39 +84,11 @@ class OnnxGraph(BaseGraph):
     def save(self, path: str):
         onnx.save(self.model(), path)
 
-    def get_prev_node(self, input_name: str) -> Union[Node, PlaceHolder, Initializer]:
-        # TODO: raise exception
-        return self._prev_map.get(input_name, None)
-
-    def get_next_nodes(self, output_name: str) -> Union[List[Node], List[PlaceHolder], List[Initializer]]:
-        # TODO: raise exception
-        return self._next_map.get(output_name, [])
-
-    def toposort(self):
-        def visited_all_prev_nodes(node, visited):
-            for input_name in node.inputs:
-                prev_node = self.get_prev_node(input_name)
-                if prev_node not in visited and prev_node:
-                    return False
-            return True
-
-        queue = deque()
-        visited = set()
-        for node in self._nodes:
-            if visited_all_prev_nodes(node, visited):
-                queue.append(node)
-        
-        sorted_nodes = []
-        while queue:
-            node = queue.popleft()
-            if visited_all_prev_nodes(node, visited):
-                sorted_nodes.append(node)
-                visited.add(node)
-                for output_name in node.outputs:
-                    for next_node in self.get_next_nodes(output_name):
-                        if next_node not in queue and next_node not in visited:
-                            queue.append(next_node)
-            else:
-                queue.append(node)
-        
-        self._nodes = sorted_nodes
+    def infershape(self):
+        model = self.model()
+        # TODO: exception
+        inferred_model = onnx.shape_inference.infer_shapes(model, strict_mode=True)
+        graph = inferred_model.graph
+        self._value_infos = [OnnxPlaceHolder.parse(v) for v in graph.value_info]
+        for n in self._value_infos:
+            self._node_map[n.name] = n

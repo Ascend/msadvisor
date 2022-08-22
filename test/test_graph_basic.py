@@ -20,15 +20,15 @@ import numpy as np
 from onnx import helper, GraphProto, ModelProto
 from onnx.mapping import NP_TYPE_TO_TENSOR_TYPE
 
-from auto_optimizer.graph_refactor.onnx.node import PlaceHolder, Initializer, Node
+from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from test_node_common import is_ph_equal, is_ini_equal, is_node_equal
 
 
 def is_elem_equal(elem1, elem2):
-    if isinstance(elem1, PlaceHolder):
+    if isinstance(elem1, OnnxPlaceHolder):
         return is_ph_equal(elem1, elem2)
-    elif isinstance(elem1, Initializer):
+    elif isinstance(elem1, OnnxInitializer):
         return is_ini_equal(elem1, elem2)
     else:
         return is_node_equal(elem1, elem2)
@@ -52,7 +52,7 @@ def is_map_equal(map1, map2):
             flag &= is_elem_equal(map1[key], map2[key])
     return flag
 
-def is_graph_equal(g1, g2):
+def is_graph_equal(g1, g2, msg=None):
     return is_list_equal(g1.nodes, g2.nodes) and \
         is_list_equal(g1.initializers, g2.initializers) and \
         is_list_equal(g1.inputs, g2.inputs) and \
@@ -63,11 +63,11 @@ def is_graph_equal(g1, g2):
         is_map_equal(g1._next_map, g2._next_map)
 
 def create_graph():
-    input_0 = PlaceHolder('input_0', np.dtype('float32'), [3,2])
-    output_0 = PlaceHolder('output_0', np.dtype('float32'), [3,4])
-    ini_0 = Initializer('ini_0', np.array([1,4], dtype='int32'))
-    ini_1 = Initializer('ini_1', np.array([1], dtype='int32'))
-    node_0 = Node(
+    input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [3,2])
+    output_0 = OnnxPlaceHolder('output_0', np.dtype('float32'), [3,4])
+    ini_0 = OnnxInitializer('ini_0', np.array([1,4], dtype='int32'))
+    ini_1 = OnnxInitializer('ini_1', np.array([1], dtype='int32'))
+    node_0 = OnnxNode(
                 'Node_0', 
                 'Pad', 
                 inputs=['input_0', 'ini_0', 'ini_1'], 
@@ -82,11 +82,11 @@ def create_graph():
 class TestGraphBasic(unittest.TestCase):
     
     def test_graph_init(self):
-        input_0 = PlaceHolder('input_0', np.dtype('float32'), [3,2])
-        output_0 = PlaceHolder('output_0', np.dtype('float32'), [3,4])
-        ini_0 = Initializer('ini_0', np.array([1,4], dtype='int32'))
-        ini_1 = Initializer('ini_1', np.array([1], dtype='int32'))
-        node_0 = Node(
+        input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [3,2])
+        output_0 = OnnxPlaceHolder('output_0', np.dtype('float32'), [3,4])
+        ini_0 = OnnxInitializer('ini_0', np.array([1,4], dtype='int32'))
+        ini_1 = OnnxInitializer('ini_1', np.array([1], dtype='int32'))
+        node_0 = OnnxNode(
                     'Node_0', 
                     'Pad', 
                     inputs=['input_0', 'ini_0', 'ini_1'], 
