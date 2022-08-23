@@ -18,9 +18,9 @@ import numpy as np
 import onnx
 from onnx import helper, GraphProto, ModelProto, OperatorSetIdProto
 
-from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import PlaceHolder, Initializer, Node
-from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
+from .. import BaseGraph
+from .. import PlaceHolder, Initializer, Node
+from .node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
 
 class OnnxGraph(BaseGraph):
 

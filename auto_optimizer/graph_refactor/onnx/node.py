@@ -18,8 +18,7 @@ import numpy as np
 from onnx import NodeProto, TensorProto, ValueInfoProto, helper, numpy_helper
 from onnx.mapping import TENSOR_TYPE_TO_NP_TYPE, NP_TYPE_TO_TENSOR_TYPE
 
-from auto_optimizer.graph_refactor.interface.base_node import Node, PlaceHolder, Initializer
-
+from .. import Node, PlaceHolder, Initializer
 
 class OnnxNode(Node):
     def __init__(

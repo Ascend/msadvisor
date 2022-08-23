@@ -19,7 +19,7 @@ from typing import List, Dict, Union
 
 import numpy as np
 
-from auto_optimizer.graph_refactor.onnx.node import PlaceHolder, Initializer, Node
+from .base_node import PlaceHolder, Initializer, Node   
 
 class BaseGraph(ABC):
 
@@ -87,19 +87,19 @@ class BaseGraph(ABC):
 
     def add_input(self, name, dtype, shape) -> PlaceHolder:
         dtype = np.dtype(dtype)
-        input = PlaceHolder(name, dtype, shape)
+        graph_input = PlaceHolder(name, dtype, shape)
         # TODO: ERROR: duplicate names
-        self._node_map[name] = input
-        self._inputs.append(input)
-        return input
+        self._node_map[name] = graph_input
+        self._inputs.append(graph_input)
+        return graph_input
 
     def add_output(self, name, dtype, shape) -> PlaceHolder:
         dtype = np.dtype(dtype)
-        output = PlaceHolder(name, dtype, shape)
+        graph_output = PlaceHolder(name, dtype, shape)
         # TODO: ERROR: duplicate names
-        self._node_map[name] = output
-        self._outputs.append(output)
-        return output
+        self._node_map[name] = graph_output
+        self._outputs.append(graph_output)
+        return graph_output
 
     def add_initializer(self, name, value) -> Initializer:
         initializer = Initializer(name, value)
@@ -116,6 +116,16 @@ class BaseGraph(ABC):
         return node
 
     def insert_node(self, refer_name, insert_node, refer_index=0, mode='after'):
+        """Insert a node with single input and output
+
+        Args:
+            refer_name: reference node
+            insert_node: the node to be inserted
+            refer_index: specifies the inserting position within reference node's output id when mode='after'; 
+                         specifies the inserting position within reference node's input id when mode='before';
+                         Default 0.
+            mode: insert the node before or after the reference node. Default 'after'.
+        """
         # TODO: exception: name not exists in graph
         refer_node = self._node_map[refer_name]
         if refer_node.op_type == 'PlaceHolder':
@@ -158,10 +168,20 @@ class BaseGraph(ABC):
         self._node_map[insert_node.name] = insert_node
 
     def get_nodes(self, op_type):
-        nodes = [node for node in self._node_map.values()  if node.op_type == op_type]
+        nodes = [node for node in self._node_map.values() if node.op_type == op_type]
         return nodes
 
     def remove(self, name, maps=None):
+        """Remove a specific node from graph
+        If map is not provided, it will simply connect the previous node of first input and next nodes of first output.
+
+        Args:
+            name: name of the node to be removed
+            maps: auto connection map, Default = {0:0}. Keys should be input ids of current node and values should be output ids of current node.
+
+        Return:
+            True if remove succeeds, otherwise False
+        """
         maps = maps or {0:0}
         # TODO: exception: name not exist in graph
         node = self._node_map[name]
@@ -174,11 +194,11 @@ class BaseGraph(ABC):
             self._outputs.remove(node)
             self._prev_map.pop(name, None)
             return True
-        if node in self._initializers:
+        if isinstance(node, Initializer):
             self._initializers.remove(node)
             self._next_map.pop(name, None)
             return True
-        if node in self._nodes:
+        if isinstance(node, Node):
             self._nodes.remove(node)
             for in_id, in_name in enumerate(node.inputs):
                 # update next map, node is no longer a next node
