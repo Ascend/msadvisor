@@ -30,11 +30,6 @@ class TestKnowledge(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
-    def test_knowledge_apply(self):
-        for name, knowledge in KnowledgeFactory.get_knowledge_pool().items():
-            ret = knowledge.apply(None, None)
-            self.assertEqual(True, ret)
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
