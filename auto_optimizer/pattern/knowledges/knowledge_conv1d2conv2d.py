@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import List, Dict
 import operator as op
 import numpy as np
-from typing import List, Dict
-from .knowledge_base import KnowledgeBase
-from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
+
 from magiconnx.interface import BaseGraph as GraphBase
 from magiconnx.interface import BaseNode as NodeBase
+from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
 from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
+from .knowledge_base import KnowledgeBase
 
 
 class Conv1dMatch(MatchBase):

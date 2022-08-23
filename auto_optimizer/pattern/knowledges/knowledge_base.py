@@ -18,7 +18,6 @@ import operator as op
 from abc import abstractmethod
 from typing import Dict, Tuple, List
 from magiconnx.interface import BaseGraph as GraphBase
-from magiconnx.interface import BaseNode as NodeBase
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.pattern import DIRECTION
 from auto_optimizer.pattern.matcher import MatchResult

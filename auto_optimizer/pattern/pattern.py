@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 from abc import abstractmethod
 from enum import Enum, unique
-from typing import List, Dict
+from typing import List
 from magiconnx.interface import BaseGraph as GraphBase
 from magiconnx.interface import BaseNode as NodeBase
 
@@ -174,7 +173,8 @@ class Pattern(object):
         self.graph_match_pattern = match_pattern
         if match_pattern == MATCH_PATTERN.MATCH_ONECE_OR_MORE:
             if len(self.in_nodes) != len(self.out_nodes):
-                raise RuntimeError('if match sub graph continously, input nodes size should be equal to output nodes size.')
+                raise RuntimeError('if match sub graph continously, ' \
+                    'input nodes size should be equal to output nodes size.')
         return self
 
     def get_visit_direction(self):

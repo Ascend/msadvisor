@@ -14,18 +14,13 @@
 
 import unittest
 
+import operator as op
 import numpy as np
 import onnx
-import operator as op
 
 from onnx import (
-    checker,
     helper,
-    ModelProto,
     TensorProto,
-    GraphProto,
-    NodeProto,
-    shape_inference,
 )
 
 from magiconnx import OnnxGraph
@@ -34,7 +29,6 @@ from magiconnx.interface import BaseNode as NodeBase
 from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
 from auto_optimizer.pattern.pattern import Pattern
-from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.pattern.matcher import Matcher
 
 
@@ -70,7 +64,8 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), np.random.randn(64, 3, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
+            np.random.randn(64, 3, 1).astype(np.float32))
 
         conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['Z'], 'Conv_0', None, None, \
             dilations = np.array([1], dtype=np.int64), \
@@ -92,8 +87,10 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), np.random.randn(64, 3, 1).astype(np.float32))
-        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), np.random.randn(128, 64, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
+            np.random.randn(64, 3, 1).astype(np.float32))
+        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), \
+            np.random.randn(128, 64, 1).astype(np.float32))
 
         conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
             dilations = np.array([1], dtype=np.int64), \
@@ -122,7 +119,8 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), np.random.randn(64, 3, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
+            np.random.randn(64, 3, 1).astype(np.float32))
 
         conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
             dilations = np.array([1], dtype=np.int64), \
@@ -145,7 +143,8 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), np.random.randn(64, 3, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
+            np.random.randn(64, 3, 1).astype(np.float32))
 
         conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
             dilations = np.array([1], dtype=np.int64), \
@@ -169,7 +168,8 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), np.random.randn(64, 3, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
+            np.random.randn(64, 3, 1).astype(np.float32))
 
         conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
             dilations = np.array([1], dtype=np.int64), \
@@ -194,7 +194,8 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), np.random.randn(64, 3, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
+            np.random.randn(64, 3, 1).astype(np.float32))
 
         conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
             dilations = np.array([1], dtype=np.int64), \
@@ -335,8 +336,6 @@ class TestMatcher(unittest.TestCase):
         self.assertEqual(len(result.node_dicts[0].get('element_wise')), 3)
         self.assertEqual(result.node_dicts[0]['Conv'][0].name, 'Conv_0')
         self.assertEqual(result.node_dicts[0]['element_wise'][0].name, 'Relu_0')
-        #self.assertEqual(result.node_dicts[0]['element_wise'][1].name, 'Relu_2')
-        #self.assertEqual(result.node_dicts[0]['element_wise'][2].name, 'Relu_1')
 
 if __name__ == "__main__":
     unittest.main()

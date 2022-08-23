@@ -14,7 +14,6 @@
 
 import unittest
 
-from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
 from auto_optimizer.pattern.pattern import Pattern
 
