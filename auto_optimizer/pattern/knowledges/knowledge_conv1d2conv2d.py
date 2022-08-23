@@ -23,8 +23,8 @@ from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
-from .knowledge_base import KnowledgeBase
-
+from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
+from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 
 class Conv1dMatch(MatchBase):
     def __init__(self):
@@ -162,9 +162,47 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
                             self._reduce_output_dims(graph, next_node, 'before')
 
         for node_dict in match_result.node_dicts:
-            conv1d = node_dict.get('Conv')[0]
+            conv1d_name = node_dict.get('Conv')[0].name
+            conv1d = graph[conv1d_name]
             self._conv1d_to_conv2d(graph, conv1d)
         return True
 
 KnowledgeFactory.add_knowledge('KnowledgeConv1d2Conv2d', KnowledgeConv1d2Conv2d())
+
+
+def evaluate(data_path, parameter = None):
+    if parameter is None:
+        return False
+    onnx_file = parameter.get('file_name')
+    onnx_path = data_path + '/' + onnx_file
+    action = parameter.get('action')
+    graph = OnnxGraph.parse(onnx_path)
+    conv1d2conv2d = KnowledgeConv1d2Conv2d()
+    while conv1d2conv2d.has_next_pattern():
+        conv1d2conv2d.next_pattern()
+        # 遍历计算图，找出所有能匹配的子图
+        match_results = conv1d2conv2d.get_candidate_sub_graphs(graph)
+        if match_results is None or len(match_results) == 0:
+            continue
+        if op.eq(action, 'evaluate'):
+            print('Model has optimization.')
+            return True
+        # 尝试不同的修改方法
+        while conv1d2conv2d.has_next_apply():
+            conv1d2conv2d.next_apply()
+            for match_result in match_results:
+                res = conv1d2conv2d.apply(graph, match_result)
+    if op.eq(action, 'evaluate'):
+        return True
+    graph.save('%s_new.onnx' % onnx_path)
+    print('graph optimize succeed, new model path: {}.'.format('%s_new.onnx' % onnx_path))
+    return True
+
+if __name__ == "__main__":
+    import sys
+    data_path = sys.argv[1]
+    onnx_file = sys.argv[2]
+    action = 'optimizer' if len(sys.argv) <= 3 else sys.argv[3]
+    parameter = {'file_name': onnx_file, 'action': action}
+    ret = evaluate(data_path, parameter)
 
