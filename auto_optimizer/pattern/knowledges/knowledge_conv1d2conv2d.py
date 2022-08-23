@@ -15,14 +15,14 @@
 import operator as op
 import numpy as np
 from typing import List, Dict
-from knowledge_base import KnowledgeBase
-from pattern.knowledge_factory import KnowledgeFactory
+from .knowledge_base import KnowledgeBase
+from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from magiconnx.interface import BaseGraph as GraphBase
 from magiconnx.interface import BaseNode as NodeBase
-from pattern.pattern import MATCH_PATTERN
-from pattern.pattern import MatchBase
-from pattern.pattern import Pattern
-from pattern.matcher import MatchResult
+from auto_optimizer.pattern.pattern import MATCH_PATTERN
+from auto_optimizer.pattern.pattern import MatchBase
+from auto_optimizer.pattern.pattern import Pattern
+from auto_optimizer.pattern.matcher import MatchResult
 
 
 class Conv1dMatch(MatchBase):
@@ -53,6 +53,7 @@ pattern = Pattern() \
 class KnowledgeConv1d2Conv2d(KnowledgeBase):
     def __init__(self):
         super().__init__()
+        self._insert_op_names = set()
 
     def _build_patterns(self) -> List[Pattern]:
         """
@@ -78,7 +79,11 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         :param conv: 卷积算子，在该算子前面插入Unsqueeze算子
         :return: True： 操作成功； False： 操作失败
         """
-        us = graph.add_node('Unsqueeze_%s_%s' % (mode, conv.name), 'Unsqueeze', {'axes': [2]})
+        op_name = 'Unsqueeze_%s_%s' % (mode, conv.name)
+        if op_name in self._insert_op_names:
+            return True
+        self._insert_op_names.add(op_name)
+        us = graph.add_node(op_name, 'Unsqueeze', {'axes': [2]})
         graph.insert_node(conv.name, us, mode=mode)
         return True
 
@@ -111,7 +116,11 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         :param node:
         :return: True：操作成功；False：操作失败
         """
-        sq = graph.add_node('Squeeze_%s_%s' % (mode, node.name), 'Squeeze', {'axes': [2]})
+        op_name = 'Squeeze_%s_%s' % (mode, node.name)
+        if op_name in self._insert_op_names:
+            return True
+        self._insert_op_names.add(op_name)
+        sq = graph.add_node(op_name, 'Squeeze', {'axes': [2]})
         graph.insert_node(node.name, sq, mode=mode)
         return True
 
@@ -143,6 +152,8 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             element_wise_pattern = pattern.node_dict.get('element_wise')
 
             conv_next_nodes = self.__get_next_nodes(graph, conv)
+            if len(conv_next_nodes) == 0:
+                self._reduce_output_dims(graph, conv, 'after')
             for next_node in conv_next_nodes:
                 if op.eq(next_node.op_type, 'Reshape'):
                     continue
@@ -153,6 +164,8 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             if element_wises is not None:
                 for element_wise in element_wises:
                     next_nodes = self.__get_next_nodes(graph, element_wise)
+                    if len(next_nodes) == 0:
+                        self._reduce_output_dims(graph, element_wise, 'after')
                     for next_node in next_nodes:
                         if op.eq(next_node.op_type, 'Reshape'):
                             continue
@@ -166,43 +179,4 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         return True
 
 KnowledgeFactory.add_knowledge('KnowledgeConv1d2Conv2d', KnowledgeConv1d2Conv2d())
-
-
-def evaluate(data_path, parameter = None):
-    if parameter is None:
-        return False
-    onnx_file = parameter.get('file_name')
-    onnx_path = data_path + '/' + onnx_file
-    action = parameter.get('action')
-    from magiconnx import OnnxGraph
-    graph = OnnxGraph(onnx_path)
-    graph_bak = graph
-    conv1d2conv2d = KnowledgeConv1d2Conv2d()
-    while conv1d2conv2d._has_next_pattern():
-        conv1d2conv2d._next_pattern()
-        # 遍历计算图，找出所有能匹配的子图
-        match_results = conv1d2conv2d.get_candidate_sub_graphs(graph)
-        if match_results is None or len(match_results) == 0:
-            continue
-        if op.eq(action, 'evaluate'):
-            print('Model has optimization.')
-            return True
-        # 尝试不同的修改方法
-        while conv1d2conv2d._has_next_apply():
-            conv1d2conv2d._next_apply()
-            for match_result in match_results:
-                res = conv1d2conv2d.apply(graph, match_result)
-    if op.eq(action, 'evaluate'):
-        return True
-    graph.save('%s_new.onnx' % onnx_path)
-    print('graph optimize succeed, new model path: {}.'.format('%s_new.onnx' % onnx_path))
-    return True
-
-if __name__ == "__main__":
-    import sys
-    data_path = sys.argv[1]
-    onnx_file = sys.argv[2]
-    action = 'optimizer' if len(sys.argv) <= 3 else sys.argv[3]
-    parameter = {'file_name': onnx_file, 'action': action}
-    ret = evaluate(data_path, parameter)
 

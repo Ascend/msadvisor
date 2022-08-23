@@ -17,12 +17,32 @@ import types
 import operator as op
 from abc import abstractmethod
 from typing import Dict, Tuple, List
-from pattern.pattern import Pattern
-from pattern.pattern import VISIT_DIRECTION
-from pattern.matcher import MatchResult
-from pattern.matcher import Matcher
 from magiconnx.interface import BaseGraph as GraphBase
 from magiconnx.interface import BaseNode as NodeBase
+from auto_optimizer.pattern.pattern import Pattern
+from auto_optimizer.pattern.pattern import DIRECTION
+from auto_optimizer.pattern.matcher import MatchResult
+from auto_optimizer.pattern.matcher import Matcher
+
+
+class UnionFind(object):
+    def __init__(self):
+        self.uf = []
+
+    def find(self, cur):
+        if self.uf[cur] != cur:
+            return self.find(self.uf[cur])
+        return cur
+
+    def union(self, pos0, pos1):
+        u0 = self.find(pos0)
+        u1 = self.find(pos1)
+        if u0 != u1:
+            self.uf[pos1] = u0
+
+    def expand(self):
+        last_index = len(self.uf)
+        self.uf.append(last_index)
 
 
 class KnowledgeBase(object):
@@ -42,7 +62,7 @@ class KnowledgeBase(object):
             return self._patterns[self._pattern_idx]
         return None
 
-    def _has_next_pattern(self) -> bool:
+    def has_next_pattern(self) -> bool:
         if len(self._patterns) == 0:
             return False
         if self._pattern_idx == -1:
@@ -51,8 +71,8 @@ class KnowledgeBase(object):
             return True
         return False
 
-    def _next_pattern(self):
-        if not self._has_next_pattern():
+    def next_pattern(self):
+        if not self.has_next_pattern():
             return None
         self._pattern_idx += 1
         self._apply_idx = -1
@@ -69,7 +89,7 @@ class KnowledgeBase(object):
             return apply_methods[self._apply_idx]
         return None
 
-    def _has_next_apply(self):
+    def has_next_apply(self):
         pattern = self.__get_current_pattern()
         apply_methods = self._pattern_apply_dict.get(pattern)
         if apply_methods is None or len(apply_methods) == 0:
@@ -80,8 +100,8 @@ class KnowledgeBase(object):
             return True
         return False
 
-    def _next_apply(self):
-        if not self._has_next_apply():
+    def next_apply(self):
+        if not self.has_next_apply():
             return
         self._apply_idx += 1
 
@@ -101,37 +121,80 @@ class KnowledgeBase(object):
         """
         return {}
 
+    def __is_sub_graph_connection(self, match_result, cur_node) -> bool:
+        """
+        判断两个子图之间是否存在连接
+        :param match_result: 子图匹配的结果
+        :param cur_node: 当前子图的关键节点
+        :return: 存在连接，则返回True，否则返回False
+        """
+        pattern = self.__get_current_pattern()
+        direction = pattern.get_visit_direction()
+        node_dict = match_result.node_dicts[0]
+        for nodes in node_dict.values():
+            if direction == DIRECTION.UP_DOWN:
+                for node in nodes:
+                    if node.outputs[0] in cur_node.inputs:
+                        return True
+            elif direction == DIRECTION.DOWN_UP:
+                for node in nodes:
+                    if cur_node.outputs[0] in node.inputs:
+                        return True
+            else:
+                return False
+        return False
+
     def get_candidate_sub_graphs(self, graph: GraphBase, top_ops_names: List[str] = None) -> List[MatchResult]:
         """
         匹配所有子图
-        """
-        all_match_result = []
+        :param graph: 计算图
+        :param top_ops_names: topn算子列表，性能差的算子
+        :return: 成功返回匹配的结果，失败返回空数组
+        """ 
         pattern = self.__get_current_pattern()
-        if pattern is None:
-            return []
         matcher = Matcher(graph, pattern)
         candidate_nodes = matcher.get_candidate_nodes()
-        visit_direction = pattern.get_match_direction()
-        if visit_direction == VISIT_DIRECTION.DOWN_UP:
+        direction = pattern.get_visit_direction()
+        if direction == DIRECTION.DOWN_UP:
             candidate_nodes.reverse() # 从下往上遍历，遍历结果排序取反
+
+        uf = UnionFind()
+        all_match_result = []
         for node in candidate_nodes:
             match_result = matcher.get_match_map(node)
             if match_result.is_empty():
                 continue
-            is_sub_collection = False
-            for other_match_result in all_match_result:
-                if other_match_result.include(match_result):
-                    is_sub_collection = True
-                    break
-            if not is_sub_collection:
-                all_match_result.append(match_result)
-        return all_match_result
+            all_match_result.append(match_result)
+
+            if not pattern.can_match_more():
+                continue
+
+            uf.expand()
+            # 上下存在连接的子图，通过union-find建立关联
+            for index, match_res in enumerate(all_match_result):
+                if index == len(all_match_result) - 1:
+                    continue
+                if self.__is_sub_graph_connection(match_res, node):
+                    uf.union(index, len(all_match_result) - 1)
+
+        # 合并
+        for index, match_result in enumerate(all_match_result):
+            pindex = uf.find(index)
+            if pindex == index:
+                continue
+            all_match_result[pindex].add_node_dict(match_result.node_dicts[0])
+        # 拷贝结果
+        result = []
+        for index, match_result in enumerate(all_match_result):
+            if uf.find(index) == index:
+                result.append(copy.deepcopy(match_result))
+        return result
 
     def apply(self, graph: GraphBase, match_result: MatchResult) -> bool:
         """
-        修改子图
-        :param graph: 整图
-        :param node: 算子节点
+        改图
+        :param graph: 计算图
+        :param match_result: 子图匹配的结果
         :return: 成功返回True，失败返回False
         """
         apply_method = self.__get_current_apply_method()
