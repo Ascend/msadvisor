@@ -66,7 +66,7 @@ class Matcher(object):
 
         ret = [] # List[NodeBase]
         hash_set = set()
-        for node in self._graph._all_ops_map.values():
+        for node in self._graph.nodes:
             if not start_pattern_node.match(node, self._graph):
                 continue
             if node.name in hash_set:

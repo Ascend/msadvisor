@@ -15,7 +15,6 @@
 from typing import List, Dict
 import operator as op
 import numpy as np
-from auto_optimizer.graph_refactor.graph import GraphBase
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
