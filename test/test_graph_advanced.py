@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy as np
-import unittest
 from itertools import chain
+
+import unittest
+import numpy as np
 
 from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph

@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from itertools import chain
+
 import unittest
 import numpy as np
-from itertools import chain
 
 from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
@@ -59,7 +60,18 @@ class TestGraphCrud(unittest.TestCase):
     def test_add_node(self):
         test_node = self.graph.add_node('test_node', 'Add')
         self.assertEqual(self.graph['test_node'], test_node)
-        self.assertEqual(self.graph.nodes, [self.graph['Node_0'], self.graph['Node_1'], self.graph['Node_2'], self.graph['Node_3'], self.graph['Node_4'], self.graph['Node_5'], test_node])
+        self.assertEqual(
+            self.graph.nodes, 
+            [
+                self.graph['Node_0'], 
+                self.graph['Node_1'], 
+                self.graph['Node_2'], 
+                self.graph['Node_3'], 
+                self.graph['Node_4'], 
+                self.graph['Node_5'], 
+                test_node
+                ]
+            )
 
     def test_get_nodes(self):
         self.assertEqual(self.graph.get_nodes('Mul'), [self.graph['Node_1'], self.graph['Node_5']])
@@ -102,7 +114,13 @@ class TestGraphCrud(unittest.TestCase):
         self.assertEqual(self.graph, target)
 
     def test_getitem(self):
-        for node in chain(self.graph.inputs, self.graph.outputs, self.graph.nodes, self.graph.initializers, self.graph.value_infos):
+        for node in chain(
+            self.graph.inputs, 
+            self.graph.outputs, 
+            self.graph.nodes, 
+            self.graph.initializers, 
+            self.graph.value_infos
+        ):
             self.assertIs(self.graph[node.name], node)
 
 if __name__ == '__main__':

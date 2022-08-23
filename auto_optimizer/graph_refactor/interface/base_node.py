@@ -15,8 +15,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
 
-import numpy as np
 import warnings
+import numpy as np
 
 class BaseNode(ABC):
 
@@ -81,12 +81,12 @@ class Node(BaseNode):
     def inputs(self, inputs:List[str]):
         self._inputs = inputs
     
-    def get_input_id(self, input:str) -> str:
-        if input not in self._inputs:
+    def get_input_id(self, node_input:str) -> str:
+        if node_input not in self._inputs:
             raise RuntimeError(
                 f'Name of input should be one of {self._inputs}')
         else:
-            return self._inputs.index(input)
+            return self._inputs.index(node_input)
 
     @property
     def outputs(self) -> List[str]:

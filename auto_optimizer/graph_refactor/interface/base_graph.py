@@ -177,7 +177,8 @@ class BaseGraph(ABC):
 
         Args:
             name: name of the node to be removed
-            maps: auto connection map, Default = {0:0}. Keys should be input ids of current node and values should be output ids of current node.
+            maps: auto connection map, Default = {0:0}. Keys should be input ids of current node and values should
+                  be output ids of current node.
 
         Return:
             True if remove succeeds, otherwise False
