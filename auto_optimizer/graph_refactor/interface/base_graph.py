@@ -33,11 +33,11 @@ class BaseGraph(ABC):
         name: str = None,
         **kwargs: Dict[str, object]
     ):
-        self._nodes = nodes if nodes else []
-        self._inputs = inputs if inputs else []
-        self._outputs = outputs if outputs else []
-        self._initializers = initializers if initializers else []
-        self._value_infos = value_infos if value_infos else []
+        self._nodes = nodes or []
+        self._inputs = inputs or []
+        self._outputs = outputs or []
+        self._initializers = initializers or []
+        self._value_infos = value_infos or []
         self.name = name
 
         self._node_map = {}
@@ -88,6 +88,7 @@ class BaseGraph(ABC):
     def add_input(self, name, dtype, shape) -> PlaceHolder:
         dtype = np.dtype(dtype)
         input = PlaceHolder(name, dtype, shape)
+        # TODO: ERROR: duplicate names
         self._node_map[name] = input
         self._inputs.append(input)
         return input
@@ -95,18 +96,21 @@ class BaseGraph(ABC):
     def add_output(self, name, dtype, shape) -> PlaceHolder:
         dtype = np.dtype(dtype)
         output = PlaceHolder(name, dtype, shape)
+        # TODO: ERROR: duplicate names
         self._node_map[name] = output
         self._outputs.append(output)
         return output
 
     def add_initializer(self, name, value) -> Initializer:
         initializer = Initializer(name, value)
+        # TODO: ERROR: duplicate names
         self._node_map[name] = initializer
         self._initializers.append(initializer)
         return initializer
 
     def add_node(self, name, op_type, attrs=None, domain=None) -> Node:
         node = Node(name, op_type, attrs=attrs, domain=domain)
+        # TODO: ERROR: duplicate names
         self._node_map[name] = node
         self._nodes.append(node)
         return node
@@ -154,14 +158,11 @@ class BaseGraph(ABC):
         self._node_map[insert_node.name] = insert_node
 
     def get_nodes(self, op_type):
-        nodes = []
-        for node in self._node_map.values():
-            if node.op_type == op_type:
-                nodes.append(node)
+        nodes = [node for node in self._node_map.values()  if node.op_type == op_type]
         return nodes
 
     def remove(self, name, maps=None):
-        maps = maps if maps else {0:0}
+        maps = maps or {0:0}
         # TODO: exception: name not exist in graph
         node = self._node_map[name]
         self._node_map.pop(name, None)
