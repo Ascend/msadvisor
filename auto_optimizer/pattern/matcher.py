@@ -15,9 +15,7 @@
 import copy
 import types
 import operator as op
-from enum import Enum
 from typing import List, Dict
-from magiconnx.interface import BaseGraph as GraphBase
 from magiconnx.interface import BaseNode as NodeBase
 from .pattern import PatternNode
 from .pattern import DIRECTION

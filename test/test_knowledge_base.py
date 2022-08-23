@@ -14,19 +14,14 @@
 
 import unittest
 
+from typing import Dict, List
+import operator as op
 import numpy as np
 import onnx
-import operator as op
-from typing import Dict, List
 
 from onnx import (
-    checker,
     helper,
-    ModelProto,
     TensorProto,
-    GraphProto,
-    NodeProto,
-    shape_inference,
 )
 
 from magiconnx import OnnxGraph
@@ -35,8 +30,6 @@ from magiconnx.interface import BaseNode as NodeBase
 from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
 from auto_optimizer.pattern.pattern import Pattern
-from auto_optimizer.pattern.matcher import MatchResult
-from auto_optimizer.pattern.matcher import Matcher
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 
 
@@ -88,8 +81,10 @@ class TestKnowledgeBase(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), np.random.randn(64, 3, 1).astype(np.float32))
-        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), np.random.randn(128, 64, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
+            np.random.randn(64, 3, 1).astype(np.float32))
+        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), \
+            np.random.randn(128, 64, 1).astype(np.float32))
 
         conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
             dilations = np.array([1], dtype=np.int64), \
@@ -118,9 +113,12 @@ class TestKnowledgeBase(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), np.random.randn(64, 3, 1).astype(np.float32))
-        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), np.random.randn(128, 64, 1).astype(np.float32))
-        weight_2 = helper.make_tensor('weight_2', TensorProto.FLOAT, (128, 64, 1), np.random.randn(128, 64, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
+            np.random.randn(64, 3, 1).astype(np.float32))
+        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), \
+            np.random.randn(128, 64, 1).astype(np.float32))
+        weight_2 = helper.make_tensor('weight_2', TensorProto.FLOAT, (128, 64, 1), \
+            np.random.randn(128, 64, 1).astype(np.float32))
 
         conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['conv_0_out'], 'Conv_0', None, None, \
             dilations = np.array([1], dtype=np.int64), \
@@ -149,7 +147,8 @@ class TestKnowledgeBase(unittest.TestCase):
 
         add = helper.make_node('Add', ['relu_2_out', 'relu_3_out'], ['Z'], 'Add_0', None, None)
 
-        graph = helper.make_graph([conv_0, relu_0, relu_1, conv_1, relu_2, relu_3, conv_2, add], "conv1d_test", [X], [Z], [weight_0, weight_1, weight_2])
+        graph = helper.make_graph([conv_0, relu_0, relu_1, conv_1, relu_2, relu_3, conv_2, add], "conv1d_test", \
+            [X], [Z], [weight_0, weight_1, weight_2])
         model = helper.make_model(graph)
 
         del model.opset_import[:]
@@ -162,9 +161,12 @@ class TestKnowledgeBase(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), np.random.randn(64, 3, 1).astype(np.float32))
-        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), np.random.randn(128, 64, 1).astype(np.float32))
-        weight_2 = helper.make_tensor('weight_2', TensorProto.FLOAT, (128, 64, 1), np.random.randn(128, 64, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
+            np.random.randn(64, 3, 1).astype(np.float32))
+        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), \
+            np.random.randn(128, 64, 1).astype(np.float32))
+        weight_2 = helper.make_tensor('weight_2', TensorProto.FLOAT, (128, 64, 1), \
+            np.random.randn(128, 64, 1).astype(np.float32))
 
         conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['conv_0_out'], 'Conv_0', None, None, \
             dilations = np.array([1], dtype=np.int64), \
@@ -195,7 +197,8 @@ class TestKnowledgeBase(unittest.TestCase):
 
         add = helper.make_node('Add', ['relu_2_out', 'relu_3_out'], ['Z'], 'Add_0', None, None)
 
-        graph = helper.make_graph([conv_0, relu_0, relu_1, conv_1, relu_2, relu_3, conv_2, add, shape], "conv1d_test", [X], [Z], [weight_0, weight_1, weight_2])
+        graph = helper.make_graph([conv_0, relu_0, relu_1, conv_1, relu_2, relu_3, conv_2, add, shape], \
+            "conv1d_test", [X], [Z], [weight_0, weight_1, weight_2])
         model = helper.make_model(graph)
 
         del model.opset_import[:]
