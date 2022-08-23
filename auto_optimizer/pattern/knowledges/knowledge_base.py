@@ -17,11 +17,11 @@ import types
 import operator as op
 from abc import abstractmethod
 from typing import Dict, Tuple, List
-from magiconnx.interface import BaseGraph as GraphBase
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.pattern import DIRECTION
 from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.pattern.matcher import Matcher
+from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 
 
 class UnionFind(object):
@@ -143,7 +143,7 @@ class KnowledgeBase(object):
                 return False
         return False
 
-    def get_candidate_sub_graphs(self, graph: GraphBase, top_ops_names: List[str] = None) -> List[MatchResult]:
+    def get_candidate_sub_graphs(self, graph: BaseGraph, top_ops_names: List[str] = None) -> List[MatchResult]:
         """
         匹配所有子图
         :param graph: 计算图
@@ -164,11 +164,11 @@ class KnowledgeBase(object):
             if match_result.is_empty():
                 continue
             all_match_result.append(match_result)
+            uf.expand()
 
             if not pattern.can_match_more():
                 continue
 
-            uf.expand()
             # 上下存在连接的子图，通过union-find建立关联
             for index, match_res in enumerate(all_match_result):
                 if index == len(all_match_result) - 1:
@@ -189,7 +189,7 @@ class KnowledgeBase(object):
                 result.append(copy.deepcopy(match_result))
         return result
 
-    def apply(self, graph: GraphBase, match_result: MatchResult) -> bool:
+    def apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:
         """
         改图
         :param graph: 计算图

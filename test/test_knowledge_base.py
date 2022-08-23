@@ -24,9 +24,9 @@ from onnx import (
     TensorProto,
 )
 
-from magiconnx import OnnxGraph
-from magiconnx.interface import BaseGraph as GraphBase
-from magiconnx.interface import BaseNode as NodeBase
+from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode
+from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
 from auto_optimizer.pattern.pattern import Pattern
@@ -37,7 +37,7 @@ class Conv1dMatch(MatchBase):
     def __init__(self):
         super().__init__()
 
-    def match(self, node: NodeBase, graph: GraphBase) -> bool:
+    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
         if node is None:
             return False
         if not op.eq(node.op_type, 'Conv'):
@@ -225,7 +225,7 @@ class TestKnowledgeBase(unittest.TestCase):
 
         self.make_twice_conv1d_model(onnx_path, x)
 
-        graph = OnnxGraph(onnx_path)
+        graph = OnnxGraph.parse(onnx_path)
         knowledge_example = Knowledge_Example()
 
         result = knowledge_example.get_candidate_sub_graphs(graph)
@@ -242,7 +242,7 @@ class TestKnowledgeBase(unittest.TestCase):
 
         self.make_multi_conv1d_and_split_graph_model(onnx_path, x)
 
-        graph = OnnxGraph(onnx_path)
+        graph = OnnxGraph.parse(onnx_path)
         knowledge_example = Knowledge_Example()
 
         result = knowledge_example.get_candidate_sub_graphs(graph)
@@ -260,7 +260,7 @@ class TestKnowledgeBase(unittest.TestCase):
 
         self.make_multi_conv1d_and_split_graph_and_shape_model(onnx_path, x)
 
-        graph = OnnxGraph(onnx_path)
+        graph = OnnxGraph.parse(onnx_path)
         knowledge_example = Knowledge_Example()
 
         results = knowledge_example.get_candidate_sub_graphs(graph)
@@ -278,7 +278,7 @@ class TestKnowledgeBase(unittest.TestCase):
 
         self.make_twice_conv1d_model(onnx_path, x)
 
-        graph = OnnxGraph(onnx_path)
+        graph = OnnxGraph.parse(onnx_path)
         knowledge_example = Knowledge_Example()
 
         match_result = knowledge_example.get_candidate_sub_graphs(graph)

@@ -15,8 +15,8 @@
 from abc import abstractmethod
 from enum import Enum, unique
 from typing import List
-from magiconnx.interface import BaseGraph as GraphBase
-from magiconnx.interface import BaseNode as NodeBase
+from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 
 
 @unique
@@ -45,7 +45,7 @@ class MatchBase(object):
         pass
 
     @abstractmethod
-    def match(self, node: NodeBase, graph: GraphBase) -> bool:
+    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
         return False
 
 
@@ -57,7 +57,7 @@ class PatternNode(object):
         self.inputs = []
         self.outputs = []
 
-    def match(self, node: NodeBase, graph: GraphBase) -> bool:
+    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
         """
         算子节点匹配
         :param node: 实际算子节点

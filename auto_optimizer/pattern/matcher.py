@@ -16,7 +16,7 @@ import copy
 import types
 import operator as op
 from typing import List, Dict
-from magiconnx.interface import BaseNode as NodeBase
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 from .pattern import PatternNode
 from .pattern import DIRECTION
 
@@ -26,7 +26,7 @@ class MatchResult(object):
         self.pattern = pattern
         self.node_dicts = []
 
-    def add_node_dict(self, node_dict: Dict[str, List[NodeBase]]):
+    def add_node_dict(self, node_dict: Dict[str, List[BaseNode]]):
         """
         添加子图匹配到的节点数据
         :param node_dict:子图匹配后的所有节点，字典key是算子名，value是实际算子节点
@@ -55,7 +55,7 @@ class Matcher(object):
         self._graph = graph
         self._pattern = pattern
 
-    def get_candidate_nodes(self) -> List[NodeBase]:
+    def get_candidate_nodes(self) -> List[BaseNode]:
         """
         根据定义的子图的输入/输出节点，匹配计算图中所有候选节点
         :return: 返回候选节点列表
@@ -75,35 +75,17 @@ class Matcher(object):
             hash_set.add(node.name)
         return ret
 
-    def __get_prev_nodes(self, cur_node: NodeBase):
+    def __get_prev_nodes(self, cur_node: BaseNode):
         """
         根据节点输入名，获取所有该节点的前置节点
         """
         prev_nodes = set()
-        for node in self._graph._all_ops_map.values():
-            if len(node.outputs) == 0:
+        for input_name in cur_node.inputs:
+            node = self._graph.get_prev_node(input_name)
+            if node is None:
                 continue
-            for prev_output_name in node.outputs:
-                for input_name in cur_node.inputs:
-                    if op.eq(prev_output_name, input_name):
-                        prev_nodes.add(node)
-                        break
+            prev_nodes.add(node)
         return list(prev_nodes)
-
-    def __get_next_nodes(self, cur_node: NodeBase):
-        """
-        根据节点输出，获取所有该节点的后置节点
-        """
-        next_nodes = set()
-        for node in self._graph._all_ops_map.values():
-            if len(node.inputs) == 0:
-                continue
-            for next_input_name in node.inputs:
-                for output_name in cur_node.outputs:
-                    if op.eq(next_input_name, output_name):
-                        next_nodes.add(node)
-                        break
-        return list(next_nodes)
 
     def __get_prev_pattern_nodes(self, pattern_node) -> List[PatternNode]:
         """
@@ -237,7 +219,7 @@ class Matcher(object):
         :param result: 匹配结果
         :return: 匹配成功则返回True，否则返回False
         """
-        next_nodes = self.__get_next_nodes(node)
+        next_nodes = self._graph.get_next_nodes(node.outputs[0])
         if self._pattern.node_cann_match_more(pattern_node.op_name):
             if self.__match_continuous_same_nodes(next_nodes, pattern_node, result, self.__match_next_nodes):
                 return True
