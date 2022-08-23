@@ -149,7 +149,9 @@ class KnowledgeBase(object):
         :param graph: 计算图
         :param top_ops_names: topn算子列表，性能差的算子
         :return: 成功返回匹配的结果，失败返回空数组
-        """ 
+        """
+        if graph is None:
+            return []
         pattern = self.__get_current_pattern()
         matcher = Matcher(graph, pattern)
         candidate_nodes = matcher.get_candidate_nodes()
@@ -196,6 +198,8 @@ class KnowledgeBase(object):
         :param match_result: 子图匹配的结果
         :return: 成功返回True，失败返回False
         """
+        if graph is None or match_result is None:
+            return False
         apply_method = self.__get_current_apply_method()
         if apply_method is None:
             return False

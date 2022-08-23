@@ -30,13 +30,9 @@ class TestKnowledge(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
-    def test_knowledge_pattern(self):
-        for name, knowledge in KnowledgeFactory.get_knowledge_pool().items():
-            knowledge.pattern()
-
     def test_knowledge_apply(self):
         for name, knowledge in KnowledgeFactory.get_knowledge_pool().items():
-            ret = knowledge.apply(None)
+            ret = knowledge.apply(None, None)
             self.assertEqual(True, ret)
 
 
