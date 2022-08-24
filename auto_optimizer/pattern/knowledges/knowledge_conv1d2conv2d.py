@@ -16,6 +16,7 @@ from typing import List, Dict
 import operator as op
 import numpy as np
 import onnx
+import os
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
@@ -201,32 +202,57 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
 KnowledgeFactory.add_knowledge('KnowledgeConv1d2Conv2d', KnowledgeConv1d2Conv2d())
 
 
+def need_to_optimize(graph, knowledge):
+    while knowledge.has_next_pattern():
+        knowledge.next_pattern()
+        match_results = knowledge.get_candidate_sub_graphs(graph)
+        if match_results is None or len(match_results) == 0:
+            continue
+        else:
+            return True
+    return False
+
+def optimize(graph, knowledge):
+    res = True
+    while knowledge.has_next_pattern():
+        knowledge.next_pattern()
+        match_results = knowledge.get_candidate_sub_graphs(graph)
+        if match_results is None or len(match_results) == 0:
+            continue
+        while knowledge.has_next_apply():
+            knowledge.next_apply()
+            for match_result in match_results:
+                res &= knowledge.apply(graph, match_result)
+    return res
+
 def evaluate(data_path, parameter = None):
     if parameter is None:
         return False
     onnx_file = parameter.get('file_name')
-    onnx_path = data_path + '/' + onnx_file
-    action = parameter.get('action')
-    graph = OnnxGraph.parse(onnx_path)
-    conv1d2conv2d = KnowledgeConv1d2Conv2d()
-    while conv1d2conv2d.has_next_pattern():
-        conv1d2conv2d.next_pattern()
-        # 遍历计算图，找出所有能匹配的子图
-        match_results = conv1d2conv2d.get_candidate_sub_graphs(graph)
-        if match_results is None or len(match_results) == 0:
-            continue
-        if op.eq(action, 'evaluate'):
-            print('Model has optimization.')
-            return True
-        # 尝试不同的修改方法
-        while conv1d2conv2d.has_next_apply():
-            conv1d2conv2d.next_apply()
-            for match_result in match_results:
-                res = conv1d2conv2d.apply(graph, match_result)
-    if op.eq(action, 'evaluate'):
-        return True
-    graph.save('%s_new.onnx' % onnx_path)
-    print('graph optimize succeed, new model path: {}.'.format('%s_new.onnx' % onnx_path))
+    onnx_path = os.path.join(data_path, onnx_file)
+    mode = parameter.get('mode')
+    onnx_graph = OnnxGraph.parse(onnx_path)
+    if onnx_graph is None:
+        print('onnx model open failed, onnx path: {}'.format(onnx_path))
+        return False
+    if len(onnx_graph.inputs) == 0 and len(onnx_graph.outputs) == 0:
+        print('Invalid onnx model, onnx path: {}'.format(onnx_path))
+        return False
+
+    knowledge = KnowledgeConv1d2Conv2d()
+
+    if mode == "evaluate":
+        res =  need_to_optimize(onnx_graph, knowledge)
+        if res:
+            print("The current model need to be optimized")
+    elif mode == "optimize":
+        res = optimize(onnx_graph, knowledge)
+        if res:
+            out_file = os.path.join(data_path, "{}_optimize.onnx".format(os.path.splitext(onnx_file)[0]))
+            onnx_graph.save(out_file)
+            print("The current model need to be optimized, the optimized model path is: {}".format(out_file))
+        else:
+            raise RuntimeError('optimize failed file: {}'.format(onnx_path))
     return True
 
 if __name__ == "__main__":
@@ -236,10 +262,10 @@ if __name__ == "__main__":
         exit(1)
     data_path = sys.argv[1]
     onnx_file = sys.argv[2]
-    action = 'optimizer' if len(sys.argv) <= 3 else sys.argv[3]
-    if not op.eq(action, 'optimizer') and not op.eq(action, 'evaluate'):
-        print('Invalid parameter {}'.format(action))
+    mode = 'optimize' if len(sys.argv) <= 3 else sys.argv[3]
+    if mode not in ['optimize', 'evaluate']:
+        print('Invalid parameter {}'.format(mode))
         exit(1)
-    parameter = {'file_name': onnx_file, 'action': action}
+    parameter = {'file_name': onnx_file, 'mode': mode}
     ret = evaluate(data_path, parameter)
 
