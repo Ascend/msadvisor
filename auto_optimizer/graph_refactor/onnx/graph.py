@@ -26,11 +26,11 @@ class OnnxGraph(BaseGraph):
 
     def __init__(
         self,
-        nodes: List[Node] = None,
-        inputs: List[PlaceHolder] = None,
-        outputs: List[PlaceHolder] = None,
-        initializers: List[Initializer] = None,
-        value_infos: List[PlaceHolder] = None,
+        nodes: List[OnnxNode] = None,
+        inputs: List[OnnxPlaceHolder] = None,
+        outputs: List[OnnxPlaceHolder] = None,
+        initializers: List[OnnxInitializer] = None,
+        value_infos: List[OnnxPlaceHolder] = None,
         name: str = None,
         **kwargs: Dict[str, object]
     ):
@@ -67,6 +67,24 @@ class OnnxGraph(BaseGraph):
 
         graph = cls(nodes, inputs, outputs, initializers, value_infos, onnx_graph.name, **meta)
         return graph
+
+    def add_input(self, name, dtype, shape) -> OnnxPlaceHolder:
+        dtype = np.dtype(dtype)
+        graph_input = OnnxPlaceHolder(name, dtype, shape)
+        return self._add_input(graph_input)
+
+    def add_output(self, name, dtype, shape) -> OnnxPlaceHolder:
+        dtype = np.dtype(dtype)
+        graph_output = OnnxPlaceHolder(name, dtype, shape)
+        return self._add_output(graph_output)
+
+    def add_initializer(self, name, value) -> OnnxInitializer:
+        initializer = OnnxInitializer(name, value)
+        return self._add_initializer(initializer)
+
+    def add_node(self, name, op_type, attrs=None, domain=None) -> OnnxNode:
+        node = OnnxNode(name, op_type, attrs=attrs, domain=domain)
+        return self._add_node(node)
 
     def proto(self) -> GraphProto:
         self.toposort()
