@@ -101,12 +101,12 @@ class TestGraphBasic(unittest.TestCase):
                     domain=''
         )
 
-        graph = create_graph()
-        self.assertTrue(is_list_equal(graph._nodes, [node_0]))
-        self.assertTrue(is_list_equal(graph._inputs, [input_0]))
-        self.assertTrue(is_list_equal(graph._outputs, [output_0]))
-        self.assertTrue(is_list_equal(graph._initializers, [ini_0, ini_1, ini_2]))
-        self.assertTrue(is_map_equal(graph._node_map, {
+
+        self.assertTrue(is_list_equal(self.graph._nodes, [node_0]))
+        self.assertTrue(is_list_equal(self.graph._inputs, [input_0]))
+        self.assertTrue(is_list_equal(self.graph._outputs, [output_0]))
+        self.assertTrue(is_list_equal(self.graph._initializers, [ini_0, ini_1]))
+        self.assertTrue(is_map_equal(self.graph._node_map, {
                                                     'input_0':input_0, 
                                                     'output_0':output_0, 
                                                     'ini_0':ini_0, 
@@ -114,9 +114,9 @@ class TestGraphBasic(unittest.TestCase):
                                                     'const_0': ini_2,
                                                     'Node_0':node_0
         }))
-        self.assertTrue(is_map_equal(graph._prev_map, {'output_0':node_0}))
-        self.assertTrue(is_map_equal(graph._next_map, 
-                        {'input_0':[node_0], 'ini_0':[node_0], 'ini_1':[node_0], 'const_0':[node_0]}))
+        self.assertTrue(is_map_equal(self.graph._prev_map, {'output_0':node_0}))
+        self.assertTrue(is_map_equal(self.graph._next_map, {'input_0':[node_0], 'ini_0':[node_0], 'ini_1':[node_0]}))
+
 
     def test_parse_proto(self):
         input_0 = helper.make_tensor_value_info('input_0', NP_TYPE_TO_TENSOR_TYPE[np.dtype('float32')], [3,2])
@@ -130,19 +130,16 @@ class TestGraphBasic(unittest.TestCase):
         graph_proto = helper.make_graph([node_0, node_1], 'test_parse', [input_0], [output_0], [ini_0, ini_1])
         model_proto = helper.make_model(graph_proto, producer_name='test_parse')
         
-        expected_graph = create_graph()
         parse_from_graph_proto = OnnxGraph.parse(graph_proto)
         parse_from_model_proto = OnnxGraph.parse(model_proto)
-        self.assertTrue(is_graph_equal(parse_from_graph_proto, expected_graph))
-        self.assertTrue(is_graph_equal(parse_from_model_proto, expected_graph))
+        self.assertTrue(is_graph_equal(parse_from_graph_proto, self.graph))
+        self.assertTrue(is_graph_equal(parse_from_model_proto, self.graph))
     
     def test_to_proto(self):
-        graph = create_graph()
-        self.assertIsInstance(graph.proto(), GraphProto)
+        self.assertIsInstance(self.graph.proto(), GraphProto)
     
     def test_to_model(self):
-        graph = create_graph()
-        self.assertIsInstance(graph.model(), ModelProto)
+        self.assertIsInstance(self.graph.model(), ModelProto)
 
     def test_save_after_add_node(self):
         self.graph.add_input('test_input', 'float32', [1, 2, 3])
@@ -152,22 +149,19 @@ class TestGraphBasic(unittest.TestCase):
         self.graph.save('test.onnx')
         os.remove('test.onnx')
 
-
     def test_toposort(self):
-        graph = create_graph()
-        expected_order = [n.name for n in graph._nodes]
-        random.shuffle(graph._nodes)
-        graph.toposort()
-        test_order = [n.name for n in graph._nodes]
+        expected_order = [n.name for n in self.graph._nodes]
+        random.shuffle(self.graph._nodes)
+        self.graph.toposort()
+        test_order = [n.name for n in self.graph._nodes]
         self.assertEqual(test_order, expected_order)
 
     def test_opset(self):
-        graph = create_graph()
-        self.assertEqual(graph.opset_imports, None)
-        graph.opset_imports = 13
+        self.assertEqual(self.graph.opset_imports, None)
+        self.graph.opset_imports = 13
         opset = OperatorSetIdProto()
         opset.version = 13
-        self.assertEqual(graph.opset_imports, opset)
+        self.assertEqual(self.graph.opset_imports, opset)
 
 if __name__ == '__main__':
     unittest.main()

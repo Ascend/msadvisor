@@ -15,6 +15,7 @@
 from typing import List, Dict, Union, Sequence, Optional
 
 import onnx
+import numpy as np
 from onnx import helper, GraphProto, ModelProto, OperatorSetIdProto
 
 from .. import BaseGraph
