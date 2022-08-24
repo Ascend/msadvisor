@@ -30,7 +30,7 @@ from auto_optimizer.pattern.knowledges.knowledge_conv1d2conv2d import KnowledgeC
 class TestKnowledgeConv1d2Conv2d(unittest.TestCase):
     def make_twice_conv1d_model(self, onnx_name, x):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
-        Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
+        Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, [1, 128, 2500])
 
         weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
             np.random.randn(64, 3, 1).astype(np.float32))
@@ -62,7 +62,7 @@ class TestKnowledgeConv1d2Conv2d(unittest.TestCase):
 
     def make_multi_conv1d_and_split_graph_model(self, onnx_name, x):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
-        Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
+        Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, [1, 128, 2500])
 
         weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
             np.random.randn(64, 3, 1).astype(np.float32))
