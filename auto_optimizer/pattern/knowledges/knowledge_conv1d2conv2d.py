@@ -16,13 +16,13 @@ from typing import List, Dict
 import operator as op
 import numpy as np
 
-from magiconnx.interface import BaseGraph as GraphBase
-from magiconnx.interface import BaseNode as NodeBase
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
 from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
+from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 from .knowledge_base import KnowledgeBase
 
 
@@ -30,7 +30,7 @@ class Conv1dMatch(MatchBase):
     def __init__(self):
         super().__init__()
 
-    def match(self, node: NodeBase, graph: GraphBase) -> bool:
+    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
         if node is None:
             return False
         if not op.eq(node.op_type, 'Conv'):
@@ -73,7 +73,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         }
         return apply_dict
 
-    def _expand_conv_input_dims(self, graph: GraphBase, conv: NodeBase, mode: str) -> bool:
+    def _expand_conv_input_dims(self, graph, conv, mode: str) -> bool:
         """
         通过增加Unsqueeze算子，将conv1d的输入从3维扩展到4维
         :param graph: 整图
@@ -86,9 +86,10 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         self._insert_op_names.add(op_name)
         us = graph.add_node(op_name, 'Unsqueeze', {'axes': [2]})
         graph.insert_node(conv.name, us, mode=mode)
+        graph.update_map()
         return True
 
-    def _conv1d_to_conv2d(self, graph: GraphBase, conv: NodeBase) -> bool:
+    def _conv1d_to_conv2d(self, graph, conv) -> bool:
         """
         将conv1d转换成conv2d，修改conv1d属性和W
         :param graph: 整图
@@ -110,7 +111,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         graph[conv.inputs[1]].value = conv_w
         return True
 
-    def _reduce_output_dims(self, graph: GraphBase, node: NodeBase, mode: str) -> bool:
+    def _reduce_output_dims(self, graph, node, mode: str) -> bool:
         """
         降低维度
         :param graph: 整图
@@ -123,24 +124,10 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         self._insert_op_names.add(op_name)
         sq = graph.add_node(op_name, 'Squeeze', {'axes': [2]})
         graph.insert_node(node.name, sq, mode=mode)
+        graph.update_map()
         return True
 
-    def __get_next_nodes(self, graph: GraphBase, cur_node: NodeBase):
-        """
-        根据节点输出，获取所有该节点的后置节点
-        """
-        next_nodes = set()
-        for node in graph._all_ops_map.values():
-            if len(node.inputs) == 0:
-                continue
-            for next_input_name in node.inputs:
-                for output_name in cur_node.outputs:
-                    if op.eq(next_input_name, output_name):
-                        next_nodes.add(node)
-                        break
-        return list(next_nodes)
-
-    def _conv1d2conv2d_apply(self, graph: GraphBase, match_result: MatchResult) -> bool:
+    def _conv1d2conv2d_apply(self, graph, match_result: MatchResult) -> bool:
         input_node = match_result.node_dicts[0].get('Conv')[0]
         self._expand_conv_input_dims(graph, input_node, 'before')
 
@@ -152,7 +139,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             conv_pattern = pattern.node_dict.get('Conv')
             element_wise_pattern = pattern.node_dict.get('element_wise')
 
-            conv_next_nodes = self.__get_next_nodes(graph, conv)
+            conv_next_nodes = graph.get_next_nodes(conv.outputs[0])
             if len(conv_next_nodes) == 0:
                 self._reduce_output_dims(graph, conv, 'after')
             for next_node in conv_next_nodes:
@@ -164,7 +151,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
 
             if element_wises is not None:
                 for element_wise in element_wises:
-                    next_nodes = self.__get_next_nodes(graph, element_wise)
+                    next_nodes = graph.get_next_nodes(element_wise.outputs[0])
                     if len(next_nodes) == 0:
                         self._reduce_output_dims(graph, element_wise, 'after')
                     for next_node in next_nodes:

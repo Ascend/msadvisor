@@ -23,7 +23,7 @@ from onnx import (
     TensorProto,
 )
 
-from magiconnx import OnnxGraph
+from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_conv1d2conv2d import KnowledgeConv1d2Conv2d
 
 
@@ -136,7 +136,7 @@ class TestKnowledgeConv1d2Conv2d(unittest.TestCase):
         self.make_twice_conv1d_model(onnx_path, x)
         run_result_0 = self.infer_run(onnx_path, x)
 
-        graph = OnnxGraph(onnx_path)
+        graph = OnnxGraph.parse(onnx_path)
 
         conv1d2conv2d = KnowledgeConv1d2Conv2d()
         res = self.optimize(graph, conv1d2conv2d)
@@ -152,7 +152,7 @@ class TestKnowledgeConv1d2Conv2d(unittest.TestCase):
         self.make_multi_conv1d_and_split_graph_model(onnx_path, x)
         run_result_0 = self.infer_run(onnx_path, x)
 
-        graph = OnnxGraph(onnx_path)
+        graph = OnnxGraph.parse(onnx_path)
 
         conv1d2conv2d = KnowledgeConv1d2Conv2d()
         res = self.optimize(graph, conv1d2conv2d)
