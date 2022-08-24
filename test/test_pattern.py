@@ -36,8 +36,8 @@ class TestPattern(unittest.TestCase):
             pattern.add_node('Conv', ['Conv'], None)
             pattern.add_node('Conv', ['Conv'], None)
         except RuntimeError as e:
-            print('pattern add node failed.')
-        
+            pass
+
         self.assertEqual(len(pattern.node_dict), 1)
         self.assertTrue(pattern.node_dict.get('Conv') is not None)
 
