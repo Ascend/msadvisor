@@ -200,9 +200,15 @@ def evaluate(data_path, parameter = None):
 
 if __name__ == "__main__":
     import sys
+    if len(sys.argv) != 3 and len(sys.argv) != 4:
+        print('Parameter size should be 2 or 3')
+        exit(1)
     data_path = sys.argv[1]
     onnx_file = sys.argv[2]
     action = 'optimizer' if len(sys.argv) <= 3 else sys.argv[3]
+    if not op.eq(action, 'optimizer') and not op.eq(action, 'evaluate'):
+        print('Invalid parameter {}'.format(action))
+        exit(1)
     parameter = {'file_name': onnx_file, 'action': action}
     ret = evaluate(data_path, parameter)
 
