@@ -30,8 +30,7 @@ class BaseGraph(ABC):
         outputs: List[PlaceHolder] = None,
         initializers: List[Initializer] = None,
         value_infos: List[PlaceHolder] = None,
-        name: str = None,
-        **kwargs: Dict[str, object]
+        name: str = None
     ):
         self._nodes = nodes or []
         self._inputs = inputs or []
@@ -43,15 +42,6 @@ class BaseGraph(ABC):
         self._node_map = {}
         self._prev_map = {}
         self._next_map = {}
-
-        self._meta = {
-                    'ir_version': kwargs.get('ir_version', 4),
-                    'producer_name': kwargs.get('producer_name', 'AutoOptimizer'),
-                    'producer_version': kwargs.get('producer_version', 'alpha'),
-                    'domain': kwargs.get('domain', ''),
-                    'model_version': kwargs.get('model_version', 0),
-                    'opset_imports': kwargs.get('opset_imports', None)
-        }
 
         self.update_map()
     

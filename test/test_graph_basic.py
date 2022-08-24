@@ -18,7 +18,7 @@ import unittest
 from typing import List
 
 import numpy as np
-from onnx import helper, GraphProto, ModelProto, numpy_helper
+from onnx import helper, GraphProto, ModelProto, OperatorSetIdProto
 from onnx.mapping import NP_TYPE_TO_TENSOR_TYPE
 
 from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
@@ -160,6 +160,14 @@ class TestGraphBasic(unittest.TestCase):
         graph.toposort()
         test_order = [n.name for n in graph._nodes]
         self.assertEqual(test_order, expected_order)
+
+    def test_opset(self):
+        graph = create_graph()
+        self.assertEqual(graph.opset_imports, None)
+        graph.opset_imports = 13
+        opset = OperatorSetIdProto()
+        opset.version = 13
+        self.assertEqual(graph.opset_imports, opset)
 
 if __name__ == '__main__':
     unittest.main()
