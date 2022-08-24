@@ -23,7 +23,7 @@ from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
-from .knowledge_base import KnowledgeBase
+from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 
 
 class Conv1dMatch(MatchBase):
@@ -162,7 +162,8 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
                             self._reduce_output_dims(graph, next_node, 'before')
 
         for node_dict in match_result.node_dicts:
-            conv1d = node_dict.get('Conv')[0]
+            conv1d_name = node_dict.get('Conv')[0].name
+            conv1d = graph[conv1d_name]
             self._conv1d_to_conv2d(graph, conv1d)
         return True
 

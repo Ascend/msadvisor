@@ -141,8 +141,10 @@ class TestKnowledgeConv1d2Conv2d(unittest.TestCase):
         conv1d2conv2d = KnowledgeConv1d2Conv2d()
         res = self.optimize(graph, conv1d2conv2d)
         self.assertTrue(res)
+        new_onnx_path = '%s_new.onnx' % onnx_path
+        graph.save(new_onnx_path)
 
-        run_result_1 = self.infer_run(onnx_path, x)
+        run_result_1 = self.infer_run(new_onnx_path, x)
         self.assertTrue(np.array_equal(run_result_0, run_result_1))
 
     def test_conv1d2conv2d_optimizer_1(self):
@@ -157,8 +159,10 @@ class TestKnowledgeConv1d2Conv2d(unittest.TestCase):
         conv1d2conv2d = KnowledgeConv1d2Conv2d()
         res = self.optimize(graph, conv1d2conv2d)
         self.assertTrue(res)
+        new_onnx_path = '%s_new.onnx' % onnx_path
+        graph.save(new_onnx_path)
 
-        run_result_1 = self.infer_run(onnx_path, x)
+        run_result_1 = self.infer_run(new_onnx_path, x)
         self.assertTrue(np.array_equal(run_result_0, run_result_1))
 
 if __name__ == "__main__":
