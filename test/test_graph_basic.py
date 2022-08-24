@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import random
 import unittest
 from typing import List
@@ -81,6 +82,9 @@ def create_graph():
 
 class TestGraphBasic(unittest.TestCase):
     
+    def setUp(self):
+        self.graph = create_graph()
+
     def test_graph_init(self):
         input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [3,2])
         output_0 = OnnxPlaceHolder('output_0', np.dtype('float32'), [3,4])
@@ -132,6 +136,15 @@ class TestGraphBasic(unittest.TestCase):
     def test_to_model(self):
         graph = create_graph()
         self.assertIsInstance(graph.model(), ModelProto)
+
+    def test_save_after_add_node(self):
+        self.graph.add_input('test_input', 'float32', [1, 2, 3])
+        self.graph.add_output('test_output', 'float32', [1, 2, 3])
+        self.graph.add_initializer('test_initializer', np.array([1, 2, 3]))
+        self.graph.add_node('test_node', 'Add')
+        self.graph.save('test.onnx')
+        os.remove('test.onnx')
+
 
     def test_toposort(self):
         graph = create_graph()
