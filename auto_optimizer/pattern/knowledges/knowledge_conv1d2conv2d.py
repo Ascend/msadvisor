@@ -213,7 +213,7 @@ def need_to_optimize(graph, knowledge):
     return False
 
 def optimize(graph, knowledge):
-    res = True
+    res = False
     while knowledge.has_next_pattern():
         knowledge.next_pattern()
         match_results = knowledge.get_candidate_sub_graphs(graph)
@@ -222,7 +222,7 @@ def optimize(graph, knowledge):
         while knowledge.has_next_apply():
             knowledge.next_apply()
             for match_result in match_results:
-                res &= knowledge.apply(graph, match_result)
+                res |= knowledge.apply(graph, match_result)
     return res
 
 def evaluate(data_path, parameter = None):
@@ -245,6 +245,8 @@ def evaluate(data_path, parameter = None):
         res =  need_to_optimize(onnx_graph, knowledge)
         if res:
             print("The current model need to be optimized")
+        else:
+            print('The current model does not need to be optimized')
     elif mode == "optimize":
         res = optimize(onnx_graph, knowledge)
         if res:
@@ -252,7 +254,7 @@ def evaluate(data_path, parameter = None):
             onnx_graph.save(out_file)
             print("The current model need to be optimized, the optimized model path is: {}".format(out_file))
         else:
-            raise RuntimeError('optimize failed file: {}'.format(onnx_path))
+            print('The current model is not optimized')
     return True
 
 if __name__ == "__main__":
