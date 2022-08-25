@@ -156,12 +156,24 @@ class TestGraphBasic(unittest.TestCase):
         test_order = [n.name for n in self.graph._nodes]
         self.assertEqual(test_order, expected_order)
 
-    def test_opset(self):
-        self.assertEqual(self.graph.opset_imports, None)
+    def test_opset_imports(self):
+        # specify opset_imports
         self.graph.opset_imports = 13
         opset = OperatorSetIdProto()
         opset.version = 13
         self.assertEqual(self.graph.opset_imports, opset)
+        # clear opset_imports
+        self.graph.opset_imports = None
+        self.assertEqual(self.graph.opset_imports, None)
+        # exist two domain version fields
+        opset_0 = OperatorSetIdProto()
+        opset_0.domain = ""
+        opset_0.version = 13
+        opset_1 = OperatorSetIdProto()
+        opset_1.domain = "ai.onnx.ml"
+        opset_1.version = 2
+        graph = OnnxGraph(opset_imports = [opset_0, opset_1])
+        self.assertEqual(graph.opset_imports, [opset_0])
 
 if __name__ == '__main__':
     unittest.main()

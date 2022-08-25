@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import warnings
 from typing import List, Dict, Union, Sequence, Optional
 
 import onnx
@@ -35,12 +36,17 @@ class OnnxGraph(BaseGraph):
     ):
         super(OnnxGraph, self).__init__(nodes, inputs, outputs, initializers, value_infos, name)
         
-        opset = kwargs.get('opset_imports', None)
-        if isinstance(opset, int):
+        opsets = kwargs.get('opset_imports', None)
+        if isinstance(opsets, int):
             opset_imports = onnx.OperatorSetIdProto()
-            opset_imports.version = opset
+            opset_imports.version = opsets
+        elif isinstance(opsets, Sequence):
+            opset_imports = [op for op in opsets if not op.domain or op.domain == '']
+            if len(opset_imports) < len(opsets):
+                warnings.warn(
+                    f'Only one domain version is allowed, keep opset with domain "ai.onnx"')
         else:
-            opset_imports = opset
+            opset_imports = opsets
 
         self._meta = {
                     'ir_version': kwargs.get('ir_version', 4),
@@ -133,7 +139,10 @@ class OnnxGraph(BaseGraph):
         return self._meta['opset_imports']
     
     @opset_imports.setter
-    def opset_imports(self, opset:int):
-        opset_imports = OperatorSetIdProto()
-        opset_imports.version = opset
+    def opset_imports(self, opset:Union[int, None]):
+        if not opset:
+            opset_imports = None
+        else:
+            opset_imports = OperatorSetIdProto()
+            opset_imports.version = opset
         self._meta['opset_imports'] = opset_imports
