@@ -86,7 +86,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         for i, v in enumerate(onnx_version.split('.')):
             if i == len(limit_versions):
                 return False
-            if v < limit_versions[i]:
+            if int(v) < int(limit_versions[i]):
                 return True
         return False
 
