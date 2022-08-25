@@ -68,7 +68,7 @@ def evaluate(datapath, parameter):
         raise RuntimeError('mode:{} invalid not in optimize or evaluate'.format(mode))
 
     file_name = params.get("file_name")
-    if file_name == None:
+    if file_name is None:
         raise RuntimeError('file_name:{} is none'.format(file_name))
     onnx_path = os.path.join("{}/{}".format(datapath, file_name))
     if os.path.isfile(onnx_path) == False:
