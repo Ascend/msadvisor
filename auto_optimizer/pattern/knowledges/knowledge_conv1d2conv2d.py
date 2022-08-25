@@ -15,6 +15,7 @@
 from typing import List, Dict
 import operator as op
 import numpy as np
+import onnx
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
@@ -23,7 +24,7 @@ from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
-from .knowledge_base import KnowledgeBase
+from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 
 
 class Conv1dMatch(MatchBase):
@@ -73,6 +74,22 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         }
         return apply_dict
 
+    def __is_lower_onnx_version(self) -> bool:
+        """
+        判断当前onnx版本是否小于1.12.0
+        :return: onnx版本小于1.12.0，则返回True，否则返回False
+        """
+        limit_version = '1.12.0'
+        onnx_version = onnx.version.version
+
+        limit_versions = limit_version.split('.')
+        for i, v in enumerate(onnx_version.split('.')):
+            if i == len(limit_versions):
+                return False
+            if v < limit_versions[i]:
+                return True
+        return False
+
     def _expand_conv_input_dims(self, graph, conv, mode: str) -> bool:
         """
         通过增加Unsqueeze算子，将conv1d的输入从3维扩展到4维
@@ -84,8 +101,15 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         if op_name in self._insert_op_names:
             return True
         self._insert_op_names.add(op_name)
-        us = graph.add_node(op_name, 'Unsqueeze', {'axes': [2]})
-        graph.insert_node(conv.name, us, mode=mode)
+        if self.__is_lower_onnx_version():
+            us = graph.add_node(op_name, 'Unsqueeze', {'axes': np.array([2], dtype=np.int64)})
+            graph.insert_node(conv.name, us, mode=mode)
+        else:
+            us = graph.add_node(op_name, 'Unsqueeze')
+            axes_name = '%s_axes' % op_name
+            graph.add_initializer(axes_name, np.array([2], dtype=np.int64))
+            graph.insert_node(conv.name, us, mode=mode)
+            us.inputs.append(axes_name)
         graph.update_map()
         return True
 
@@ -122,8 +146,15 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         if op_name in self._insert_op_names:
             return True
         self._insert_op_names.add(op_name)
-        sq = graph.add_node(op_name, 'Squeeze', {'axes': [2]})
-        graph.insert_node(node.name, sq, mode=mode)
+        if self.__is_lower_onnx_version():
+            sq = graph.add_node(op_name, 'Squeeze', {'axes': np.array([2], dtype=np.int64)})
+            graph.insert_node(node.name, sq, mode=mode)
+        else:
+            sq = graph.add_node(op_name, 'Squeeze')
+            axes_name = '%s_axes' % op_name
+            graph.add_initializer(axes_name, np.array([2], dtype=np.int64))
+            graph.insert_node(node.name, sq, mode=mode)
+            sq.inputs.append(axes_name)
         graph.update_map()
         return True
 
@@ -162,7 +193,8 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
                             self._reduce_output_dims(graph, next_node, 'before')
 
         for node_dict in match_result.node_dicts:
-            conv1d = node_dict.get('Conv')[0]
+            conv1d_name = node_dict.get('Conv')[0].name
+            conv1d = graph[conv1d_name]
             self._conv1d_to_conv2d(graph, conv1d)
         return True
 
