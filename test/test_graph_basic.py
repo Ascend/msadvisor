@@ -18,7 +18,7 @@ import unittest
 from typing import List
 
 import numpy as np
-from onnx import helper, GraphProto, ModelProto, OperatorSetIdProto
+from onnx import helper, numpy_helper, GraphProto, ModelProto, OperatorSetIdProto
 from onnx.mapping import NP_TYPE_TO_TENSOR_TYPE
 
 from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
