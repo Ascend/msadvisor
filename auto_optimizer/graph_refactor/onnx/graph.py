@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict, Union
+import warnings
+from typing import List, Dict, Union, Sequence, Optional
 
-import numpy as np
 import onnx
+import numpy as np
 from onnx import helper, GraphProto, ModelProto, OperatorSetIdProto
 
 from .. import BaseGraph
@@ -33,7 +34,28 @@ class OnnxGraph(BaseGraph):
         name: str = None,
         **kwargs: Dict[str, object]
     ):
-        super(OnnxGraph, self).__init__(nodes, inputs, outputs, initializers, value_infos, name, **kwargs)
+        super(OnnxGraph, self).__init__(nodes, inputs, outputs, initializers, value_infos, name)
+        
+        opsets = kwargs.get('opset_imports', None)
+        if isinstance(opsets, int):
+            opset_imports = onnx.OperatorSetIdProto()
+            opset_imports.version = opsets
+        elif isinstance(opsets, Sequence):
+            opset_imports = [op for op in opsets if not op.domain or op.domain == '']
+            if len(opset_imports) < len(opsets):
+                warnings.warn(
+                    f'Only one domain version is allowed, keep opset with domain "ai.onnx"')
+        else:
+            opset_imports = opsets
+
+        self._meta = {
+                    'ir_version': kwargs.get('ir_version', 4),
+                    'producer_name': kwargs.get('producer_name', 'AutoOptimizer'),
+                    'producer_version': kwargs.get('producer_version', 'alpha'),
+                    'domain': kwargs.get('domain', ''),
+                    'model_version': kwargs.get('model_version', 0),
+                    'opset_imports': opset_imports
+        }
 
     @classmethod
     def parse(cls, path_or_bytes: Union[str, ModelProto, GraphProto]) -> 'OnnxGraph':
@@ -111,3 +133,16 @@ class OnnxGraph(BaseGraph):
         self._value_infos = [OnnxPlaceHolder.parse(v) for v in graph.value_info]
         for n in self._value_infos:
             self._node_map[n.name] = n
+
+    @property
+    def opset_imports(self) -> Optional[Sequence[OperatorSetIdProto]]:
+        return self._meta['opset_imports']
+    
+    @opset_imports.setter
+    def opset_imports(self, opset:Union[int, None]):
+        if not opset:
+            opset_imports = None
+        else:
+            opset_imports = OperatorSetIdProto()
+            opset_imports.version = opset
+        self._meta['opset_imports'] = opset_imports
