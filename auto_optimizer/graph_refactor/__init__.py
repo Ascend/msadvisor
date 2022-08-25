@@ -13,3 +13,4 @@
 # limitations under the License.
 
 from .interface import BaseGraph, Node, Initializer, PlaceHolder
+from .onnx import OnnxGraph, OnnxPlaceHolder, OnnxInitializer, OnnxNode
