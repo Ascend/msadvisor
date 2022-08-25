@@ -19,7 +19,6 @@ import onnx
 from onnx import helper, GraphProto, ModelProto, OperatorSetIdProto
 
 from .. import BaseGraph
-from .. import PlaceHolder, Initializer, Node
 from .node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
 
 class OnnxGraph(BaseGraph):
@@ -60,10 +59,12 @@ class OnnxGraph(BaseGraph):
         initializers = [OnnxInitializer.parse(i) for i in onnx_graph.initializer]
         value_infos = [OnnxPlaceHolder.parse(v) for v in onnx_graph.value_info]
 
-        # TODO: Constant Node to Initializer
         nodes = []
         for node in onnx_graph.node:
-            nodes.append(OnnxNode.parse(node))
+            if node.op_type == 'Constant':
+                initializers.append(OnnxInitializer.parse(node))        
+            else:
+                nodes.append(OnnxNode.parse(node))
 
         graph = cls(nodes, inputs, outputs, initializers, value_infos, onnx_graph.name, **meta)
         return graph
