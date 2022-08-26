@@ -13,21 +13,32 @@
 # limitations under the License.
 
 import os
-import argparse
+import sys
+import unittest
 
 from multiprocessing import Pool, Manager
 
-from auto_optimizer.common.config import Config
 from auto_optimizer.common import Register
+from auto_optimizer.common.config import Config
 
+from auto_optimizer.inference_engine.data_process_factory import InferenceFactory
 from auto_optimizer.inference_engine.data_process_factory import EvaluateFactory
 from auto_optimizer.inference_engine.data_process_factory import PreProcessFactory
 from auto_optimizer.inference_engine.data_process_factory import PostProcessFactory
-from auto_optimizer.inference_engine.data_process_factory import InferenceFactory
 
 
-class InferEngine():
-    def __init__(self):
+class TestResnet(unittest.TestCase):
+
+    def setUp(self) -> None:
+        sys.path.append("..")
+        os.chdir("..")
+
+        register = Register(os.path.join(os.getcwd(), "auto_optimizer"))
+        register.import_modules()
+
+        self.cfg = Config.read_by_file(os.sep.join(['auto_optimizer', 'configs', 'cv',
+                                                    'classification', 'resnet50.py']))
+
         max_queue_num = 100
         self.pre_queue = Manager().Queue(max_queue_num)
         self.infer_queue = Manager().Queue(max_queue_num)
@@ -37,6 +48,9 @@ class InferEngine():
         self.post_process_pool = None
         self.inference_pool = None
         self.evaluate_pool = None
+
+    def tearDown(self) -> None:
+        pass
 
     def inference(self, cfg):
         try:
@@ -61,7 +75,7 @@ class InferEngine():
 
     def _thread(self, loop, worker, batch_size, engine_cfg):
         pre_process, post_process, inference, evaluate = \
-            InferEngine._get_engine(engine_cfg)
+            self._get_engine(engine_cfg)
 
         self.pre_process_pool = Pool(worker)
         self.post_process_pool = Pool(1)
@@ -73,16 +87,13 @@ class InferEngine():
                                               args=(i, batch_size, worker, engine_cfg["pre_process"],
                                                     None, self.pre_queue))
 
-        # 除预处理用多进程，其他任务用单进程
+        # 用单进程
         self.inference_pool.apply_async(inference,
-                                        args=(loop, engine_cfg["inference"],
-                                              self.pre_queue, self.infer_queue))
+                                        args=(loop, engine_cfg["inference"], self.pre_queue, self.infer_queue))
         self.post_process_pool.apply_async(post_process,
-                                           args=(loop, engine_cfg["post_process"],
-                                                 self.infer_queue, self.post_queue))
+                                           args=(loop, engine_cfg["post_process"], self.infer_queue, self.post_queue))
         self.evaluate_pool.apply_async(evaluate,
-                                       args=(loop, batch_size, engine_cfg["evaluate"],
-                                             self.post_queue, None))
+                                       args=(loop, batch_size, engine_cfg["evaluate"], self.post_queue, None))
 
         self.pre_process_pool.close()
         self.inference_pool.close()
@@ -94,8 +105,7 @@ class InferEngine():
         self.post_process_pool.join()
         self.evaluate_pool.join()
 
-    @staticmethod
-    def _get_engine(engine):
+    def _get_engine(self, engine):
         try:
             pre_process = PreProcessFactory.get_pre_process(engine["pre_process"]["type"])
             post_process = PostProcessFactory.get_post_process(engine["post_process"]["type"])
@@ -106,27 +116,13 @@ class InferEngine():
 
         return pre_process, post_process, inference, evaluate
 
-
-def parse_args():
-    parser = argparse.ArgumentParser(description='model inference')
-    parser.add_argument('config', help='inference config file path')
-
-    args = parser.parse_args()
-
-    return args
+    def test_resnet_inference(self):
+        self.inference(self.cfg)
 
 
-def main():
-    args = parse_args()
+def test_suite():
+    suite = unittest.TestSuite()
 
-    register = Register(os.path.join(os.getcwd(), "auto_optimizer"))
-    register.import_modules()
+    suite.addTest(TestResnet("test_resnet_inference"))
 
-    cfg = Config.read_by_file(args.config)
-
-    infer_engine = InferEngine()
-    infer_engine.inference(cfg)
-
-
-if __name__ == '__main__':
-    main()
+    return suite

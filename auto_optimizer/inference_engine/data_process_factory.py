@@ -17,6 +17,7 @@ from typing import Dict
 from .pre_process.pre_process_base import PreProcessBase
 from .post_process.post_process_base import PostProcessBase
 from .evaluate.evaluate_base import EvaluateBase
+from .inference.inference_base import InferenceBase
 
 
 class PreProcessFactory(object):
@@ -30,9 +31,17 @@ class PreProcessFactory(object):
     def get_pre_process(cls, name):
         return cls._pre_process_pool.get(name, "Not exist")
 
+
+class InferenceFactory(object):
+    _inference_pool: Dict[str, InferenceBase] = {}
+
     @classmethod
-    def get_pre_process_pool(cls) -> Dict[str, PreProcessBase]:
-        return cls._pre_process_pool
+    def add_inference(cls, name, inference):
+        cls._inference_pool[name] = inference
+
+    @classmethod
+    def get_inference(cls, name):
+        return cls._inference_pool.get(name, "Not exist")
 
 
 class PostProcessFactory(object):
@@ -46,22 +55,15 @@ class PostProcessFactory(object):
     def get_post_process(cls, name):
         return cls._post_process_pool.get(name, "Not exist")
 
-    @classmethod
-    def get_post_process_pool(cls) -> Dict[str, PostProcessBase]:
-        return cls._post_process_pool
-
 
 class EvaluateFactory(object):
     _evaluate_pool: Dict[str, EvaluateBase] = {}
 
     @classmethod
-    def add_evaluate(cls, name, post_process):
-        cls._evaluate_pool[name] = post_process
+    def add_evaluate(cls, name, evaluate):
+        cls._evaluate_pool[name] = evaluate
 
     @classmethod
     def get_evaluate(cls, name):
         return cls._evaluate_pool.get(name, "Not exist")
 
-    @classmethod
-    def get_evaluate_pool(cls) -> Dict[str, EvaluateBase]:
-        return cls._evaluate_pool

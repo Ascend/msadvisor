@@ -19,13 +19,12 @@ class EvaluateBase(object):
     def __init__(self):
         pass
 
-    def __call__(self, *args, **kwargs):
+    @abstractmethod
+    def __call__(self, loop, batch_size, cfg, in_queue, out_queue):
+        """
+        loop: 循环次数，根据数据集大小、batch_size及worker计算得到loop次数
+        cfg: 配置文件，参考auto_optimizer\configs\cv\classification\resnet50.py
+        in_queue: 输入数据队列
+        out_queue： 输出数据队列
+        """
         pass
-
-    def __len__(self):
-        pass
-
-    def __getitem__(self, item):
-        pass
-
-

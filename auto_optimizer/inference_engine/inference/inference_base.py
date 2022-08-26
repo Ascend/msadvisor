@@ -14,25 +14,24 @@
 
 from abc import abstractmethod
 
-
-class PreProcessBase(object):
+class InferenceBase(object):
     def __init__(self):
         pass
 
     @abstractmethod
-    def __call__(self, index, batch_size, worker, cfg, in_queue, out_queue):
+    def __call__(self, loop, cfg, in_queue, out_queue):
         """
-        index: 多线程的索引
-        batch_size: batch_size
-        worker: 多线程的数量
+        loop: 循环次数，根据数据集大小、batch_size及worker计算得到loop次数
         cfg: 配置文件，参考auto_optimizer\configs\cv\classification\resnet50.py
-        in_queue: 输入数据队列，预处理输入队列为空
+        in_queue: 输入数据队列
         out_queue： 输出数据队列
         """
         pass
 
-    def __len__(self):
-        pass
+    def _get_params(self, cfg):
+        try:
+            model = cfg["model"]
+        except Exception as err:
+            raise RuntimeError("get params failed error={}".format(err))
 
-    def __getitem__(self, item):
-        pass
+        return model

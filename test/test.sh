@@ -8,6 +8,12 @@ pwd_dir=${PWD}
 cp ${pwd_dir}/../auto_optimizer ${pwd_dir}/ -rf
 
 coverage run -p -m unittest
+ret=$?
+if [ $ret != 0 ]; then
+    echo "coverage run failed! "
+    exit -1
+fi
+
 coverage combine
 coverage report -m --omit="test_*.py" > ${pwd_dir}/test.coverage
 

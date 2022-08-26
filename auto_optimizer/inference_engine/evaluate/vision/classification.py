@@ -11,26 +11,105 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import os
 from abc import ABC
+
+import numpy as np
+from tqdm import tqdm
 
 from ..evaluate_base import EvaluateBase
 from ...data_process_factory import EvaluateFactory
 
 
 class ClassificationEvaluate(EvaluateBase, ABC):
-    def __init__(self):
-        pass
 
-    def __call__(self, *args, **kwargs):
-        print("evaluate")
-        return True
+    def __call__(self, loop, batch_size, cfg, in_queue, out_queue):
+        """
+        和基类的参数顺序和个数需要一致
+        """
+        print("evaluate start")
+        try:
+            ground_truth, topk = ClassificationEvaluate._get_params(cfg)
+            gt_dict = ClassificationEvaluate._groundtruth_dict_fromtxt(ground_truth)
 
-    def acc_1(self, *args, **kwargs):
-        print("acc_1")
-        return True
+            count = 0
+            count_hit = np.zeros([len(topk), loop * batch_size])
+            for i in tqdm(range(loop), desc="Evaluating"):
+                in_data = in_queue.get()
+                if len(in_data) < 2:  # include file_name and data
+                    raise RuntimeError("input params error len={}".format(len(in_data)))
 
-    def acc_k(self, *args, **kwargs):
-        print("evaluate")
-        pass
+                files, data = in_data[0], in_data[1]
+                files_len = len(files)
 
-EvaluateFactory.add_evaluate("Classification", ClassificationEvaluate())
+                for file_index, file_path in enumerate(files):
+                    file_name = os.path.splitext(os.path.basename(file_path))[0]
+
+                    # 多batch下，按batch取出对应的数据，先判断文件名称和模型输出数据大小是否一致
+                    if len(data[0]) < files_len:
+                        raise RuntimeError("input params error len={}".format(len(data[0])))
+
+                    for idx, k in enumerate(topk):
+                        hit = self._is_hit_ground_truth([data[0][file_index]], gt_dict[file_name], k)
+
+                        if hit:
+                            count_hit[idx][count] = 1
+                    count += 1
+
+            for idx, k in enumerate(topk):
+                if count:
+                    top_k_accuracy = np.count_nonzero(count_hit[idx]) / count
+                    print("top_{}_accuracy={}".format(k, top_k_accuracy))
+        except Exception as err:
+            print("evaluate failed error={}".format(err))
+
+        print("evaluate end")
+
+    def _is_hit_ground_truth(self, data, targets, k):
+        values, indices = self._get_top_k(data, k)
+        for indice in indices:
+            if indice == int(targets):
+                return True
+
+        return False
+
+    def _get_top_k(self, data, k, order=True):
+        indices = np.argsort(data, axis=-1)[:, -k:]
+        if order:
+            temp = []
+            for indice in indices:
+                temp.append(indice[::-1])
+            indices = np.array(temp)
+        values = []
+        for idx, item in zip(indices, data):
+            value = item.reshape(1, -1)[:, idx].reshape(-1)
+            values.append(value)
+        return np.array(values)[0], indices[0]
+
+    @staticmethod
+    def _groundtruth_dict_fromtxt(gt_file_path):
+        """
+        :param filename: file contains the imagename and label number
+        :return: dictionary key imagename, value is label number
+        """
+        img_gt_dict = {}
+        with open(gt_file_path, 'r') as f:
+            for line in f.readlines():
+                temp = line.strip().split(" ")
+                img_name = temp[0].split(".")[0]
+                img_lab = temp[1]
+                img_gt_dict[img_name] = img_lab
+        return img_gt_dict
+
+    @staticmethod
+    def _get_params(cfg):
+        try:
+            ground_truth = cfg["ground_truth"]
+            topk = cfg["topk"]
+            return ground_truth, topk
+        except Exception as err:
+            raise RuntimeError("get params failed error={}".format(err))
+
+
+EvaluateFactory.add_evaluate("classification", ClassificationEvaluate())

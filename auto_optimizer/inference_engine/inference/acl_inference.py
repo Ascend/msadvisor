@@ -13,11 +13,21 @@
 # limitations under the License.
 
 
-from abc import abstractmethod
+from abc import ABC
+from .inference_base import InferenceBase
+from ..data_process_factory import InferenceFactory
 
 
-class InferenceBase(object):
+class AclInference(InferenceBase, ABC):
 
-    @abstractmethod
-    def inference(self):
-        pass
+    def __call__(self, loop, cfg, in_queue, out_queue):
+        print("inference start")
+
+        for i in range(loop):
+            data = in_queue.get()
+            out_queue.put(data)
+
+        print("inference end")
+
+
+InferenceFactory.add_inference("acl", AclInference())
