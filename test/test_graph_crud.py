@@ -36,12 +36,13 @@ def create_graph():
 def create_graph_1():
     input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [1,3,224,224])
     output_0 = OnnxPlaceHolder('0_out_0', np.dtype('float32'), [1,3,224,224])
-    output_1 = OnnxPlaceHolder('1_out_0', np.dtype('float32'), [1,3,224,224])
+    output_1 = OnnxPlaceHolder('3_out_0', np.dtype('float32'), [1,3,224,224])
     ini_0 = OnnxInitializer('ini_0', np.array([1], dtype='int32'))
-    ini_1 = OnnxInitializer('ini_1', np.array([1], dtype='int32'))
-    node_0 = OnnxNode('Node_0', 'Mul', inputs=['input_0', 'ini_0'], outputs=['0_out_0'], attrs={})
-    node_1 = OnnxNode('Node_1', 'Mul', inputs=['0_out_0', 'ini_1'], outputs=['1_out_0'], attrs={})
-    return OnnxGraph([node_0,node_1], [input_0], [output_0, output_1], [ini_0, ini_1], name='graph_1')
+    node_0 = OnnxNode('Node_0', 'Sqrt', inputs=['input_0'], outputs=['0_out_0'], attrs={})
+    node_1 = OnnxNode('Node_1', 'Sqrt', inputs=['input_0'], outputs=['1_out_0'], attrs={})
+    node_2 = OnnxNode('Node_2', 'Add', inputs=['0_out_0', 'ini_0'], outputs=['2_out_0'], attrs={})
+    node_3 = OnnxNode('Node_3', 'Add', inputs=['2_out_0', '1_out_0'], outputs=['3_out_0'], attrs={})
+    return OnnxGraph([node_0,node_1,node_2,node_3], [input_0], [output_0, output_1], [ini_0], name='graph_1')
     
 class TestGraphCrud(unittest.TestCase):
 
@@ -114,7 +115,10 @@ class TestGraphCrud(unittest.TestCase):
         self.graph_1.insert_node('input_0', test_node, 0, 'after')
         self.assertEqual(test_node.inputs, ['input_0'])
         self.assertEqual(test_node.outputs, ['test_node/Node_0'])
-        self.assertEqual(self.graph_1.get_next_nodes('test_node/Node_0'), [self.graph_1['Node_0']])
+        self.assertEqual(
+            self.graph_1.get_next_nodes('test_node/Node_0'), 
+            [self.graph_1['Node_0'], self.graph_1['Node_1']]
+            )
         self.assertEqual(self.graph_1.get_prev_node('test_node/Node_0'), test_node)
         self.assertEqual(self.graph_1.get_next_nodes('input_0'), [test_node])
 
@@ -122,9 +126,9 @@ class TestGraphCrud(unittest.TestCase):
         test_node = self.graph_1.add_node('test_node', 'Add')
         self.graph_1.insert_node('ini_0', test_node, 0, 'after')
         self.assertEqual(test_node.inputs, ['ini_0'])
-        self.assertEqual(test_node.outputs, ['test_node/Node_0'])
-        self.assertEqual(self.graph_1.get_next_nodes('test_node/Node_0'), [self.graph_1['Node_0']])
-        self.assertEqual(self.graph_1.get_prev_node('test_node/Node_0'), test_node)
+        self.assertEqual(test_node.outputs, ['test_node/Node_2'])
+        self.assertEqual(self.graph_1.get_next_nodes('test_node/Node_2'), [self.graph_1['Node_2']])
+        self.assertEqual(self.graph_1.get_prev_node('test_node/Node_2'), test_node)
         self.assertEqual(self.graph_1.get_next_nodes('ini_0'), [test_node])
 
     def test_insert_node_before_graph_output(self):
@@ -132,9 +136,9 @@ class TestGraphCrud(unittest.TestCase):
         self.graph_1.insert_node('0_out_0', test_node, 0, 'before')
         self.assertEqual(test_node.inputs, ['Node_0/test_node'])
         self.assertEqual(test_node.outputs, ['0_out_0'])
-        self.assertEqual(self.graph_1.get_next_nodes('Node_0/test_node'), [test_node, self.graph_1['Node_1']])
+        self.assertEqual(self.graph_1.get_next_nodes('Node_0/test_node'), [test_node, self.graph_1['Node_2']])
         self.assertEqual(self.graph_1.get_prev_node('Node_0/test_node'), self.graph['Node_0'])
-        self.assertEqual(self.graph_1.get_next_node('0_out_0'), [])
+        self.assertEqual(self.graph_1.get_next_nodes('0_out_0'), [])
         self.assertEqual(self.graph_1.get_prev_node('0_out_0'), test_node)
     
     # single input & single output

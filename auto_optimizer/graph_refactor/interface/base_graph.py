@@ -143,18 +143,16 @@ class BaseGraph(ABC):
                 f'The value for mode argument should be "after" or "before", but got "{mode}"')
         
         # reference node is input or initializer: convert to inserting node before the next node
+        input_flag = False
         if refer_node in self._inputs or isinstance(refer_node, Initializer):
             if mode == 'before':
                 raise RuntimeError(
                     f'Can not insert node before {refer_node.name}.')
-            if len(self._next_map[refer_node.name]) >= 2:
-                raise RuntimeError(
-                    'Please use "before" mode with appropriate reference node')
-            else:
-                name = refer_node.name
-                refer_node = self._next_map[name][0]
-                refer_index = refer_node.inputs.index(name)
-                mode = 'before'
+            name = refer_node.name
+            refer_node = self._next_map[name][0]
+            refer_index = refer_node.inputs.index(name)
+            mode = 'before'
+            input_flag = True
                 
         # reference node is output: convert to inserting node after the prev node
         output_flag = False
@@ -198,8 +196,15 @@ class BaseGraph(ABC):
             self._prev_map[new_in_name] = insert_node
             self._next_map[new_in_name] = [refer_node]
             self._next_map[refer_in_name].append(insert_node)
-            self._next_map[refer_in_name].remove(refer_node)          
-       
+            self._next_map[refer_in_name].remove(refer_node)
+            if input_flag:
+                for node in self._next_map[refer_in_name]:
+                    if node.name != insert_node.name:
+                        index = node.get_input_id(refer_in_name)
+                        node.inputs[index] = new_in_name
+                        self._next_map[new_in_name].append(node)
+                self._next_map[refer_in_name] = [insert_node]
+
         self._node_map[insert_node.name] = insert_node
 
     def get_nodes(self, op_type):
