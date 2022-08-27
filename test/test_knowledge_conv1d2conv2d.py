@@ -145,7 +145,10 @@ class TestKnowledgeConv1d2Conv2d(unittest.TestCase):
         graph.save(new_onnx_path)
 
         run_result_1 = self.infer_run(new_onnx_path, x)
-        self.assertTrue(np.array_equal(run_result_0, run_result_1))
+        result_item_sum = abs(np.array(run_result_1) - np.array(run_result_0)).sum()
+        result_0_item_sum = abs(np.array(run_result_0)).sum()
+        acc = result_item_sum / result_0_item_sum
+        self.assertTrue(acc < 0.0000001)
 
     def test_conv1d2conv2d_optimizer_1(self):
         x = np.random.randn(1, 3, 2500).astype(np.float32)
@@ -163,7 +166,10 @@ class TestKnowledgeConv1d2Conv2d(unittest.TestCase):
         graph.save(new_onnx_path)
 
         run_result_1 = self.infer_run(new_onnx_path, x)
-        self.assertTrue(np.array_equal(run_result_0, run_result_1))
+        result_item_sum = abs(np.array(run_result_1) - np.array(run_result_0)).sum()
+        result_0_item_sum = abs(np.array(run_result_0)).sum()
+        acc = result_item_sum / result_0_item_sum
+        self.assertTrue(acc < 0.0000001)
 
 if __name__ == "__main__":
     unittest.main()
