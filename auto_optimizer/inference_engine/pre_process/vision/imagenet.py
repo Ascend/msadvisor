@@ -122,7 +122,8 @@ class ImageNetPreProcess(PreProcessBase, ABC):
             resize = cfg["resize"]
             dataset_path = cfg["dataset_path"]
             dtype = cfg["dtype"]
-            return ImageParam(mean, std, center_crop, resize, dataset_path, dtype)
+            real_path = os.path.realpath(dataset_path)
+            return ImageParam(mean, std, center_crop, resize, real_path, dtype)
         except Exception as err:
             raise RuntimeError("get params failed error={}".format(err))
 
