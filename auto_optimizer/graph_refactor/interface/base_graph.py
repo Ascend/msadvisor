@@ -201,6 +201,135 @@ class BaseGraph(ABC):
                 self._next_map[refer_in_name] = [insert_node]
 
         self._node_map[insert_node.name] = insert_node
+    
+    def connect_node(self, insert_node, prev_nodes_info:List[str], next_nodes_info:List[str]):
+        """Insert a node with multiple inputs and outputs
+
+        Example:
+            g.connect_node(
+                Split_0,
+                ['Add_0:1', 'split_ini'], 
+                ['Transpose_0', 'Transpose_1', 'Transpose_2']
+            )
+        """  
+        # create outputs of insert_node
+        insert_node.outputs = [f'{insert_node.name}_out_{idx}' for idx in range(len(next_nodes_info))]
+
+        # parse information of previous and next nodes
+        prev_nodes_info, next_nodes_info = self._parse_nodes_info(prev_nodes_info, next_nodes_info)
+        
+        # check if next nodes include the graph output
+        output_flag = False
+        for node_info in next_nodes_info:
+            if self._node_map[node_info['next_node_name']] in self._outputs:
+                output_flag = True     
+        
+        # connect the insert node to previous nodes
+        for node_info in prev_nodes_info:
+            node = self._node_map[node_info['prev_node_name']]
+            if node in self._outputs:
+                # the prev node is graph output: illegal
+                raise RuntimeError('Please check the list of prev_nodes_info.')
+            elif isinstance(node, Initializer) or node in self._inputs:
+                # the prev node is graph input or init: link input of insert_node
+                insert_node.inputs.append(node_info['prev_node_name'])
+                if not self.get_next_nodes(node_info['prev_node_name']):
+                    self._next_map[node_info['prev_node_name']] = [insert_node]
+                else:
+                    self._next_map[node_info['prev_node_name']].append(insert_node)
+            else:
+                idx = node_info['prev_node_output_idx']
+                old_out_name = node.outputs[idx]
+                if old_out_name in [o.name for o in self._outputs] and output_flag:
+                    # the prev node is neighbor of graph output: create new edge of insert_node
+                    new_out_name = f'{node.name}_{idx}_{insert_node.name}'
+                    node.outputs[idx] = new_out_name
+                    insert_node.inputs.append(new_out_name)
+                    self._prev_map[new_out_name] = node
+                    self._next_map[new_out_name] = [insert_node]
+                    for node in self.get_next_nodes(old_out_name):
+                        index = node.get_input_id(old_out_name)
+                        node.inputs[index] = new_out_name
+                        self._next_map[new_out_name].append(node)
+                else:
+                    # link input of insert_node               
+                    insert_node.inputs.append(old_out_name)
+                    self._next_map[old_out_name].append(insert_node)          
+    
+        # connect the insert node to next nodes
+        for node_info in next_nodes_info:
+            node = self._node_map[node_info['next_node_name']]
+            if node in self._inputs:
+                # the next node is graph input: illegal
+                raise RuntimeError('Please check the list of next_nodes_info.')
+            elif node in self._outputs:
+                # the next node is graph output: link output of insert_node
+                insert_node.outputs[node_info['insert_node_output_idx']] = node.name
+                self._prev_map[node.name] = insert_node
+            else:
+                # link new output of insert_node
+                idx = node_info['next_node_input_idx']
+                old_in_name = node.inputs[idx]
+                new_in_name = insert_node.outputs[node_info['insert_node_output_idx']]
+                node.inputs[idx] = new_in_name
+                self._prev_map[new_in_name] = insert_node
+                if not self.get_next_nodes(new_in_name):
+                    self._next_map[new_in_name] = [node]
+                elif node not in self._next_map[new_in_name]:
+                    self._next_map[new_in_name].append(node)
+                self._next_map[old_in_name].remove(node)
+
+    def _parse_nodes_info(self, prev_nodes_info:List[str], next_nodes_info:List[str]):
+        """Parse information of prev_nodes_info and next_nodes_info
+
+        Example:
+            prev_info_list = [
+                {'prev_node_name': 'Add_0', 'prev_node_output_idx': 1}, 
+                {'prev_node_name': 'split_ini', 'prev_node_output_idx': 0}
+                ]
+            next_info_list = [
+                {'next_node_name': 'Transpose_0', 'next_node_input_idx': 0, 'insert_node_output_idx': 0}, 
+                {'next_node_name': 'Transpose_1', 'next_node_input_idx': 0, 'insert_node_output_idx': 1}, 
+                {'next_node_name': 'Transpose_2', 'next_node_input_idx': 0, 'insert_node_output_idx': 2}
+                ]
+        """  
+        prev_info_list = []
+        next_info_list = []
+
+        for node_info in prev_nodes_info:
+            info = {}
+            info_splits = node_info.split(':')
+            info['prev_node_name'] = info_splits[0]
+            if len(info_splits) == 1:
+                info['prev_node_output_idx'] = 0
+            else:
+                info['prev_node_output_idx'] = int(info_splits[1])         
+            prev_info_list.append(info)
+        
+        for idx, str_info in enumerate(next_nodes_info):
+            nodes_info = str_info.split(';')
+            if len(nodes_info) > 1:
+                for i, node_info in enumerate(nodes_info):
+                    next_node_name = node_info.split(':')[0]
+                    if self._node_map[next_node_name] in self._outputs:
+                        # when next node share the same edge with graph output, deal with graph output first
+                        nodes_info[0], nodes_info[i] = nodes_info[i], nodes_info[0]
+            for node_info in nodes_info:
+                info_splits = node_info.split(':')
+                if len(info_splits) == 1:
+                    info = {}
+                    info['next_node_name'] = info_splits[0]
+                    info['next_node_input_idx'] = 0
+                    info['insert_node_output_idx'] = idx
+                    next_info_list.append(info)  
+                else:
+                    for elem in info_splits[1].split(','):
+                        info = {}
+                        info['next_node_name'] = info_splits[0]
+                        info['next_node_input_idx'] = int(elem)
+                        info['insert_node_output_idx'] = idx
+                        next_info_list.append(info)                            
+        return prev_info_list, next_info_list
 
     def get_nodes(self, op_type):
         nodes = [node for node in self._node_map.values() if node.op_type == op_type]
