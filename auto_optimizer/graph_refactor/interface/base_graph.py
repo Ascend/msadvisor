@@ -127,9 +127,14 @@ class BaseGraph(ABC):
             mode: insert the node before or after the reference node. Default 'after'.
         """        
         # TODO: parameter checking with decorator
-        # name not exists
         # single input and output
         # the value for mode argument
+
+        if refer_name not in self._node_map.keys():
+            raise KeyError(
+                f'The node name"{refer_name}" not exists in graph')
+        else:
+            refer_node = self._node_map[refer_name]
 
         # reference node is input or initializer: convert to inserting node before the next node
         input_flag = False
