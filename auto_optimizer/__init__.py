@@ -15,3 +15,4 @@
 from .common import Register
 from .common.config import Config
 from .pattern.knowledge_factory import KnowledgeFactory
+from .graph_refactor import OnnxGraph, OnnxPlaceHolder, OnnxInitializer, OnnxNode

@@ -18,7 +18,7 @@ import unittest
 from typing import List
 
 import numpy as np
-from onnx import helper, GraphProto, ModelProto
+from onnx import helper, numpy_helper, GraphProto, ModelProto, OperatorSetIdProto
 from onnx.mapping import NP_TYPE_TO_TENSOR_TYPE
 
 from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
@@ -68,15 +68,16 @@ def create_graph():
     output_0 = OnnxPlaceHolder('output_0', np.dtype('float32'), [3,4])
     ini_0 = OnnxInitializer('ini_0', np.array([1,4], dtype='int32'))
     ini_1 = OnnxInitializer('ini_1', np.array([1], dtype='int32'))
+    ini_2 = OnnxInitializer('const_0', np.array([1], dtype='int32'))
     node_0 = OnnxNode(
                 'Node_0', 
                 'Pad', 
-                inputs=['input_0', 'ini_0', 'ini_1'], 
+                inputs=['input_0', 'ini_0', 'ini_1', 'const_0'], 
                 outputs=['output_0'], 
                 attrs={'mode':b'constant'}, 
                 domain=''
     )
-    graph = OnnxGraph([node_0], [input_0], [output_0], [ini_0, ini_1], name='test_graph')
+    graph = OnnxGraph([node_0], [input_0], [output_0], [ini_0, ini_1, ini_2], name='test_graph')
     return graph
 
 
@@ -90,52 +91,60 @@ class TestGraphBasic(unittest.TestCase):
         output_0 = OnnxPlaceHolder('output_0', np.dtype('float32'), [3,4])
         ini_0 = OnnxInitializer('ini_0', np.array([1,4], dtype='int32'))
         ini_1 = OnnxInitializer('ini_1', np.array([1], dtype='int32'))
+        ini_2 = OnnxInitializer('const_0', np.array([1], dtype='int32'))
         node_0 = OnnxNode(
                     'Node_0', 
                     'Pad', 
-                    inputs=['input_0', 'ini_0', 'ini_1'], 
+                    inputs=['input_0', 'ini_0', 'ini_1', 'const_0'], 
                     outputs=['output_0'], 
                     attrs={'mode':b'constant'}, 
                     domain=''
         )
 
-        graph = create_graph()
-        self.assertTrue(is_list_equal(graph._nodes, [node_0]))
-        self.assertTrue(is_list_equal(graph._inputs, [input_0]))
-        self.assertTrue(is_list_equal(graph._outputs, [output_0]))
-        self.assertTrue(is_list_equal(graph._initializers, [ini_0, ini_1]))
-        self.assertTrue(is_map_equal(graph._node_map, {
+
+        self.assertTrue(is_list_equal(self.graph._nodes, [node_0]))
+        self.assertTrue(is_list_equal(self.graph._inputs, [input_0]))
+        self.assertTrue(is_list_equal(self.graph._outputs, [output_0]))
+        self.assertTrue(is_list_equal(self.graph._initializers, [ini_0, ini_1, ini_2]))
+        self.assertTrue(is_map_equal(self.graph._node_map, {
                                                     'input_0':input_0, 
                                                     'output_0':output_0, 
                                                     'ini_0':ini_0, 
-                                                    'ini_1':ini_1, 
+                                                    'ini_1':ini_1,
+                                                    'const_0': ini_2,
                                                     'Node_0':node_0
         }))
-        self.assertTrue(is_map_equal(graph._prev_map, {'output_0':node_0}))
-        self.assertTrue(is_map_equal(graph._next_map, {'input_0':[node_0], 'ini_0':[node_0], 'ini_1':[node_0]}))
+        self.assertTrue(is_map_equal(self.graph._prev_map, {'output_0':node_0}))
+        self.assertTrue(is_map_equal(self.graph._next_map, {
+                                                    'input_0':[node_0], 
+                                                    'ini_0':[node_0], 
+                                                    'ini_1':[node_0], 
+                                                    'const_0':[node_0]
+        }))
+
 
     def test_parse_proto(self):
         input_0 = helper.make_tensor_value_info('input_0', NP_TYPE_TO_TENSOR_TYPE[np.dtype('float32')], [3,2])
         ini_0 = helper.make_tensor('ini_0', NP_TYPE_TO_TENSOR_TYPE[np.dtype('int32')], [2], np.array([1,4]))
         ini_1 = helper.make_tensor('ini_1', NP_TYPE_TO_TENSOR_TYPE[np.dtype('int32')], [1], np.array([1]))
-        node_0 = helper.make_node('Pad', ['input_0', 'ini_0', 'ini_1'], ['output_0'], 'Node_0', mode='constant')
+        node_0 = helper.make_node('Pad', ['input_0', 'ini_0', 'ini_1', 'const_0'], 
+                                ['output_0'], 'Node_0', mode='constant')
+        node_1 = helper.make_node('Constant', [], ['const_0'], 'Constant_0', 
+                                value=numpy_helper.from_array(np.array([1], dtype='int32')))
         output_0 = helper.make_tensor_value_info('output_0', NP_TYPE_TO_TENSOR_TYPE[np.dtype('float32')], [3,4])
-        graph_proto = helper.make_graph([node_0], 'test_parse', [input_0], [output_0], [ini_0, ini_1])
+        graph_proto = helper.make_graph([node_0, node_1], 'test_parse', [input_0], [output_0], [ini_0, ini_1])
         model_proto = helper.make_model(graph_proto, producer_name='test_parse')
         
-        expected_graph = create_graph()
         parse_from_graph_proto = OnnxGraph.parse(graph_proto)
         parse_from_model_proto = OnnxGraph.parse(model_proto)
-        self.assertTrue(is_graph_equal(parse_from_graph_proto, expected_graph))
-        self.assertTrue(is_graph_equal(parse_from_model_proto, expected_graph))
+        self.assertTrue(is_graph_equal(parse_from_graph_proto, self.graph))
+        self.assertTrue(is_graph_equal(parse_from_model_proto, self.graph))
     
     def test_to_proto(self):
-        graph = create_graph()
-        self.assertIsInstance(graph.proto(), GraphProto)
+        self.assertIsInstance(self.graph.proto(), GraphProto)
     
     def test_to_model(self):
-        graph = create_graph()
-        self.assertIsInstance(graph.model(), ModelProto)
+        self.assertIsInstance(self.graph.model(), ModelProto)
 
     def test_save_after_add_node(self):
         self.graph.add_input('test_input', 'float32', [1, 2, 3])
@@ -145,14 +154,31 @@ class TestGraphBasic(unittest.TestCase):
         self.graph.save('test.onnx')
         os.remove('test.onnx')
 
-
     def test_toposort(self):
-        graph = create_graph()
-        expected_order = [n.name for n in graph._nodes]
-        random.shuffle(graph._nodes)
-        graph.toposort()
-        test_order = [n.name for n in graph._nodes]
+        expected_order = [n.name for n in self.graph._nodes]
+        random.shuffle(self.graph._nodes)
+        self.graph.toposort()
+        test_order = [n.name for n in self.graph._nodes]
         self.assertEqual(test_order, expected_order)
+
+    def test_opset_imports(self):
+        # specify opset_imports
+        self.graph.opset_imports = 13
+        opset = OperatorSetIdProto()
+        opset.version = 13
+        self.assertEqual(self.graph.opset_imports, opset)
+        # clear opset_imports
+        self.graph.opset_imports = None
+        self.assertEqual(self.graph.opset_imports, None)
+        # exist two domain version fields
+        opset_0 = OperatorSetIdProto()
+        opset_0.domain = ""
+        opset_0.version = 13
+        opset_1 = OperatorSetIdProto()
+        opset_1.domain = "ai.onnx.ml"
+        opset_1.version = 2
+        graph = OnnxGraph(opset_imports = [opset_0, opset_1])
+        self.assertEqual(graph.opset_imports, [opset_0])
 
 if __name__ == '__main__':
     unittest.main()

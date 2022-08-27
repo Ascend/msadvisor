@@ -66,11 +66,13 @@ class OnnxInitializer(Initializer):
     @classmethod
     def parse(cls, node:Union[NodeProto, TensorProto]):
         if hasattr(node, 'op_type') and node.op_type == 'Constant':
+            name = node.output[0]
             value = numpy_helper.to_array(node.attribute[0].t)
         else:
+            name = node.name
             value = numpy_helper.to_array(node)
         return cls(
-            name = node.name, 
+            name = name, 
             value = value
         )
     
