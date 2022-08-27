@@ -22,7 +22,7 @@ model = dict(
         pre_process=dict(
             type='ImageNet',
             worker=4,
-            dataset_path='/opt/',
+            dataset_path='./test_jpg/',
             resize=256,
             center_crop=224,
             mean=[0.485, 0.456, 0.406],
@@ -41,7 +41,7 @@ model = dict(
         ),
         evaluate=dict(
             type='classification',
-            ground_truth='/opt/label.txt',
+            ground_truth='./test_jpg/label.txt',
             topk=[1, 5]
         ),
     )
