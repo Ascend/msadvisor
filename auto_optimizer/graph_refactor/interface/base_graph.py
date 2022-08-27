@@ -125,26 +125,15 @@ class BaseGraph(ABC):
                          specifies the inserting position within reference node's input id when mode='before';
                          Default 0.
             mode: insert the node before or after the reference node. Default 'after'.
-        """
-        # check
-        if refer_name not in self._node_map.keys():
-            raise KeyError(
-                f'The node name"{refer_name}" not exists in graph')
-        else:
-            refer_node = self._node_map[refer_name]
-        
-        if len(insert_node.inputs) > 1 or len(insert_node.outputs) > 1:
-            raise RuntimeError(
-                'Only support inserting node with single input and output.')
-        
+        """        
         # TODO: parameter checking with decorator
-        if mode != 'after' and mode != 'before':
-            raise ValueError(
-                f'The value for mode argument should be "after" or "before", but got "{mode}"')
-        
+        # name not exists
+        # single input and output
+        # the value for mode argument
+
         # reference node is input or initializer: convert to inserting node before the next node
         input_flag = False
-        if refer_node in self._inputs or isinstance(refer_node, Initializer):
+        if isinstance(refer_node, Initializer) or refer_node in self._inputs:
             if mode == 'before':
                 raise RuntimeError(
                     f'Can not insert node before {refer_node.name}.')
@@ -198,6 +187,7 @@ class BaseGraph(ABC):
             self._next_map[refer_in_name].append(insert_node)
             self._next_map[refer_in_name].remove(refer_node)
             if input_flag:
+                # deal with situation of inserting node before output
                 for node in self._next_map[refer_in_name]:
                     if node.name != insert_node.name:
                         index = node.get_input_id(refer_in_name)
