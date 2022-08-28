@@ -71,7 +71,7 @@ def evaluate(datapath, parameter):
     if file_name is None:
         raise RuntimeError('file_name:{} is none'.format(file_name))
     onnx_path = os.path.join("{}/{}".format(datapath, file_name))
-    if os.path.isfile(onnx_path) == False:
+    if os.path.isfile(onnx_path) is False:
         raise RuntimeError('onnx_path:{} is not exist'.format(onnx_path))
 
     print("evaluate datapath:{} parameter:{} onnx_path:{}".format(datapath, parameter, onnx_path))
@@ -92,11 +92,11 @@ def evaluate(datapath, parameter):
 
     if mode == "evaluate":
         needflag =  need_to_optimize(onnx_graph, knowlege_class)
-        if needflag == True:
+        if needflag is True:
             result.summary = "The current model need to be optimized"
     elif mode == "optimize":
         flag = optimize(onnx_graph, knowlege_class)
-        if flag == True:
+        if flag is True:
             out_file = os.path.join(datapath, "{}_optimize.onnx".format(os.path.splitext(file_name)[0]))
             onnx_graph.save(out_file)
             result.error_code = error_code['optimized']

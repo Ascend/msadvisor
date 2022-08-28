@@ -121,7 +121,8 @@ def make_c4_slice_model(onnx_name, x, same_axis=False):
     node_slice3 = helper.make_node("Slice", ["X_S_S_S", "start3", "end3", "axes3", "step3"], ["Z"], "Slice3")
 
     graph = helper.make_graph([node_slice0, node_slice1, node_slice2, node_slice3], "continue4_slice_test",
-        [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1, start2, end2, axes2, step2, start3, end3, axes3, step3],)
+        [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1,
+                    start2, end2, axes2, step2, start3, end3, axes3, step3],)
     model = helper.make_model(graph)
 
     del model.opset_import[:]
@@ -149,7 +150,7 @@ def optimize(graph, knowledge, onnx_path):
             knowledge.next_apply()
             for match_result in match_results:
                 res &= knowledge.apply(graph, match_result)
-                if res == False:
+                if res is False:
                     return res
                 graph.save(onnx_path)
     return res
