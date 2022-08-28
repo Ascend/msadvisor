@@ -87,7 +87,7 @@ def make_c3_slice_model(onnx_name, x):
     opset.version = 14
     onnx.save(model, onnx_name)
 
-def make_c4_slice_model(onnx_name, x):
+def make_c4_slice_model(onnx_name, x, same_axis=False):
     X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
     Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
@@ -106,9 +106,13 @@ def make_c4_slice_model(onnx_name, x):
     axes2 = helper.make_tensor("axes2", TensorProto.INT64, [1], np.array([2], dtype=np.int64))
     step2 = helper.make_tensor("step2", TensorProto.INT64, [1], np.array([1], dtype=np.int64))
 
+    if same_axis:
+        axis = 0
+    else:
+        axis = 3
     start3 = helper.make_tensor("start3", TensorProto.INT64, [1], np.array([5], dtype=np.int64))
     end3 = helper.make_tensor("end3", TensorProto.INT64, [1], np.array([-1], dtype=np.int64))
-    axes3 = helper.make_tensor("axes3", TensorProto.INT64, [1], np.array([3], dtype=np.int64))
+    axes3 = helper.make_tensor("axes3", TensorProto.INT64, [1], np.array([axis], dtype=np.int64))
     step3 = helper.make_tensor("step3", TensorProto.INT64, [1], np.array([1], dtype=np.int64))
 
     node_slice0 = helper.make_node("Slice", ["X", "start0", "end0", "axes0", "step0"], ["X_S"], "Slice0")
@@ -145,6 +149,8 @@ def optimize(graph, knowledge, onnx_path):
             knowledge.next_apply()
             for match_result in match_results:
                 res &= knowledge.apply(graph, match_result)
+                if res == False:
+                    return res
                 graph.save(onnx_path)
     return res
 
@@ -194,7 +200,7 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         c4_slice_optimize_onnx = "{}_optimize.onnx".format(os.path.splitext(c4_slice_onnx)[0])
         os.system("rm -rf {} {}".format(c4_slice_onnx, c4_slice_optimize_onnx))
 
-        make_c4_slice_model(c4_slice_onnx, x)
+        make_c4_slice_model(c4_slice_onnx, x, False)
         ret = infer_run(c4_slice_onnx, x)
 
         graph = OnnxGraph.parse(c4_slice_onnx)
@@ -203,6 +209,19 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         self.assertTrue(res)
         ret1 = infer_run(c4_slice_optimize_onnx, x)
         self.assertTrue(np.array_equal(ret, ret1))
+
+    def test_merge_c4_slice_same_axis(self):
+        x = np.random.randn(50, 50, 50, 50).astype(np.float32)
+
+        c4_slice_onnx = "./c4_slice_same_axis.onnx"
+        os.system("rm -rf {}".format(c4_slice_onnx))
+
+        make_c4_slice_model(c4_slice_onnx, x, True)
+
+        graph = OnnxGraph.parse(c4_slice_onnx)
+        knowledge = KnowledgeMergeContinueSlice()
+        res = optimize(graph, knowledge, None)
+        self.assertFalse(res)
 
 if __name__ == "__main__":
     unittest.main()

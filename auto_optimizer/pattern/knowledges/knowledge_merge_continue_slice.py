@@ -22,7 +22,6 @@ from auto_optimizer.pattern.pattern import MATCH_PATTERN
 from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
-from .msadvisor_adapter import evaluate
 
 # continue 4 slice op
 pattern0 = Pattern() \
@@ -71,7 +70,6 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
                     merged_name: name for merged node
         @return     merged initializer
         """
-        print("lcm debug i1value:{} type:{}".format(initializer1.value, type(initializer1.value)))
         merged_data = np.append(
             initializer1.value,
             initializer2.value,
@@ -136,10 +134,22 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
         }
         return apply_dict
 
+    def is_nodes_has_same_axis(self, graph: BaseGraph, node_dict):
+        axis_list = []
+        for name,node in node_dict.items():
+            axis = graph[graph[node[0].name].inputs[3]].value
+            print("name:{} axis:{}".format(name, axis))
+            if axis in axis_list:
+                return True
+            axis_list.append(axis)
+        return False
+
     def _merge_continue_slice_apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:
-        # print("match result:{} nodes_dict:{}".format(match_result, match_result.node_dicts))
         flag = False
         for dict in match_result.node_dicts:
+            if self.is_nodes_has_same_axis(graph, dict):
+                print("error check nodes has same axis can not merge")
+                continue
             last_node_name = dict[list(dict.keys())[-1]][0].name
             for name,node in dict.items():
                 graph = self.merge_slicedop(graph, node[0].name, last_node_name)
