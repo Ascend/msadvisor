@@ -76,10 +76,10 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
 
     def __is_lower_onnx_version(self) -> bool:
         """
-        判断当前onnx版本是否小于1.12.0
-        :return: onnx版本小于1.12.0，则返回True，否则返回False
+        判断当前onnx版本是否小于1.11.0
+        :return: onnx版本小于1.11.0，则返回True，否则返回False
         """
-        limit_version = '1.12.0'
+        limit_version = '1.11.0'
         onnx_version = onnx.version.version
 
         limit_versions = limit_version.split('.')
