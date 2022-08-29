@@ -125,17 +125,42 @@ class BaseGraph(ABC):
                          specifies the inserting position within reference node's input id when mode='before';
                          Default 0.
             mode: insert the node before or after the reference node. Default 'after'.
-        """
-        # TODO: exception: name not exists in graph
-        refer_node = self._node_map[refer_name]
-        if refer_node.op_type == 'PlaceHolder':
-            raise RuntimeError(
-                'Please use another mode with appropriate reference node or other insert methods.')
-        
-        if len(insert_node.inputs) > 1 or len(insert_node.outputs) > 1:
-            raise RuntimeError(
-                'Only support inserting node with single input and output.')
+        """        
+        # TODO: parameter checking with decorator
+        # single input and output
+        # the value for mode argument
 
+        if refer_name not in self._node_map.keys():
+            raise KeyError(
+                f'The node name"{refer_name}" not exists in graph')
+        else:
+            refer_node = self._node_map[refer_name]
+
+        # reference node is input or initializer: convert to inserting node before the next node
+        input_flag = False
+        if isinstance(refer_node, Initializer) or refer_node in self._inputs:
+            if mode == 'before':
+                raise RuntimeError(
+                    f'Can not insert node before {refer_node.name}.')
+            name = refer_node.name
+            refer_node = self._next_map[name][0]
+            refer_index = refer_node.inputs.index(name)
+            mode = 'before'
+            input_flag = True
+                
+        # reference node is output: convert to inserting node after the prev node
+        output_flag = False
+        if refer_node in self._outputs:
+            if mode == 'after':
+                raise RuntimeError(
+                    f'Can not insert node after {refer_node.name}.')
+            name = refer_node.name
+            refer_node = self._prev_map[name]
+            refer_index = refer_node.outputs.index(name)
+            mode = 'after'
+            output_flag = True
+
+        # reference node is operator node
         if mode == 'after':
             refer_out_name = refer_node.outputs[refer_index]
             new_out_name = f'{refer_node.name}/{insert_node.name}'
@@ -143,11 +168,17 @@ class BaseGraph(ABC):
             refer_node.outputs[refer_index] = new_out_name
             insert_node.inputs = [new_out_name]
             insert_node.outputs = [refer_out_name]
-            # update prev and next map for new output of reference node
+            # update prev and next map
             self._prev_map[new_out_name] = refer_node
             self._next_map[new_out_name] = [insert_node]
-            # update prev map for original output of reference node
             self._prev_map[refer_out_name] = insert_node
+            # deal with situation of inserting node before output
+            if output_flag and self._next_map[refer_out_name]:
+                for node in self._next_map[refer_out_name]:
+                    index = node.get_input_id(refer_out_name)
+                    node.inputs[index] = new_out_name
+                    self._next_map[new_out_name].append(node)
+                    self._next_map[refer_out_name] = []
         elif mode == 'before':
             refer_in_name = refer_node.inputs[refer_index]
             new_in_name = f'{insert_node.name}/{refer_node.name}'
@@ -155,16 +186,20 @@ class BaseGraph(ABC):
             refer_node.inputs[refer_index] = new_in_name
             insert_node.inputs = [refer_in_name]
             insert_node.outputs = [new_in_name]
-            # update prev and next map for new input of reference node
+            # update prev and next map
             self._prev_map[new_in_name] = insert_node
             self._next_map[new_in_name] = [refer_node]
-            # update next map for original input of reference node
             self._next_map[refer_in_name].append(insert_node)
-            self._next_map[refer_in_name].remove(refer_node)            
-        else:
-            raise ValueError(
-                f'The value for mode argument should be "after" or "before", but got "{mode}"')
-        
+            self._next_map[refer_in_name].remove(refer_node)
+            if input_flag:
+                # deal with situation of inserting node before output
+                for node in self._next_map[refer_in_name]:
+                    if node.name != insert_node.name:
+                        index = node.get_input_id(refer_in_name)
+                        node.inputs[index] = new_in_name
+                        self._next_map[new_in_name].append(node)
+                self._next_map[refer_in_name] = [insert_node]
+
         self._node_map[insert_node.name] = insert_node
 
     def get_nodes(self, op_type):

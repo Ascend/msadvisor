@@ -109,17 +109,22 @@ class TestGraphBasic(unittest.TestCase):
         self.assertTrue(is_list_equal(self.graph._nodes, [node_0]))
         self.assertTrue(is_list_equal(self.graph._inputs, [input_0]))
         self.assertTrue(is_list_equal(self.graph._outputs, [output_0]))
-        self.assertTrue(is_list_equal(self.graph._initializers, [ini_0, ini_1]))
+        self.assertTrue(is_list_equal(self.graph._initializers, [ini_0, ini_1, ini_2]))
         self.assertTrue(is_map_equal(self.graph._node_map, {
                                                     'input_0':input_0, 
                                                     'output_0':output_0, 
                                                     'ini_0':ini_0, 
-                                                    'ini_1':ini_1, 
+                                                    'ini_1':ini_1,
                                                     'const_0': ini_2,
                                                     'Node_0':node_0
         }))
         self.assertTrue(is_map_equal(self.graph._prev_map, {'output_0':node_0}))
-        self.assertTrue(is_map_equal(self.graph._next_map, {'input_0':[node_0], 'ini_0':[node_0], 'ini_1':[node_0]}))
+        self.assertTrue(is_map_equal(self.graph._next_map, {
+                                                    'input_0':[node_0], 
+                                                    'ini_0':[node_0], 
+                                                    'ini_1':[node_0], 
+                                                    'const_0':[node_0]
+        }))
 
 
     def test_parse_proto(self):
