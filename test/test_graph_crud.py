@@ -55,11 +55,6 @@ class TestGraphCrud(unittest.TestCase):
         self.graph = create_graph()
         self.graph_1 = create_graph_1()
 
-    # def test_graph_test(self):
-    #     target = OnnxGraph()
-    #     self.assertEqual(self.graph, target)
-    #     # self.assertTrue(is_graph_equal(self.graph, target))
-
     def test_add_input(self):
         test_input = self.graph.add_input('test_input', 'float32', [1,3,224,224])
         self.assertEqual(self.graph['test_input'], test_input)
@@ -143,7 +138,7 @@ class TestGraphCrud(unittest.TestCase):
         self.assertEqual(test_node.inputs, ['Node_0/test_node'])
         self.assertEqual(test_node.outputs, ['0_out_0'])
         self.assertEqual(self.graph_1.get_next_nodes('Node_0/test_node'), [test_node, self.graph_1['Node_2']])
-        self.assertEqual(self.graph_1.get_prev_node('Node_0/test_node'), self.graph['Node_0'])
+        self.assertEqual(self.graph_1.get_prev_node('Node_0/test_node'), self.graph_1['Node_0'])
         self.assertEqual(self.graph_1.get_next_nodes('0_out_0'), [])
         self.assertEqual(self.graph_1.get_prev_node('0_out_0'), test_node)
 
