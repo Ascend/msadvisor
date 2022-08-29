@@ -61,60 +61,6 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
         super().__init__()
         self._insert_op_names = set()
 
-    def merge_intializers(self, graph, initializer1, initializer2, merged_name):
-        """
-        @des        merge two initializers to one initializer
-        @param      graph: input onnx graph
-                    initializer1: initializer need to be merged
-                    initializer2: initializer need to be merged
-                    merged_name: name for merged node
-        @return     merged initializer
-        """
-        merged_data = np.append(
-            initializer1.value,
-            initializer2.value,
-        )
-
-        merged_node = graph.add_initializer(name=merged_name, value=merged_data)
-        return merged_node
-
-    def merge_slicedop(self, graph, node1_name, node2_name):
-        """
-        @des        merge two node to one node
-        @param      graph: input onnx graph
-                    slice_node1: slice node1 need to be merged
-                    slice_node2: slice node2 need to be merged
-        @return     merged graph
-        """
-        node1 = graph[node1_name]
-        node2 = graph[node2_name]
-        if node1_name == node2_name:
-            return graph
-        
-        # modify slice_node1 -> merge_node
-        node2.inputs[1] = self.merge_intializers(
-            graph,
-            graph[node1.inputs[1]],
-            graph[node2.inputs[1]],
-            '{}_1'.format(node1.name)).name
-        node2.inputs[2] = self.merge_intializers(
-            graph,
-            graph[node1.inputs[2]],
-            graph[node2.inputs[2]],
-            '{}_2'.format(node1.name)).name
-        node2.inputs[3] = self.merge_intializers(
-            graph,
-            graph[node1.inputs[3]],
-            graph[node2.inputs[3]],
-            '{}_3'.format(node1.name)).name
-        node2.inputs[4] = self.merge_intializers(
-            graph,
-            graph[node1.inputs[4]],
-            graph[node2.inputs[4]],
-            '{}_4'.format(node1.name)).name
-        graph.remove(node1.name)
-        return graph
-
     def _build_patterns(self) -> List[Pattern]:
         """
         知识库对应多个子图
@@ -134,26 +80,43 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
         }
         return apply_dict
 
-    def is_nodes_has_same_axis(self, graph: BaseGraph, node_dict):
-        axis_list = []
-        for name,node in node_dict.items():
-            axis = graph[graph[node[0].name].inputs[3]].value
-            print("name:{} axis:{}".format(name, axis))
-            if axis in axis_list:
-                return True
-            axis_list.append(axis)
-        return False
+    def merge_slice_nodes(self, graph: BaseGraph, nodesinfo):
+        input1_list = []
+        input2_list = []
+        input3_list = []
+        input4_list = []
+        for name,nodes in nodesinfo.items():
+            node = graph[nodes[0].name]
+            input1_list.append(graph[node.inputs[1]].value)
+            input2_list.append(graph[node.inputs[2]].value)
+            input3_list.append(graph[node.inputs[3]].value)
+            input4_list.append(graph[node.inputs[4]].value)
+
+        merge_axises = np.concatenate(input3_list)
+        if np.unique(merge_axises).size != merge_axises.size:
+            print("error check nodes has same axis can not merge merge_axises:{}".format(merge_axises))
+            return False
+
+        last_node_name = dict[list(dict.keys())[-1]][0].name
+        for name,nodes in dict.items():
+            node = graph[nodes[0].name]
+            if last_node_name == nodes[0].name:
+                graph[node.inputs[1]].value = np.concatenate(input1_list)
+                graph[node.inputs[2]].value = np.concatenate(input2_list)
+                graph[node.inputs[3]].value = merge_axises
+                graph[node.inputs[4]].value = np.concatenate(input4_list)
+            else:
+                graph.remove(node.name)
+                graph.remove(node.inputs[1])
+                graph.remove(node.inputs[2])
+                graph.remove(node.inputs[3])
+                graph.remove(node.inputs[4])
+        return True
 
     def _merge_continue_slice_apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:
         flag = False
-        for dict in match_result.node_dicts:
-            if self.is_nodes_has_same_axis(graph, dict):
-                print("error check nodes has same axis can not merge")
-                continue
-            last_node_name = dict[list(dict.keys())[-1]][0].name
-            for name,node in dict.items():
-                graph = self.merge_slicedop(graph, node[0].name, last_node_name)
-                flag = True
+        for nodesinfo in match_result.node_dicts:
+            flag |= self.merge_slice_nodes(graph, nodesinfo)
         return flag
 
 KnowledgeFactory.add_knowledge('KnowledgeMergeContinueSlice', KnowledgeMergeContinueSlice())
