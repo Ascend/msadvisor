@@ -97,19 +97,19 @@ class ImageNetPreProcess(PreProcessBase, ABC):
         return img.crop((crop_left, crop_top, crop_left + crop_width, crop_top + crop_height))
 
     @staticmethod
-    def resize(img, size, interpolation=Image.BILINEAR):
+    def resize(img, size, interpolation=Image.Resampling.BILINEAR):
         if isinstance(size, int):
             w, h = img.size
             if (w <= h and w == size) or (h <= w and h == size):
                 return img
             if w < h:
-                ow = size
-                oh = int(size * h / w)
-                return img.resize((ow, oh), interpolation)
+                o_w = size
+                o_h = int(size * h / w)
+                return img.resize((o_w, o_h), interpolation)
             else:
-                oh = size
-                ow = int(size * w / h)
-                return img.resize((ow, oh), interpolation)
+                o_h = size
+                o_w = int(size * w / h)
+                return img.resize((o_w, o_h), interpolation)
         else:
             return img.resize(size[::-1], interpolation)
 
