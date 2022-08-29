@@ -53,8 +53,9 @@ class BaseGraph(ABC):
 
         self._node_map = {n.name: n for n in 
                         chain(self._inputs, self._outputs, self._nodes, self._initializers, self._value_infos)}
-        # update prev node info
+        
         for n in self._nodes:
+            # update prev node info
             for o in n.outputs:
                 # if output name not in map
                 if not self._prev_map.get(o):
@@ -62,8 +63,7 @@ class BaseGraph(ABC):
                 else:
                     # TODO: ERROR: duplicate output names
                     pass
-        # update next node info
-        for n in self._nodes:
+            # update next node info
             for i in n.inputs:
                 if not self._next_map.get(i):
                     self._next_map[i] = [n]
@@ -238,7 +238,10 @@ class BaseGraph(ABC):
             self._nodes.remove(node)
             for in_id, in_name in enumerate(node.inputs):
                 # update next map, node is no longer a next node
-                self._next_map[in_name].remove(node)
+                if self._next_map.get(in_name, None):
+                    self._next_map[in_name].remove(node)
+                    if not self._next_map[in_name]:
+                        self._next_map.pop(in_name, None)
                 out_id = maps.get(in_id, None)
                 # out_id exists, do connection
                 if out_id is not None:
