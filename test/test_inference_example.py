@@ -13,11 +13,10 @@
 # limitations under the License.
 
 import os
-import sys
 import unittest
-import timeout_decorator
-
 from multiprocessing import Pool, Manager
+
+import timeout_decorator
 
 from auto_optimizer.common import Register
 from auto_optimizer.common.config import Config

@@ -13,11 +13,9 @@
 # limitations under the License.
 
 import os
-import sys
 import unittest
 
 from auto_optimizer.common import Register
-from auto_optimizer.pattern import KnowledgeFactory
 
 
 class TestKnowledge(unittest.TestCase):
