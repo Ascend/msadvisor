@@ -30,8 +30,6 @@ from auto_optimizer.inference_engine.data_process_factory import PostProcessFact
 class TestResnet(unittest.TestCase):
 
     def setUp(self) -> None:
-        sys.path.append("..")
-        os.chdir("..")
 
         register = Register(os.path.join(os.getcwd(), "auto_optimizer"))
         register.import_modules()
@@ -59,7 +57,8 @@ class TestResnet(unittest.TestCase):
 
             worker = engine_cfg["pre_process"]["worker"]
             dataset_path = engine_cfg["pre_process"]["dataset_path"]
-            file_len = len(os.listdir(dataset_path))
+            real_path = os.path.realpath(dataset_path)
+            file_len = len(os.listdir(real_path))
 
             # 计算inference等进程循环次数，数据考虑对齐
             remainder = file_len % (worker * batch_size)

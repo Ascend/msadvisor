@@ -22,8 +22,7 @@ from auto_optimizer.common import Register
 class TestRegister(unittest.TestCase):
 
     def setUp(self) -> None:
-        sys.path.append("..")
-        os.chdir("..")
+        pass
 
     def tearDown(self) -> None:
         pass

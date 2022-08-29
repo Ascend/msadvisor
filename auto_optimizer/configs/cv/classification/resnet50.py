@@ -17,12 +17,12 @@ model = dict(
     name='Resnet50',
     type='onnx',
     dataset='ImageNet',
-    batch_size=4,
+    batch_size=1,
     engine=dict(
         pre_process=dict(
             type='ImageNet',
-            worker=4,
-            dataset_path='./test_jpg/',
+            worker=1,
+            dataset_path='./dataset/test_img/',
             resize=256,
             center_crop=224,
             mean=[0.485, 0.456, 0.406],
@@ -31,7 +31,7 @@ model = dict(
         ),
         inference=dict(
             type='onnx',
-            model='/opt/model/test.onnx',
+            model='./onnx/test.onnx',
         ),
         model_convert=dict(
             type='atc',
@@ -41,7 +41,7 @@ model = dict(
         ),
         evaluate=dict(
             type='classification',
-            ground_truth='./test_jpg/label.txt',
+            ground_truth='./dataset/label.txt',
             topk=[1, 5]
         ),
     )
