@@ -238,7 +238,10 @@ class BaseGraph(ABC):
             self._nodes.remove(node)
             for in_id, in_name in enumerate(node.inputs):
                 # update next map, node is no longer a next node
-                self._next_map[in_name].remove(node)
+                if self._next_map.get(in_name, None):
+                    self._next_map[in_name].remove(node)
+                    if not self._next_map[in_name]:
+                        self._next_map.pop(in_name, None)
                 out_id = maps.get(in_id, None)
                 # out_id exists, do connection
                 if out_id is not None:
@@ -247,7 +250,10 @@ class BaseGraph(ABC):
                         next_node_in_id = next_node.get_input_id(out_name)
                         next_node.inputs[next_node_in_id] = in_name
                         # update next map, prev node has new next node
-                        self._next_map[in_name].append(next_node)
+                        if not self._next_map.get(in_name):
+                            self._next_map[in_name] = [next_node]
+                        else:
+                            self._next_map[in_name].append(next_node)
             # update prev and next map, outputs of node no long exist
             for out_name in node.outputs:
                 self._prev_map.pop(out_name, None)
