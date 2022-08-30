@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from addict import Dict
+from typing import Dict
 
 from .register import Register
 from .utils import path_to_module_format

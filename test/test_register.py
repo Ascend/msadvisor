@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os
-import sys
 import unittest
 
 from auto_optimizer.common import Register
@@ -22,8 +21,7 @@ from auto_optimizer.common import Register
 class TestRegister(unittest.TestCase):
 
     def setUp(self) -> None:
-        sys.path.append("..")
-        os.chdir("..")
+        pass
 
     def tearDown(self) -> None:
         pass
