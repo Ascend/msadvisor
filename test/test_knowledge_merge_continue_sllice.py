@@ -54,6 +54,37 @@ def make_c2_slice_model(onnx_name, x):
     opset.version = 14
     onnx.save(model, onnx_name)
 
+def make_c2_slice_2dim_1dims_model(onnx_name, x, same_axis=False):
+    X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
+    Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
+    
+    start0 = helper.make_tensor("start0", TensorProto.INT64, [1], np.array([0], dtype=np.int64))
+    end0 = helper.make_tensor("end0", TensorProto.INT64, [1], np.array([2], dtype=np.int64))
+    axes0 = helper.make_tensor("axes0", TensorProto.INT64, [1], np.array([0], dtype=np.int64))
+    step0 = helper.make_tensor("step0", TensorProto.INT64, [1], np.array([1], dtype=np.int64))
+
+    if same_axis:
+        axis = 0
+    else:
+        axis = 1
+    start1 = helper.make_tensor("start1", TensorProto.INT64, [2], np.array([1,3], dtype=np.int64))
+    end1 = helper.make_tensor("end1", TensorProto.INT64, [2], np.array([5,4], dtype=np.int64))
+    axes1 = helper.make_tensor("axes1", TensorProto.INT64, [2], np.array([2,axis], dtype=np.int64))
+    step1 = helper.make_tensor("step1", TensorProto.INT64, [2], np.array([1,1], dtype=np.int64))
+
+    node_slice0 = helper.make_node("Slice", ["X", "start0", "end0", "axes0", "step0"], ["X_S"], "Slice0")
+    node_slice1 = helper.make_node("Slice", ["X_S", "start1", "end1", "axes1", "step1"], ["Z"], "Slice1")
+
+    graph = helper.make_graph([node_slice0, node_slice1], "continue_slice_test",
+        [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1],)
+    model = helper.make_model(graph)
+
+    del model.opset_import[:]
+    opset = model.opset_import.add()
+    opset.domain = ''
+    opset.version = 14
+    onnx.save(model, onnx_name)
+
 def make_c2_slice_2dim_model(onnx_name, x, same_axis=False):
     X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
     Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
@@ -282,6 +313,37 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         make_c2_slice_2dim_model(c2_slice_2dims_onnx, x, True)
 
         graph = OnnxGraph.parse(c2_slice_2dims_onnx)
+        knowledge = KnowledgeMergeContinueSlice()
+        res = optimize(graph, knowledge, None)
+        self.assertFalse(res)
+
+    def test_merge_c2_slice_2dims_1dims(self):
+        x = np.random.randn(50, 50, 50, 30).astype(np.float32)
+
+        c2_slice_2dims_1dims_onnx = "./c2_slice_2dims_1dims.onnx"
+        c2_slice_2dims_1dims_optimize_onnx = "{}_optimize.onnx".format(os.path.splitext(c2_slice_2dims_1dims_onnx)[0])
+        os.system("rm -rf {} {}".format(c2_slice_2dims_1dims_onnx, c2_slice_2dims_1dims_optimize_onnx))
+
+        make_c2_slice_2dim_model(c2_slice_2dims_1dims_onnx, x, False)
+        ret = infer_run(c2_slice_2dims_1dims_onnx, x)
+
+        graph = OnnxGraph.parse(c2_slice_2dims_1dims_onnx)
+        knowledge = KnowledgeMergeContinueSlice()
+        res = optimize(graph, knowledge, c2_slice_2dims_1dims_optimize_onnx)
+        self.assertTrue(res)
+
+        ret1 = infer_run(c2_slice_2dims_1dims_optimize_onnx, x)
+        self.assertTrue(np.array_equal(ret, ret1))
+
+    def test_merge_c2_slice_2dims_1dims_same_axis(self):
+        x = np.random.randn(50, 50, 50, 30).astype(np.float32)
+
+        c2_slice_2dims_1dims_onnx = "./c2_slice_2dims_1dims_same.onnx"
+        os.system("rm -rf {}".format(c2_slice_2dims_1dims_onnx))
+
+        make_c2_slice_2dim_model(c2_slice_2dims_1dims_onnx, x, True)
+
+        graph = OnnxGraph.parse(c2_slice_2dims_1dims_onnx)
         knowledge = KnowledgeMergeContinueSlice()
         res = optimize(graph, knowledge, None)
         self.assertFalse(res)

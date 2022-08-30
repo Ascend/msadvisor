@@ -97,8 +97,8 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
             print("error check nodes has same axis can not merge merge_axises:{}".format(merge_axises))
             return False
 
-        last_node_name = dict[list(dict.keys())[-1]][0].name
-        for name,nodes in dict.items():
+        last_node_name = nodesinfo[list(nodesinfo.keys())[-1]][0].name
+        for name,nodes in nodesinfo.items():
             node = graph[nodes[0].name]
             if last_node_name == nodes[0].name:
                 graph[node.inputs[1]].value = np.concatenate(input1_list)
