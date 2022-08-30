@@ -54,7 +54,7 @@ def is_map_equal(map1, map2):
     return flag
 
 def is_graph_equal(g1, g2, msg=None):
-    return is_list_equal(g1.nodes, g2.nodes) and \
+    ret = is_list_equal(g1.nodes, g2.nodes) and \
         is_list_equal(g1.initializers, g2.initializers) and \
         is_list_equal(g1.inputs, g2.inputs) and \
         is_list_equal(g1.outputs, g2.outputs) and \
@@ -62,6 +62,10 @@ def is_graph_equal(g1, g2, msg=None):
         is_map_equal(g1._node_map, g2._node_map) and \
         is_map_equal(g1._prev_map, g2._prev_map) and \
         is_map_equal(g1._next_map, g2._next_map)
+    if not ret:
+        msg = 'two graphs are not equal!'
+        raise unittest.TestCase.failureException(msg)
+    return ret
 
 def create_graph():
     input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [3,2])

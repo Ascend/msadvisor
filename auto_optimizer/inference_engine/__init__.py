@@ -15,6 +15,7 @@
 from .pre_process.pre_process_base import PreProcessBase
 from .post_process.post_process_base import PostProcessBase
 from .evaluate.evaluate_base import EvaluateBase
+from .inference.inference_base import InferenceBase
 
 
-__all__ = ["PreProcessBase", "PostProcessBase", "EvaluateBase"]
+__all__ = ["PreProcessBase", "PostProcessBase", "EvaluateBase", "InferenceBase"]

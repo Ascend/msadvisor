@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from abc import ABC
 
 from ..post_process_base import PostProcessBase
@@ -18,12 +19,21 @@ from ...data_process_factory import PostProcessFactory
 
 
 class ClassificationPostProcess(PostProcessBase, ABC):
-    def __init__(self):
-        pass
 
-    def __call__(self, *args, **kwargs):
-        print("post_process")
-        return True
+    def __call__(self, loop, cfg, in_queue, out_queue):
+        """
+        和基类的参数顺序和个数需要一致
+        """
+        print("post_process start")
+        try:
+            for i in range(loop):
+                data = in_queue.get()
+
+                out_queue.put(data)
+        except Exception as err:
+            print("post_process failed error={}".format(err))
+
+        print("post_process end")
 
 
-PostProcessFactory.add_post_process("Classification", ClassificationPostProcess())
+PostProcessFactory.add_post_process("classification", ClassificationPostProcess())
