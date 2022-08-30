@@ -64,7 +64,7 @@ class BaseGraph(ABC):
                     pass
         # update next node info
         for n in self._nodes:
-            for i in n.inputs:
+            for i in set(n.inputs):
                 if not self._next_map.get(i):
                     self._next_map[i] = [n]
                 else:
