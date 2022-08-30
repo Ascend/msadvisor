@@ -13,17 +13,13 @@
 # limitations under the License.
 
 import os
-import sys
 import unittest
 
 from auto_optimizer.common import Register
-from auto_optimizer.pattern import KnowledgeFactory
 
 
 class TestKnowledge(unittest.TestCase):
     def setUp(self) -> None:
-        sys.path.append("..")
-        os.chdir("..")
         register = Register(os.path.join(os.getcwd(), "auto_optimizer", "pattern", "knowledges"))
         register.import_modules()
 
