@@ -64,11 +64,11 @@ class BaseGraph(ABC):
                     # TODO: ERROR: duplicate output names
                     pass
             # update next node info
-                for i in set(n.inputs):
-                    if not self._next_map.get(i):
-                        self._next_map[i] = [n]
-                    else:
-                        self._next_map[i].append(n)
+            for i in set(n.inputs):
+                if not self._next_map.get(i):
+                    self._next_map[i] = [n]
+                else:
+                    self._next_map[i].append(n)
 
     @classmethod
     @abstractmethod

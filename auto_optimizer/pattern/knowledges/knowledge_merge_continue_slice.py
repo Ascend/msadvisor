@@ -80,7 +80,29 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
         }
         return apply_dict
 
+    def check_nodesinfo_need_to_optimize(self, graph: BaseGraph, nodesinfo):
+        input3_list = []
+        for name,nodes in nodesinfo.items():
+            node = graph[nodes[0].name]
+            input3_list.append(graph[node.inputs[3]].value)
+        merge_axises = np.concatenate(input3_list)
+        if np.unique(merge_axises).size != merge_axises.size:
+            print("warning check nodes has same axis can not merge merge_axises:{}".format(merge_axises))
+            return False
+
+        last_node_name = nodesinfo[list(nodesinfo.keys())[-1]][0].name
+        for name,nodes in nodesinfo.items():
+            node = graph[nodes[0].name]
+            if last_node_name != nodes[0].name:
+                next_nodes = graph.get_next_nodes(node.outputs[0])
+                if len(next_nodes) > 1:
+                    print("warning check node:{} has >1 outputs:{} len:{}".format(node, next_nodes, len(next_nodes)))
+                    return False
+        return True
+
     def merge_slice_nodes(self, graph: BaseGraph, nodesinfo):
+        if self.check_nodesinfo_need_to_optimize(graph, nodesinfo) is False:
+            return False
         input1_list = []
         input2_list = []
         input3_list = []
@@ -92,10 +114,6 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
             input3_list.append(graph[node.inputs[3]].value)
             input4_list.append(graph[node.inputs[4]].value)
 
-        merge_axises = np.concatenate(input3_list)
-        if np.unique(merge_axises).size != merge_axises.size:
-            print("error check nodes has same axis can not merge merge_axises:{}".format(merge_axises))
-            return False
 
         last_node_name = nodesinfo[list(nodesinfo.keys())[-1]][0].name
         for name,nodes in nodesinfo.items():
@@ -103,7 +121,7 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
             if last_node_name == nodes[0].name:
                 graph[node.inputs[1]].value = np.concatenate(input1_list)
                 graph[node.inputs[2]].value = np.concatenate(input2_list)
-                graph[node.inputs[3]].value = merge_axises
+                graph[node.inputs[3]].value = np.concatenate(input3_list)
                 graph[node.inputs[4]].value = np.concatenate(input4_list)
             else:
                 graph.remove(node.name)
