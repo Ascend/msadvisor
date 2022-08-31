@@ -64,7 +64,7 @@ class BaseGraph(ABC):
                     # TODO: ERROR: duplicate output names
                     pass
             # update next node info
-            for i in n.inputs:
+            for i in set(n.inputs):
                 if not self._next_map.get(i):
                     self._next_map[i] = [n]
                 else:
@@ -250,7 +250,10 @@ class BaseGraph(ABC):
                         next_node_in_id = next_node.get_input_id(out_name)
                         next_node.inputs[next_node_in_id] = in_name
                         # update next map, prev node has new next node
-                        self._next_map[in_name].append(next_node)
+                        if self._next_map.get(in_name) is None:
+                            self._next_map[in_name] = [next_node]
+                        else:
+                            self._next_map[in_name].append(next_node)
             # update prev and next map, outputs of node no long exist
             for out_name in node.outputs:
                 self._prev_map.pop(out_name, None)
