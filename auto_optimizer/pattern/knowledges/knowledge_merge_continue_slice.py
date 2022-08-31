@@ -14,6 +14,7 @@
 
 from typing import List, Dict
 import numpy as np
+import warnings
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
@@ -80,14 +81,17 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
         }
         return apply_dict
 
-    def check_nodesinfo_need_to_optimize(self, graph: BaseGraph, nodesinfo):
+    def check_nodesinfo_need_to_optimize(self, graph: BaseGraph, nodesinfo: Dict[str, List[BaseNode]]):
         input3_list = []
         for name,nodes in nodesinfo.items():
             node = graph[nodes[0].name]
+            if len(node.inputs) < 5:
+                warnings.warn("check nodes inputs:{} len:{} != 5".format(node.inputs, len(node.inputs)))
+                return False
             input3_list.append(graph[node.inputs[3]].value)
         merge_axises = np.concatenate(input3_list)
         if np.unique(merge_axises).size != merge_axises.size:
-            print("warning check nodes has same axis can not merge merge_axises:{}".format(merge_axises))
+            warnings.warn("check nodes has same axis can not merge merge_axises:{}".format(merge_axises))
             return False
 
         last_node_name = nodesinfo[list(nodesinfo.keys())[-1]][0].name
@@ -96,11 +100,11 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
             if last_node_name != nodes[0].name:
                 next_nodes = graph.get_next_nodes(node.outputs[0])
                 if len(next_nodes) > 1:
-                    print("warning check node:{} has >1 outputs:{} len:{}".format(node, next_nodes, len(next_nodes)))
+                    warnings.warn("check node:{} has >1 outputs:{} len:{}".format(node, next_nodes, len(next_nodes)))
                     return False
         return True
 
-    def merge_slice_nodes(self, graph: BaseGraph, nodesinfo):
+    def merge_slice_nodes(self, graph: BaseGraph, nodesinfo: Dict[str, List[BaseNode]]):
         if self.check_nodesinfo_need_to_optimize(graph, nodesinfo) is False:
             return False
         input1_list = []
