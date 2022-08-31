@@ -1,12 +1,31 @@
 {
-    "model_list": [
+  "model_list": [
+    {
+      "model_name": "model",
+      "session_list": [
         {
-            "model_name": "model",
-            "session_list": [
-                {
-                    "python_model_path": "/home/msadvisor/ecosystem/model/model/src"
-                }
-            ]
+          "python_model_path": "./src/",
+          "parameter":{
+                  "application_scenarios": 1,
+                  "servers_name": "EG520-G30",
+                  "migration": [
+                    {
+                      "transfer_version": "310pV1",
+                      "target_file_address": "./data/knowledge/knowledgeBase/TestFileProject,./data/knowledge/knowledgeBase/TestFileProject2"
+                    },
+                    {
+                      "VPC": 1,
+                      "VDEC": 0,
+                      "VENC": 0,
+                      "JPEGD": 1,
+                      "JPEGE":0,
+                      "PNGD": 1
+                    }
+                  ]
+          }
         }
-    ]
+      ]
+    }
+
+  ]
 }
