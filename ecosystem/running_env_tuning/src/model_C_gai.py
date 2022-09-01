@@ -253,7 +253,6 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
         'transfer_V2_file')  # 转化为310pV2的接口信息310_Transfer_v2
     # 获取目标文件下的所有文件内容
     target_file_address = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('target_file_address')  # 转化为310pV2的接口信息310_Transfer_v2
-    print(target_file_address)
     target_file_address_list = list(str.split(target_file_address, ','))
     target_file_content = function.GetFileContent(target_file_address_list)
 
