@@ -58,6 +58,7 @@ def Evaluate(datapath, parameter):
         :param datapath:
     """
     # do evaluate work by file data
+    print(parameter)
     result = Result()
     sequence = 0  # summary次序
     result.class_type = CLASS_TYPE['model']
