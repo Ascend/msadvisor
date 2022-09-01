@@ -24,14 +24,14 @@ def get_data(filename, dir_path='./', second_path=''):
     return task_data
 
 # 专家系统调用的函数
-def Evaluate(datapath):
+def Evaluate(datapath, parameter):
     environment_data = get_data('environmentConfig.json', datapath, 'knowledgeBase')   # 获取系统配置文件的数据environmentConfig.json
     version = environment_data.get('English')
 
     if version == 0:
-        ret = model_C_gai.Evaluate(datapath)
+        ret = model_C_gai.Evaluate(datapath, parameter)
     else:
-        ret = model_E_gai.Evaluate(datapath)
+        ret = model_E_gai.Evaluate(datapath, parameter)
 
     if not ret:
         print('The address of the knowledge base file is incorrect. Please check the file name')

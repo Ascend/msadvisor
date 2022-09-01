@@ -47,7 +47,7 @@ EXTEND_DATA_TYPE = {'str': '0', 'int': '1', 'double': '2'}
 
 # msadvisor调用函数接口，调用时传入工程文件夹路径(传入绝对路径)
 # 需要用户自行修改具体profiling数据的位置
-def Evaluate(datapath):
+def Evaluate(datapath, parameter):
     """
     interface function called by msadvisor
     Args:
@@ -58,6 +58,7 @@ def Evaluate(datapath):
         :param datapath:
     """
     # do evaluate work by file data
+    print(parameter)
     result = Result()
     sequence = 0  # summary次序
     result.class_type = CLASS_TYPE['model']
