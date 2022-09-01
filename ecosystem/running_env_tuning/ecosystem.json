@@ -4,7 +4,7 @@
       "model_name": "model",
       "session_list": [
         {
-          "python_model_path": "src",
+          "python_model_path": "src/model.py",
           "parameter":{
                   "application_scenarios": 1,
                   "servers_name": "EG520-G30",
