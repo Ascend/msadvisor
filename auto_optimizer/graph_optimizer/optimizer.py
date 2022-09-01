@@ -14,13 +14,14 @@
 
 from typing import List, Dict, Union
 
-from auto_optimizer.pattern.knowledges.knowledge_conv1d2conv2d import KnowledgeConv1d2Conv2d
+# from auto_optimizer.pattern.knowledges.knowledge_conv1d2conv2d import KnowledgeConv1d2Conv2d
+from auto_optimizer.pattern.knowledges import *
 
 knowledge_map = {'KnowledgeConv1d2Conv2d': KnowledgeConv1d2Conv2d}
 
 class GraphOptimizer:
 
-    def __init__(self, knowledges: List[str]):
+    def __init__(self, knowledges: List[str] = []):
         self.knowldges = knowledges
 
     def load_config(self):
@@ -41,7 +42,7 @@ class GraphOptimizer:
 
     def apply_knowledges(self, graph):
         for knowldge in self.knowldges:
-            self.optimize(graph, knowledge_map[knowldge])
+            self.optimize(graph, knowledge_map[knowldge]())
 
         return graph
 
