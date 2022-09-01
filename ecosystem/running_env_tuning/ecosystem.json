@@ -8,20 +8,17 @@
           "parameter":{
                   "application_scenarios": 1,
                   "servers_name": "EG520-G30",
-                  "migration": [
-                    {
-                      "transfer_version": "310pV1",
-                      "target_file_address": ".data/knowledge/knowledgeBase/TestFileProject,./data/knowledge/knowledgeBase/TestFileProject2"
-                    },
-                    {
-                      "VPC": 1,
-                      "VDEC": 0,
-                      "VENC": 0,
-                      "JPEGD": 1,
-                      "JPEGE":0,
-                      "PNGD": 1
-                    }
-                  ]
+
+                  "transfer_version": "310pV1",
+                  "target_file_address": ".data/knowledge/knowledgeBase/TestFileProject,./data/knowledge/knowledgeBase/TestFileProject2",
+                  "Module": {
+                    "VPC": 1,
+                    "VDEC": 0,
+                    "VENC": 0,
+                    "JPEGD": 1,
+                    "JPEGE":0,
+                    "PNGD": 1
+                  }
           }
         }
       ]

@@ -65,31 +65,33 @@ def Evaluate(datapath, parameter):
     result.summary = "操作环境需要优化调优, "
 
     environment_filename = 'environmentConfig.json'
-    user_filename = 'UserEnvironmentConfig.json'
+    user_filename = 'ecosystem.json'
 
     target_path = "knowledgeBase"
+
     environment_data = get_data(environment_filename, datapath, target_path)  # 获取系统配置文件的数据environmentConfig.json
-    user_data = get_data(user_filename, datapath, target_path)  # 获取用户配置文件的数据UserEnvironmentConfig.json
+
+    user_data = get_data(user_filename, '../../', "running_env_tuning")  # 获取用户配置文件的数据ecosystem.json
     # 获取各个方向的ExtendResult,并处理各个方向的er
-    # 方向1
-    er1, optimizedsummary = direction1_process(user_data)
-    result, sequence = result_generate(er1, result, "Direction1", optimizedsummary, sequence)
-    # 方向2
-    er2, optimizedsummary = direction2_process(user_data, datapath, target_path)  # 方向二
-    result, sequence = result_generate(er2, result, "Direction2", optimizedsummary, sequence)
-    # 方向3
-    er3, optimizedsummary = direction3_process(environment_data, datapath, target_path)
-    result, sequence = result_generate(er3, result, "Direction3", optimizedsummary, sequence)
-    # 方向4_1
+    # # 方向1
+    # er1, optimizedsummary = direction1_process(user_data)
+    # result, sequence = result_generate(er1, result, "Direction1", optimizedsummary, sequence)
+    # # 方向2
+    # er2, optimizedsummary = direction2_process(user_data, datapath, target_path)  # 方向二
+    # result, sequence = result_generate(er2, result, "Direction2", optimizedsummary, sequence)
+    # # 方向3
+    # er3, optimizedsummary = direction3_process(environment_data, datapath, target_path)
+    # result, sequence = result_generate(er3, result, "Direction3", optimizedsummary, sequence)
+    # # 方向4_1
     er4_1, optimizedsummary = direction4_1_process(environment_data, user_data, datapath, target_path)
     result, sequence = result_generate(er4_1, result, "Direction4_1", optimizedsummary, sequence)
-
-    # 方向4_2
-    er4_2, optimizedsummary = direction4_2_process(environment_data, datapath, target_path)
-    result, sequence = result_generate(er4_2, result, "Direction4_2", optimizedsummary, sequence)
-    # 方向5
-    er5, optimizedsummary = direction5_process(environment_data, datapath, target_path)
-    result, sequence = result_generate(er5, result, "Direction5", optimizedsummary, sequence)
+    #
+    # # 方向4_2
+    # er4_2, optimizedsummary = direction4_2_process(environment_data, datapath, target_path)
+    # result, sequence = result_generate(er4_2, result, "Direction4_2", optimizedsummary, sequence)
+    # # 方向5
+    # er5, optimizedsummary = direction5_process(environment_data, datapath, target_path)
+    # result, sequence = result_generate(er5, result, "Direction5", optimizedsummary, sequence)
 
     return result.generate()
 
@@ -120,7 +122,7 @@ def get_data(filename, dir_path='./', second_path=''):
 def direction1_process(user_data):
     er = ExtendResult()
     optimizedsummary = ""
-    applicationSceneNum = user_data.get('direction_one')  # 获取应用场景编码
+    applicationSceneNum = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get("application_scenarios")  # 获取应用场景编码
     temp_npu_name = function.getCard()
     if temp_npu_name == "d100":
         npu_name = "Atlas 300I"
@@ -185,7 +187,7 @@ def direction2_process(user_data, datapath, target_path):
         # optimizedsummary = "The current inference card is not appropriate"
         return er, optimizedsummary
     else:   # 推理卡为Atlas 300I Pro或 Atlas 300V Pro
-        server_name = user_data.get('direction_two')[0].get('servers_name')
+        server_name = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get("servers_name")
 
         server_pcieCard_data = get_data('Server_PcieCard.json', datapath, target_path)  # 从对应服务器的json文件中获取数据
         server_piceCard_list = server_pcieCard_data['Server_PcieCard']
@@ -244,18 +246,18 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
     target_path += '/Direction4'
     er1 = ExtendResult()
     er2 = ExtendResult()
-    transfer_version = user_data.get('direction_four')[0].get('transfer_version')  # 需要转化模型的版本
+    transfer_version = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('transfer_version')  # 需要转化模型的版本
     transfer_V1_file = environment_data.get('direction_four')[0].get(
         'transfer_V1_file')  # 转化为310pV1的接口信息310_Transfer_v1
     transfer_V2_file = environment_data.get('direction_four')[0].get(
         'transfer_V2_file')  # 转化为310pV2的接口信息310_Transfer_v2
     # 获取目标文件下的所有文件内容
-    target_file_address = user_data.get('direction_four')[0].get('target_file_address')  # 转化为310pV2的接口信息310_Transfer_v2
+    target_file_address = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('target_file_address')  # 转化为310pV2的接口信息310_Transfer_v2
     target_file_address_list = list(str.split(target_file_address, ','))
     target_file_content = function.GetFileContent(target_file_address_list)
 
     flag = False
-    needed_sketchy_function = user_data.get('direction_four')[1]  # 用户所需的模块功能列表
+    needed_sketchy_function = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('Module')   # 用户所需的模块功能列表
 
     transfer_V1_json = get_data(transfer_V1_file + '.json', datapath, target_path)  # 获取对应json中数据
     transfer_V2_json = get_data(transfer_V2_file + '.json', datapath, target_path)  # 获取对应json中数据
@@ -407,3 +409,6 @@ def direction5_process(environment_data, datapath, target_path):
     else:  # 推理卡不为Atlas 300I Pro或Atlas 300V Pro，但是方向一已经输出此错误了，无需重复
         return er, optimizedsummary
 
+# if __name__ == '__main__':
+#     str1 = Evaluate("D:/desktop/msadvisor_2/ecosystem/running_env_tuning/data/knowledge","a")
+#     print(str1)
