@@ -97,11 +97,23 @@ def create_graph():
     graph = OnnxGraph([node_0], [input_0], [output_0], [ini_0, ini_1, ini_2], name='test_graph')
     return graph
 
+def create_graph_1():
+    input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [1,3,224,224])
+    output_0 = OnnxPlaceHolder('0_out_0', np.dtype('float32'), [1,3,224,224])
+    output_1 = OnnxPlaceHolder('3_out_0', np.dtype('float32'), [1,3,224,224])
+    ini_0 = OnnxInitializer('ini_0', np.array([1], dtype='int32'))
+    node_0 = OnnxNode('Node_0', 'Sqrt', inputs=['input_0'], outputs=['0_out_0'], attrs={})
+    node_1 = OnnxNode('Node_1', 'Sqrt', inputs=['input_0'], outputs=['1_out_0'], attrs={})
+    node_2 = OnnxNode('Node_2', 'Add', inputs=['0_out_0', 'ini_0'], outputs=['2_out_0'], attrs={})
+    node_3 = OnnxNode('Node_3', 'Add', inputs=['2_out_0', '1_out_0'], outputs=['3_out_0'], attrs={})
+    graph_1 = OnnxGraph([node_0,node_1,node_2,node_3], [input_0], [output_0, output_1], [ini_0], name='graph_1')
+    return graph_1
 
 class TestGraphBasic(unittest.TestCase):
     
     def setUp(self):
         self.graph = create_graph()
+        self.graph_1 = create_graph_1()
 
     def test_graph_init(self):
         input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [3,2])
@@ -172,11 +184,20 @@ class TestGraphBasic(unittest.TestCase):
         os.remove('test.onnx')
 
     def test_toposort(self):
-        expected_order = [n.name for n in self.graph._nodes]
-        random.shuffle(self.graph._nodes)
-        self.graph.toposort()
-        test_order = [n.name for n in self.graph._nodes]
-        self.assertEqual(test_order, expected_order)
+        random.shuffle(self.graph_1._nodes)
+        self.graph_1.toposort()
+        sorted_order = [n.name for n in self.graph_1._nodes]
+        possible_orders = [
+            ['Node_0', 'Node_1', 'Node_2', 'Node_3'],
+            ['Node_1', 'Node_0', 'Node_2', 'Node_3']
+        ]
+        self.assertIn(sorted_order, possible_orders)
+    
+    def test_toposort_with_cycle(self):
+        self.graph_1['Node_2'].inputs[1] = '3_out_0'
+        self.graph_1._next_map['3_out_0'] = self.graph_1['Node_2']
+        with self.assertRaisesRegex(RuntimeError, "Cycle detected in graph!"):
+            self.graph_1.toposort()
 
     def test_opset_imports(self):
         # specify opset_imports
