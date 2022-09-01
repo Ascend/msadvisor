@@ -168,10 +168,10 @@ class TestGraphCrud(unittest.TestCase):
             ['Node_0'],
             ['Node_2;0_out_0']
             )
-        self.assertEqual(test_node.inputs, ['Node_0_0_test_node'])
+        self.assertEqual(test_node.inputs, ['test_node_in_0'])
         self.assertEqual(test_node.outputs, ['0_out_0'])
-        self.assertEqual(self.graph_1.get_next_nodes('Node_0_0_test_node'), [test_node])
-        self.assertEqual(self.graph_1.get_prev_node('Node_0_0_test_node'), self.graph_1['Node_0'])
+        self.assertEqual(self.graph_1.get_next_nodes('test_node_in_0'), [test_node])
+        self.assertEqual(self.graph_1.get_prev_node('test_node_in_0'), self.graph_1['Node_0'])
         self.assertEqual(self.graph_1.get_next_nodes('0_out_0'), [self.graph_1['Node_2']])
         self.assertEqual(self.graph_1.get_prev_node('0_out_0'), test_node)
 
