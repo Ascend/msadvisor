@@ -24,7 +24,7 @@ def get_data(filename, dir_path='./', second_path=''):
     return task_data
 
 # 专家系统调用的函数
-def Evaluate(datapath, parameter):
+def evaluate(datapath, parameter):
     environment_data = get_data('environmentConfig.json', datapath, 'knowledgeBase')   # 获取系统配置文件的数据environmentConfig.json
     version = environment_data.get('English')
 
