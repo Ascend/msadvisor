@@ -10,7 +10,8 @@
                   "servers_name": "EG520-G30",
 
                   "transfer_version": "310pV1",
-                  "target_file_address": ".data/knowledge/knowledgeBase/TestFileProject,./data/knowledge/knowledgeBase/TestFileProject2",
+                  "target_file_address": "./data/knowledge/knowledgeBase/TestFileProject,./data/knowledge/knowledgeBase/TestFileProject2",
+
                   "Module": {
                     "VPC": 1,
                     "VDEC": 0,
