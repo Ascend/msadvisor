@@ -70,8 +70,8 @@ def Evaluate(datapath, parameter):
     target_path = "knowledgeBase"
 
     environment_data = get_data(environment_filename, datapath, target_path)  # 获取系统配置文件的数据environmentConfig.json
-
-    user_data = get_data(user_filename, '../../', "running_env_tuning")  # 获取用户配置文件的数据ecosystem.json
+    # 获取用户配置文件的数据ecosystem.json   第二个参数是服务器上对应文件工程的地址
+    user_data = get_data(user_filename, '/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem', "running_env_tuning")
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # # 方向1
     # er1, optimizedsummary = direction1_process(user_data)
