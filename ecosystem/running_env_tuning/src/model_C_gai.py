@@ -58,9 +58,9 @@ def Evaluate(datapath, parameter):
         :param datapath:
     """
     # do evaluate work by file data
-    # print(parameter, type(parameter))
+    print(parameter, type(parameter))
     user_parameter = json.loads(parameter)
-    # print(user_parameter, type(user_parameter))
+    print(user_parameter, type(user_parameter))
     result = Result()
     sequence = 0  # summary次序
     result.class_type = CLASS_TYPE['model']
@@ -424,3 +424,9 @@ def direction5_process(environment_data, datapath, target_path):
     else:  # 推理卡不为Atlas 300I Pro或Atlas 300V Pro，但是方向一已经输出此错误了，无需重复
         return er, optimizedsummary
 
+if __name__ == '__main__':
+    str2 = str({"JPEGD":1,"JPEGE":0,"PNGD":1,"VDEC":0,"VENC":0,"VPC":1,"application_scenarios":1,"servers_name":"EG520-G30","target_file_address":"/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem/running_env_tuning/data/knowledge/knowledgeBase/TestFileProject,/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem/running_env_tuning/data/knowledge/knowledgeBase/TestFileProject2","transfer_version":"310pV1"}
+               )
+    str1 = Evaluate("D:/desktop/msadvisor_2/ecosystem/running_env_tuning/data/knowledge", str2
+                    )
+    print(str1)
