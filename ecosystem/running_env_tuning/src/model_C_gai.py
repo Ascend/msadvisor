@@ -259,7 +259,23 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
     target_file_content = function.GetFileContent(target_file_address_list)
 
     flag = False
-    needed_sketchy_function = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('Module')   # 用户所需的模块功能列表
+
+    VPC = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('VPC')
+    VDEC = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('VDEC')
+    VENC = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('VENC')
+    JPEGD = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('JPEGD')
+    JPEGE = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('JPEGE')
+    PNGD = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('PNGD')
+    needed_sketchy_function = dict()
+    needed_sketchy_function['VPC'] = VPC
+    needed_sketchy_function['VDEC'] = VDEC
+    needed_sketchy_function['VENC'] = VENC
+    needed_sketchy_function['JPEGD'] = JPEGD
+    needed_sketchy_function['JPEGE'] = JPEGE
+    needed_sketchy_function['PNGD'] = PNGD
+
+    #needed_sketchy_function = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('Module')   # 用户所需的模块功能列表
+
 
     transfer_V1_json = get_data(transfer_V1_file + '.json', datapath, target_path)  # 获取对应json中数据
     transfer_V2_json = get_data(transfer_V2_file + '.json', datapath, target_path)  # 获取对应json中数据
