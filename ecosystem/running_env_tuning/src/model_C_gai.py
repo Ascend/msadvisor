@@ -67,7 +67,6 @@ def Evaluate(datapath, parameter):
     result.summary = "操作环境需要优化调优, "
 
     environment_filename = 'environmentConfig.json'
-    user_filename = 'ecosystem.json'
 
     target_path = "knowledgeBase"
 
@@ -273,8 +272,6 @@ def direction4_1_process(environment_data, user_parameter, datapath, target_path
     needed_sketchy_function['JPEGD'] = JPEGD
     needed_sketchy_function['JPEGE'] = JPEGE
     needed_sketchy_function['PNGD'] = PNGD
-
-    #needed_sketchy_function = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('Module')   # 用户所需的模块功能列表
 
 
     transfer_V1_json = get_data(transfer_V1_file + '.json', datapath, target_path)  # 获取对应json中数据

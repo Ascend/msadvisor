@@ -67,7 +67,6 @@ def Evaluate(datapath, parameter):
     result.summary = "Operating environment Tuning need to be optimized, "
 
     environment_filename = 'environmentConfig.json'
-    user_filename = 'ecosystem.json'
 
     target_path = "knowledgeBase"
 
