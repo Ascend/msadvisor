@@ -77,7 +77,7 @@ def Evaluate(datapath, parameter):
 
     # 获取各个方向的ExtendResult,并处理各个方向的er
 
-    print(user_data)
+
     # 方向1
     er1, optimizedsummary = direction1_process(user_parameter)
     result, sequence = result_generate(er1, result, "Direction1", optimizedsummary, sequence)
