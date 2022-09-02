@@ -7,6 +7,7 @@ Copyright Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 import os
 import json
 import function
+import json_tools
 
 
 # msadvisor识别的结果类型
@@ -72,7 +73,10 @@ def Evaluate(datapath, parameter):
     environment_data = get_data(environment_filename, datapath, target_path)  # 获取系统配置文件的数据environmentConfig.json
     # 获取用户配置文件的数据ecosystem.json   第二个参数是服务器上对应文件工程的地址/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem，本地调试的话使用../../
     user_data = get_data(user_filename, '/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem', "running_env_tuning")
-    user_parameter = user_data.get('model_list')[0].get("session_list")[0].get("parameter")
+    user_parameter = user_data.get('model_list')[0].get("session_list")[0].get("parameter")  # 默认参数
+    result = json_tools.diff(parameter, user_parameter)
+    if result != []:
+        user_parameter = parameter
     print(user_parameter)
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # 方向1
