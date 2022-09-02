@@ -74,7 +74,7 @@ def Evaluate(datapath, parameter):
     user_data = get_data(user_filename, '/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem', "running_env_tuning")
     user_parameter = user_data.get('model_list')[0].get("session_list")[0].get("parameter")
 
-
+    print(user_parameter)
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # 方向1
     er1, optimizedsummary = direction1_process(user_parameter)

@@ -73,7 +73,7 @@ def Evaluate(datapath, parameter):
     # 获取用户配置文件的数据ecosystem.json   第二个参数是服务器上对应文件工程的地址
     user_data = get_data(user_filename, '/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem', "running_env_tuning")
     user_parameter = user_data.get('model_list')[0].get("session_list")[0].get("parameter")
-
+    print(user_parameter)
 
     # 获取各个方向的ExtendResult,并处理各个方向的er
 
@@ -430,6 +430,3 @@ def direction5_process(environment_data, datapath, target_path):
     else:  # 推理卡不为Atlas 300I Pro或Atlas 300V Pro，但是方向一已经输出此错误了，无需重复
         return er, optimizedsummary
 
-# if __name__ == '__main__':
-#     str1 = Evaluate("D:/desktop/msadvisor_2/ecosystem/running_env_tuning/data/knowledge","a")
-#     print(str1)
