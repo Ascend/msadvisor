@@ -9,8 +9,6 @@ import json
 import time
 import model_C
 import model_E
-import model_E_gai
-import model_C_gai
 # 根据路径获取解析数据json->python
 
 
@@ -29,29 +27,12 @@ def evaluate(datapath, parameter):
     version = environment_data.get('English')
 
     if version == 0:
-        ret = model_C_gai.Evaluate(datapath, parameter)
+        ret = model_C.Evaluate(datapath, parameter)
     else:
-        ret = model_E_gai.Evaluate(datapath, parameter)
+        ret = model_E.Evaluate(datapath, parameter)
 
     if not ret:
         print('The address of the knowledge base file is incorrect. Please check the file name')
 
     return ret
 
-# 主函数接口，在本地调试试使用
-if __name__ == '__main__':
-    environment_data = get_data('environmentConfig.json', './', 'knowledgeBase')   # 获取系统配置文件的数据environmentConfig.json
-    version = environment_data.get('English')
-    time_start = time.time()
-    datapath = './'
-
-    if version == 0:
-        ret = model_C.Evaluate(datapath)
-    else:
-        ret = model_E.Evaluate(datapath)
-    if ret==False:
-            print('The address of the knowledge base file is incorrect. Please check the file name')
-    else:
-        print(ret.encode('utf-8').decode('unicode_escape'))   # 将unicode编码妆化为中文
-    time_end = time.time()
-    # print('elapsed time', time_end-time_start)  # 此处单位为秒

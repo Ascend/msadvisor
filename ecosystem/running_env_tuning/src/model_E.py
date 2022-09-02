@@ -47,7 +47,7 @@ EXTEND_DATA_TYPE = {'str': '0', 'int': '1', 'double': '2'}
 
 # msadvisor调用函数接口，调用时传入工程文件夹路径(传入绝对路径)
 # 需要用户自行修改具体profiling数据的位置
-def Evaluate(datapath):
+def Evaluate(datapath, parameter):
     """
     interface function called by msadvisor
     Args:
@@ -58,103 +58,55 @@ def Evaluate(datapath):
         :param datapath:
     """
     # do evaluate work by file data
+    # print(parameter, type(parameter))
+    user_parameter = json.loads(parameter)
+    # print(user_parameter, type(user_parameter))
     result = Result()
     sequence = 0  # summary次序
     result.class_type = CLASS_TYPE['model']
     result.summary = "Operating environment Tuning need to be optimized, "
 
     environment_filename = 'environmentConfig.json'
-    user_filename = 'UserEnvironmentConfig.json'
 
     target_path = "knowledgeBase"
+
     environment_data = get_data(environment_filename, datapath, target_path)  # 获取系统配置文件的数据environmentConfig.json
-    user_data = get_data(user_filename, datapath, target_path)  # 获取用户配置文件的数据UserEnvironmentConfig.json
+
+
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # 方向1
-    # er1 = direction1_process(user_data)
-    # SuccessSummary = "Inference card are well compatible with application scene"
-    # OptimizedSummary = "Inference card need to be optimized"
-    # sequence += 1
-    # result = result_generate(SuccessSummary, er1, result, "Direction1", OptimizedSummary, sequence)
-    # # 方向2
-    # server_name, real_pcie, er2 = direction2_process(user_data, datapath, target_path)  # 方向二
-    # sequence += 1
-    # result = result_generate(server_name + " match " + real_pcie + "(Pcie) successfully", er2, result,
-    #                          "Direction2", server_name + " can't match " + real_pcie, sequence)
-    # # 方向3
-    # er3 = direction3_process(environment_data, datapath, target_path)
-    # SuccessSummary = "InferenceCard are well compatible with operating systems"
-    # OptimizedSummary = "OS need to be optimized"
-    # sequence += 1
-    # result = result_generate(SuccessSummary, er3, result, "Direction3", OptimizedSummary, sequence)
+    er1, optimizedsummary = direction1_process(user_parameter)
+    result, sequence = result_generate(er1, result, "Direction1", optimizedsummary, sequence)
+    # 方向2
+    er2, optimizedsummary = direction2_process(user_parameter, datapath, target_path)  # 方向二
+    result, sequence = result_generate(er2, result, "Direction2", optimizedsummary, sequence)
+    # 方向3
+    er3, optimizedsummary = direction3_process(environment_data, datapath, target_path)
+    result, sequence = result_generate(er3, result, "Direction3", optimizedsummary, sequence)
     # 方向4_1
-    transfer_version, er4_1 = direction4_1_process(environment_data, user_data, datapath, target_path)
-    # if isinstance(er4_1, list):  # 迁移版本2的时候会出现返回两个ExtendResist
-    #     sequence += 1
-    #     result = result_generate("transfer to 310p_v1_acldvpp is reasonable", er4_1[0], result,
-    #                              "Direction4-1", "", sequence)
-    #     sequence += 1
-    #     result = result_generate("transfer to " + transfer_version + " is reasonable", er4_1[1], result,
-    #                              "Direction4_1", "", sequence)
-    # else:
-    #     sequence += 1
-    #     result = result_generate("transfer to " + transfer_version + " is reasonable", er4_1, result,
-    #                              "Direction4_1", "transfer to" + transfer_version + " is unreasonable,", sequence)
-    sequence += 1
-    result = result_generate("transfer to " + transfer_version + " is reasonable", er4_1, result,
-                             "Direction4_1", "transfer to" + transfer_version + " is unreasonable", sequence)
+    er4_1, optimizedsummary = direction4_1_process(environment_data, user_parameter, datapath, target_path)
+    result, sequence = result_generate(er4_1, result, "Direction4_1", optimizedsummary, sequence)
 
-    # # 方向4_2
-    # er4_2 = direction4_2_process(environment_data, datapath, target_path)
-    # sequence += 1
-    # result = result_generate("Target chip identification succeeded", er4_2, result, "Direction4_2",
-    #                          "There's no chip match", sequence)
-    # # 方向5
-    # er5 = direction5_process(environment_data, datapath, target_path)
-    # SuccessSummary = "The current operating system kernel version is recommended"
-    # OptimizedSummary = "You need to change the software or hardware versions"
-    # sequence += 1
-    # result = result_generate(SuccessSummary, er5, result, "Direction5", OptimizedSummary, sequence)
+    # 方向4_2
+    er4_2, optimizedsummary = direction4_2_process(environment_data, datapath, target_path)
+    result, sequence = result_generate(er4_2, result, "Direction4_2", optimizedsummary, sequence)
+    # 方向5
+    er5, optimizedsummary = direction5_process(environment_data, datapath, target_path)
+    result, sequence = result_generate(er5, result, "Direction5", optimizedsummary, sequence)
 
     return result.generate()
 
 
 # result最终生成
 # 处理各个方向的er   sequence序号
-def result_generate(SuccessSummary, er, result, direction, OptimizedSummary, sequence):
+def result_generate(er, result, direction, OptimizedSummary, sequence):
     # 处理各个方向的er
-    result.summary += str(sequence) + ". "
-    if direction == 'Direction4_2' and er.data_type == []:
-        result.summary += OptimizedSummary
+    if er.data_type != []:
+        sequence += 1
+        result.summary += str(sequence) + ". " + OptimizedSummary
         result.summary += ' '
         result.extend_result.append(er)
-    elif direction == 'Direction4_2' and er.data_type != []:
-        result.summary += SuccessSummary
-        result.summary += ' '
-        result.extend_result.append(er)
-    elif direction == 'Direction4_1' and er.extend_title == 'Port compatibility information for migrating to 310pV1:':
-        result.summary += SuccessSummary
-        result.summary += ' '
-        result.extend_result.append(er)
-    elif direction == 'Direction4_1' and er.extend_title != 'Port compatibility information for migrating to 310pV1:'\
-            and er.extend_title != 'Port compatibility information for migrating to 310pV2:':
-        result.summary += OptimizedSummary
-        result.summary += ' '
-        result.extend_result.append(er)
-    elif direction == 'Direction4_1' and er.extend_title == 'Port compatibility information for migrating to 310pV2:':
-        result.summary += SuccessSummary
-        result.summary += ' '
-        result.extend_result.append(er)
-    # elif er.extend_title == 'Port compatibility information for migrating to 310pV1:' or \
-    #         er.extend_title == 'Port compatibility information for migrating to 310pV2:':
-    #     result.summary += SuccessSummary
-    #     result.summary += ' '
-    #     result.extend_result.append(er)
-    else:
-        result.summary += OptimizedSummary
-        result.summary += ' '
-        result.extend_result.append(er)
-    return result
+    return result, sequence
 
 
 # 根据路径获取解析数据json->python
@@ -168,112 +120,161 @@ def get_data(filename, dir_path='./', second_path=''):
 
 
 # 方向一：推理卡的选择
-def direction1_process(user_data):
+def direction1_process(user_parameter):
     er = ExtendResult()
-    applicationSceneNum = user_data.get('direction_one')  # 获取应用场景编码
+    optimizedsummary = ""
+    applicationSceneNum = user_parameter.get("application_scenarios")  # 获取应用场景编码
     temp_npu_name = function.getCard()
     if temp_npu_name == "d100":
         npu_name = "Atlas 300I"
     elif temp_npu_name == "d500":
         npu_name = function.getCard310P()
     else:
-        npu_name = ""
-    if applicationSceneNum <= 5:
-        if npu_name == "Atals 300I Pro":
-            return er
-        else:
-            er.type = EXTEND_TYPE['list']
-            er.extend_title = "Recommendations of Inference Card:"
-            er.data_type.append(EXTEND_DATA_TYPE['str'])
-            er.key.append("Atals 300I Pro key")
-            er.value.append("Atals 300I Pro")
-        return er
+        npu_name = "others"
+    if npu_name == "others" or npu_name == "Atlas 300I":
+        er.data_type.append(EXTEND_DATA_TYPE['str'])
+        er.extend_title = "Please replace the inference card with Atlas 300I Pro or Atlas 300V Pro"
+        optimizedsummary = "The current inference card is not the target of migration or is not included in the expert system"
+        return er, optimizedsummary
     else:
-        if npu_name == "Atals 300V Pro":
-            return er
+        if applicationSceneNum <= 5 and applicationSceneNum >= 1:
+            if npu_name == "Atals 300I Pro":
+                return er, optimizedsummary
+            else:
+                er.type = EXTEND_TYPE['list']
+                er.extend_title = "Recommendation of Inference Card:"
+                er.data_type.append(EXTEND_DATA_TYPE['str'])
+                er.key.append("Atals 300I Pro key")
+                er.value.append("Atals 300I Pro")
+                optimizedsummary = "Inference card need to be optimized"
+            return er, optimizedsummary
+        elif applicationSceneNum == 6:
+            if npu_name == "Atals 300V Pro":
+                return er, optimizedsummary
+            else:
+                er.type = EXTEND_TYPE['list']
+                er.extend_title = "Recommendation of Inference Card:"
+                er.data_type.append(EXTEND_DATA_TYPE['str'])
+                er.key.append("Atals 300V Pro key")
+                er.value.append("Atals 300V Pro")
+                optimizedsummary = "Inference card need to be optimized"
+            return er, optimizedsummary
         else:
-            er.type = EXTEND_TYPE['list']
-            er.extend_title = "Recommendations of Inference Card:"
             er.data_type.append(EXTEND_DATA_TYPE['str'])
-            er.key.append("Atals 300V Pro key")
-            er.value.append("Atals 300V Pro")
-        return er
-
+            er.extend_title = "The input sequence number of the application scene should be 1-6"
+            optimizedsummary = "The input application scene parameter is incorrect"
+            return er, optimizedsummary
 
 # 方向二：推理服务器兼容校验，返回的推理服卡匹配的推理服务器信息
-def direction2_process(user_data, datapath, target_path):
+def direction2_process(user_parameter, datapath, target_path):
     target_path += '/Direction2/E'
     er = ExtendResult()
+    optimizedsummary = ""
     servers_recommend_list = list()
 
-    pcie_Card = function.getCard310P()
-    server_name = user_data.get('direction_two')[0].get('servers_name')
+    # 获取当前推理卡
+    temp_pcie_Card = function.getCard()
+    if temp_pcie_Card == "d100":
+        pcie_Card = "Atlas 300I"
+    elif temp_pcie_Card == "d500":
+        pcie_Card = function.getCard310P()
+    else:
+        pcie_Card = "others"
 
-    server_pcieCard_data = get_data('Server_PcieCard.json', datapath, target_path)  # 从对应服务器的json文件中获取数据
-    server_piceCard_list = server_pcieCard_data['Server_PcieCard']
-    for server_piceCard in server_piceCard_list:
-        if server_piceCard['Server Model'] == server_name and server_piceCard['Ascend AI processor'] == pcie_Card:
-            er.extend_title = 'Pcie Card Matching AI servers successfully'
-            return server_name, pcie_Card, er
-        elif server_piceCard['Ascend AI processor'] == pcie_Card and server_piceCard['Cooperative partner'] == 'Huawei':
-            servers_recommend_list.append(server_piceCard)
-    if servers_recommend_list:
-        er.type = EXTEND_TYPE['table']
+    if pcie_Card == "others" or pcie_Card == "Atlas 300I":
+        # 推理卡不为Atlas 300I Pro或Atlas 300V Pro，但是方向一已经输出此错误了，无需重复
+        # er.data_type.append(EXTEND_DATA_TYPE['str'])
+        # er.extend_title = "Please replace the inference card with Atlas 300i Pro or Atlas 300V Pro"
+        # optimizedsummary = "The current inference card is not appropriate"
+        return er, optimizedsummary
+    else:   # 推理卡为Atlas 300I Pro或 Atlas 300V Pro
+        server_name = user_parameter.get("servers_name")
 
-        er.extend_title = 'The inference card is incompatible with the inference server.The following are the recommended inference servers:'
-        er.data_type = [EXTEND_DATA_TYPE['str'] * 8]
-        er.key = ['Cooperative partner', 'Server Model', 'Ascend AI processor',
-                  'Maximum number of AI processors per node',
-                  'CPU family', 'Maximum number of CPUs per node', 'Server form', 'Expiration date']
-        for servers_recommend in servers_recommend_list:
-            er.value.append([servers_recommend.get(er.key[0]),
-                             servers_recommend.get(er.key[1]),
-                             servers_recommend.get(er.key[2]),
-                             servers_recommend.get(er.key[3]),
-                             servers_recommend.get(er.key[4]),
-                             servers_recommend.get(er.key[5]),
-                             servers_recommend.get(er.key[6]),
-                             servers_recommend.get(er.key[7])])
-    return server_name, pcie_Card, er
+        server_pcieCard_data = get_data('Server_PcieCard.json', datapath, target_path)  # 从对应服务器的json文件中获取数据
+        server_piceCard_list = server_pcieCard_data['Server_PcieCard']
+        for server_piceCard in server_piceCard_list:
+            if server_piceCard['Server Model'] == server_name and server_piceCard['Ascend AI processor'] == pcie_Card:
+                er.extend_title = 'Pcie Card Matching AI servers successfully'
+                return er, optimizedsummary
+            elif server_piceCard['Ascend AI processor'] == pcie_Card and server_piceCard['Cooperative partner'] == 'Huawei':
+                servers_recommend_list.append(server_piceCard)
+        if servers_recommend_list:
+            er.type = EXTEND_TYPE['table']
+
+            er.extend_title = 'The following are the recommended inference servers:'
+            er.data_type = [EXTEND_DATA_TYPE['str'] * 8]
+            er.key = ['Cooperative partner', 'Server Model', 'Ascend AI processor',
+                      'Maximum number of AI processors per node',
+                      'CPU family', 'Maximum number of CPUs per node', 'Server form', 'Expiration date']
+            for servers_recommend in servers_recommend_list:
+                er.value.append([servers_recommend.get(er.key[0]),
+                                 servers_recommend.get(er.key[1]),
+                                 servers_recommend.get(er.key[2]),
+                                 servers_recommend.get(er.key[3]),
+                                 servers_recommend.get(er.key[4]),
+                                 servers_recommend.get(er.key[5]),
+                                 servers_recommend.get(er.key[6]),
+                                 servers_recommend.get(er.key[7])])
+            optimizedsummary = "The inference card is incompatible with the inference server"
+        return er, optimizedsummary
 
 
 # 方向三 基础软件适配
 def direction3_process(environment_data, datapath, target_path):
     er = ExtendResult()
+    optimizedsummary = ""
     target_path += '/Direction3'
     inferenceCard_name = environment_data.get('direction_three')[0].get('inferenceCard_name')  # 真实推理卡信息
     inferenceCard_data = get_data(inferenceCard_name + '.json', datapath, target_path)  # 获取各推理卡兼容的操作系统数据
     status, npu_name, os_name = function.IsCompatible(inferenceCard_data)
     if status == 0:
-        return er
+        return er, optimizedsummary
     elif status == 1:
         er.type = EXTEND_TYPE['list']
         er.extend_title = "Recommendations of operating system:"
         er.data_type = [EXTEND_DATA_TYPE['str']]
         er.value = inferenceCard_data[npu_name]
-        return er
-    else:
-        er.extend_title = "The tuning direction does not include this PCIe card"
-        return er
+        optimizedsummary = "Operating system need to be optimized"
+        return er, optimizedsummary
+    else:  # 推理卡不为Atlas 300I Pro或Atlas 300V Pro，但是方向一已经输出此错误了，无需重复
+        # er.data_type.append(EXTEND_DATA_TYPE['str'])
+        # er.extend_title = "Please replace the inference card with Atlas 300i pro or atlas 300V pro"
+        return er, optimizedsummary
 
 
 # 方向四_1:昇腾软件兼容性校验---媒体数据处理接口迁移指引
-def direction4_1_process(environment_data, user_data, datapath, target_path):
+def direction4_1_process(environment_data, user_parameter, datapath, target_path):
     target_path += '/Direction4/E'
     er1 = ExtendResult()
     er2 = ExtendResult()
-    transfer_version = user_data.get('direction_four')[0].get('transfer_version')  # 需要转化模型的版本
+    transfer_version = user_parameter.get('transfer_version')  # 需要转化模型的版本
     transfer_V1_file = environment_data.get('direction_four')[0].get(
         'transfer_V1_file')  # 转化为310pV1的接口信息310_Transfer_v1
     transfer_V2_file = environment_data.get('direction_four')[0].get(
         'transfer_V2_file')  # 转化为310pV2的接口信息310_Transfer_v2
     # 获取目标文件下的所有文件内容
-    target_file_address = user_data.get('direction_four')[0].get('target_file_address')  # 转化为310pV2的接口信息310_Transfer_v2
+    target_file_address = user_parameter.get('target_file_address')  # 转化为310pV2的接口信息310_Transfer_v2
     target_file_address_list = list(str.split(target_file_address, ','))
     target_file_content = function.GetFileContent(target_file_address_list)
 
     flag = False
-    needed_sketchy_function = user_data.get('direction_four')[1]  # 用户所需的模块功能列表
+
+    VPC = user_parameter.get('VPC')
+    VDEC = user_parameter.get('VDEC')
+    VENC = user_parameter.get('VENC')
+    JPEGD = user_parameter.get('JPEGD')
+    JPEGE = user_parameter.get('JPEGE')
+    PNGD = user_parameter.get('PNGD')
+    needed_sketchy_function = dict()
+    needed_sketchy_function['VPC'] = VPC
+    needed_sketchy_function['VDEC'] = VDEC
+    needed_sketchy_function['VENC'] = VENC
+    needed_sketchy_function['JPEGD'] = JPEGD
+    needed_sketchy_function['JPEGE'] = JPEGE
+    needed_sketchy_function['PNGD'] = PNGD
+
+    #needed_sketchy_function = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('Module')   # 用户所需的模块功能列表
+
 
     transfer_V1_json = get_data(transfer_V1_file + '.json', datapath, target_path)  # 获取对应json中数据
     transfer_V2_json = get_data(transfer_V2_file + '.json', datapath, target_path)  # 获取对应json中数据
@@ -289,13 +290,14 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
         er1.type = EXTEND_TYPE['list']
         er1.data_type = EXTEND_DATA_TYPE['str']
         er1.value.append('Recommended transfer to 310p_v2')
-        return transfer_version, er1
+        optimizedsummary = "Transfer to 310p_v1 is unreasonable"
+        return er1, optimizedsummary
     elif transfer_version == '310pV1':  # flag为False且转移的版本为V1版本的话说明迁移到310p_v1_acldvpp版本可以实现
-        er1.extend_title = 'Port compatibility information for migrating to 310pV1:'
+        er1.extend_title = 'Relevant interface recommendations for transferring to 310p_v1:'
         er1.type = EXTEND_TYPE['table']
-        er1.data_type = [EXTEND_DATA_TYPE['str'] * 3]
-        er1.key = ['The AscendCL interface involved', '310-> 310P Indicates the impact on users during V1 migration',
-                   'Subordinate to the module']
+        # er1.data_type = [EXTEND_DATA_TYPE['str'] * 3]
+        er1.key = ['The AscendCL interface name', 'The migration recommendations from 310_v1 to 310p_v1',
+                   'Module']
         for key, value in needed_sketchy_function.items():
             if value == 1 and key != 'PNGD':  # v1版本中没有这个PNGD功能
                 temps = transfer_V1_json['v1_' + key]
@@ -310,20 +312,21 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
                             break  # 如果当前module下的一个功能中有了用户代码中的接口 则输出一次这个temp即可，避免多次输出
             else:
                 continue
-        # if er1.value:
-        #     er1.data_type = [EXTEND_DATA_TYPE['str'] * 6]
-        return transfer_version, er1
+        if er1.value:
+            er1.data_type = [EXTEND_DATA_TYPE['str'] * 3]
+        optimizedsummary = "There are relevant transfer suggestions from 310_v1 to 310p_v1"
+        return er1, optimizedsummary
     elif transfer_version == '310pV2':  # flag为False且转移的版本为V2版本的话说明迁移到310p_v2_hi_mpi版本可以实现
-        er2.extend_title = 'Port compatibility information for migrating to 310pV2:'
+        er2.extend_title = 'Relevant interface recommendations for transferring to 310p_v2:'
         er2.type = EXTEND_TYPE['table']
         er2.data_type = [EXTEND_DATA_TYPE['str'] * 3]
-        er2.key = ['310->310Pv2 Migration Impact on Users', 'Ascend 310 acldvpp interface', 'Subordinate to the module']
+        er2.key = ['The migration recommendations from 310_v1 to 310p_v2', 'The AscendCL interface name', 'Module']
         # 对必须处理的头文件进行单独处理
         temps = transfer_V2_json['v2_library file']
         for temp in temps:
             er2.value.append([temp.get(er2.key[0]),
                               temp.get(er2.key[1]),
-                              'header file'])
+                              'library file'])
         temps = transfer_V2_json['v2_header file']
         for temp in temps:
             er2.value.append([temp.get(er2.key[0]),
@@ -348,7 +351,8 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
                                           key])
             else:
                 continue
-        return transfer_version, er2
+        optimizedsummary = "There are relevant transfer suggestions from 310_v1 to 310p_v2"
+        return er2, optimizedsummary
 
 
 # 方向四_2:昇腾软件兼容性校验---目标芯片选项参数差异
@@ -366,7 +370,7 @@ def direction4_2_process(environment_data, datapath, target_path):
     elif chip == "d801":
         chip_type = '910'
     if chip_type == '310' or chip_type == '710' or chip_type == '910':
-        er1.extend_title = "Target chip options:"
+        er1.extend_title = "Target chip options for ATC tools:"
         er1.type = EXTEND_TYPE['table']
         er1.data_type = [EXTEND_DATA_TYPE['str'] * 2]
         er1.key = ['options', 'format']
@@ -376,39 +380,50 @@ def direction4_2_process(environment_data, datapath, target_path):
             else:
                 er1.value.append([chip[er1.key[0]],
                                   chip[chip_type]])
+        optimizedsummary = "ATC tool parameters need to be optimized"
     else:
-        er1.extend_title = "There are no information about " + chip_type
-
-    return er1
+        er1.extend_title = "There are no chip information about " + chip_type + "in ATC tool"
+        er1.type = EXTEND_TYPE['table']
+        er1.data_type = [EXTEND_DATA_TYPE['str']]
+        er1.key = ['recommendation']
+        er1.value = ['Please select Ascend 310 or 710 or 910 chip']
+        optimizedsummary = "No chip can be matched in ATC tool"
+    return er1, optimizedsummary
 
 
 # 方向五：操作系统内核版本校验
 def direction5_process(environment_data, datapath, target_path):
     er = ExtendResult()
+    optimizedsummary = ""
     target_path += '/Direction5/E'
     inner_core = environment_data.get('direction_five')[0].get('inner_core')  # 真实推理卡信息
     innerCore_data = get_data(inner_core + '.json', datapath, target_path)  # 获取各推理卡兼容的操作系统数据
-    status, InnerCore_version = function.IsInnerCoreAndOSCompatible_E(innerCore_data)
+    status, version = function.IsInnerCoreAndOSCompatible_E(innerCore_data)
     if status == 0:
-        return er
+        return er, optimizedsummary
     elif status == 1:
         er.type = EXTEND_TYPE['table']
         er.extend_title = "Recommendations of OS kernel version:"
         er.data_type = [EXTEND_DATA_TYPE['str'] * 4]
         er.key = ['Operating System Version', 'Default OS kernel version', 'Operating System Architecture',
                   'Way to install']
-        er.value.append([InnerCore_version.get(er.key[0]),
-                         InnerCore_version.get(er.key[1]),
-                         InnerCore_version.get(er.key[2]),
-                         InnerCore_version.get(er.key[3])])
-        return er
+        er.value.append([version.get(er.key[0]),
+                         version.get(er.key[1]),
+                         version.get(er.key[2]),
+                         version.get(er.key[3])])
+        optimizedsummary = "You need to change the OS kernel version"
+        return er, optimizedsummary
     elif status == -1:
-        er.data_type.append(EXTEND_DATA_TYPE['str'])
-        er.extend_title = "The default kernel version of the corresponding operating system is not " \
-                          "displayed on the inference card "
-        return er
-    else:
-        er.data_type.append(EXTEND_DATA_TYPE['str'])
-        er.extend_title = "The tuning direction does not include this inference card"
-        return er
+        data = innerCore_data.get(version)  # 获取知识库当前推理卡下的所有操作系统、操作系统架构和默认内核版本的对应关系
+        er.type = EXTEND_TYPE['table']
+        er.extend_title = "Recommendations of OS versions and architecture:"
+        er.data_type = [EXTEND_DATA_TYPE['str'] * 2]
+        er.key = ['Operating System Version', 'Operating System Architecture']
+        for tmp in data:
+            er.value.append([tmp.get(er.key[0]),
+                             tmp.get(er.key[1])])
+        optimizedsummary = "There is no suitable kernel version under the current inference card and operating system version and architecture. Please replace the operating system version and architecture"
+        return er, optimizedsummary
+    else:  # 推理卡不为Atlas 300I Pro或Atlas 300V Pro，但是方向一已经输出此错误了，无需重复
+        return er, optimizedsummary
 
