@@ -72,20 +72,23 @@ def Evaluate(datapath, parameter):
     environment_data = get_data(environment_filename, datapath, target_path)  # 获取系统配置文件的数据environmentConfig.json
     # 获取用户配置文件的数据ecosystem.json   第二个参数是服务器上对应文件工程的地址
     user_data = get_data(user_filename, '/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem', "running_env_tuning")
+    user_parameter = user_data.get('model_list')[0].get("session_list")[0].get("parameter")
+
+
     # 获取各个方向的ExtendResult,并处理各个方向的er
 
     print(user_data)
     # 方向1
-    er1, optimizedsummary = direction1_process(user_data)
+    er1, optimizedsummary = direction1_process(user_parameter)
     result, sequence = result_generate(er1, result, "Direction1", optimizedsummary, sequence)
     # 方向2
-    er2, optimizedsummary = direction2_process(user_data, datapath, target_path)  # 方向二
+    er2, optimizedsummary = direction2_process(user_parameter, datapath, target_path)  # 方向二
     result, sequence = result_generate(er2, result, "Direction2", optimizedsummary, sequence)
     # 方向3
     er3, optimizedsummary = direction3_process(environment_data, datapath, target_path)
     result, sequence = result_generate(er3, result, "Direction3", optimizedsummary, sequence)
     # 方向4_1
-    er4_1, optimizedsummary = direction4_1_process(environment_data, user_data, datapath, target_path)
+    er4_1, optimizedsummary = direction4_1_process(environment_data, user_parameter, datapath, target_path)
     result, sequence = result_generate(er4_1, result, "Direction4_1", optimizedsummary, sequence)
 
     # 方向4_2
@@ -121,10 +124,10 @@ def get_data(filename, dir_path='./', second_path=''):
 
 
 # 方向一：推理卡的选择
-def direction1_process(user_data):
+def direction1_process(user_parameter):
     er = ExtendResult()
     optimizedsummary = ""
-    applicationSceneNum = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get("application_scenarios")  # 获取应用场景编码
+    applicationSceneNum = user_parameter.get("application_scenarios")  # 获取应用场景编码
     temp_npu_name = function.getCard()
     if temp_npu_name == "d100":
         npu_name = "Atlas 300I"
@@ -167,8 +170,8 @@ def direction1_process(user_data):
             return er, optimizedsummary
 
 # 方向二：推理服务器兼容校验，返回的推理服卡匹配的推理服务器信息
-def direction2_process(user_data, datapath, target_path):
-    target_path += '/Direction2'
+def direction2_process(user_parameter, datapath, target_path):
+    target_path += '/Direction2/E'
     er = ExtendResult()
     optimizedsummary = ""
     servers_recommend_list = list()
@@ -189,7 +192,7 @@ def direction2_process(user_data, datapath, target_path):
         # optimizedsummary = "The current inference card is not appropriate"
         return er, optimizedsummary
     else:   # 推理卡为Atlas 300I Pro或 Atlas 300V Pro
-        server_name = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get("servers_name")
+        server_name = user_parameter.get("servers_name")
 
         server_pcieCard_data = get_data('Server_PcieCard.json', datapath, target_path)  # 从对应服务器的json文件中获取数据
         server_piceCard_list = server_pcieCard_data['Server_PcieCard']
@@ -244,28 +247,28 @@ def direction3_process(environment_data, datapath, target_path):
 
 
 # 方向四_1:昇腾软件兼容性校验---媒体数据处理接口迁移指引
-def direction4_1_process(environment_data, user_data, datapath, target_path):
-    target_path += '/Direction4'
+def direction4_1_process(environment_data, user_parameter, datapath, target_path):
+    target_path += '/Direction4/E'
     er1 = ExtendResult()
     er2 = ExtendResult()
-    transfer_version = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('transfer_version')  # 需要转化模型的版本
+    transfer_version = user_parameter.get('transfer_version')  # 需要转化模型的版本
     transfer_V1_file = environment_data.get('direction_four')[0].get(
         'transfer_V1_file')  # 转化为310pV1的接口信息310_Transfer_v1
     transfer_V2_file = environment_data.get('direction_four')[0].get(
         'transfer_V2_file')  # 转化为310pV2的接口信息310_Transfer_v2
     # 获取目标文件下的所有文件内容
-    target_file_address = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('target_file_address')  # 转化为310pV2的接口信息310_Transfer_v2
+    target_file_address = user_parameter.get('target_file_address')  # 转化为310pV2的接口信息310_Transfer_v2
     target_file_address_list = list(str.split(target_file_address, ','))
     target_file_content = function.GetFileContent(target_file_address_list)
 
     flag = False
 
-    VPC = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('VPC')
-    VDEC = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('VDEC')
-    VENC = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('VENC')
-    JPEGD = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('JPEGD')
-    JPEGE = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('JPEGE')
-    PNGD = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('PNGD')
+    VPC = user_parameter.get('VPC')
+    VDEC = user_parameter.get('VDEC')
+    VENC = user_parameter.get('VENC')
+    JPEGD = user_parameter.get('JPEGD')
+    JPEGE = user_parameter.get('JPEGE')
+    PNGD = user_parameter.get('PNGD')
     needed_sketchy_function = dict()
     needed_sketchy_function['VPC'] = VPC
     needed_sketchy_function['VDEC'] = VDEC
