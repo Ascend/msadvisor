@@ -58,9 +58,9 @@ def Evaluate(datapath, parameter):
         :param datapath:
     """
     # do evaluate work by file data
-    print(parameter, type(parameter))
+    # print(parameter, type(parameter))
     user_parameter = json.loads(parameter)
-    print(user_parameter, type(user_parameter))
+    # print(user_parameter, type(user_parameter))
     result = Result()
     sequence = 0  # summary次序
     result.class_type = CLASS_TYPE['model']
