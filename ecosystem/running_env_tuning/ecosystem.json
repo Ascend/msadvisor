@@ -12,14 +12,14 @@
                   "transfer_version": "310pV1",
                   "target_file_address": "/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem/running_env_tuning/data/knowledge/knowledgeBase/TestFileProject,/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem/running_env_tuning/data/knowledge/knowledgeBase/TestFileProject2",
 
-                  "Module": {
+
                     "VPC": 1,
                     "VDEC": 0,
                     "VENC": 0,
                     "JPEGD": 1,
                     "JPEGE":0,
                     "PNGD": 1
-                  }
+
           }
         }
       ]

@@ -70,7 +70,7 @@ def Evaluate(datapath, parameter):
     target_path = "knowledgeBase"
 
     environment_data = get_data(environment_filename, datapath, target_path)  # 获取系统配置文件的数据environmentConfig.json
-    # 获取用户配置文件的数据ecosystem.json   第二个参数是服务器上对应文件工程的地址
+    # 获取用户配置文件的数据ecosystem.json   第二个参数是服务器上对应文件工程的地址/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem，本地调试的话使用../../
     user_data = get_data(user_filename, '/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem', "running_env_tuning")
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # 方向1
@@ -257,7 +257,23 @@ def direction4_1_process(environment_data, user_data, datapath, target_path):
     target_file_content = function.GetFileContent(target_file_address_list)
 
     flag = False
-    needed_sketchy_function = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('Module')   # 用户所需的模块功能列表
+
+    VPC = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('VPC')
+    VDEC = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('VDEC')
+    VENC = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('VENC')
+    JPEGD = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('JPEGD')
+    JPEGE = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('JPEGE')
+    PNGD = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('PNGD')
+    needed_sketchy_function = dict()
+    needed_sketchy_function['VPC'] = VPC
+    needed_sketchy_function['VDEC'] = VDEC
+    needed_sketchy_function['VENC'] = VENC
+    needed_sketchy_function['JPEGD'] = JPEGD
+    needed_sketchy_function['JPEGE'] = JPEGE
+    needed_sketchy_function['PNGD'] = PNGD
+
+    #needed_sketchy_function = user_data.get('model_list')[0].get("session_list")[0].get("parameter").get('Module')   # 用户所需的模块功能列表
+
 
     transfer_V1_json = get_data(transfer_V1_file + '.json', datapath, target_path)  # 获取对应json中数据
     transfer_V2_json = get_data(transfer_V2_file + '.json', datapath, target_path)  # 获取对应json中数据
@@ -410,3 +426,6 @@ def direction5_process(environment_data, datapath, target_path):
     else:  # 推理卡不为Atlas 300I Pro或Atlas 300V Pro，但是方向一已经输出此错误了，无需重复
         return er, optimizedsummary
 
+if __name__ == '__main__':
+    str1 = Evaluate("D:/desktop/msadvisor_2/ecosystem/running_env_tuning/data/knowledge","a")
+    print(str1)
