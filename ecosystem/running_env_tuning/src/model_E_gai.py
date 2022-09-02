@@ -73,7 +73,6 @@ def Evaluate(datapath, parameter):
     # 获取用户配置文件的数据ecosystem.json   第二个参数是服务器上对应文件工程的地址/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem，本地调试的话使用../../
     user_data = get_data(user_filename, '/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem', "running_env_tuning")
     user_parameter = user_data.get('model_list')[0].get("session_list")[0].get("parameter")
-
     print(user_parameter)
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # 方向1
