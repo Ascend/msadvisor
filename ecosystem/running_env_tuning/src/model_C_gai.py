@@ -75,24 +75,24 @@ def Evaluate(datapath, parameter):
 
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # 方向1
-    er1, optimizedsummary = direction1_process(user_parameter)
-    result, sequence = result_generate(er1, result, "Direction1", optimizedsummary, sequence)
-    # 方向2
-    er2, optimizedsummary = direction2_process(user_parameter, datapath, target_path)  # 方向二
-    result, sequence = result_generate(er2, result, "Direction2", optimizedsummary, sequence)
-    # 方向3
-    er3, optimizedsummary = direction3_process(environment_data, datapath, target_path)
-    result, sequence = result_generate(er3, result, "Direction3", optimizedsummary, sequence)
+    # er1, optimizedsummary = direction1_process(user_parameter)
+    # result, sequence = result_generate(er1, result, "Direction1", optimizedsummary, sequence)
+    # # 方向2
+    # er2, optimizedsummary = direction2_process(user_parameter, datapath, target_path)  # 方向二
+    # result, sequence = result_generate(er2, result, "Direction2", optimizedsummary, sequence)
+    # # 方向3
+    # er3, optimizedsummary = direction3_process(environment_data, datapath, target_path)
+    # result, sequence = result_generate(er3, result, "Direction3", optimizedsummary, sequence)
     # 方向4_1
     er4_1, optimizedsummary = direction4_1_process(environment_data, user_parameter, datapath, target_path)
     result, sequence = result_generate(er4_1, result, "Direction4_1", optimizedsummary, sequence)
 
     # 方向4_2
-    er4_2, optimizedsummary = direction4_2_process(environment_data, datapath, target_path)
-    result, sequence = result_generate(er4_2, result, "Direction4_2", optimizedsummary, sequence)
-    # 方向5
-    er5, optimizedsummary = direction5_process(environment_data, datapath, target_path)
-    result, sequence = result_generate(er5, result, "Direction5", optimizedsummary, sequence)
+    # er4_2, optimizedsummary = direction4_2_process(environment_data, datapath, target_path)
+    # result, sequence = result_generate(er4_2, result, "Direction4_2", optimizedsummary, sequence)
+    # # 方向5
+    # er5, optimizedsummary = direction5_process(environment_data, datapath, target_path)
+    # result, sequence = result_generate(er5, result, "Direction5", optimizedsummary, sequence)
 
     return result.generate()
 
@@ -167,7 +167,7 @@ def direction1_process(user_parameter):
 
 # 方向二：推理服务器兼容校验，返回的推理服卡匹配的推理服务器信息
 def direction2_process(user_parameter, datapath, target_path):
-    target_path += '/Direction2/E'
+    target_path += '/Direction2'
     er = ExtendResult()
     optimizedsummary = ""
     servers_recommend_list = list()
@@ -244,7 +244,7 @@ def direction3_process(environment_data, datapath, target_path):
 
 # 方向四_1:昇腾软件兼容性校验---媒体数据处理接口迁移指引
 def direction4_1_process(environment_data, user_parameter, datapath, target_path):
-    target_path += '/Direction4/E'
+    target_path += '/Direction4'
     er1 = ExtendResult()
     er2 = ExtendResult()
     transfer_version = user_parameter.get('transfer_version')  # 需要转化模型的版本
@@ -425,8 +425,8 @@ def direction5_process(environment_data, datapath, target_path):
         return er, optimizedsummary
 
 if __name__ == '__main__':
-    str2 = str({"JPEGD":1,"JPEGE":0,"PNGD":1,"VDEC":0,"VENC":0,"VPC":1,"application_scenarios":1,"servers_name":"EG520-G30","target_file_address":"/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem/running_env_tuning/data/knowledge/knowledgeBase/TestFileProject,/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem/running_env_tuning/data/knowledge/knowledgeBase/TestFileProject2","transfer_version":"310pV1"}
-               )
+    str2 = '{"JPEGD":1,"JPEGE":0,"PNGD":1,"VDEC":0,"VENC":0,"VPC":1,"application_scenarios":1,"servers_name":"EG520-G30","target_file_address":"/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem/running_env_tuning/data/knowledge/knowledgeBase/TestFileProject,/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem/running_env_tuning/data/knowledge/knowledgeBase/TestFileProject2","transfer_version":"310pV1"}'
+
     str1 = Evaluate("D:/desktop/msadvisor_2/ecosystem/running_env_tuning/data/knowledge", str2
                     )
     print(str1)
