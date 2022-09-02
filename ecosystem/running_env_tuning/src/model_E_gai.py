@@ -7,7 +7,6 @@ Copyright Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
 import os
 import json
 import function
-import json_tools
 
 
 # msadvisor识别的结果类型
