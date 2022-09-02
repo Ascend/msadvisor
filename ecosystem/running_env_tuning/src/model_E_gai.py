@@ -58,7 +58,7 @@ def Evaluate(datapath, parameter):
         :param datapath:
     """
     # do evaluate work by file data
-    print(parameter)
+    print(parameter, type(parameter))
     result = Result()
     sequence = 0  # summary次序
     result.class_type = CLASS_TYPE['model']
@@ -73,7 +73,7 @@ def Evaluate(datapath, parameter):
     # 获取用户配置文件的数据ecosystem.json   第二个参数是服务器上对应文件工程的地址/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem，本地调试的话使用../../
     # user_data = get_data(user_filename, '/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem', "running_env_tuning")
     user_parameter = json.load(parameter)
-    print(user_parameter)
+    print(user_parameter, type(user_parameter))
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # 方向1
     er1, optimizedsummary = direction1_process(user_parameter)
