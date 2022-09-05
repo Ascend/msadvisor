@@ -14,6 +14,6 @@
 
 from .register import Register
 from .config import Config
-from .utils import path_to_module_format
+from .utils import format_to_module, typeassert, check_file_exist
 
-__all__ = ["Register", "Config", "path_to_module_format"]
+__all__ = ["Register", "Config", "format_to_module", "typeassert", "check_file_exist"]

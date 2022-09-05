@@ -114,6 +114,17 @@ class ImageNetPreProcess(PreProcessBase, ABC):
             return img.resize(size[::-1], interpolation)
 
     @staticmethod
+    def _check_params(image_param):
+        if all(i > 1 for i in image_param.std) or all(i < 0 for i in image_param.std):
+            raise RuntimeError("the parameter does not meet the requirements std={}".format(image_param.std))
+
+        if all(i > 1 for i in image_param.mean) or all(i < 0 for i in image_param.mean):
+            raise RuntimeError("the parameter does not meet the requirements mean={}".format(image_param.mean))
+
+        if image_param.dtype not in ["fp32", "fp16", "int8"]:
+            raise RuntimeError("the parameter does not meet the requirements dtype={}".format(image_param.dtype))
+
+    @staticmethod
     def _get_params(cfg):
         try:
             mean = cfg["mean"]
@@ -123,7 +134,11 @@ class ImageNetPreProcess(PreProcessBase, ABC):
             dataset_path = cfg["dataset_path"]
             dtype = cfg["dtype"]
             real_path = os.path.realpath(dataset_path)
-            return ImageParam(mean, std, center_crop, resize, real_path, dtype)
+
+            image_param = ImageParam(mean, std, center_crop, resize, real_path, dtype)
+            ImageNetPreProcess._check_params(image_param)
+
+            return image_param
         except Exception as err:
             raise RuntimeError("get params failed error={}".format(err))
 
