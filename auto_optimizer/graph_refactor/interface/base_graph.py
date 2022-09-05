@@ -22,13 +22,6 @@ import numpy as np
 
 from .base_node import PlaceHolder, Initializer, Node   
 
-class NodeNotExistException(KeyError):
-    def __init__(self, node_name):
-        self.value = '{} is not exist in graph'.format(node_name)
-
-    def __str__(self):
-        return repr(self.value)
-
 class BaseGraph(ABC):
 
     def __init__(

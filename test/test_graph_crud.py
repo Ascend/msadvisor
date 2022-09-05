@@ -87,7 +87,6 @@ class TestGraphCrud(unittest.TestCase):
             )
 
     def test_get_nodes(self):
-        self.graph['a']
         self.assertEqual(self.graph.get_nodes('Mul'), [self.graph['Node_1'], self.graph['Node_5']])
         self.assertEqual(self.graph.get_nodes('Sub'), [self.graph['Node_0'], self.graph['Node_3']])
         self.assertEqual(self.graph.get_nodes('Add'), [self.graph['Node_2'], self.graph['Node_4']])

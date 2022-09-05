@@ -15,9 +15,8 @@
 import sys
 import argparse
 
-from auto_optimizer.graph_optimizer.optimizer import GraphOptimizer
-from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges import KnowledgeConv1d2Conv2d, KnowledgeMergeContinueSlice
+from .graph_optimizer.optimizer import GraphOptimizer
+from .graph_refactor.onnx.graph import OnnxGraph
 
 def _opt_parser(opt_parser):
     opt_parser.add_argument('input_model', help='Input model path')

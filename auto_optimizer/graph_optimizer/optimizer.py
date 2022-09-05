@@ -14,14 +14,13 @@
 
 from typing import List, Dict, Union
 
-from auto_optimizer.pattern.knowledges import KnowledgeConv1d2Conv2d, KnowledgeMergeContinueSlice
-
-knowledge_map = {'KnowledgeConv1d2Conv2d': KnowledgeConv1d2Conv2d}
+from ..common.register import Register
 
 class GraphOptimizer:
 
     def __init__(self, knowledges: List[str] = None):
-        self.knowldges = knowledges
+        knowledge_module = Register.import_module('auto_optimizer.pattern.knowledges')
+        self.knowldges = [getattr(knowledge_module, k) for k in knowledges]
 
     def load_config(self):
         pass
@@ -42,7 +41,7 @@ class GraphOptimizer:
 
     def apply_knowledges(self, graph):
         for knowldge in self.knowldges:
-            GraphOptimizer.optimize(graph, knowledge_map[knowldge]())
+            GraphOptimizer.optimize(graph, knowldge())
 
         return graph
 
