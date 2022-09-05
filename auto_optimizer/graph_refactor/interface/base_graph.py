@@ -16,10 +16,18 @@ from abc import ABC, abstractmethod
 from collections import deque
 from itertools import chain
 from typing import List, Dict, Union
+import warnings
 
 import numpy as np
 
 from .base_node import PlaceHolder, Initializer, Node   
+
+class NodeNotExistException(KeyError):
+    def __init__(self, node_name):
+        self.value = '{} is not exist in graph'.format(node_name)
+
+    def __str__(self):
+        return repr(self.value)
 
 class BaseGraph(ABC):
 
@@ -365,8 +373,11 @@ class BaseGraph(ABC):
             True if remove succeeds, otherwise False
         """
         maps = {0:0} if maps is None else maps
-        # TODO: exception: name not exist in graph
-        node = self._node_map[name]
+        try:
+            node = self._node_map[name]
+        except KeyError:
+            warnings.warn('You are trying to remove node {}, which is not exist!'.format(name))
+            return False
         self._node_map.pop(name, None)
         if node in self._inputs:
             self._inputs.remove(node)
@@ -385,7 +396,8 @@ class BaseGraph(ABC):
             for in_id, in_name in enumerate(node.inputs):
                 # update next map, node is no longer a next node
                 if self._next_map.get(in_name, None):
-                    self._next_map[in_name].remove(node)
+                    if node in self._next_map[in_name]:
+                        self._next_map[in_name].remove(node)
                     if not self._next_map[in_name]:
                         self._next_map.pop(in_name, None)
                 out_id = maps.get(in_id, None)
@@ -408,7 +420,10 @@ class BaseGraph(ABC):
         return False
 
     def __getitem__(self, key):
-        return self._node_map[key]
+        try:
+            return self._node_map[key]
+        except KeyError as e:
+            raise Exception("'{}' is not exist in graph".format(key)) from e 
 
     def __setitem__(self, key, value):
         # TODO

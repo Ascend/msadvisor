@@ -27,9 +27,9 @@ def create_graph():
     output_0 = OnnxPlaceHolder('output_0', np.dtype('float32'), [1,3,224,224])
     ini_0 = OnnxInitializer('ini_0', np.array([1,2,3], dtype='float32'))
     node_0 = OnnxNode('Node_0', 'Sub', inputs=['input_0'], outputs=['0_out_0', '0_out_1'], attrs={})
-    node_1 = OnnxNode('Node_1', 'Mul', inputs=['0_out_0'], outputs=['1_out_0'], attrs={})
+    node_1 = OnnxNode('Node_1', 'Mul', inputs=['0_out_0', 'ini_0'], outputs=['1_out_0'], attrs={})
     node_2 = OnnxNode('Node_2', 'Add', inputs=['0_out_0', '0_out_1'], outputs=['2_out_0', '2_out_1'], attrs={})
-    node_3 = OnnxNode('Node_3', 'Sub', inputs=['1_out_0', 'ini_0'], outputs=['3_out_0'], attrs={})
+    node_3 = OnnxNode('Node_3', 'Sub', inputs=['1_out_0', 'ini_0', 'ini_0'], outputs=['3_out_0'], attrs={})
     node_4 = OnnxNode('Node_4', 'Add', inputs=['1_out_0', '2_out_0'], outputs=['4_out_0'], attrs={})
     node_5 = OnnxNode('Node_5', 'Mul', inputs=['3_out_0', '4_out_0', '2_out_1'], outputs=['output_0'], attrs={})
     return OnnxGraph([node_0,node_1,node_2,node_3,node_4,node_5], [input_0], [output_0], [ini_0])
@@ -87,6 +87,7 @@ class TestGraphCrud(unittest.TestCase):
             )
 
     def test_get_nodes(self):
+        self.graph['a']
         self.assertEqual(self.graph.get_nodes('Mul'), [self.graph['Node_1'], self.graph['Node_5']])
         self.assertEqual(self.graph.get_nodes('Sub'), [self.graph['Node_0'], self.graph['Node_3']])
         self.assertEqual(self.graph.get_nodes('Add'), [self.graph['Node_2'], self.graph['Node_4']])
@@ -205,14 +206,13 @@ class TestGraphCrud(unittest.TestCase):
         self.assertEqual(self.graph_1.get_next_nodes('test_node_out_1'), [self.graph_1['Node_1']])
         self.assertEqual(self.graph_1.get_prev_node('test_node_out_1'), test_node)
     
-    # single input & single output
     def test_graph_remove_defualt(self):
         # create target
         input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [1,3,224,224])
         output_0 = OnnxPlaceHolder('output_0', np.dtype('float32'), [1,3,224,224])
         ini_0 = OnnxInitializer('ini_0', np.array([1,2,3], dtype='float32'))
         node_0 = OnnxNode('Node_0', 'Sub', inputs=['input_0'], outputs=['0_out_0', '0_out_1'], attrs={})
-        node_1 = OnnxNode('Node_1', 'Mul', inputs=['0_out_0'], outputs=['1_out_0'], attrs={})
+        node_1 = OnnxNode('Node_1', 'Mul', inputs=['0_out_0', 'ini_0'], outputs=['1_out_0'], attrs={})
         node_2 = OnnxNode('Node_2', 'Add', inputs=['0_out_0', '0_out_1'], outputs=['2_out_0', '2_out_1'], attrs={})
         node_4 = OnnxNode('Node_4', 'Add', inputs=['1_out_0', '2_out_0'], outputs=['4_out_0'], attrs={})
         node_5 = OnnxNode('Node_5', 'Mul', inputs=['1_out_0', '4_out_0', '2_out_1'], outputs=['output_0'], attrs={})
@@ -226,13 +226,30 @@ class TestGraphCrud(unittest.TestCase):
         input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [1,3,224,224])
         output_0 = OnnxPlaceHolder('output_0', np.dtype('float32'), [1,3,224,224])
         node_0 = OnnxNode('Node_0', 'Sub', inputs=['input_0'], outputs=['0_out_0', '0_out_1'], attrs={})
-        node_1 = OnnxNode('Node_1', 'Mul', inputs=['0_out_0'], outputs=['1_out_0'], attrs={})
+        node_1 = OnnxNode('Node_1', 'Mul', inputs=['0_out_0', 'ini_0'], outputs=['1_out_0'], attrs={})
         node_2 = OnnxNode('Node_2', 'Add', inputs=['0_out_0', '0_out_1'], outputs=['2_out_0', '2_out_1'], attrs={})
         node_4 = OnnxNode('Node_4', 'Add', inputs=['1_out_0', '2_out_0'], outputs=['4_out_0'], attrs={})
         node_5 = OnnxNode('Node_5', 'Mul', inputs=['1_out_0', '4_out_0', '2_out_1'], outputs=['output_0'], attrs={})
         target = OnnxGraph([node_0,node_1,node_2,node_4,node_5], [input_0], [output_0])
+        target._next_map.pop('ini_0')
 
         self.graph.remove('ini_0')
+        self.graph.remove('Node_3')
+        self.assertEqual(self.graph, target)
+
+    # remove node with duplicate input
+    def test_graph_remove_duplicate_input(self):
+        # create target
+        input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [1,3,224,224])
+        output_0 = OnnxPlaceHolder('output_0', np.dtype('float32'), [1,3,224,224])
+        ini_0 = OnnxInitializer('ini_0', np.array([1,2,3], dtype='float32'))
+        node_0 = OnnxNode('Node_0', 'Sub', inputs=['input_0'], outputs=['0_out_0', '0_out_1'], attrs={})
+        node_1 = OnnxNode('Node_1', 'Mul', inputs=['0_out_0', 'ini_0'], outputs=['1_out_0'], attrs={})
+        node_2 = OnnxNode('Node_2', 'Add', inputs=['0_out_0', '0_out_1'], outputs=['2_out_0', '2_out_1'], attrs={})
+        node_4 = OnnxNode('Node_4', 'Add', inputs=['1_out_0', '2_out_0'], outputs=['4_out_0'], attrs={})
+        node_5 = OnnxNode('Node_5', 'Mul', inputs=['1_out_0', '4_out_0', '2_out_1'], outputs=['output_0'], attrs={})
+        target = OnnxGraph([node_0,node_1,node_2,node_4,node_5], [input_0], [output_0], [ini_0])
+
         self.graph.remove('Node_3')
         self.assertEqual(self.graph, target)
 

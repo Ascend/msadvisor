@@ -54,18 +54,31 @@ def is_map_equal(map1, map2):
     return flag
 
 def is_graph_equal(g1, g2, msg=None):
-    ret = is_list_equal(g1.nodes, g2.nodes) and \
-        is_list_equal(g1.initializers, g2.initializers) and \
-        is_list_equal(g1.inputs, g2.inputs) and \
-        is_list_equal(g1.outputs, g2.outputs) and \
-        is_list_equal(g1._value_infos, g2._value_infos) and \
-        is_map_equal(g1._node_map, g2._node_map) and \
-        is_map_equal(g1._prev_map, g2._prev_map) and \
-        is_map_equal(g1._next_map, g2._next_map)
-    if not ret:
-        msg = 'two graphs are not equal!'
+    if not is_list_equal(g1.nodes, g2.nodes):
+        msg = 'graph nodes are not equal!'
         raise unittest.TestCase.failureException(msg)
-    return ret
+    if not is_list_equal(g1.initializers, g2.initializers):
+        msg = 'graph initializers are not equal!'
+        raise unittest.TestCase.failureException(msg)
+    if not is_list_equal(g1.inputs, g2.inputs):
+        msg = 'graph inputs are not equal!'
+        raise unittest.TestCase.failureException(msg)
+    if not is_list_equal(g1.outputs, g2.outputs):
+        msg = 'graph outputs are not equal!'
+        raise unittest.TestCase.failureException(msg)
+    if not is_list_equal(g1._value_infos, g2._value_infos):
+        msg = 'graph value_infos are not equal!'
+        raise unittest.TestCase.failureException(msg)
+    if not is_map_equal(g1._node_map, g2._node_map):
+        msg = 'graph node_map are not equal!'
+        raise unittest.TestCase.failureException(msg)
+    if not is_map_equal(g1._prev_map, g2._prev_map):
+        msg = 'graph prev_map are not equal!'
+        raise unittest.TestCase.failureException(msg)
+    if not is_map_equal(g1._next_map, g2._next_map):
+        msg = 'graph next_map are not equal!'
+        raise unittest.TestCase.failureException(msg)
+    return True
 
 def create_graph():
     input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [3,2])
