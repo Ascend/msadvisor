@@ -146,6 +146,69 @@ class TestGraphCrud(unittest.TestCase):
         self.assertEqual(self.graph_1.get_prev_node('Node_0/test_node'), self.graph['Node_0'])
         self.assertEqual(self.graph_1.get_next_nodes('0_out_0'), [])
         self.assertEqual(self.graph_1.get_prev_node('0_out_0'), test_node)
+
+    def test_connect_node_case_0(self):
+        test_node = self.graph_1.add_node('test_node', 'Sqrt')
+        self.graph_1.connect_node(
+            test_node,
+            ['Node_1'],
+            ['Node_3:1']
+            )
+        self.assertEqual(test_node.inputs, ['1_out_0'])
+        self.assertEqual(test_node.outputs, ['test_node_out_0'])
+        self.assertEqual(self.graph_1.get_next_nodes('1_out_0'), [test_node])
+        self.assertEqual(self.graph_1.get_prev_node('1_out_0'), self.graph_1['Node_1'])
+        self.assertEqual(self.graph_1.get_next_nodes('test_node_out_0'), [self.graph_1['Node_3']])
+        self.assertEqual(self.graph_1.get_prev_node('test_node_out_0'), test_node)
+    
+    def test_connect_node_case_1(self):
+        test_node = self.graph_1.add_node('test_node', 'Sqrt')
+        self.graph_1.connect_node(
+            test_node,
+            ['Node_0'],
+            ['Node_2;0_out_0']
+            )
+        self.assertEqual(test_node.inputs, ['test_node_in_0'])
+        self.assertEqual(test_node.outputs, ['0_out_0'])
+        self.assertEqual(self.graph_1.get_next_nodes('test_node_in_0'), [test_node])
+        self.assertEqual(self.graph_1.get_prev_node('test_node_in_0'), self.graph_1['Node_0'])
+        self.assertEqual(self.graph_1.get_next_nodes('0_out_0'), [self.graph_1['Node_2']])
+        self.assertEqual(self.graph_1.get_prev_node('0_out_0'), test_node)
+
+    def test_connect_node_case_2(self):
+        test_node = self.graph_1.add_node('test_node', 'Add')
+        self.graph_1.connect_node(
+            test_node,
+            ['Node_1', 'Node_2'],
+            ['Node_3:0,1']
+            )
+        self.assertEqual(test_node.inputs, ['1_out_0', '2_out_0'])
+        self.assertEqual(test_node.outputs, ['test_node_out_0'])
+        self.assertEqual(self.graph_1.get_next_nodes('1_out_0'), [test_node])
+        self.assertEqual(self.graph_1.get_prev_node('1_out_0'), self.graph_1['Node_1'])
+        self.assertEqual(self.graph_1.get_next_nodes('2_out_0'), [test_node])
+        self.assertEqual(self.graph_1.get_prev_node('2_out_0'), self.graph_1['Node_2'])
+        self.assertEqual(self.graph_1.get_next_nodes('test_node_out_0'), [self.graph_1['Node_3']])
+        self.assertEqual(self.graph_1.get_prev_node('test_node_out_0'), test_node)
+    
+    def test_connect_node_case_3(self):
+        test_node = self.graph_1.add_node('test_node', 'Split', {'axis':1})
+        test_ini = self.graph_1.add_initializer('test_ini', np.array([1,2]))
+        self.graph_1.connect_node(
+            test_node,
+            ['Node_0', 'test_ini'],
+            ['Node_2:1', 'Node_1']
+            )
+        self.assertEqual(test_node.inputs, ['0_out_0', 'test_ini'])
+        self.assertEqual(test_node.outputs, ['test_node_out_0', 'test_node_out_1'])
+        self.assertEqual(self.graph_1.get_next_nodes('0_out_0'), [self.graph_1['Node_2'], test_node])
+        self.assertEqual(self.graph_1.get_prev_node('0_out_0'), self.graph_1['Node_0'])
+        self.assertEqual(self.graph_1.get_next_nodes('test_ini'), [test_node])
+        self.assertEqual(self.graph_1.get_prev_node('test_ini'), None)
+        self.assertEqual(self.graph_1.get_next_nodes('test_node_out_0'), [self.graph_1['Node_2']])
+        self.assertEqual(self.graph_1.get_prev_node('test_node_out_0'), test_node)
+        self.assertEqual(self.graph_1.get_next_nodes('test_node_out_1'), [self.graph_1['Node_1']])
+        self.assertEqual(self.graph_1.get_prev_node('test_node_out_1'), test_node)
     
     # single input & single output
     def test_graph_remove_defualt(self):
