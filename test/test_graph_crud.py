@@ -59,16 +59,22 @@ class TestGraphCrud(unittest.TestCase):
         test_input = self.graph.add_input('test_input', 'float32', [1,3,224,224])
         self.assertEqual(self.graph['test_input'], test_input)
         self.assertEqual(self.graph.inputs, [self.graph['input_0'], test_input])
+        with self.assertRaisesRegex(ValueError, "node name '.+' already exists!"):
+            self.graph.add_input('test_input', 'float32', [1,3,224,224])
 
     def test_add_output(self):
         test_output = self.graph.add_output('test_output', 'float32', [1,3,224,224])
         self.assertEqual(self.graph['test_output'], test_output)
         self.assertEqual(self.graph.outputs, [self.graph['output_0'], test_output])
+        with self.assertRaisesRegex(ValueError, "node name '.+' already exists!"):
+            self.graph.add_output('test_output', 'float32', [1,3,224,224])
 
     def test_add_initializer(self):
         test_ini = self.graph.add_initializer('test_ini', np.array([1,2,3]))
         self.assertEqual(self.graph['test_ini'], test_ini)
         self.assertEqual(self.graph.initializers, [self.graph['ini_0'], test_ini])
+        with self.assertRaisesRegex(ValueError, "node name '.+' already exists!"):
+            self.graph.add_initializer('test_ini', np.array([1,2,3]))
 
     def test_add_node(self):
         test_node = self.graph.add_node('test_node', 'Add')
@@ -85,6 +91,8 @@ class TestGraphCrud(unittest.TestCase):
                 test_node
                 ]
             )
+        with self.assertRaisesRegex(ValueError, "node name '.+' already exists!"):
+            self.graph.add_node('test_node', 'Add')
 
     def test_get_nodes(self):
         self.assertEqual(self.graph.get_nodes('Mul'), [self.graph['Node_1'], self.graph['Node_5']])
@@ -141,69 +149,6 @@ class TestGraphCrud(unittest.TestCase):
         self.assertEqual(self.graph_1.get_prev_node('Node_0/test_node'), self.graph_1['Node_0'])
         self.assertEqual(self.graph_1.get_next_nodes('0_out_0'), [])
         self.assertEqual(self.graph_1.get_prev_node('0_out_0'), test_node)
-
-    def test_connect_node_case_0(self):
-        test_node = self.graph_1.add_node('test_node', 'Sqrt')
-        self.graph_1.connect_node(
-            test_node,
-            ['Node_1'],
-            ['Node_3:1']
-            )
-        self.assertEqual(test_node.inputs, ['1_out_0'])
-        self.assertEqual(test_node.outputs, ['test_node_out_0'])
-        self.assertEqual(self.graph_1.get_next_nodes('1_out_0'), [test_node])
-        self.assertEqual(self.graph_1.get_prev_node('1_out_0'), self.graph_1['Node_1'])
-        self.assertEqual(self.graph_1.get_next_nodes('test_node_out_0'), [self.graph_1['Node_3']])
-        self.assertEqual(self.graph_1.get_prev_node('test_node_out_0'), test_node)
-    
-    def test_connect_node_case_1(self):
-        test_node = self.graph_1.add_node('test_node', 'Sqrt')
-        self.graph_1.connect_node(
-            test_node,
-            ['Node_0'],
-            ['Node_2;0_out_0']
-            )
-        self.assertEqual(test_node.inputs, ['test_node_in_0'])
-        self.assertEqual(test_node.outputs, ['0_out_0'])
-        self.assertEqual(self.graph_1.get_next_nodes('test_node_in_0'), [test_node])
-        self.assertEqual(self.graph_1.get_prev_node('test_node_in_0'), self.graph_1['Node_0'])
-        self.assertEqual(self.graph_1.get_next_nodes('0_out_0'), [self.graph_1['Node_2']])
-        self.assertEqual(self.graph_1.get_prev_node('0_out_0'), test_node)
-
-    def test_connect_node_case_2(self):
-        test_node = self.graph_1.add_node('test_node', 'Add')
-        self.graph_1.connect_node(
-            test_node,
-            ['Node_1', 'Node_2'],
-            ['Node_3:0,1']
-            )
-        self.assertEqual(test_node.inputs, ['1_out_0', '2_out_0'])
-        self.assertEqual(test_node.outputs, ['test_node_out_0'])
-        self.assertEqual(self.graph_1.get_next_nodes('1_out_0'), [test_node])
-        self.assertEqual(self.graph_1.get_prev_node('1_out_0'), self.graph_1['Node_1'])
-        self.assertEqual(self.graph_1.get_next_nodes('2_out_0'), [test_node])
-        self.assertEqual(self.graph_1.get_prev_node('2_out_0'), self.graph_1['Node_2'])
-        self.assertEqual(self.graph_1.get_next_nodes('test_node_out_0'), [self.graph_1['Node_3']])
-        self.assertEqual(self.graph_1.get_prev_node('test_node_out_0'), test_node)
-    
-    def test_connect_node_case_3(self):
-        test_node = self.graph_1.add_node('test_node', 'Split', {'axis':1})
-        test_ini = self.graph_1.add_initializer('test_ini', np.array([1,2]))
-        self.graph_1.connect_node(
-            test_node,
-            ['Node_0', 'test_ini'],
-            ['Node_2:1', 'Node_1']
-            )
-        self.assertEqual(test_node.inputs, ['0_out_0', 'test_ini'])
-        self.assertEqual(test_node.outputs, ['test_node_out_0', 'test_node_out_1'])
-        self.assertEqual(self.graph_1.get_next_nodes('0_out_0'), [self.graph_1['Node_2'], test_node])
-        self.assertEqual(self.graph_1.get_prev_node('0_out_0'), self.graph_1['Node_0'])
-        self.assertEqual(self.graph_1.get_next_nodes('test_ini'), [test_node])
-        self.assertEqual(self.graph_1.get_prev_node('test_ini'), None)
-        self.assertEqual(self.graph_1.get_next_nodes('test_node_out_0'), [self.graph_1['Node_2']])
-        self.assertEqual(self.graph_1.get_prev_node('test_node_out_0'), test_node)
-        self.assertEqual(self.graph_1.get_next_nodes('test_node_out_1'), [self.graph_1['Node_1']])
-        self.assertEqual(self.graph_1.get_prev_node('test_node_out_1'), test_node)
     
     def test_graph_remove_defualt(self):
         # create target
@@ -219,6 +164,8 @@ class TestGraphCrud(unittest.TestCase):
 
         self.graph.remove('Node_3')
         self.assertEqual(self.graph, target)
+        with self.assertRaisesRegex(Exception, "You are trying to remove node '.+', which does not exist!"):
+            self.graph.remove('Node_3')
 
     def test_graph_remove_ini_node(self):
         # create target
@@ -261,6 +208,8 @@ class TestGraphCrud(unittest.TestCase):
             self.graph.value_infos
         ):
             self.assertIs(self.graph[node.name], node)
+        with self.assertRaisesRegex(KeyError, "node '.+' not in graph!"):
+            self.graph['node_not_in_graph']
 
 if __name__ == '__main__':
     unittest.main()
