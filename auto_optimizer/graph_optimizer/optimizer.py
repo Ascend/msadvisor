@@ -20,7 +20,7 @@ class GraphOptimizer:
 
     def __init__(self, knowledges: List[str] = None):
         knowledge_module = Register.import_module('auto_optimizer.pattern.knowledges')
-        self.knowldges = [getattr(knowledge_module, k) for k in knowledges]
+        self.knowledges = [getattr(knowledge_module, k) for k in knowledges]
 
     def load_config(self):
         pass
@@ -40,8 +40,8 @@ class GraphOptimizer:
         return res
 
     def apply_knowledges(self, graph):
-        for knowldge in self.knowldges:
-            GraphOptimizer.optimize(graph, knowldge())
+        for knowledge in self.knowledges:
+            GraphOptimizer.optimize(graph, knowledge())
 
         return graph
 
