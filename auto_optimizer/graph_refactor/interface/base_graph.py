@@ -16,10 +16,18 @@ from abc import ABC, abstractmethod
 from collections import deque
 from itertools import chain
 from typing import List, Dict, Union
+import warnings
 
 import numpy as np
 
 from .base_node import PlaceHolder, Initializer, Node   
+
+class NodeNotExistException(KeyError):
+    def __init__(self, node_name):
+        self.value = '{} is not exist in graph'.format(node_name)
+
+    def __str__(self):
+        return repr(self.value)
 
 class BaseGraph(ABC):
 
@@ -92,25 +100,29 @@ class BaseGraph(ABC):
         pass
 
     def _add_input(self, graph_input) -> PlaceHolder:
-        # TODO: ERROR: duplicate names
+        if self._node_map.get(graph_input.name, None):
+            raise ValueError("node name '{}' already exists!".format(graph_input.name))
         self._node_map[graph_input.name] = graph_input
         self._inputs.append(graph_input)
         return graph_input
 
     def _add_output(self, graph_output) -> PlaceHolder:
-        # TODO: ERROR: duplicate names
+        if self._node_map.get(graph_output.name, None):
+            raise ValueError("node name '{}' already exists!".format(graph_output.name))
         self._node_map[graph_output.name] = graph_output
         self._outputs.append(graph_output)
         return graph_output
 
     def _add_initializer(self, initializer) -> Initializer:
-        # TODO: ERROR: duplicate names
+        if self._node_map.get(initializer.name, None):
+            raise ValueError("node name '{}' already exists!".format(initializer.name))
         self._node_map[initializer.name] = initializer
         self._initializers.append(initializer)
         return initializer
 
     def _add_node(self, node) -> Node:
-        # TODO: ERROR: duplicate names
+        if self._node_map.get(node.name, None):
+            raise ValueError("node name '{}' already exists!".format(node.name))
         self._node_map[node.name] = node
         self._nodes.append(node)
         return node
@@ -365,8 +377,9 @@ class BaseGraph(ABC):
             True if remove succeeds, otherwise False
         """
         maps = {0:0} if maps is None else maps
-        # TODO: exception: name not exist in graph
-        node = self._node_map[name]
+        node = self._node_map.get(name, None)
+        if not node:
+            raise KeyError("You are trying to remove node '{}', which does not exist!".format(name))
         self._node_map.pop(name, None)
         if node in self._inputs:
             self._inputs.remove(node)
@@ -385,7 +398,8 @@ class BaseGraph(ABC):
             for in_id, in_name in enumerate(node.inputs):
                 # update next map, node is no longer a next node
                 if self._next_map.get(in_name, None):
-                    self._next_map[in_name].remove(node)
+                    if node in self._next_map[in_name]:
+                        self._next_map[in_name].remove(node)
                     if not self._next_map[in_name]:
                         self._next_map.pop(in_name, None)
                 out_id = maps.get(in_id, None)
@@ -408,6 +422,8 @@ class BaseGraph(ABC):
         return False
 
     def __getitem__(self, key):
+        if not self._node_map.get(key, None):
+            raise KeyError("node '{}' not in graph!".format(key))
         return self._node_map[key]
 
     def __setitem__(self, key, value):
@@ -435,11 +451,9 @@ class BaseGraph(ABC):
         return self._value_infos
 
     def get_prev_node(self, input_name: str) -> Union[Node, PlaceHolder, Initializer]:
-        # TODO: raise exception
         return self._prev_map.get(input_name, None)
 
     def get_next_nodes(self, output_name: str) -> Union[List[Node], List[PlaceHolder], List[Initializer]]:
-        # TODO: raise exception
         return self._next_map.get(output_name, [])
 
     def toposort(self):

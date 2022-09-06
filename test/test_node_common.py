@@ -21,22 +21,34 @@ from onnx.mapping import NP_TYPE_TO_TENSOR_TYPE
 from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
 
 def is_node_equal(node1, node2, msg=None):
-    return node1.name == node2.name and \
+    ret = node1.name == node2.name and \
         node1.op_type == node2.op_type and \
         node1.inputs == node2.inputs and \
         node1.outputs == node2.outputs and \
         node1.attrs == node2.attrs and \
         node1.domain == node2.domain
+    if not ret:
+        msg = 'two nodes are not equal!'
+        raise unittest.TestCase.failureException(msg)
+    return ret
 
 def is_ph_equal(ph1, ph2, msg=None):
-    return ph1.name == ph2.name and \
+    ret = ph1.name == ph2.name and \
         ph1.dtype == ph2.dtype and \
         ph1.shape == ph2.shape
+    if not ret:
+        msg = 'two nodes are not equal!'
+        raise unittest.TestCase.failureException(msg)
+    return ret
 
 def is_ini_equal(ini1, ini2, msg=None):
-    return ini1.name == ini2.name and \
+    ret = ini1.name == ini2.name and \
         np.array_equal(ini1.value, ini2.value, equal_nan=True) and \
         ini1.value.dtype == ini2.value.dtype
+    if not ret:
+        msg = 'two nodes are not equal!'
+        raise unittest.TestCase.failureException(msg)
+    return ret
 
 def create_node(node_type):
     if node_type == 'OnnxNode':
