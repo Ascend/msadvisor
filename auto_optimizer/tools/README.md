@@ -6,11 +6,9 @@ inference.py工具实现了推理全流程的串接，全流程包含4个引擎�
 推理引擎介绍参考：
 [README.md](../inference_engine/README.md)
 
-
 ## 软件架构
 
 ![软件架构](../../docs/img/inference.png)
-
 
 ## 工具使用
 
