@@ -149,7 +149,15 @@ class TestGraphBasic(unittest.TestCase):
         node_1 = helper.make_node('Constant', [], ['const_0'], 'Constant_0', 
                                 value=numpy_helper.from_array(np.array([1], dtype='int32')))
         output_0 = helper.make_tensor_value_info('output_0', NP_TYPE_TO_TENSOR_TYPE[np.dtype('float32')], [3,4])
-        graph_proto = helper.make_graph([node_0, node_1], 'test_parse', [input_0], [output_0], [ini_0, ini_1])
+        value_info_0 = helper.make_tensor_value_info('const_0', NP_TYPE_TO_TENSOR_TYPE[np.dtype('int32')], [1])
+        graph_proto = helper.make_graph(
+                                        [node_0, node_1], 
+                                        'test_parse', 
+                                        [input_0], 
+                                        [output_0], 
+                                        [ini_0, ini_1], 
+                                        value_info=[value_info_0]
+        )
         model_proto = helper.make_model(graph_proto, producer_name='test_parse')
         
         parse_from_graph_proto = OnnxGraph.parse(graph_proto)
