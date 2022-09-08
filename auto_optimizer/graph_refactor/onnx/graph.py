@@ -79,14 +79,20 @@ class OnnxGraph(BaseGraph):
         inputs = [OnnxPlaceHolder.parse(i) for i in onnx_graph.input]
         outputs = [OnnxPlaceHolder.parse(o) for o in onnx_graph.output]
         initializers = [OnnxInitializer.parse(i) for i in onnx_graph.initializer]
-        value_infos = [OnnxPlaceHolder.parse(v) for v in onnx_graph.value_info]
 
         nodes = []
+        useless_value_infos = set()
         for node in onnx_graph.node:
             if node.op_type == 'Constant':
-                initializers.append(OnnxInitializer.parse(node))        
+                initializers.append(OnnxInitializer.parse(node))
+                useless_value_infos.add(node.output[0])
             else:
                 nodes.append(OnnxNode.parse(node))
+
+        value_infos = []
+        for value_info in onnx_graph.value_info:
+            if value_info.name not in useless_value_infos:
+                value_infos.append(OnnxPlaceHolder.parse(value_info))
 
         graph = cls(nodes, inputs, outputs, initializers, value_infos, onnx_graph.name, **meta)
         return graph
