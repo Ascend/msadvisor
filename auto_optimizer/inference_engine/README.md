@@ -64,6 +64,7 @@ def __call__(index, batch_size, worker, cfg, in_queue, out_queue)
 离线推理，输入预处理的数据，执行模型输出得到输出结果。
 
 推理引擎包括如下两种方式：
+
 - [x] onnxruntime离线推理
 - [x] 昇腾pyacl离线推理
 
