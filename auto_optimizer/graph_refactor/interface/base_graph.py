@@ -276,7 +276,7 @@ class BaseGraph(ABC):
 
         Example:
             prev_info_list = [
-                {'prev_node_name': 'Add_0', 'prev_node_output_idx': 1}, 
+                {'prev_node_name': 'Add_0', 'prev_node_output_idx': 0}, 
                 {'prev_node_name': 'split_ini', 'prev_node_output_idx': 0}
                 ]
             next_info_list = [
@@ -427,8 +427,41 @@ class BaseGraph(ABC):
         return self._node_map[key]
 
     def __setitem__(self, key, value):
-        # TODO
-        pass
+        src_node = self._node_map.pop(key, None)
+        if not src_node:
+            raise KeyError("You are trying to replace node '{}', which does not exist!".format(key))
+
+        if isinstance(src_node, Node):
+            self._nodes.remove(src_node)
+            # op -> op
+            if isinstance(value, Node):
+                value.inputs = src_node.inputs
+                value.outputs = src_node.outputs
+                for i in src_node.inputs:
+                    self._next_map[i].append(value)
+                    self._next_map[i].remove(src_node)
+                for o in src_node.outputs:
+                    self._prev_map[o] = value
+            # op -> input
+            elif value in self._inputs:
+                for i in src_node.inputs:
+                    self._next_map[i].remove(src_node)
+                o = src_node.outputs[0]
+                for n in self.get_next_nodes(o):
+                    n.inputs[n.get_input_id(o)] = value.name
+                    self._next_map[value.name] = [n]
+                self._prev_map.pop(o, None)
+                self._next_map.pop(o, None)
+        elif isinstance(src_node, Initializer):
+            self._initializers.remove(src_node)
+            # ini -> input
+            if value in self._inputs:
+                for n in self.get_next_nodes(src_node.name):
+                    n.inputs[n.get_input_id(src_node.name)] = value.name
+                    self._next_map[value.name] = [n]
+                self._next_map.pop(src_node.name, None)
+        else:
+            raise RuntimeError("Unsupported!")
 
     @property
     def inputs(self) -> List[PlaceHolder]:
@@ -466,9 +499,11 @@ class BaseGraph(ABC):
 
         queue = deque()
         visited = set()
+        ins = dict([(n.name, len(n.inputs)) for n in self._nodes])
         for node in self._nodes:
             if visited_all_prev_nodes(node, visited):
                 queue.append(node)
+                ins[node.name] -= 1
         
         sorted_nodes = []
         while queue:
@@ -480,9 +515,14 @@ class BaseGraph(ABC):
                     for next_node in self.get_next_nodes(output_name):
                         if next_node not in queue and next_node not in visited:
                             queue.append(next_node)
+                            ins[node.name] -= 1
             else:
                 queue.append(node)
-        
+                if ins[node.name] < 0:
+                    raise RuntimeError('Cycle detected in graph!')
+                else:
+                    ins[node.name] -= 1
+                    
         self._nodes = sorted_nodes
 
     @abstractmethod
