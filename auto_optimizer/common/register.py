@@ -16,7 +16,7 @@
 import os
 import importlib
 
-from .utils import path_to_module_format
+from .utils import format_to_module
 
 
 class Register:
@@ -43,7 +43,7 @@ class Register:
 
         for root, dirs, files in os.walk(self.path_name, topdown=False):
             modules += [
-                path_to_module_format(os.path.join(root.split(pwd_dir)[1], file)) for file in files
+                format_to_module(os.path.join(root.split(pwd_dir)[1], file)) for file in files
             ]
 
     def import_modules(self):
