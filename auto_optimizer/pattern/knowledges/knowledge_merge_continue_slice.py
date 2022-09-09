@@ -13,8 +13,9 @@
 # limitations under the License.
 
 from typing import List, Dict
-import numpy as np
 import warnings
+import numpy as np
+
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
@@ -26,37 +27,39 @@ from .knowledge_base import KnowledgeBase
 
 # continue 4 slice op
 pattern0 = Pattern() \
-    .add_node('Slice_0', ['Slice']) \
-    .add_node('Slice_1', ['Slice']) \
-    .add_node('Slice_2', ['Slice']) \
-    .add_node('Slice_3', ['Slice']) \
-    .add_edge('Slice_0', 'Slice_1') \
-    .add_edge('Slice_1', 'Slice_2') \
-    .add_edge('Slice_2', 'Slice_3') \
-    .set_input('Slice_0') \
-    .set_output('Slice_3') \
-    .set_loop(MATCH_PATTERN.MATCH_ONECE)
+    .add_node("Slice_0", ["Slice"]) \
+    .add_node("Slice_1", ["Slice"]) \
+    .add_node("Slice_2", ["Slice"]) \
+    .add_node("Slice_3", ["Slice"]) \
+    .add_edge("Slice_0", "Slice_1") \
+    .add_edge("Slice_1", "Slice_2") \
+    .add_edge("Slice_2", "Slice_3") \
+    .set_input("Slice_0") \
+    .set_output("Slice_3") \
+    .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 # continue 3 slice op
 pattern1 = Pattern() \
-    .add_node('Slice_0', ['Slice']) \
-    .add_node('Slice_1', ['Slice']) \
-    .add_node('Slice_2', ['Slice']) \
-    .add_edge('Slice_0', 'Slice_1') \
-    .add_edge('Slice_1', 'Slice_2') \
-    .set_input('Slice_0') \
-    .set_output('Slice_2') \
-    .set_loop(MATCH_PATTERN.MATCH_ONECE)
+    .add_node("Slice_0", ["Slice"]) \
+    .add_node("Slice_1", ["Slice"]) \
+    .add_node("Slice_2", ["Slice"]) \
+    .add_edge("Slice_0", "Slice_1") \
+    .add_edge("Slice_1", "Slice_2") \
+    .set_input("Slice_0") \
+    .set_output("Slice_2") \
+    .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 # continue 2 slice op
 pattern2 = Pattern() \
-    .add_node('Slice_0', ['Slice']) \
-    .add_node('Slice_1', ['Slice']) \
-    .add_edge('Slice_0', 'Slice_1') \
-    .set_input('Slice_0') \
-    .set_output('Slice_1') \
-    .set_loop(MATCH_PATTERN.MATCH_ONECE)
+    .add_node("Slice_0", ["Slice"]) \
+    .add_node("Slice_1", ["Slice"]) \
+    .add_edge("Slice_0", "Slice_1") \
+    .set_input("Slice_0") \
+    .set_output("Slice_1") \
+    .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
+
+@KnowledgeFactory.register("KnowledgeMergeContinueSlice")
 class KnowledgeMergeContinueSlice(KnowledgeBase):
     def __init__(self):
         super().__init__()
@@ -81,9 +84,9 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
         }
         return apply_dict
 
-    def check_nodesinfo_need_to_optimize(self, graph: BaseGraph, nodesinfo: Dict[str, List[BaseNode]]):
+    def check_matchinfo_need_to_optimize(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]):
         input3_list = []
-        for name,nodes in nodesinfo.items():
+        for name,nodes in matchinfo.items():
             node = graph[nodes[0].name]
             if len(node.inputs) < 5:
                 warnings.warn("check nodes inputs:{} len:{} != 5".format(node.inputs, len(node.inputs)))
@@ -94,8 +97,8 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
             warnings.warn("check nodes has same axis can not merge merge_axises:{}".format(merge_axises))
             return False
 
-        last_node_name = nodesinfo[list(nodesinfo.keys())[-1]][0].name
-        for name,nodes in nodesinfo.items():
+        last_node_name = matchinfo[list(matchinfo.keys())[-1]][0].name
+        for name,nodes in matchinfo.items():
             node = graph[nodes[0].name]
             if last_node_name != nodes[0].name:
                 next_nodes = graph.get_next_nodes(node.outputs[0])
@@ -104,14 +107,14 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
                     return False
         return True
 
-    def merge_slice_nodes(self, graph: BaseGraph, nodesinfo: Dict[str, List[BaseNode]]):
-        if self.check_nodesinfo_need_to_optimize(graph, nodesinfo) is False:
+    def merge_slice_nodes(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
+        if self.check_matchinfo_need_to_optimize(graph, matchinfo) is False:
             return False
         input1_list = []
         input2_list = []
         input3_list = []
         input4_list = []
-        for name,nodes in nodesinfo.items():
+        for name,nodes in matchinfo.items():
             node = graph[nodes[0].name]
             input1_list.append(graph[node.inputs[1]].value)
             input2_list.append(graph[node.inputs[2]].value)
@@ -119,8 +122,8 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
             input4_list.append(graph[node.inputs[4]].value)
 
 
-        last_node_name = nodesinfo[list(nodesinfo.keys())[-1]][0].name
-        for name,nodes in nodesinfo.items():
+        last_node_name = matchinfo[list(matchinfo.keys())[-1]][0].name
+        for name,nodes in matchinfo.items():
             node = graph[nodes[0].name]
             if last_node_name == nodes[0].name:
                 graph[node.inputs[1]].value = np.concatenate(input1_list)
@@ -137,9 +140,7 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
 
     def _merge_continue_slice_apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:
         flag = False
-        for nodesinfo in match_result.node_dicts:
-            flag |= self.merge_slice_nodes(graph, nodesinfo)
+        for matchinfo in match_result.node_dicts:
+            if matchinfo:
+                flag |= self.merge_slice_nodes(graph, matchinfo)
         return flag
-
-KnowledgeFactory.add_knowledge('KnowledgeMergeContinueSlice', KnowledgeMergeContinueSlice())
-

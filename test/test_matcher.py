@@ -55,7 +55,7 @@ pattern = Pattern() \
     .set_input('Conv') \
     .set_output('element_wise') \
     .set_node_loop('element_wise', MATCH_PATTERN.MATCH_ZERO_OR_MORE) \
-    .set_loop(MATCH_PATTERN.MATCH_ONECE_OR_MORE)
+    .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
 
 
 class TestMatcher(unittest.TestCase):

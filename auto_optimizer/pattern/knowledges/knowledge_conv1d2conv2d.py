@@ -50,8 +50,10 @@ pattern = Pattern() \
     .set_input('Conv') \
     .set_output('element_wise') \
     .set_node_loop('element_wise', MATCH_PATTERN.MATCH_ZERO_OR_MORE) \
-    .set_loop(MATCH_PATTERN.MATCH_ONECE_OR_MORE)
+    .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
 
+
+@KnowledgeFactory.register("KnowledgeConv1d2Conv2d")
 class KnowledgeConv1d2Conv2d(KnowledgeBase):
     def __init__(self):
         super().__init__()
@@ -197,6 +199,3 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             conv1d = graph[conv1d_name]
             self._conv1d_to_conv2d(graph, conv1d)
         return True
-
-KnowledgeFactory.add_knowledge('KnowledgeConv1d2Conv2d', KnowledgeConv1d2Conv2d())
-

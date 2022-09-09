@@ -22,9 +22,9 @@ from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 @unique
 class MATCH_PATTERN(Enum):
     # 不循环，只匹配一次
-    MATCH_ONECE = 1
+    MATCH_ONCE = 1
     # 循环无上限，匹配一次或者多次
-    MATCH_ONECE_OR_MORE = 2
+    MATCH_ONCE_OR_MORE = 2
     # 循环无上限，匹配零次或者多次
     MATCH_ZERO_OR_MORE = 3
 
@@ -96,7 +96,7 @@ class Pattern(object):
         self.in_nodes = [] # PatternNode
         self.out_nodes = [] # PatternNode
         self.node_match_pattern_dict = {}
-        self.graph_match_pattern = MATCH_PATTERN.MATCH_ONECE
+        self.graph_match_pattern = MATCH_PATTERN.MATCH_ONCE
 
     def add_node(self, op_name, op_types, op_matchs: List[MatchBase] = None):
         """
@@ -171,7 +171,7 @@ class Pattern(object):
         :return: 返回实例
         """
         self.graph_match_pattern = match_pattern
-        if match_pattern == MATCH_PATTERN.MATCH_ONECE_OR_MORE:
+        if match_pattern == MATCH_PATTERN.MATCH_ONCE_OR_MORE:
             if len(self.in_nodes) != len(self.out_nodes):
                 raise RuntimeError('if match sub graph continously, ' \
                     'input nodes size should be equal to output nodes size.')
@@ -216,7 +216,7 @@ class Pattern(object):
         """
         if op_name not in self.node_match_pattern_dict:
             return False
-        return self.node_match_pattern_dict[op_name] == MATCH_PATTERN.MATCH_ONECE_OR_MORE or \
+        return self.node_match_pattern_dict[op_name] == MATCH_PATTERN.MATCH_ONCE_OR_MORE or \
             self.node_match_pattern_dict[op_name] == MATCH_PATTERN.MATCH_ZERO_OR_MORE
 
     def node_cann_match_zero(self, op_name) -> bool:
@@ -234,5 +234,5 @@ class Pattern(object):
         判断子图是否可以循环匹配
         :return: 能匹配则返回True，否则返回False
         """
-        return self.graph_match_pattern == MATCH_PATTERN.MATCH_ONECE_OR_MORE or \
+        return self.graph_match_pattern == MATCH_PATTERN.MATCH_ONCE_OR_MORE or \
             self.graph_match_pattern == MATCH_PATTERN.MATCH_ZERO_OR_MORE
