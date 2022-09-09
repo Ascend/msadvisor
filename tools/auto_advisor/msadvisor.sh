@@ -112,7 +112,7 @@ function collect_profiling() {
 
     get_app_command "$_out_path"
 
-    local _prof_cmd="$_prof_bin --output=${_out_path}/profiling --application=\"${app_cmd}\""
+    local _prof_cmd="$_prof_bin --output=${_out_path}/profiling"
     _prof_cmd="$_prof_cmd --aicpu=on --ai-core=on --aic-mode=task-based --ascendcl=on --runtime-api=on"
 
     local _soc_version=$(get_soc_version)
@@ -131,7 +131,7 @@ function collect_profiling() {
     for metric in ${metrics[@]}; do
         print_log $INFO "Start to collect $metric profiling data."
         _prof_cmd="$_prof_cmd --aic-metrics=$metric"
-        $_prof_cmd 2>&1 >/dev/null
+        $_prof_cmd --application="${app_cmd}" 2>&1 >/dev/null
         if [ $? -ne 0 ]; then
             print_log $ERROR "Collect $metric profiling data failed."
             exit 1
@@ -304,7 +304,8 @@ function analysis_data() {
         _model_json="$_model_json;$_ecosystem_json"
     fi
     if [ $scene_type -eq 0 ]; then
-        timeout 300 msadvisor -c "$_model_json" -d "$output_path"
+        local _model_dir=$(basename $model_path | cut -d"." -f1)
+        timeout 300 msadvisor -c "$_model_json" -d "$output_path/$_model_dir"
     else
         analysis_operator $_model_json
     fi
