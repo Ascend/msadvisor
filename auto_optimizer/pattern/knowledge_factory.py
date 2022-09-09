@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from typing import Dict
+from typing import Dict, Type
 from .knowledges.knowledge_base import KnowledgeBase
 
 
@@ -31,3 +31,10 @@ class KnowledgeFactory(object):
     @classmethod
     def get_knowledge_pool(cls) -> Dict[str, KnowledgeBase]:
         return cls._knowledge_pool
+
+    @classmethod
+    def register(cls, name: str):
+        def _deco(knowledge_cls: Type[KnowledgeBase]):
+            cls.add_knowledge(name, knowledge_cls())
+            return knowledge_cls
+        return _deco

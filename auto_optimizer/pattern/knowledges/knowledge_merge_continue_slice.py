@@ -13,11 +13,12 @@
 # limitations under the License.
 
 from typing import List, Dict
-import numpy as np
 import warnings
+import numpy as np
+
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
 from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import Pattern
@@ -26,37 +27,39 @@ from .knowledge_base import KnowledgeBase
 
 # continue 4 slice op
 pattern0 = Pattern() \
-    .add_node('Slice_0', ['Slice']) \
-    .add_node('Slice_1', ['Slice']) \
-    .add_node('Slice_2', ['Slice']) \
-    .add_node('Slice_3', ['Slice']) \
-    .add_edge('Slice_0', 'Slice_1') \
-    .add_edge('Slice_1', 'Slice_2') \
-    .add_edge('Slice_2', 'Slice_3') \
-    .set_input('Slice_0') \
-    .set_output('Slice_3') \
-    .set_loop(MATCH_PATTERN.MATCH_ONECE)
+    .add_node("Slice_0", ["Slice"]) \
+    .add_node("Slice_1", ["Slice"]) \
+    .add_node("Slice_2", ["Slice"]) \
+    .add_node("Slice_3", ["Slice"]) \
+    .add_edge("Slice_0", "Slice_1") \
+    .add_edge("Slice_1", "Slice_2") \
+    .add_edge("Slice_2", "Slice_3") \
+    .set_input("Slice_0") \
+    .set_output("Slice_3") \
+    .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 # continue 3 slice op
 pattern1 = Pattern() \
-    .add_node('Slice_0', ['Slice']) \
-    .add_node('Slice_1', ['Slice']) \
-    .add_node('Slice_2', ['Slice']) \
-    .add_edge('Slice_0', 'Slice_1') \
-    .add_edge('Slice_1', 'Slice_2') \
-    .set_input('Slice_0') \
-    .set_output('Slice_2') \
-    .set_loop(MATCH_PATTERN.MATCH_ONECE)
+    .add_node("Slice_0", ["Slice"]) \
+    .add_node("Slice_1", ["Slice"]) \
+    .add_node("Slice_2", ["Slice"]) \
+    .add_edge("Slice_0", "Slice_1") \
+    .add_edge("Slice_1", "Slice_2") \
+    .set_input("Slice_0") \
+    .set_output("Slice_2") \
+    .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 # continue 2 slice op
 pattern2 = Pattern() \
-    .add_node('Slice_0', ['Slice']) \
-    .add_node('Slice_1', ['Slice']) \
-    .add_edge('Slice_0', 'Slice_1') \
-    .set_input('Slice_0') \
-    .set_output('Slice_1') \
-    .set_loop(MATCH_PATTERN.MATCH_ONECE)
+    .add_node("Slice_0", ["Slice"]) \
+    .add_node("Slice_1", ["Slice"]) \
+    .add_edge("Slice_0", "Slice_1") \
+    .set_input("Slice_0") \
+    .set_output("Slice_1") \
+    .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
+
+@KnowledgeFactory.register("KnowledgeMergeContinueSlice")
 class KnowledgeMergeContinueSlice(KnowledgeBase):
     def __init__(self):
         super().__init__()
@@ -81,65 +84,65 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
         }
         return apply_dict
 
-    def check_nodesinfo_need_to_optimize(self, graph: BaseGraph, nodesinfo: Dict[str, List[BaseNode]]):
-        input3_list = []
-        for name,nodes in nodesinfo.items():
-            node = graph[nodes[0].name]
-            if len(node.inputs) < 5:
-                warnings.warn("check nodes inputs:{} len:{} != 5".format(node.inputs, len(node.inputs)))
-                return False
-            input3_list.append(graph[node.inputs[3]].value)
-        merge_axises = np.concatenate(input3_list)
-        if np.unique(merge_axises).size != merge_axises.size:
-            warnings.warn("check nodes has same axis can not merge merge_axises:{}".format(merge_axises))
+    def check_matchinfo_need_to_optimize(self, graph: BaseGraph, nodes: List[BaseNode], axes: List[np.ndarray]) -> bool:
+        """判断当前匹配的子图是否需要优化
+
+        Args:
+            graph: 整个模型的图
+            nodes: 子图的节点列表
+            axes: 全部需要合并的Slice算子操作的轴列表
+
+        Return:
+            是否需要优化
+        """
+        axes_to_merge = np.concatenate(axes)
+        if np.unique(axes_to_merge).size != axes_to_merge.size:
+            warnings.warn(f"Nodes has duplicate slice axis: {axes_to_merge}")
             return False
 
-        last_node_name = nodesinfo[list(nodesinfo.keys())[-1]][0].name
-        for name,nodes in nodesinfo.items():
-            node = graph[nodes[0].name]
-            if last_node_name != nodes[0].name:
-                next_nodes = graph.get_next_nodes(node.outputs[0])
-                if len(next_nodes) > 1:
-                    warnings.warn("check node:{} has >1 outputs:{} len:{}".format(node, next_nodes, len(next_nodes)))
-                    return False
+        for node in nodes[:-1]:
+            if not isinstance(node, (Node, )):
+                warnings.warn(f"Node of slice match is invalid: name {node.name} type {type(node)}")
+                return False
+            next_nodes = graph.get_next_nodes(node.outputs[0])
+            if len(next_nodes) > 1:
+                names = ", ".join([node.name for node in next_nodes])
+                warnings.warn(f"Node {node.name} has multiple outputs: {names} len {len(next_nodes)}")
+                return False
         return True
 
-    def merge_slice_nodes(self, graph: BaseGraph, nodesinfo: Dict[str, List[BaseNode]]):
-        if self.check_nodesinfo_need_to_optimize(graph, nodesinfo) is False:
+    def merge_slice_nodes(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
+        try:
+            nodes = [graph[node[0].name] for node in matchinfo.values()]
+            input_lists = [[graph[node.inputs[i]].value for node in nodes] for i in range(1, 5)]
+        except (KeyError, IndexError, AttributeError) as e:
+            warnings.warn(f"Failed get node list or input list: {e}")
             return False
-        input1_list = []
-        input2_list = []
-        input3_list = []
-        input4_list = []
-        for name,nodes in nodesinfo.items():
-            node = graph[nodes[0].name]
-            input1_list.append(graph[node.inputs[1]].value)
-            input2_list.append(graph[node.inputs[2]].value)
-            input3_list.append(graph[node.inputs[3]].value)
-            input4_list.append(graph[node.inputs[4]].value)
 
+        if not self.check_matchinfo_need_to_optimize(graph, nodes, input_lists[2]):
+            return False
 
-        last_node_name = nodesinfo[list(nodesinfo.keys())[-1]][0].name
-        for name,nodes in nodesinfo.items():
-            node = graph[nodes[0].name]
-            if last_node_name == nodes[0].name:
-                graph[node.inputs[1]].value = np.concatenate(input1_list)
-                graph[node.inputs[2]].value = np.concatenate(input2_list)
-                graph[node.inputs[3]].value = np.concatenate(input3_list)
-                graph[node.inputs[4]].value = np.concatenate(input4_list)
-            else:
-                graph.remove(node.name)
-                graph.remove(node.inputs[1])
-                graph.remove(node.inputs[2])
-                graph.remove(node.inputs[3])
-                graph.remove(node.inputs[4])
+        nodes_to_merge = [node.name for node in nodes]
+
+        for node in nodes[:-1]:
+            graph.remove(node.name)
+
+        last_node = nodes[-1]
+        if not isinstance(last_node, (Node, )):
+            warnings.warn(f"Node is invalid: name {last_node.name} type {type(last_node)}")
+            return False
+        params = ["starts_", "ends_", "axes_", "steps_"]
+        for i in range(4):
+            new_input = graph.add_initializer(
+                name=params[i] + "_".join(nodes_to_merge),
+                value=np.concatenate(input_lists[i])
+            )
+            last_node.inputs[i + 1] = new_input.name
         return True
 
     def _merge_continue_slice_apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:
         flag = False
-        for nodesinfo in match_result.node_dicts:
-            flag |= self.merge_slice_nodes(graph, nodesinfo)
+        for matchinfo in match_result.node_dicts:
+            if matchinfo:
+                flag |= self.merge_slice_nodes(graph, matchinfo)
         return flag
-
-KnowledgeFactory.add_knowledge('KnowledgeMergeContinueSlice', KnowledgeMergeContinueSlice())
-

@@ -15,10 +15,9 @@
 import unittest
 
 import os
+
 import numpy as np
 import onnx
-import onnxruntime as ort
-
 from onnx import (
     helper,
     TensorProto,
@@ -26,11 +25,13 @@ from onnx import (
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_merge_continue_slice import KnowledgeMergeContinueSlice
+from utils import infer_run, optimize
+
 
 def make_c2_slice_model(onnx_name, x):
     X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
     Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
-    
+
     start0 = helper.make_tensor("start0", TensorProto.INT64, [1], np.array([0], dtype=np.int64))
     end0 = helper.make_tensor("end0", TensorProto.INT64, [1], np.array([2], dtype=np.int64))
     axes0 = helper.make_tensor("axes0", TensorProto.INT64, [1], np.array([0], dtype=np.int64))
@@ -54,10 +55,11 @@ def make_c2_slice_model(onnx_name, x):
     opset.version = 14
     onnx.save(model, onnx_name)
 
+
 def make_c2_slice_optional_args_model(onnx_name, x):
     X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
     Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
-    
+
     start0 = helper.make_tensor("start0", TensorProto.INT64, [1], np.array([0], dtype=np.int64))
     end0 = helper.make_tensor("end0", TensorProto.INT64, [1], np.array([2], dtype=np.int64))
 
@@ -81,7 +83,7 @@ def make_c2_slice_optional_args_model(onnx_name, x):
 def make_c2_slice_2dim_1dims_model(onnx_name, x, same_axis=False):
     X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
     Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
-    
+
     start0 = helper.make_tensor("start0", TensorProto.INT64, [1], np.array([0], dtype=np.int64))
     end0 = helper.make_tensor("end0", TensorProto.INT64, [1], np.array([2], dtype=np.int64))
     axes0 = helper.make_tensor("axes0", TensorProto.INT64, [1], np.array([0], dtype=np.int64))
@@ -91,10 +93,10 @@ def make_c2_slice_2dim_1dims_model(onnx_name, x, same_axis=False):
         axis = 0
     else:
         axis = 1
-    start1 = helper.make_tensor("start1", TensorProto.INT64, [2], np.array([1,3], dtype=np.int64))
-    end1 = helper.make_tensor("end1", TensorProto.INT64, [2], np.array([5,4], dtype=np.int64))
-    axes1 = helper.make_tensor("axes1", TensorProto.INT64, [2], np.array([2,axis], dtype=np.int64))
-    step1 = helper.make_tensor("step1", TensorProto.INT64, [2], np.array([1,1], dtype=np.int64))
+    start1 = helper.make_tensor("start1", TensorProto.INT64, [2], np.array([1, 3], dtype=np.int64))
+    end1 = helper.make_tensor("end1", TensorProto.INT64, [2], np.array([5, 4], dtype=np.int64))
+    axes1 = helper.make_tensor("axes1", TensorProto.INT64, [2], np.array([2, axis], dtype=np.int64))
+    step1 = helper.make_tensor("step1", TensorProto.INT64, [2], np.array([1, 1], dtype=np.int64))
 
     node_slice0 = helper.make_node("Slice", ["X", "start0", "end0", "axes0", "step0"], ["X_S"], "Slice0")
     node_slice1 = helper.make_node("Slice", ["X_S", "start1", "end1", "axes1", "step1"], ["Z"], "Slice1")
@@ -109,10 +111,11 @@ def make_c2_slice_2dim_1dims_model(onnx_name, x, same_axis=False):
     opset.version = 14
     onnx.save(model, onnx_name)
 
+
 def make_c2_slice_2dim_model(onnx_name, x, same_axis=False):
     X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
     Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
-    
+
     start0 = helper.make_tensor("start0", TensorProto.INT64, [2], np.array([0, 1], dtype=np.int64))
     end0 = helper.make_tensor("end0", TensorProto.INT64, [2], np.array([2, 4], dtype=np.int64))
     axes0 = helper.make_tensor("axes0", TensorProto.INT64, [2], np.array([0, 1], dtype=np.int64))
@@ -122,10 +125,10 @@ def make_c2_slice_2dim_model(onnx_name, x, same_axis=False):
         axis = 1
     else:
         axis = 3
-    start1 = helper.make_tensor("start1", TensorProto.INT64, [2], np.array([1,3], dtype=np.int64))
-    end1 = helper.make_tensor("end1", TensorProto.INT64, [2], np.array([5,4], dtype=np.int64))
-    axes1 = helper.make_tensor("axes1", TensorProto.INT64, [2], np.array([2,axis], dtype=np.int64))
-    step1 = helper.make_tensor("step1", TensorProto.INT64, [2], np.array([1,1], dtype=np.int64))
+    start1 = helper.make_tensor("start1", TensorProto.INT64, [2], np.array([1, 3], dtype=np.int64))
+    end1 = helper.make_tensor("end1", TensorProto.INT64, [2], np.array([5, 4], dtype=np.int64))
+    axes1 = helper.make_tensor("axes1", TensorProto.INT64, [2], np.array([2, axis], dtype=np.int64))
+    step1 = helper.make_tensor("step1", TensorProto.INT64, [2], np.array([1, 1], dtype=np.int64))
 
     node_slice0 = helper.make_node("Slice", ["X", "start0", "end0", "axes0", "step0"], ["X_S"], "Slice0")
     node_slice1 = helper.make_node("Slice", ["X_S", "start1", "end1", "axes1", "step1"], ["Z"], "Slice1")
@@ -139,6 +142,7 @@ def make_c2_slice_2dim_model(onnx_name, x, same_axis=False):
     opset.domain = ''
     opset.version = 14
     onnx.save(model, onnx_name)
+
 
 def make_c3_slice_model(onnx_name, x):
     X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
@@ -172,6 +176,7 @@ def make_c3_slice_model(onnx_name, x):
     opset.domain = ''
     opset.version = 14
     onnx.save(model, onnx_name)
+
 
 def make_c4_slice_model(onnx_name, x, same_axis=False):
     X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
@@ -208,7 +213,7 @@ def make_c4_slice_model(onnx_name, x, same_axis=False):
 
     graph = helper.make_graph([node_slice0, node_slice1, node_slice2, node_slice3], "continue4_slice_test",
         [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1,
-                    start2, end2, axes2, step2, start3, end3, axes3, step3],)
+                   start2, end2, axes2, step2, start3, end3, axes3, step3],)
     model = helper.make_model(graph)
 
     del model.opset_import[:]
@@ -216,30 +221,6 @@ def make_c4_slice_model(onnx_name, x, same_axis=False):
     opset.domain = ''
     opset.version = 14
     onnx.save(model, onnx_name)
-
-def infer_run(onnx_path, x):
-    session = ort.InferenceSession(onnx_path)
-    inputs = session.get_inputs()
-    outputs_name = [meta.name for meta in session.get_outputs()]
-
-    feed = {inputs[0].name: x}
-    return session.run(outputs_name, feed)
-
-def optimize(graph, knowledge, onnx_path):
-    res = True
-    while knowledge.has_next_pattern():
-        knowledge.next_pattern()
-        match_results = knowledge.get_candidate_sub_graphs(graph)
-        if match_results is None or len(match_results) == 0:
-            continue
-        while knowledge.has_next_apply():
-            knowledge.next_apply()
-            for match_result in match_results:
-                res &= knowledge.apply(graph, match_result)
-                if res is False:
-                    return res
-                graph.save(onnx_path)
-    return res
 
 
 class TestKnowledgeMergeContinueSlice(unittest.TestCase):
@@ -380,13 +361,13 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         os.system("rm -rf {} {}".format(c2_slice_onnx, c2_slice_optimize_onnx))
 
         make_c2_slice_optional_args_model(c2_slice_onnx, x)
-        ret = infer_run(c2_slice_onnx, x)
+        _ = infer_run(c2_slice_onnx, x)
 
         graph = OnnxGraph.parse(c2_slice_onnx)
         knowledge = KnowledgeMergeContinueSlice()
         res = optimize(graph, knowledge, c2_slice_optimize_onnx)
         self.assertFalse(res)
-        
+
 
 if __name__ == "__main__":
     unittest.main()
