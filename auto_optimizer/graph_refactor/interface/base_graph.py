@@ -497,13 +497,13 @@ class BaseGraph(ABC):
                     return False
             return True
 
+        self.update_map()
+        
         queue = deque()
         visited = set()
-        ins = dict([(n.name, len(n.inputs)) for n in self._nodes])
         for node in self._nodes:
             if visited_all_prev_nodes(node, visited):
                 queue.append(node)
-                ins[node.name] -= 1
         
         sorted_nodes = []
         while queue:
@@ -513,18 +513,24 @@ class BaseGraph(ABC):
                 visited.add(node)
                 for output_name in node.outputs:
                     for next_node in self.get_next_nodes(output_name):
-                        if next_node not in queue and next_node not in visited:
+                        if next_node not in queue \
+                            and next_node not in visited \
+                            and visited_all_prev_nodes(next_node, visited):
                             queue.append(next_node)
-                            ins[node.name] -= 1
-            else:
-                queue.append(node)
-                if ins[node.name] < 0:
-                    raise RuntimeError('Cycle detected in graph!')
-                else:
-                    ins[node.name] -= 1
-                    
-        self._nodes = sorted_nodes
+        
+        if len(self._nodes) != len(sorted_nodes):
+            raise RuntimeError('Cycle detected in graph!') 
+        else:           
+            self._nodes = sorted_nodes
 
     @abstractmethod
     def save(self, path):
+        pass
+
+    @abstractmethod
+    def extract(self, new_model_save_path, input_name_list, output_name_list, enable_model_check=True):
+        pass
+
+    @abstractmethod
+    def simplify(self, **kwargs):
         pass
