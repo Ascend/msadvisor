@@ -204,7 +204,7 @@ class TestGraphBasic(unittest.TestCase):
         self.graph.opset_imports = 13
         opset = OperatorSetIdProto()
         opset.version = 13
-        self.assertEqual(self.graph.opset_imports, opset)
+        self.assertEqual(self.graph.opset_imports, [opset])
         # clear opset_imports
         self.graph.opset_imports = None
         self.assertEqual(self.graph.opset_imports, None)

@@ -40,6 +40,7 @@ class OnnxGraph(BaseGraph):
         if isinstance(opsets, int):
             opset_imports = onnx.OperatorSetIdProto()
             opset_imports.version = opsets
+            opset_imports = [opset_imports]
         elif isinstance(opsets, Sequence):
             opset_imports = [op for op in opsets if not op.domain or op.domain == '']
             if len(opset_imports) < len(opsets):
@@ -134,6 +135,36 @@ class OnnxGraph(BaseGraph):
         for n in self._value_infos:
             self._node_map[n.name] = n
 
+    def extract(self, new_model_save_path, input_name_list, output_name_list, enable_model_check=True):
+        # TODO: reimplement
+        def check_model(model):
+            pass
+        if not enable_model_check:
+            onnx.checker.check_model = check_model
+        
+        print('Begin to extract the model.')
+        old_model_save_path = '{}_tmp.onnx'.format(new_model_save_path)
+        onnx.utils.extract_model(
+            old_model_save_path, new_model_save_path, input_name_list, output_name_list)
+        print('Extract the model completed, model saved in {}.'.format(
+            new_model_save_path))
+        
+        return OnnxGraph.parse(new_model_save_path)
+    
+    def simplify(self, **kwargs):
+        try:
+            from onnxsim import simplify
+        except ImportError:
+            raise RuntimeError("No module named 'onnxsim'")
+
+        model = self.model()
+        model_sim, check = simplify(model, **kwargs)
+        if not check:
+            raise RuntimeError("Simplified ONNX model could not be validated")
+        
+        return OnnxGraph.parse(model_sim) 
+    
+
     @property
     def opset_imports(self) -> Optional[Sequence[OperatorSetIdProto]]:
         return self._meta['opset_imports']
@@ -141,8 +172,8 @@ class OnnxGraph(BaseGraph):
     @opset_imports.setter
     def opset_imports(self, opset:Union[int, None]):
         if not opset:
-            opset_imports = None
+            self._meta['opset_imports'] = None
         else:
             opset_imports = OperatorSetIdProto()
             opset_imports.version = opset
-        self._meta['opset_imports'] = opset_imports
+            self._meta['opset_imports'] = [opset_imports]
