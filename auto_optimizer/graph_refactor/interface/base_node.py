@@ -68,10 +68,6 @@ class Node(BaseNode):
     @classmethod
     def parse(cls, node):
         pass
-    
-    @property
-    def op_type(self):
-        return self._op_type
 
     @property
     def inputs(self) -> List[str]:
