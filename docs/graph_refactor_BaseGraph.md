@@ -9,17 +9,17 @@
 
 BaseGraph 类提供了基本的接口用于增删改查节点：
 
-|                                              | **Operations**       | **API**                                                      |
+| API 详细说明                                 | **Operations**       | **API**                                                      |
 | -------------------------------------------- | -------------------- | ------------------------------------------------------------ |
 | [查询节点](./graph_refactor_API.md#查询节点) | 根据节点名称查询节点 | g[name]                                                      |
 |                                              | 根据节点类型查询节点 | g.get_nodes(op_type)                                         |
 |                                              | 查询前驱节点         | g.get_prev_node(input_name)                                  |
-|                                              | 查询后继节点         | g.get_prev_node(output_name)                                 |
+|                                              | 查询后继节点         | g.get_next_nodes(output_name)                                |
 | [修改节点](./graph_refactor_API.md#修改节点) | 修改单个节点         | g[name] = new_node                                           |
 |                                              | 修改节点信息         | 详见[BaseNode说明](./graph_refactor_BaseNode.md)             |
-| [添加节点](./graph_refactor_API.md#添加节点) | 添加整网输入节点     | g.add_inputs(name, dtype, shape)                             |
+| [添加节点](./graph_refactor_API.md#添加节点) | 添加整网输入节点     | g.add_input(name, dtype, shape)                              |
 |                                              | 添加整网输出节点     | g.add_output(name, dtype, shape)                             |
-|                                              | 添加算子节点         | g.add_node(name,attrs)                                       |
+|                                              | 添加算子节点         | g.add_node(name, op_type, attrs)                             |
 |                                              | 添加常量节点         | g.add_initializer(name, value)                               |
 | [插入节点](./graph_refactor_API.md#插入节点) | 插入单输入单输出节点 | g.insert_node(refer_name, insert_node,refer_index, mode)     |
 |                                              | 插入多输入多输出节点 | g.connect_node(insert_node, prev_nodes_info, next_nodes_info) |
@@ -27,7 +27,7 @@ BaseGraph 类提供了基本的接口用于增删改查节点：
 
 除此之外，BaseGraph 类提供的其它功能如下所示：
 
-|                                              | **Operations**     | **API**                                                 |
+| API 详细说明                                 | **Operations**     | **API**                                                 |
 | -------------------------------------------- | ------------------ | ------------------------------------------------------- |
 | [属性](./graph_refactor_API.md#属性)         | 获取整网输入节点   | g.inputs                                                |
 |                                              | 获取整网输出节点   | g.outputs                                               |

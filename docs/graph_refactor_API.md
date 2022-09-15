@@ -9,17 +9,17 @@
 - 根据节点名称查询单个节点，返回该节点。
 - `name(str)` - 节点名称
 
-**get_nodes(op_type) -> List[Node]** 
+**get_nodes(op_type) -> Union[List[Node], List[PlaceHolder], List[Initializer]]** 
 
 - 根据节点类型名称查询节点，返回由该类型节点组成的列表。
-- `op_type(str)` - 节点类型名称
+- `op_type(str)` - 节点类型名称，如 `'Add'` 。
 
 **get_prev_node(input_name) -> Node**
 
 - 查询某条边的前驱节点并返回该节点。若不存在返回 `None` 。
 - `input_name(str)` - 图中存在的边的名称
 
-**get_prev_node(input_name) -> List[Node]**
+**get_next_nodes(output_name) -> List[Node]**
 
 - 查询某条边的后继节点列表并返回该列表。若不存在返回 `[]` 。
 - `output_name(str)` - 图中存在的边的名称
@@ -28,9 +28,14 @@
   <summary> sample code </summary>
 
 ```python
-g = OnnxGraph.parse('model.onnx') # 加载模型
-node = g['Add_0'] # 获取名称为'Add_0'的节点
-nodes = g.get_nodes('Add') # 获取所有Add类型节点
+# 加载模型
+g = OnnxGraph.parse('model.onnx') 
+
+# 获取名称为'Add_0'的节点
+node = g['Add_0'] 
+
+# 获取所有Add类型节点
+nodes = g.get_nodes('Add') 
 
 # 获取 node 的所有前驱节点
 prev_nodes = []
@@ -41,6 +46,7 @@ for i in node.inputs:
 next_nodes = []
 for o in node.outputs:
 	next_nodes.extend(g.get_next_nodes(o))
+next_nodes = list(set(next_nodes))
 ```
 
 </details>
@@ -49,7 +55,11 @@ for o in node.outputs:
 
 **g[name] = new_node**
 
-- 替换图中单个节点。
+- 替换图中单个节点。支持以下场景：
+  - 算子节点替换成输入输出相同的算子节点
+  - 常量节点替换成输入节点
+  - 算子节点替换成输入节点
+
 - `name(str)` - 待替换节点名称
 
 ### 添加节点
@@ -66,7 +76,7 @@ for o in node.outputs:
 - 添加整网输出节点。
 - `name(str)` - 输出节点名称 \
   `dtype(str)` - 输出数据类型 \
-  `shape(List[int])` - 输出数据形状
+  `shape(List[int])` - 输出维度信息
 
 **add_initializer(name, value) -> Initializer**
 
@@ -88,8 +98,10 @@ for o in node.outputs:
 # 添加整网输入输出节点
 new_input = g.add_input('new_input', 'float32', [1,3,224,224])
 new_output = g.add_output('new_output', 'float32', [1,3,224,224])
+
 # 添加常量节点
 new_ini = g.add_initializer('new_ini', np.array([1,1,1]))
+
 # 添加算子节点
 new_op = g.add_node('Transpose_new', 'Transpose', {'perm':[1,0,2]})
 ```
@@ -234,24 +246,24 @@ g.extract('extracted_model.onnx', ['5'], ['12'])
 
 ### 公共属性/方法
 
-| API          | 说明                           |
-| ------------ | ------------------------------ |
-| node.name    | 可读性属性，获取和修改节点名称 |
-| node.op_type | 只读属性，获取节点类型         |
-| print(node)  | 打印节点信息                   |
+| API          | 说明                                                         |
+| ------------ | ------------------------------------------------------------ |
+| node.name    | 可读性属性，获取和修改节点名称                               |
+| node.op_type | 只读属性，获取节点类型。<br>注：除算子节点外，输入/输出节点的类型名称为 `'PlaceHolder'`，常量节点的类型名称为`'Initializer'`。 |
+| print(node)  | 打印节点信息                                                 |
 
 ### 常量节点
 
-| API       | 说明                                                      |
-| --------- | --------------------------------------------------------- |
-| ini.value | 可读写属性，借助 `numpy` 数组获取和修改常量节点的具体数值 |
+| API       | 说明                                                         |
+| --------- | ------------------------------------------------------------ |
+| ini.value | 可读写属性，借助 `numpy.ndarray` 获取和修改常量节点的具体数值 |
 
 ### 输入/输出节点
 
-| API      | 说明                                                   |
-| -------- | ------------------------------------------------------ |
-| ph.dtype | 可读写属性，用 `np.dtype` 表示输入/输出节点的数据类型  |
-| ph.shape | 可读写属性，用 `List[int]` 表示输入/输出节点的维度信息 |
+| API      | 说明                                                     |
+| -------- | -------------------------------------------------------- |
+| ph.dtype | 可读写属性，用 `numpy.dtype` 表示输入/输出节点的数据类型 |
+| ph.shape | 可读写属性，用 `List[int]` 表示输入/输出节点的维度信息   |
 
 ### 算子节点
 

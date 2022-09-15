@@ -21,7 +21,7 @@
 
 通过 [BaseGraph](./graph_refactor_BaseGraph.md) 获取特定节点后，可以获取和修改节点的相关信息。
 
-|                                                       | Operations               | API                                                          |
+| API 详细说明                                          | Operations               | API                                                          |
 | ----------------------------------------------------- | ------------------------ | ------------------------------------------------------------ |
 | [公共属性/方法](./graph_refactor_API.md#公共属性方法) | 获取节点名字             | node.name                                                    |
 |                                                       | 修改节点名字             | node.name = 'new_name'                                       |
@@ -30,8 +30,8 @@
 | [常量节点](./graph_refactor_API.md#常量节点)          | 获取节点常量值           | ini.value                                                    |
 |                                                       | 修改节点常量值           | Ini.value = np.array([1, 1, 1], dtype='int64')               |
 |                                                       | 获取节点常量值的数据类型 | ini.value.dtype                                              |
-|                                                       | 获取节点常量值           | ini.value                                                    |
-| [输入输出节点](./graph_refactor_API.md#输入输出节点)  | 获取节点数据类型         | ph.dtype                                                     |
+|                                                       | 获取节点常量值的维度信息 | ini.value.shape                                              |
+| [输入/输出节点](./graph_refactor_API.md#输入输出节点) | 获取节点数据类型         | ph.dtype                                                     |
 |                                                       | 修改节点数据类型         | ph.dtype = np.dtype('float16')                               |
 |                                                       | 获取节点维度信息         | ph.shape                                                     |
 |                                                       | 修改节点维度信息         | ph.shape = [1, 3, 224, 224]                                  |
