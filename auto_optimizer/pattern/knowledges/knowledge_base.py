@@ -127,20 +127,13 @@ class KnowledgeBase(object):
         :param cur_node: 当前子图的关键节点
         :return: 存在连接，则返回True，否则返回False
         """
-        pattern = self.__get_current_pattern()
-        direction = pattern.get_visit_direction()
-        node_dict = match_result.node_dicts[0]
-        for nodes in node_dict.values():
-            if direction == DIRECTION.UP_DOWN:
+        for node_dict in match_result.node_dicts:
+            for nodes in node_dict.values():
                 for node in nodes:
                     if node.outputs[0] in cur_node.inputs:
                         return True
-            elif direction == DIRECTION.DOWN_UP:
-                for node in nodes:
                     if cur_node.outputs[0] in node.inputs:
                         return True
-            else:
-                return False
         return False
 
     def get_candidate_sub_graphs(self, graph: BaseGraph, top_ops_names: List[str] = None) -> List[MatchResult]:
