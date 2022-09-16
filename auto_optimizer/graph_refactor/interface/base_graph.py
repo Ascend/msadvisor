@@ -56,11 +56,18 @@ class BaseGraph(ABC):
     def update_map(self):
         # clear map first
         self._node_map = {}
+        self._value_map = {}
         self._prev_map = {}
         self._next_map = {}
 
-        self._node_map = {n.name: n for n in 
-                        chain(self._inputs, self._outputs, self._nodes, self._initializers, self._value_infos)}
+        for n in chain(self._inputs, self._outputs, self._nodes, self._initializers):
+            if self._node_map.get(n.name, None):
+                raise RuntimeError("Duplicate names! {}: '{}' and {}: '{}' have same name,\
+                    please use add_name_suffix=True in graph parse"\
+                    .format(type(n).__name__, n.name, type(self._node_map[n.name]).__name__, n.name))
+            self._node_map[n.name] = n
+        
+        self._value_map = {v.name: v for v in self._value_infos}
         
         for n in self._nodes:
             # update prev node info
@@ -363,6 +370,11 @@ class BaseGraph(ABC):
     def get_nodes(self, op_type):
         nodes = [node for node in self._node_map.values() if node.op_type == op_type]
         return nodes
+    
+    def get_value_info(self, io_name):
+        if not self._value_map.get(io_name, None):
+            raise KeyError("'{}' does not have value_info or does not exist!".format(io_name))
+        return self._value_map[io_name]
 
     def remove(self, name, maps=None):
         """Remove a specific node from graph

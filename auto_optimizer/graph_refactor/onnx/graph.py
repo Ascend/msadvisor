@@ -59,7 +59,7 @@ class OnnxGraph(BaseGraph):
         }
 
     @classmethod
-    def parse(cls, path_or_bytes: Union[str, ModelProto, GraphProto]) -> 'OnnxGraph':
+    def parse(cls, path_or_bytes: Union[str, ModelProto, GraphProto], add_name_suffix=False) -> 'OnnxGraph':
         if isinstance(path_or_bytes, str):
             onnx_model = onnx.load(path_or_bytes)
         if isinstance(path_or_bytes, ModelProto):
@@ -88,7 +88,7 @@ class OnnxGraph(BaseGraph):
                 initializers.append(OnnxInitializer.parse(node))
                 useless_value_infos.add(node.output[0])
             else:
-                nodes.append(OnnxNode.parse(node))
+                nodes.append(OnnxNode.parse(node, add_name_suffix))
 
         value_infos = []
         for value_info in onnx_graph.value_info:
@@ -133,13 +133,15 @@ class OnnxGraph(BaseGraph):
         onnx.save(self.model(), path)
 
     def infershape(self):
+        # clear value_infos
+        self._value_infos = []
+        self._value_map = {}
         model = self.model()
         # TODO: exception
         inferred_model = onnx.shape_inference.infer_shapes(model, strict_mode=True)
         graph = inferred_model.graph
         self._value_infos = [OnnxPlaceHolder.parse(v) for v in graph.value_info]
-        for n in self._value_infos:
-            self._node_map[n.name] = n
+        self._value_map = {v.name: v for v in self._value_infos}
 
     def extract(self, new_model_save_path, input_name_list, output_name_list, enable_model_check=True):
         # TODO: reimplement

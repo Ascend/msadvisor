@@ -51,8 +51,8 @@ class TestGraphAdvanced(unittest.TestCase):
         graph = OnnxGraph([node_0,node_1,node_2], [input_0], [output_0], [ini_0,ini_1,ini_2], name='test')
 
         graph.infershape()
-        self.assertEqual(graph['0_out_0'], OnnxPlaceHolder('0_out_0', np.dtype('float32'), [2, 5000]))
-        self.assertEqual(graph['1_out_0'], OnnxPlaceHolder('1_out_0', np.dtype('float32'), [4, 2500]))
+        self.assertEqual(graph.get_value_info('0_out_0'), OnnxPlaceHolder('0_out_0', np.dtype('float32'), [2, 5000]))
+        self.assertEqual(graph.get_value_info('1_out_0'), OnnxPlaceHolder('1_out_0', np.dtype('float32'), [4, 2500]))
 
 if __name__ == "__main__":
     unittest.main()
