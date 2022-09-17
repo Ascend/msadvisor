@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import warnings
 from abc import ABC, abstractmethod
 from typing import List, Dict
 
-import warnings
 import numpy as np
 
 class BaseNode(ABC):
@@ -68,10 +68,6 @@ class Node(BaseNode):
     @classmethod
     def parse(cls, node):
         pass
-    
-    @property
-    def op_type(self):
-        return self._op_type
 
     @property
     def inputs(self) -> List[str]:

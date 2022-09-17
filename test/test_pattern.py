@@ -48,7 +48,7 @@ class TestPattern(unittest.TestCase):
             .add_edge('Conv', 'Relu') \
             .set_input('Conv') \
             .set_output('Relu') \
-            .set_node_loop('Conv', MATCH_PATTERN.MATCH_ONECE_OR_MORE) \
+            .set_node_loop('Conv', MATCH_PATTERN.MATCH_ONCE_OR_MORE) \
             .set_node_loop('Relu', MATCH_PATTERN.MATCH_ZERO_OR_MORE)
 
         self.assertTrue(pattern.node_cann_match_more('Conv'))
@@ -61,7 +61,7 @@ class TestPattern(unittest.TestCase):
             .add_edge('Conv', 'Relu') \
             .set_input('Conv') \
             .set_output('Relu') \
-            .set_node_loop('Conv', MATCH_PATTERN.MATCH_ONECE_OR_MORE) \
+            .set_node_loop('Conv', MATCH_PATTERN.MATCH_ONCE_OR_MORE) \
             .set_node_loop('Relu', MATCH_PATTERN.MATCH_ZERO_OR_MORE)
 
         self.assertFalse(pattern.node_cann_match_zero('Conv'))
@@ -74,7 +74,7 @@ class TestPattern(unittest.TestCase):
             .add_edge('Conv', 'Relu') \
             .set_input('Conv') \
             .set_output('Relu') \
-            .set_loop(MATCH_PATTERN.MATCH_ONECE_OR_MORE)
+            .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
 
         self.assertTrue(pattern.can_match_more())
 

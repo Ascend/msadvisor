@@ -66,11 +66,13 @@ class OnnxInitializer(Initializer):
     @classmethod
     def parse(cls, node:Union[NodeProto, TensorProto]):
         if hasattr(node, 'op_type') and node.op_type == 'Constant':
+            name = node.output[0]
             value = numpy_helper.to_array(node.attribute[0].t)
         else:
+            name = node.name
             value = numpy_helper.to_array(node)
         return cls(
-            name = node.name, 
+            name = name, 
             value = value
         )
     
@@ -96,10 +98,13 @@ class OnnxPlaceHolder(PlaceHolder):
     def parse(cls, node:ValueInfoProto):
         tensor_type = node.type.tensor_type
         dtype = TENSOR_TYPE_TO_NP_TYPE[tensor_type.elem_type]
-        shape = [
-            dim.dim_value if dim.dim_value > 0 else -1
-            for dim in tensor_type.shape.dim
-        ]
+        if not tensor_type.shape.dim:
+            shape = None 
+        else:
+            shape = [
+                dim.dim_value if dim.dim_value > 0 else -1
+                for dim in tensor_type.shape.dim
+            ]
         return cls(
             name = node.name, 
             dtype = dtype,

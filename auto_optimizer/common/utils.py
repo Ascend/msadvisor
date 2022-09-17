@@ -13,9 +13,32 @@
 # limitations under the License.
 
 import os
+from inspect import signature
+from functools import wraps
 
 
-def path_to_module_format(path: str):
+def typeassert(*ty_args, **ty_kwargs):
+    def decorate(func):
+        # Map function argument names to supplied types
+        sig = signature(func)
+        bound_types = sig.bind_partial(*ty_args, **ty_kwargs).arguments
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            bound_values = sig.bind(*args, **kwargs)
+            # Enforce type assertions across supplied arguments
+            for name, value in bound_values.arguments.items():
+                if name in bound_types:
+                    if not isinstance(value, bound_types[name]):
+                        raise TypeError(
+                            f'Argument {name} must be {bound_types[name]}'
+                        )
+            return func(*args, **kwargs)
+        return wrapper
+    return decorate
+
+@typeassert(path=str)
+def format_to_module(path):
     """
     路径转换，把文件相对路径转换成python的import路径
     """
@@ -28,7 +51,6 @@ def path_to_module_format(path: str):
         format_path = format_path.replace(".", "", 1)
 
     return format_path
-
 
 def check_file_exist(file, msg='file "{}" does not exist'):
     if not os.path.isfile(file):

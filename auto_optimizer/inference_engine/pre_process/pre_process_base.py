@@ -12,12 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from abc import abstractmethod
+
 
 class PreProcessBase(object):
     def __init__(self):
         pass
 
-    def __call__(self, *args, **kwargs):
+    @abstractmethod
+    def __call__(self, index, batch_size, worker, cfg, in_queue, out_queue):
+        """
+        index: 多线程的索引
+        batch_size: batch_size
+        worker: 多线程的数量
+        cfg: 配置文件，参考auto_optimizer\configs\cv\classification\resnet50.py
+        in_queue: 输入数据队列，预处理输入队列为空
+        out_queue： 输出数据队列
+        数据队列建议存放数据格式：[[batch_file_name], [[batch_data_0], [batch_data_1]]]
+        batch_file_name：表示多batch时，对应数据集的文件名，用于精度评测
+        batch_data_n：表示第n个输入or输出，batch_data_n包含batch组数据
+        """
         pass
 
     def __len__(self):

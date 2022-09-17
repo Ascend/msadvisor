@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict, Union
+import warnings
+from typing import List, Dict, Union, Sequence, Optional
 
-import numpy as np
 import onnx
+import numpy as np
 from onnx import helper, GraphProto, ModelProto, OperatorSetIdProto
 
 from .. import BaseGraph
-from .. import PlaceHolder, Initializer, Node
 from .node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
 
 class OnnxGraph(BaseGraph):
@@ -34,7 +34,29 @@ class OnnxGraph(BaseGraph):
         name: str = None,
         **kwargs: Dict[str, object]
     ):
-        super(OnnxGraph, self).__init__(nodes, inputs, outputs, initializers, value_infos, name, **kwargs)
+        super(OnnxGraph, self).__init__(nodes, inputs, outputs, initializers, value_infos, name)
+        
+        opsets = kwargs.get('opset_imports', None)
+        if isinstance(opsets, int):
+            opset_imports = onnx.OperatorSetIdProto()
+            opset_imports.version = opsets
+            opset_imports = [opset_imports]
+        elif isinstance(opsets, Sequence):
+            opset_imports = [op for op in opsets if not op.domain or op.domain == '']
+            if len(opset_imports) < len(opsets):
+                warnings.warn(
+                    f'Only one domain version is allowed, keep opset with domain "ai.onnx"')
+        else:
+            opset_imports = opsets
+
+        self._meta = {
+                    'ir_version': kwargs.get('ir_version', 4),
+                    'producer_name': kwargs.get('producer_name', 'AutoOptimizer'),
+                    'producer_version': kwargs.get('producer_version', 'alpha'),
+                    'domain': kwargs.get('domain', ''),
+                    'model_version': kwargs.get('model_version', 0),
+                    'opset_imports': opset_imports
+        }
 
     @classmethod
     def parse(cls, path_or_bytes: Union[str, ModelProto, GraphProto]) -> 'OnnxGraph':
@@ -58,12 +80,20 @@ class OnnxGraph(BaseGraph):
         inputs = [OnnxPlaceHolder.parse(i) for i in onnx_graph.input]
         outputs = [OnnxPlaceHolder.parse(o) for o in onnx_graph.output]
         initializers = [OnnxInitializer.parse(i) for i in onnx_graph.initializer]
-        value_infos = [OnnxPlaceHolder.parse(v) for v in onnx_graph.value_info]
 
-        # TODO: Constant Node to Initializer
         nodes = []
+        useless_value_infos = set()
         for node in onnx_graph.node:
-            nodes.append(OnnxNode.parse(node))
+            if node.op_type == 'Constant':
+                initializers.append(OnnxInitializer.parse(node))
+                useless_value_infos.add(node.output[0])
+            else:
+                nodes.append(OnnxNode.parse(node))
+
+        value_infos = []
+        for value_info in onnx_graph.value_info:
+            if value_info.name not in useless_value_infos:
+                value_infos.append(OnnxPlaceHolder.parse(value_info))
 
         graph = cls(nodes, inputs, outputs, initializers, value_infos, onnx_graph.name, **meta)
         return graph
@@ -110,3 +140,46 @@ class OnnxGraph(BaseGraph):
         self._value_infos = [OnnxPlaceHolder.parse(v) for v in graph.value_info]
         for n in self._value_infos:
             self._node_map[n.name] = n
+
+    def extract(self, new_model_save_path, input_name_list, output_name_list, enable_model_check=True):
+        # TODO: reimplement
+        def check_model(model):
+            pass
+        if not enable_model_check:
+            onnx.checker.check_model = check_model
+        
+        print('Begin to extract the model.')
+        old_model_save_path = '{}_tmp.onnx'.format(new_model_save_path)
+        onnx.utils.extract_model(
+            old_model_save_path, new_model_save_path, input_name_list, output_name_list)
+        print('Extract the model completed, model saved in {}.'.format(
+            new_model_save_path))
+        
+        return OnnxGraph.parse(new_model_save_path)
+    
+    def simplify(self, **kwargs):
+        try:
+            from onnxsim import simplify
+        except ImportError:
+            raise RuntimeError("No module named 'onnxsim'")
+
+        model = self.model()
+        model_sim, check = simplify(model, **kwargs)
+        if not check:
+            raise RuntimeError("Simplified ONNX model could not be validated")
+        
+        return OnnxGraph.parse(model_sim) 
+    
+
+    @property
+    def opset_imports(self) -> Optional[Sequence[OperatorSetIdProto]]:
+        return self._meta['opset_imports']
+    
+    @opset_imports.setter
+    def opset_imports(self, opset:Union[int, None]):
+        if not opset:
+            self._meta['opset_imports'] = None
+        else:
+            opset_imports = OperatorSetIdProto()
+            opset_imports.version = opset
+            self._meta['opset_imports'] = [opset_imports]

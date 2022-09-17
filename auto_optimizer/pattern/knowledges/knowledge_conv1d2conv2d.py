@@ -16,7 +16,6 @@ from typing import List, Dict
 import operator as op
 import numpy as np
 import onnx
-import os
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
@@ -26,7 +25,6 @@ from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
-from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 
 class Conv1dMatch(MatchBase):
     def __init__(self):
@@ -51,8 +49,10 @@ pattern = Pattern() \
     .set_input('Conv') \
     .set_output('element_wise') \
     .set_node_loop('element_wise', MATCH_PATTERN.MATCH_ZERO_OR_MORE) \
-    .set_loop(MATCH_PATTERN.MATCH_ONECE_OR_MORE)
+    .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
 
+
+@KnowledgeFactory.register("KnowledgeConv1d2Conv2d")
 class KnowledgeConv1d2Conv2d(KnowledgeBase):
     def __init__(self):
         super().__init__()
@@ -77,10 +77,10 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
 
     def __is_lower_onnx_version(self) -> bool:
         """
-        判断当前onnx版本是否小于1.12.0
-        :return: onnx版本小于1.12.0，则返回True，否则返回False
+        判断当前onnx版本是否小于1.11.0
+        :return: onnx版本小于1.11.0，则返回True，否则返回False
         """
-        limit_version = '1.12.0'
+        limit_version = '1.11.0'
         onnx_version = onnx.version.version
 
         limit_versions = limit_version.split('.')
@@ -198,76 +198,3 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             conv1d = graph[conv1d_name]
             self._conv1d_to_conv2d(graph, conv1d)
         return True
-
-KnowledgeFactory.add_knowledge('KnowledgeConv1d2Conv2d', KnowledgeConv1d2Conv2d())
-
-
-def need_to_optimize(graph, knowledge):
-    while knowledge.has_next_pattern():
-        knowledge.next_pattern()
-        match_results = knowledge.get_candidate_sub_graphs(graph)
-        if match_results is None or len(match_results) == 0:
-            continue
-        else:
-            return True
-    return False
-
-def optimize(graph, knowledge):
-    res = False
-    while knowledge.has_next_pattern():
-        knowledge.next_pattern()
-        match_results = knowledge.get_candidate_sub_graphs(graph)
-        if match_results is None or len(match_results) == 0:
-            continue
-        while knowledge.has_next_apply():
-            knowledge.next_apply()
-            for match_result in match_results:
-                res |= knowledge.apply(graph, match_result)
-    return res
-
-def evaluate(data_path, parameter = None):
-    if parameter is None:
-        return False
-    onnx_file = parameter.get('file_name')
-    onnx_path = os.path.join(data_path, onnx_file)
-    mode = parameter.get('mode')
-    onnx_graph = OnnxGraph.parse(onnx_path)
-    if onnx_graph is None:
-        print('onnx model open failed, onnx path: {}'.format(onnx_path))
-        return False
-    if len(onnx_graph.inputs) == 0 and len(onnx_graph.outputs) == 0:
-        print('Invalid onnx model, onnx path: {}'.format(onnx_path))
-        return False
-
-    knowledge = KnowledgeConv1d2Conv2d()
-
-    if mode == "evaluate":
-        res =  need_to_optimize(onnx_graph, knowledge)
-        if res:
-            print("The current model need to be optimized")
-        else:
-            print('The current model does not need to be optimized')
-    elif mode == "optimize":
-        res = optimize(onnx_graph, knowledge)
-        if res:
-            out_file = os.path.join(data_path, "{}_optimize.onnx".format(os.path.splitext(onnx_file)[0]))
-            onnx_graph.save(out_file)
-            print("The current model need to be optimized, the optimized model path is: {}".format(out_file))
-        else:
-            print('The current model is not optimized')
-    return True
-
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) != 3 and len(sys.argv) != 4:
-        print('Parameter size should be 2 or 3')
-        exit(1)
-    data_path = sys.argv[1]
-    onnx_file = sys.argv[2]
-    mode = 'optimize' if len(sys.argv) <= 3 else sys.argv[3]
-    if mode not in ['optimize', 'evaluate']:
-        print('Invalid parameter {}'.format(mode))
-        exit(1)
-    parameter = {'file_name': onnx_file, 'mode': mode}
-    ret = evaluate(data_path, parameter)
-

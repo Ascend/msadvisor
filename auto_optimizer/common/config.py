@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from addict import Dict
+from typing import Dict
 
 from .register import Register
-from .utils import path_to_module_format
+from .utils import format_to_module
 
 
 class ConfigDict(Dict):
@@ -44,8 +44,12 @@ class Config:
         读取模型配置文件，返回模型相关配置参数及推理流程
         """
         try:
-            format_path = path_to_module_format(file_name)
+            format_path = format_to_module(file_name)
             model_dict = Register.import_module(format_path)
+
+            if not isinstance(model_dict.model, Dict):
+                raise RuntimeError("config is not Dict")
+
             config_dict = model_dict.model
         except Exception as err:
             raise RuntimeError("invalid read file error={}".format(err))
