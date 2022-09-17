@@ -287,6 +287,32 @@ class TestKnowledgeBase(unittest.TestCase):
         res = knowledge_example.apply(graph, match_result[0])
         self.assertTrue(res)
 
+    def test_get_pattern_and_apply_id(self):
+        knowledge_example = Knowledge_Example()
+        id = knowledge_example.get_pattern_and_apply_id()
+        self.assertEqual(id, '0_0')
+
+    def test_set_pattern_and_apply_id(self):
+        knowledge_example = Knowledge_Example()
+
+        res = knowledge_example.set_pattern_and_apply_id(0)
+        self.assertFalse(res)
+
+        res = knowledge_example.set_pattern_and_apply_id('0')
+        self.assertFalse(res)
+
+        res = knowledge_example.set_pattern_and_apply_id('0_0_0')
+        self.assertFalse(res)
+
+        res = knowledge_example.set_pattern_and_apply_id('0_1')
+        self.assertFalse(res)
+
+        res = knowledge_example.set_pattern_and_apply_id('1_0')
+        self.assertFalse(res)
+
+        res = knowledge_example.set_pattern_and_apply_id('0_0')
+        self.assertTrue(res)
+
 
 if __name__ == "__main__":
     unittest.main()

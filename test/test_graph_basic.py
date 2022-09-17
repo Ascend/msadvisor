@@ -191,7 +191,6 @@ class TestGraphBasic(unittest.TestCase):
         self.graph.save('test.onnx')
         os.remove('test.onnx')
 
-
     def test_toposort(self):
         random.shuffle(self.graph_1._nodes)
         self.graph_1.toposort()
