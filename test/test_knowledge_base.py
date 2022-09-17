@@ -289,8 +289,8 @@ class TestKnowledgeBase(unittest.TestCase):
 
     def test_get_pattern_and_apply_id(self):
         knowledge_example = Knowledge_Example()
-        id = knowledge_example.get_pattern_and_apply_id()
-        self.assertEqual(id, '0_0')
+        pattern_and_apply_id = knowledge_example.get_pattern_and_apply_id()
+        self.assertEqual(pattern_and_apply_id, '0_0')
 
     def test_set_pattern_and_apply_id(self):
         knowledge_example = Knowledge_Example()

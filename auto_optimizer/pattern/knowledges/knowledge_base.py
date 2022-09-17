@@ -122,9 +122,8 @@ class KnowledgeBase(object):
         ids = str.split(pattern_and_apply_id, '_')
         if len(ids) != 2:
             return False
-        for id in ids:
-            if not id.isdigit():
-                return False
+        if not ids[0].isdigit() or not ids[-1].isdigit():
+            return False
         pattern_idx = int(ids[0])
         apply_idx = int(ids[-1])
         if pattern_idx >= len(self._patterns):
