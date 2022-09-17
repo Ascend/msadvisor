@@ -191,14 +191,6 @@ class TestGraphBasic(unittest.TestCase):
         self.graph.save('test.onnx')
         os.remove('test.onnx')
 
-    def test_save_after_add_node(self):
-        self.graph.add_input('test_input', 'float32', [1, 2, 3])
-        self.graph.add_output('test_output', 'float32', [1, 2, 3])
-        self.graph.add_initializer('test_initializer', np.array([1, 2, 3]))
-        self.graph.add_node('test_node', 'Add')
-        self.graph.save('test.onnx')
-        os.remove('test.onnx')
-
 
     def test_toposort(self):
         random.shuffle(self.graph_1._nodes)

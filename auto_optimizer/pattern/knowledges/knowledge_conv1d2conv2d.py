@@ -26,6 +26,7 @@ from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 
+
 class Conv1dMatch(MatchBase):
     def __init__(self):
         super().__init__()
