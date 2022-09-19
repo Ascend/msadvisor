@@ -122,7 +122,10 @@ class KnowledgeBase(object):
         apply_methods = self._pattern_apply_dict.get(pattern)
         if apply_methods is None:
             return False
-        return True if apply_id < len(apply_methods) and apply_id >= 0 else False
+        if apply_id >= len(apply_methods) or apply_id < 0:
+            return False
+        self._apply_idx = apply_id
+        return True
 
     @abstractmethod
     def __build_patterns(self) -> List[Pattern]:
