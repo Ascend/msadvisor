@@ -104,7 +104,7 @@ class KnowledgeBase(object):
             return
         self._apply_idx += 1
 
-    def get_pattern_and_apply_id(self) -> str:
+    def get_subgraph_apply_id(self) -> str:
         """
         将当前pattern和apply的id转成str返回
         """
@@ -112,7 +112,15 @@ class KnowledgeBase(object):
         apply_id = self._apply_idx if self._apply_idx >= 0 else 0
         return '%d_%d' % (pattern_id, apply_id)
 
-    def set_pattern_and_apply_id(self, pattern_and_apply_id):
+    def get_subgraph_apply_list(self) -> List[str]:
+        """
+        获取当前pattern所有的修改方法，并将结果转成str返回
+        """
+        pattern_id = self._pattern_idx if self._pattern_idx >= 0 else 0
+        apply_methods = self._pattern_apply_dict.get(self.__get_current_pattern())
+        return [ '%d_%d' % (pattern_id, apply_id) for apply_id, _ in enumerate(apply_methods) ]
+
+    def set_subgraph_apply_id(self, pattern_and_apply_id):
         """
         设置pattern和apply的id
         :param apply_id:
