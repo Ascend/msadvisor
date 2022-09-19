@@ -104,45 +104,25 @@ class KnowledgeBase(object):
             return
         self._apply_idx += 1
 
-    def get_subgraph_apply_id(self) -> str:
+    def get_apply_ids(self) -> int:
         """
-        将当前pattern和apply的id转成str返回
+        返回当前pattern对应的所有apply_id
         """
-        pattern_id = self._pattern_idx if self._pattern_idx >= 0 else 0
-        apply_id = self._apply_idx if self._apply_idx >= 0 else 0
-        return '%d_%d' % (pattern_id, apply_id)
-
-    def get_subgraph_apply_list(self) -> List[str]:
-        """
-        获取当前pattern所有的修改方法，并将结果转成str返回
-        """
-        pattern_id = self._pattern_idx if self._pattern_idx >= 0 else 0
-        apply_methods = self._pattern_apply_dict.get(self.__get_current_pattern())
-        return [ '%d_%d' % (pattern_id, apply_id) for apply_id, _ in enumerate(apply_methods) ]
-
-    def set_subgraph_apply_id(self, pattern_and_apply_id):
-        """
-        设置pattern和apply的id
-        :param apply_id:
-        """
-        if not isinstance(pattern_and_apply_id, str):
-            return False
-        ids = str.split(pattern_and_apply_id, '_')
-        if len(ids) != 2:
-            return False
-        if not ids[0].isdigit() or not ids[-1].isdigit():
-            return False
-        pattern_idx = int(ids[0])
-        apply_idx = int(ids[-1])
-        if pattern_idx >= len(self._patterns):
-            return False
-        pattern = self._patterns[pattern_idx]
+        pattern = self.__get_current_pattern()
         apply_methods = self._pattern_apply_dict.get(pattern)
-        if apply_idx >= len(apply_methods):
-            return False
-        self._pattern_idx = pattern_idx
-        self._apply_idx = apply_idx
-        return True
+        if apply_methods is None:
+            return []
+        return [ i for i, _ in enumerate(apply_methods) ]
+
+    def set_apply_id(self, apply_id) -> bool:
+        """
+        基于当前pattern，设置apply_id
+        """
+        pattern = self.__get_current_pattern()
+        apply_methods = self._pattern_apply_dict.get(pattern)
+        if apply_methods is None:
+            return []
+        return True if apply_id < len(apply_methods) and apply_id >= 0 else False
 
     @abstractmethod
     def __build_patterns(self) -> List[Pattern]:

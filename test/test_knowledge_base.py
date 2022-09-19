@@ -287,38 +287,24 @@ class TestKnowledgeBase(unittest.TestCase):
         res = knowledge_example.apply(graph, match_result[0])
         self.assertTrue(res)
 
-    def test_get_subgraph_apply_id(self):
+    def test_get_apply_ids(self):
         knowledge_example = Knowledge_Example()
-        subgraph_apply_id = knowledge_example.get_subgraph_apply_id()
-        self.assertEqual(subgraph_apply_id, '0_0')
+        apply_ids = knowledge_example.get_apply_ids()
 
-    def test_set_subgraph_apply_id(self):
+        self.assertTrue(len(apply_ids) == 1)
+        self.assertEqual(apply_ids[0], 0)
+
+    def test_set_apply_id(self):
         knowledge_example = Knowledge_Example()
 
-        res = knowledge_example.set_subgraph_apply_id(0)
+        res = knowledge_example.set_apply_id(-1)
         self.assertFalse(res)
 
-        res = knowledge_example.set_subgraph_apply_id('0')
+        res = knowledge_example.set_apply_id(1)
         self.assertFalse(res)
 
-        res = knowledge_example.set_subgraph_apply_id('0_0_0')
-        self.assertFalse(res)
-
-        res = knowledge_example.set_subgraph_apply_id('0_1')
-        self.assertFalse(res)
-
-        res = knowledge_example.set_subgraph_apply_id('1_0')
-        self.assertFalse(res)
-
-        res = knowledge_example.set_subgraph_apply_id('0_0')
+        res = knowledge_example.set_apply_id(0)
         self.assertTrue(res)
-
-    def test_get_subgraph_apply_list(self):
-        knowledge_example = Knowledge_Example()
-        subgraph_apply_list = knowledge_example.get_subgraph_apply_list()
-
-        self.assertTrue(len(subgraph_apply_list) == 1)
-        self.assertEqual(subgraph_apply_list[0], '0_0')
 
 
 if __name__ == "__main__":
