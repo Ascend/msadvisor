@@ -104,6 +104,29 @@ class KnowledgeBase(object):
             return
         self._apply_idx += 1
 
+    def get_apply_ids(self) -> int:
+        """
+        返回当前pattern对应的所有apply_id
+        """
+        pattern = self.__get_current_pattern()
+        apply_methods = self._pattern_apply_dict.get(pattern)
+        if apply_methods is None:
+            return []
+        return [ i for i, _ in enumerate(apply_methods) ]
+
+    def set_apply_id(self, apply_id) -> bool:
+        """
+        基于当前pattern，设置apply_id
+        """
+        pattern = self.__get_current_pattern()
+        apply_methods = self._pattern_apply_dict.get(pattern)
+        if apply_methods is None:
+            return False
+        if apply_id >= len(apply_methods) or apply_id < 0:
+            return False
+        self._apply_idx = apply_id
+        return True
+
     @abstractmethod
     def __build_patterns(self) -> List[Pattern]:
         """
