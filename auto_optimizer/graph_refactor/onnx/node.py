@@ -33,9 +33,18 @@ class OnnxNode(Node):
         super(OnnxNode, self).__init__(name, op_type, inputs, outputs, attrs, domain)
     
     @classmethod
-    def parse(cls, node:NodeProto):
+    def parse(cls, node:NodeProto, add_name_suffix=False):
+        
+        if not node.name:
+            node.name = '{}_{}'.format(node.op_type, node.output[0])
+        
+        if add_name_suffix:
+            name = '{}_{}'.format(node.name, 'op')
+        else:
+            name = node.name
+            
         return cls(
-            name = node.name, 
+            name = name, 
             op_type = node.op_type, 
             inputs = list(node.input), 
             outputs = list(node.output), 

@@ -24,6 +24,11 @@
 - 查询某条边的后继节点列表并返回该列表。若不存在返回 `[]` 。
 - `output_name(str)` - 图中存在的边的名称
 
+**get_value_info(io_name) -> PlaceHolder**
+
+- 用于获取某条边的维度信息，当该边不存在或该边未推断出维度信息时报错。
+- `io_name` - 图中存在的边的名称
+
 <details>
   <summary> sample code </summary>
 
@@ -47,6 +52,9 @@ next_nodes = []
 for o in node.outputs:
 	next_nodes.extend(g.get_next_nodes(o))
 next_nodes = list(set(next_nodes))
+
+# 获取 node 节点输出的维度形状
+value_info = g.get_value_info(node.outputs[0])
 ```
 
 </details>
@@ -177,10 +185,11 @@ g.remove('Node_text', {0:0,1:1}) # 删除节点，将节点的第0个输入和�
 
 ### 基础功能
 
-**parse(path_or_bytes) -> BaseGraph**
+**parse(path_or_bytes， add_name_suffix=False) -> BaseGraph**
 
 - 加载模型，将模型解析为图。
 - `path_or_bytes(Union[str, ModelProto, GraphProto])` - 输入可以是 onnx 模型文件路径，也可以是 onnx 框架中的 `ModelProto` 或 `GraphProto`。
+- `add_name_suffix(bool)` - 可选参数，默认为 `False`，多数情况下可忽略。当设置为 `True` 时，能够自动检测算子节点和输入输出节点重名的情况并修改算子节点名称。
 
 **save(path)**
 
@@ -199,7 +208,7 @@ g.remove('Node_text', {0:0,1:1}) # 删除节点，将节点的第0个输入和�
 
 **infershape()**
 
-- 对 [onnx.shape_inference.infer_shapes](https://github.com/onnx/onnx/blob/main/onnx/shape_inference.py#L14) 的封装，用于形状推断。
+- 对 [onnx.shape_inference.infer_shapes](https://github.com/onnx/onnx/blob/main/onnx/shape_inference.py#L14) 的封装，用于维度推断。
 
 **simplify(\*\*kwargs) -> BaseGraph**
 
