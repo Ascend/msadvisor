@@ -29,6 +29,7 @@ def infer_run(onnx_path, x):
 
 def optimize(graph, knowledge, onnx_path):
     res = True
+    cnt = 0
     while knowledge.has_next_pattern():
         knowledge.next_pattern()
         match_results = knowledge.get_candidate_sub_graphs(graph)
@@ -37,8 +38,9 @@ def optimize(graph, knowledge, onnx_path):
         while knowledge.has_next_apply():
             knowledge.next_apply()
             for match_result in match_results:
+                cnt += 1
                 res &= knowledge.apply(graph, match_result)
                 if res is False:
                     return res
                 graph.save(onnx_path)
-    return res
+    return res and cnt > 0

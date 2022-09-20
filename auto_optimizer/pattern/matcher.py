@@ -137,6 +137,8 @@ class Matcher(object):
                     pattern_nodes.extend(new_pattern_nodes)
                 self.__nodes_group_dfs(nodes, pattern_nodes, nodes_map, nodes_map_group, get_next_func)
                 nodes_map.pop(pattern_node)
+                for nd in new_pattern_nodes:
+                    pattern_nodes.remove(nd)
 
     def __match_nodes(self, nodes, pattern_nodes, result, get_next_func) -> bool:
         """
