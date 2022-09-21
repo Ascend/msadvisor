@@ -184,7 +184,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             
             insert_node = None
             for refer_index, node_output in enumerate(node.outputs):
-                next_nodes = graph.get_next_nodes(node_output)
+                next_nodes = graph.get_next_nodes(node_output).copy()
                 # 如果没有后继节点出则在当前节点之后插入 Squeeze 节点
                 if len(next_nodes) == 0:
                     self._reduce_output_dims(graph, node, 'after', 0)
