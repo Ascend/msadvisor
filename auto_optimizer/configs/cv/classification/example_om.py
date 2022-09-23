@@ -36,7 +36,7 @@ model = dict(
         ),
         model_convert=dict(
             type='atc',
-		framework='5',
+            framework='5',
             model='./onnx/squeezenet1_1.onnx',
             output='./om/squeezenet1_1',
             input_format='NCHW',
