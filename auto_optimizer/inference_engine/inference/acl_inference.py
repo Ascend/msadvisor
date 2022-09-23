@@ -23,6 +23,8 @@ from ..data_process_factory import InferenceFactory
 class AclInference(InferenceBase, ABC):
 
     def __init__(self, tool):
+        if tool not in ['msame', 'pyacl']:
+            raise RuntimeError("Invalid tool type! Only support 'msame', 'pyacl', but got {}.".format(tool))
         self.tool = tool
 
     def __call__(self, loop, cfg, in_queue, out_queue):
