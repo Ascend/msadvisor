@@ -1,4 +1,31 @@
-##  知识库API说明
+# 知识库API说明
+
+```mermaid
+classDiagram
+    class KnowledgeBase {
+        __build_patterns()
+        __build_pattern_apply_map()
+    }
+    class KnowledgeConv1d2Conv2d {
+        __build_patterns()
+        __build_pattern_apply_map()
+    }
+    class KnowledgeMergeContinuousSlice {
+        __build_patterns()
+        __build_pattern_apply_map()
+    }
+    KnowledgeBase <|-- KnowledgeConv1d2Conv2d
+    KnowledgeBase <|-- KnowledgeMergeContinuousSlice
+    KnowledgeBase ..> Matcher
+    KnowledgeBase ..> Pattern
+    KnowledgeConv1d2Conv2d ..> Pattern
+    KnowledgeMergeContinuousSlice ..> Pattern
+    Matcher ..> Pattern
+    Pattern ..> PatternNode
+    PatternNode ..> MatchBase
+    Matcher ..> MatchResult
+    KnowledgeBase ..> MatchResult
+```
 
 类说明：
 
@@ -13,16 +40,12 @@
 | PatternNode                   | 子图算子节点，包含算子名、算子类型、以及一些匹配规则，这些匹配规则在基于MatchBase的子类中实现 |
 | MatchBase                     | 算子节点需要对属性、输入、输出等做一些匹配，通过实现该接口，注册到PatternNode中 |
 
-
-
 ## KnowledgeBase API
 
 KnowledgeBase是改图知识库基类，提供两个抽象方法\__build_patterns()和__build_pattern_apply_map()：
 
 - __build_patterns()：定义子图；
 - __build_pattern_apply_map()：定义子图和对应修改方法的映射关系；
-
-
 
 | API名称                                        | 功能说明                         |
 | ---------------------------------------------- | -------------------------------- |
@@ -35,8 +58,6 @@ KnowledgeBase是改图知识库基类，提供两个抽象方法\__build_pattern
 | get_candidate_sub_graphs(graph, top_ops_names) | 匹配子图，返回子图匹配结果       |
 | apply(graph, match_result)                     | 修改子图                         |
 
-
-
 ### 匹配子图
 
 get_candidate_sub_graphs(graph, top_ops_names)
@@ -46,8 +67,6 @@ get_candidate_sub_graphs(graph, top_ops_names)
 - graph：计算图，BaseGraph实例；
 
   top_ops_names：算子列表，用于对匹配结果进行筛选，默认为None；
-
-
 
 ### 修改子图
 
@@ -59,8 +78,6 @@ apply(graph, match_result)
 
   match_result：子图匹配的结果，MatchResult实例；
 
-
-
 ## Matcher API
 
 | API名称               | 功能说明                                     |
@@ -68,17 +85,12 @@ apply(graph, match_result)
 | get_candidate_nodes() | 获取候选节点                                 |
 | get_match_map(node)   | 基于深度优先搜索进行子图匹配，node是起始节点 |
 
-
-
-
 ## MatchResult API
 
 | API名称                  | 功能说明                                                     |
 | ------------------------ | ------------------------------------------------------------ |
 | add_node_dict(node_dict) | 添加匹配的子图，node_dict的key是PatternNode名称，value是一组BaseNode实例。node_dict的value存在多个的场景是PatternNode可以重复匹配多个。 |
 | is_empty()               | 判断result是否为空                                           |
-
-
 
 ## Pattern API
 
@@ -94,15 +106,11 @@ apply(graph, match_result)
 | get_start_node()                       | 获取子图遍历的起始节点                                       |
 | node_cann_match_zero(op_name)          | 允许匹配零次                                                 |
 
-
-
 ### match_pattern匹配模式
 
 - MATCH_ONCE：只匹配一次
 - MATCH_ONCE_OR_MORE：匹配一次或者多次
 - MATCH_ZERO_OR_MORE：匹配零次或者多次
-
-
 
 ## PatternNode API
 
@@ -112,15 +120,11 @@ apply(graph, match_result)
 | set_input(prev_node)  | 设置前置节点，prev_node前置节点，PatternNode实例             |
 | set_output(next_node) | 设置后置节点，next_node后置节点，PatternNode实例             |
 
-
-
 ## MatchBase API
 
 | API名称            | 功能说明                                                     |
 | ------------------ | ------------------------------------------------------------ |
 | match(node, graph) | 算子匹配规则，node算子节点，BaseNode实例；graph计算图，BaseGraph实例 |
-
-
 
 Sample
 
@@ -138,7 +142,6 @@ class Conv1dMatch(MatchBase):
             weight = graph[node.inputs[1]]
             return len(weight.value.shape) == 3
         return False
-
 
 # element_wise允许出现0次，或者多次
 pattern = Pattern() \
@@ -164,7 +167,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             pattern: [self._conv1d2conv2d_apply]
         }
         return apply_dict
-        
+ 
     def _conv1d2conv2d_apply(self, graph, match_result: MatchResult) -> bool:
     	pass
 ```
