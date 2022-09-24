@@ -167,8 +167,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             pattern: [self._conv1d2conv2d_apply]
         }
         return apply_dict
- 
-    def _conv1d2conv2d_apply(self, graph, match_result: MatchResult) -> bool:
-    	pass
-```
 
+    def _conv1d2conv2d_apply(self, graph, match_result: MatchResult) -> bool:
+        pass
+```
