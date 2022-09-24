@@ -17,7 +17,7 @@ from typing import List, Dict, Union, Sequence, Optional
 
 import onnx
 import numpy as np
-from onnx import helper, GraphProto, ModelProto, OperatorSetIdProto
+from onnx import helper, GraphProto, ModelProto, OperatorSetIdProto, version_converter
 
 from .. import BaseGraph
 from .node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
@@ -184,4 +184,7 @@ class OnnxGraph(BaseGraph):
         else:
             opset_imports = OperatorSetIdProto()
             opset_imports.version = opset
+            model = self.model()
+            converted_model = version_converter.convert_version(model, opset)
+            self.graph = OnnxGraph.parse(converted_model)
             self._meta['opset_imports'] = [opset_imports]
