@@ -1,34 +1,5 @@
 ##  知识库API说明
 
-```mermaid
-classDiagram
-	class KnowledgeBase {
-		__build_patterns()
-		__build_pattern_apply_map()
-	}
-	class KnowledgeConv1d2Conv2d {
-		__build_patterns()
-		__build_pattern_apply_map()
-	}
-	class KnowledgeMergeContinuousSlice {
-		__build_patterns()
-		__build_pattern_apply_map()
-	}
-	KnowledgeBase <|-- KnowledgeConv1d2Conv2d
-	KnowledgeBase <|-- KnowledgeMergeContinuousSlice
-	KnowledgeBase ..> Matcher
-	KnowledgeBase ..> Pattern
-	KnowledgeConv1d2Conv2d ..> Pattern
-	KnowledgeMergeContinuousSlice ..> Pattern
-	Matcher ..> Pattern
-	Pattern ..> PatternNode
-	PatternNode ..> MatchBase
-	Matcher ..> MatchResult
-	KnowledgeBase ..> MatchResult
-	
-	
-```
-
 类说明：
 
 | 类名                          | 功能说明                                                     |
