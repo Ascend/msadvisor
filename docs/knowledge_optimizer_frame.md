@@ -70,7 +70,7 @@ KnowledgeBase是改图知识库基类，提供两个抽象方法\__build_pattern
 
 get_candidate_sub_graphs(graph, top_ops_names)
 
-- 根据预先定义好的子图，在graph中进行查找匹配，返回匹配到的所有结果，匹配的结果是一组[MatchResult](##MatchResult API)实例。
+- 根据预先定义好的子图，在graph中进行查找匹配，返回匹配到的所有结果，匹配的结果是一组MatchResult实例。
 
 - graph：计算图，BaseGraph实例；
 
@@ -104,7 +104,7 @@ apply(graph, match_result)
 
 | API名称                  | 功能说明                                                     |
 | ------------------------ | ------------------------------------------------------------ |
-| add_node_dict(node_dict) | 添加匹配的子图，node_dict的key是[PatternNode](#PatternNode API)名称，value是一组BaseNode实例。node_dict的value存在多个的场景是PatternNode可以重复匹配多个。 |
+| add_node_dict(node_dict) | 添加匹配的子图，node_dict的key是PatternNode名称，value是一组BaseNode实例。node_dict的value存在多个的场景是PatternNode可以重复匹配多个。 |
 | is_empty()               | 判断result是否为空                                           |
 
 
