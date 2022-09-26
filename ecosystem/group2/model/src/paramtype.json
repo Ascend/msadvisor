@@ -1,0 +1,15 @@
+{
+ "ACL_VENC_THREAD_ID_UINT64": "Recall Thread ID,The value of this attribute type is 'uint64_t'.",
+ "ACL_VENC_CALLBACK_PTR": "Recall Function.",
+ "ACL_VENC_PIXEL_FORMAT_UINT32": "Input image format,The value of this attribute type is 'uint32_t'.",
+ "ACL_VENC_ENCODE_TYPE_UINT32": "Video coding protocol,The value of this attribute type is 'uint32_t'.",
+ "ACL_VENC_PIC_WIDTH_UINT32": "picture width,The value of this attribute type is uint32_t.",
+ "ACL_VENC_PIC_HEIGHT_UINT32": "picture height,The value of this attribute type is uint32_t.",
+ "ACL_VENC_KEY_FRAME_INTERVAL_UINT32": "Keyframe interval,value range [1,65536].",
+ "ACL_VENC_BUF_ADDR_PTR": "not support to set this parameter,the cache address is managed internally by Venc.",
+ "ACL_VENC_BUF_SIZE_UINT32": "710:Default=8M,Min=5M.\n310 and 910:not support to set this parameter,default 3686400 Byte.",
+ "ACL_VENC_RC_MODE_UINT32": "default 0.310:value 0 equal CBR mode.910:value 0 equal CBR mode.710:value 0 equal VBR mode",
+ "ACL_VENC_SRC_RATE_UINT32": "310:range 0 or [1,120].910:range 0 or [1,120].710:range 0 or [1,240].If this parameter is not set,default is 30.If set 0,use default 30.If the difference between this value and the actual input bitstream frame rate is too large, the output bitrate will be affected.",
+ "ACL_VENC_MAX_BITRATE_UINT32": "310:range 0 or [10,30000] default 300,if set 0,means use default value 300.910:range 0 or [10,30000] default 300,if set 0,means use default value 300.710:range [2,614400] default 2000,if set 0,means use default value 300.",
+ "ACL_VENC_MAX_IP_PROP_UINT32":"Ratio of the number of bits of a single I frame to the number of bits of a single P frame in a GOP,range 0 or [1,100] .If this parameter is not set,VBR mode default 80, CBR mode default 70��If set 0,use default value."
+}
