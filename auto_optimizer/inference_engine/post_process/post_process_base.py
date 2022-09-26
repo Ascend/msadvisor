@@ -22,7 +22,7 @@ class PostProcessBase(object):
     def __call__(self, loop, cfg, in_queue, out_queue):
         """
         loop: 循环次数，根据数据集大小、batch_size及worker计算得到loop次数
-        cfg: 配置文件，参考auto_optimizer\configs\cv\classification\resnet50.py
+        cfg: 配置文件，参考auto_optimizer\configs\cv\classification\example.py
         in_queue: 输入数据队列
         out_queue： 输出数据队列
         数据队列建议存放数据格式：[[batch_file_name], [[batch_data_0], [batch_data_1]]]

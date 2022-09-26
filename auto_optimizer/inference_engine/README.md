@@ -33,7 +33,7 @@ inference_engine是一个包括推理全流程的组件库，推理端到端流�
 
 对数据集进行数据处理，处理后的数据满足推理引擎要求。输出数据格式需满足数据格式要求。
 
-示例代码参考[imagenet.py](./pre_process/vision/imagenet.py)
+示例代码参考[imagenet.py](pre_process/vision/classification.py)
 
 ### 预处理API
 

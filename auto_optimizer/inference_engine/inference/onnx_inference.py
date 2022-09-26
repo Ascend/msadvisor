@@ -21,6 +21,7 @@ from .inference_base import InferenceBase
 from ..data_process_factory import InferenceFactory
 
 
+@InferenceFactory.register("onnx")
 class ONNXInference(InferenceBase, ABC):
 
     def _session_init(self, model):
@@ -67,4 +68,4 @@ class ONNXInference(InferenceBase, ABC):
         print("inference end")
 
 
-InferenceFactory.add_inference("onnx", ONNXInference())
+

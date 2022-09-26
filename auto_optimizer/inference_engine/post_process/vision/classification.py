@@ -18,6 +18,7 @@ from ..post_process_base import PostProcessBase
 from ...data_process_factory import PostProcessFactory
 
 
+@PostProcessFactory.register("classification")
 class ClassificationPostProcess(PostProcessBase, ABC):
 
     def __call__(self, loop, cfg, in_queue, out_queue):
@@ -34,6 +35,3 @@ class ClassificationPostProcess(PostProcessBase, ABC):
             print("post_process failed error={}".format(err))
 
         print("post_process end")
-
-
-PostProcessFactory.add_post_process("classification", ClassificationPostProcess())

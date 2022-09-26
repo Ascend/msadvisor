@@ -12,19 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from abc import abstractmethod
 
 
-class PreProcessBase(object):
+class DatasetBase(object):
     def __init__(self):
         pass
 
     @abstractmethod
-    def __call__(self, loop, cfg, in_queue, out_queue):
+    def __call__(self, batch_size, cfg, in_queue, out_queue):
         """
-        loop: 迭代次数
+        batch_size: batch_size
         cfg: 配置文件，参考auto_optimizer\configs\cv\classification\example.py
-        in_queue: 输入数据队列，预处理输入队列为空
+        in_queue: 输入数据队列
         out_queue： 输出数据队列
         数据队列建议存放数据格式：[[batch_file_name], [[batch_data_0], [batch_data_1]]]
         batch_file_name：表示多batch时，对应数据集的文件名，用于精度评测
@@ -32,8 +33,14 @@ class PreProcessBase(object):
         """
         pass
 
-    def __len__(self):
-        pass
+    def _get_params(self, cfg):
+        try:
+            dataset_path = cfg["dataset_path"]
+            label_path = cfg["label_path"]
+            real_dataset = os.path.realpath(dataset_path)
 
-    def __getitem__(self, item):
-        pass
+            real_label = os.path.realpath(label_path)
+
+            return real_dataset, real_label
+        except Exception as err:
+            raise RuntimeError("get params failed error={}".format(err))
