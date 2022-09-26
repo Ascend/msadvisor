@@ -10,20 +10,20 @@ KnowledgeBase是改图知识库基类，以两个改图知识库为例，他们�
 
 ```mermaid
 classDiagram
-	class KnowledgeBase {
-		-__build_patterns()
-		-__build_pattern_apply_map()
-	}
-	class KnowledgeConv1d2Conv2d {
-		-__build_patterns()
-		-__build_pattern_apply_map()
-		-_conv1d2conv2d_apply()
-	}
-	class KnowledgeMergeContinueSlice {
-		-__build_patterns()
-		-__build_pattern_apply_map()
-		-_merge_continue_slice_apply()
-	}
+    class KnowledgeBase {
+        -__build_patterns()
+        -__build_pattern_apply_map()
+    }
+    class KnowledgeConv1d2Conv2d {
+        -__build_patterns()
+        -__build_pattern_apply_map()
+        -_conv1d2conv2d_apply()
+    }
+    class KnowledgeMergeContinueSlice {
+        -__build_patterns()
+        -__build_pattern_apply_map()
+        -_merge_continue_slice_apply()
+    }
     KnowledgeBase <|-- KnowledgeConv1d2Conv2d
     KnowledgeBase <|-- KnowledgeMergeContinueSlice
 ```
@@ -48,7 +48,7 @@ __build_patterns()需要定义子图，那如何定义子图？
 
 ```mermaid
 flowchart TB
-	a --> b & c --> d
+    a --> b & c --> d
 ```
 
 除了以上要素以外，算子节点也有自己的一些属性、输入和输出等，还需要定义的基本要素有：
@@ -58,9 +58,9 @@ flowchart TB
 - 输入
 - 输出
 
-**那接下来开始定义一个子图：**
+那接下来开始定义一个子图：
 
-1. 创建一个Pattrern，通过add_node()增加节点，add_edge()增加连边，除此之外，Pattern还定义了一些其他方法，如下：
+第1步：创建一个Pattrern，通过add_node()增加节点，add_edge()增加连边，除此之外，Pattern还定义了一些其他方法，如下：
 
 | Pattern方法名称                        | 功能说明                                                     |
 | -------------------------------------- | ------------------------------------------------------------ |
@@ -77,7 +77,7 @@ flowchart TB
 - MATCH_ONCE_OR_MORE：匹配一次或者多次
 - MATCH_ZERO_OR_MORE：匹配零次或者多次
 
-2. 定义算子的属性、输入和输出，考虑到不同算子属性、输入等的差异，这里定义了一个接口MatchBase。实现MatchBase，在接口方法match中，定义算子的匹配规则。
+第2步：定义算子的属性、输入和输出，考虑到不同算子属性、输入等的差异，这里定义了一个接口MatchBase。实现MatchBase，在接口方法match中，定义算子的匹配规则。
 
 | MatchBase方法名称  | 功能说明                                                     |
 | ------------------ | ------------------------------------------------------------ |
@@ -126,7 +126,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
 
 如何定义子图优化方法？这里有一定的限制，以conv1d2conv2d知识库为例：
 
-**_conv1d2conv2d_apply(graph, match_result: MatchResult) -> bool**
+_conv1d2conv2d_apply(graph, match_result: MatchResult) -> bool
 
 - 方法名称可以任意定义，没有限制；
 
@@ -140,22 +140,22 @@ node_dicts数据结构有些复杂，以一个实际的图为例：
 
 ```mermaid
 flowchart TB
-	Conv_16 --> Relu_17 --> Relu_18 --> Conv_19 --> Relu_20
+    Conv_16 --> Relu_17 --> Relu_18 --> Conv_19 --> Relu_20
 ```
 
 根据子图的定义，匹配后的结果如下：
 
 ```
 node_dicts数据结构:
-	[
-		{
-			'Conv': ['Conv_16'],
-			'element_wise': ['Relu_17', 'Relu_18']
-		},{
-			'Conv': ['Conv_19':BaseNode],
-			'element_wise': ['Relu_20']
-		}
-	]
+    [
+        {
+            'Conv': ['Conv_16'],
+            'element_wise': ['Relu_17', 'Relu_18']
+        },{
+            'Conv': ['Conv_19':BaseNode],
+            'element_wise': ['Relu_20']
+        }
+    ]
 ```
 
 定义好优化方法之后，实现__build_pattern_apply_map()，构建子图和优化方法的对应关系。这样定义的好处是比较好做封装。
@@ -222,3 +222,4 @@ def optimize(graph, knowledge):
                 res |= knowledge.apply(graph, match_result)
     return res
 ```
+
