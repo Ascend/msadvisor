@@ -126,7 +126,7 @@ class Matcher(object):
             if pattern_node in nodes_map:
                 nodes_map.pop(pattern_node)
                 continue
-            if self._pattern.node_cann_match_zero(pattern_node.op_name):
+            if self._pattern.node_can_match_zero(pattern_node.op_name):
                 # 节点没有成功匹配过，但节点可以匹配0次
                 nodes_map[pattern_node] = None
                 if not isinstance(get_next_func, types.MethodType):
@@ -204,7 +204,7 @@ class Matcher(object):
         :return: 匹配成功则返回True，否则返回False
         """
         prev_nodes = self.__get_prev_nodes(node)
-        if self._pattern.node_cann_match_more(pattern_node.op_name):
+        if self._pattern.node_can_match_more(pattern_node.op_name):
             if self.__match_continuous_same_nodes(prev_nodes, pattern_node, result, self.__match_prev_nodes):
                 return True
         if len(pattern_node.inputs) == 0:
@@ -220,7 +220,7 @@ class Matcher(object):
         :return: 匹配成功则返回True，否则返回False
         """
         next_nodes = self._graph.get_next_nodes(node.outputs[0])
-        if self._pattern.node_cann_match_more(pattern_node.op_name):
+        if self._pattern.node_can_match_more(pattern_node.op_name):
             if self.__match_continuous_same_nodes(next_nodes, pattern_node, result, self.__match_next_nodes):
                 return True
         if len(pattern_node.outputs) == 0:

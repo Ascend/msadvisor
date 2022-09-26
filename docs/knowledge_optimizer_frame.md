@@ -1,132 +1,89 @@
-# 知识库API说明
+# 改图知识库应用说明
+
+改图知识库主要是针对推理模型提供的自动改图的能力，目的是降低调优开发工作量，提高开发效率。
+
+本章主要从开发和使用知识库两个维度展开说明，帮助开发者和使用者更快地入手改图知识库。
+
+## 1. 如何写改图知识库
+
+KnowledgeBase是改图知识库基类，以两个改图知识库为例，他们的类关系如下：
 
 ```mermaid
 classDiagram
-    class KnowledgeBase {
-        __build_patterns()
-        __build_pattern_apply_map()
-    }
-    class KnowledgeConv1d2Conv2d {
-        __build_patterns()
-        __build_pattern_apply_map()
-    }
-    class KnowledgeMergeContinuousSlice {
-        __build_patterns()
-        __build_pattern_apply_map()
-    }
+	class KnowledgeBase {
+		-__build_patterns()
+		-__build_pattern_apply_map()
+	}
+	class KnowledgeConv1d2Conv2d {
+		-__build_patterns()
+		-__build_pattern_apply_map()
+		-_conv1d2conv2d_apply()
+	}
+	class KnowledgeMergeContinueSlice {
+		-__build_patterns()
+		-__build_pattern_apply_map()
+		-_merge_continue_slice_apply()
+	}
     KnowledgeBase <|-- KnowledgeConv1d2Conv2d
-    KnowledgeBase <|-- KnowledgeMergeContinuousSlice
-    KnowledgeBase ..> Matcher
-    KnowledgeBase ..> Pattern
-    KnowledgeConv1d2Conv2d ..> Pattern
-    KnowledgeMergeContinuousSlice ..> Pattern
-    Matcher ..> Pattern
-    Pattern ..> PatternNode
-    PatternNode ..> MatchBase
-    Matcher ..> MatchResult
-    KnowledgeBase ..> MatchResult
+    KnowledgeBase <|-- KnowledgeMergeContinueSlice
 ```
 
-类说明：
-
-| 类名                          | 功能说明                                                     |
+| API名称                       | 功能说明                                                     |
 | ----------------------------- | ------------------------------------------------------------ |
-| KnowledgeBase                 | 改图知识库基类                                               |
-| KnowledgeConv1d2Conv2d        | 改图知识库，优化Conv1d，通过升维改成Conv2d                   |
-| KnowledgeMergeContinuousSlice | 改图知识库，合并连续的Slice算子                              |
-| Matcher                       | 通过深度优先搜索进行子图匹配                                 |
-| MatchResult                   | 子图匹配的结果                                               |
-| Pattern                       | 子图，包含添加节点、添加边、设置输入输出等方法，用于定义子图 |
-| PatternNode                   | 子图算子节点，包含算子名、算子类型、以及一些匹配规则，这些匹配规则在基于MatchBase的子类中实现 |
-| MatchBase                     | 算子节点需要对属性、输入、输出等做一些匹配，通过实现该接口，注册到PatternNode中 |
+| __build_patterns()            | 抽象方法，定义一个或多个子图                                 |
+| __build_pattern_apply_map()   | 抽象方法，定义子图和对应修改方法的映射关系，不同子图的优化方法不同，一个子图可能有多种优化方法 |
+| _conv1d2conv2d_apply()        | 子图优化方法，优化Conv1d到Conv2d                             |
+| _merge_continue_slice_apply() | 子图优化方法，合并连续的Slice算子                            |
 
-## KnowledgeBase API
+基于KnowledgeBase，创建一个子类，然后实现\__build_patterns()和__build_pattern_apply_map()方法。
 
-KnowledgeBase是改图知识库基类，提供两个抽象方法\__build_patterns()和__build_pattern_apply_map()：
+__build_patterns()需要定义子图，那如何定义子图？
 
-- __build_patterns()：定义子图；
-- __build_pattern_apply_map()：定义子图和对应修改方法的映射关系；
+### 1.1 定义子图
 
-| API名称                                        | 功能说明                         |
-| ---------------------------------------------- | -------------------------------- |
-| has_next_pattern()                             | 是否有下一个子图                 |
-| next_pattern()                                 | 遍历下一个子图                   |
-| has_next_apply()                               | 是否有下一个修改方法             |
-| next_apply()                                   | 遍历下一个修改方法               |
-| get_apply_ids()                                | 获取子图所有修改的方法的apply_id |
-| set_apply_id()                                 | 根据apply_id配置对应的修改方法   |
-| get_candidate_sub_graphs(graph, top_ops_names) | 匹配子图，返回子图匹配结果       |
-| apply(graph, match_result)                     | 修改子图                         |
+子图是由若干算子节点和连接的边组成，子图的基本要素有：
 
-### 匹配子图
+- 算子节点
+- 连边
 
-get_candidate_sub_graphs(graph, top_ops_names)
+```mermaid
+flowchart TB
+	a --> b & c --> d
+```
 
-- 根据预先定义好的子图，在graph中进行查找匹配，返回匹配到的所有结果，匹配的结果是一组MatchResult实例。
+除了以上要素以外，算子节点也有自己的一些属性、输入和输出等，还需要定义的基本要素有：
 
-- graph：计算图，BaseGraph实例；
+- 类型
+- 属性
+- 输入
+- 输出
 
-  top_ops_names：算子列表，用于对匹配结果进行筛选，默认为None；
+**那接下来开始定义一个子图：**
 
-### 修改子图
+1. 创建一个Pattrern，通过add_node()增加节点，add_edge()增加连边，除此之外，Pattern还定义了一些其他方法，如下：
 
-apply(graph, match_result)
-
-- 对计算图进行修改，修改的方法在改图知识库中定义，基类不感知具体的修改方法，只负责调用。
-
-- graph：计算图，BaseGraph实例；
-
-  match_result：子图匹配的结果，MatchResult实例；
-
-## Matcher API
-
-| API名称               | 功能说明                                     |
-| --------------------- | -------------------------------------------- |
-| get_candidate_nodes() | 获取候选节点                                 |
-| get_match_map(node)   | 基于深度优先搜索进行子图匹配，node是起始节点 |
-
-## MatchResult API
-
-| API名称                  | 功能说明                                                     |
-| ------------------------ | ------------------------------------------------------------ |
-| add_node_dict(node_dict) | 添加匹配的子图，node_dict的key是PatternNode名称，value是一组BaseNode实例。node_dict的value存在多个的场景是PatternNode可以重复匹配多个。 |
-| is_empty()               | 判断result是否为空                                           |
-
-## Pattern API
-
-| API名称                                | 功能说明                                                     |
+| Pattern方法名称                        | 功能说明                                                     |
 | -------------------------------------- | ------------------------------------------------------------ |
-| add_node(op_name, op_types, op_matchs) | 添加节点，op_name算子名，op_types支持的算子类型，op_matchs算子匹配规则，它是一组MatchBase子类的实例 |
+| add_node(op_name, op_types, op_matchs) | 添加节点，op_name算子名，op_types支持的算子类型，op_matchs算子匹配规则，它是一组MatchBase接口实现的实例 |
 | add_edge(prev_op_name, next_op_name)   | 添加边，prev_op_name前置节点名，next_op_name后置节点名       |
 | set_input(op_name)                     | 设置输入的算子节点                                           |
 | set_output(op_name)                    | 设置输出的算子节点                                           |
 | set_node_loop(op_name, match_pattern)  | 设置节点是否匹配多次，或者允许匹配零次，match_pattern是枚举值 |
 | set_loop(match_pattern)                | 设置子图是否匹配多次，或者允许匹配零次，match_pattern是枚举值 |
-| get_visit_direction()                  | 获取子图遍历的方向，从上到下遍历，或者从下往上遍历，根据输入输出的节点个数决定 |
-| get_start_node()                       | 获取子图遍历的起始节点                                       |
-| node_cann_match_zero(op_name)          | 允许匹配零次                                                 |
 
-### match_pattern匹配模式
+如果算子节点或者子图需要重复匹配，调用方法set_node_loop()和set_loop()，匹配模式match_pattern是枚举，有三种方式：
 
 - MATCH_ONCE：只匹配一次
 - MATCH_ONCE_OR_MORE：匹配一次或者多次
 - MATCH_ZERO_OR_MORE：匹配零次或者多次
 
-## PatternNode API
+2. 定义算子的属性、输入和输出，考虑到不同算子属性、输入等的差异，这里定义了一个接口MatchBase。实现MatchBase，在接口方法match中，定义算子的匹配规则。
 
-| API名称               | 功能说明                                                     |
-| --------------------- | ------------------------------------------------------------ |
-| match(node, graph)    | 匹配节点，node算子节点，BaseNode实例；graph计算图，BaseGraph实例 |
-| set_input(prev_node)  | 设置前置节点，prev_node前置节点，PatternNode实例             |
-| set_output(next_node) | 设置后置节点，next_node后置节点，PatternNode实例             |
-
-## MatchBase API
-
-| API名称            | 功能说明                                                     |
+| MatchBase方法名称  | 功能说明                                                     |
 | ------------------ | ------------------------------------------------------------ |
 | match(node, graph) | 算子匹配规则，node算子节点，BaseNode实例；graph计算图，BaseGraph实例 |
 
-Sample
+样例代码
 
 ```
 class Conv1dMatch(MatchBase):
@@ -161,6 +118,59 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
 
     def _build_patterns(self) -> List[Pattern]:
         return [pattern]
+```
+
+### 1.2 定义优化方法
+
+子图的优化方法是知识库的核心内容，针对子图进行修改达到性能提升的目的。
+
+如何定义子图优化方法？这里有一定的限制，以conv1d2conv2d知识库为例：
+
+**_conv1d2conv2d_apply(graph, match_result: MatchResult) -> bool**
+
+- 方法名称可以任意定义，没有限制；
+
+- 方法参数参考已有的知识库，需要支持的参数如下：
+
+  graph：图，BaseGraph实例；
+
+  match_result：子图匹配的结果，MatchResult的实例，可以直接访问里面的成员变量node_dicts；
+
+node_dicts数据结构有些复杂，以一个实际的图为例：
+
+```mermaid
+flowchart TB
+	Conv_16 --> Relu_17 --> Relu_18 --> Conv_19 --> Relu_20
+```
+
+根据子图的定义，匹配后的结果如下：
+
+```
+node_dicts数据结构:
+	[
+		{
+			'Conv': ['Conv_16'],
+			'element_wise': ['Relu_17', 'Relu_18']
+		},{
+			'Conv': ['Conv_19':BaseNode],
+			'element_wise': ['Relu_20']
+		}
+	]
+```
+
+定义好优化方法之后，实现__build_pattern_apply_map()，构建子图和优化方法的对应关系。这样定义的好处是比较好做封装。
+
+样例代码
+
+```
+@KnowledgeFactory.register("KnowledgeConv1d2Conv2d")
+class KnowledgeConv1d2Conv2d(KnowledgeBase):
+    def __init__(self):
+        super().__init__()
+        self._insert_op_names = set()
+
+    def _build_patterns(self) -> List[Pattern]:
+        return [pattern]
 
     def _build_pattern_apply_map(self) -> Dict[Pattern, List]:
         apply_dict = {
@@ -170,4 +180,45 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
 
     def _conv1d2conv2d_apply(self, graph, match_result: MatchResult) -> bool:
         pass
+```
+
+接下来就是完善改图知识库的优化方法_conv1d2conv2d_apply()。
+
+## 2. 如何使用知识库
+
+定义好了知识库之后，怎么应用？
+
+首先说明一个前提：知识库会定义多个子图，每个子图可能对应多个优化方法。
+
+基于以上前提，我们要遍历所有定义的子图，和子图对应的所有优化方法，参考迭代器的方式，提供了一些用于遍历的方法：
+
+| KnowledgeBase方法名称 | 功能说明                           |
+| --------------------- | ---------------------------------- |
+| has_next_pattern()    | 是否有下一个子图                   |
+| next_pattern()        | 指向下一个子图                     |
+| has_next_apply()      | 基于当前子图，是否有下一个优化方法 |
+| next_apply()          | 基于当前子图，指向下一个优化方法   |
+
+如何对子图进行匹配？如何使用匹配的结果？提供了如下两个接口：
+
+| KnowledgeBase方法名称           | 功能说明                                                     |
+| ------------------------------- | ------------------------------------------------------------ |
+| get_candidate_sub_graphs(graph) | 根据定义的子图，在graph中查找匹配，返回一组MatchResult实例。 |
+| apply(graph, match_result)      | 对graph进行修改，**这是修改图的唯一入口**。方法内部会根据__build_pattern_apply_map()定义的映射关系，找到对应的优化方法，对graph进行修改。 |
+
+样例代码
+
+```
+def optimize(graph, knowledge):
+    res = False
+    while knowledge.has_next_pattern():
+        knowledge.next_pattern()
+        match_results = knowledge.get_candidate_sub_graphs(graph)
+        if match_results is None or len(match_results) == 0:
+            continue
+        while knowledge.has_next_apply():
+            knowledge.next_apply()
+            for match_result in match_results:
+                res |= knowledge.apply(graph, match_result)
+    return res
 ```
