@@ -87,7 +87,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         opset_versions = [opset.version for opset in graph.opset_imports if domain_check(opset.domain)]
         return len(opset_versions) == 0 or opset_versions[0] < limit_version
 
-    def _expand_conv_input_dims(self, graph, conv, refer_index) -> bool:
+    def _expand_conv_input_dims(self, graph, conv, refer_index) -> BaseNode:
         """
         通过增加Unsqueeze算子，将conv1d的输入从3维扩展到4维
         :param graph: 整图
@@ -95,7 +95,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         :param refer_index: 插入算子的输入索引
         :return: 插入的Unsqueeze算子对象
         """
-        op_name = 'Unsqueeze_%s_%s' % ('before', conv.name)
+        op_name = f'Unsqueeze_before_{conv.name}'
         if op_name in self._insert_op_names:
             return None
         self._insert_op_names.add(op_name)
@@ -104,7 +104,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             graph.insert_node(conv.name, us, mode='before', refer_index=refer_index)
         else:
             us = graph.add_node(op_name, 'Unsqueeze')
-            axes_name = '%s_axes' % op_name
+            axes_name = f'{op_name}_axes'
             graph.add_initializer(axes_name, np.array([2], dtype=np.int64))
             graph.insert_node(conv.name, us, mode='before', refer_index=refer_index)
             us.inputs.append(axes_name)
@@ -133,7 +133,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         graph[conv.inputs[1]].value = conv_w
         return True
 
-    def _reduce_output_dims(self, graph, node, mode: str, refer_index) -> bool:
+    def _reduce_output_dims(self, graph, node, mode: str, refer_index) -> BaseNode:
         """
         降低维度
         :param graph: 整图
@@ -142,7 +142,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         :param refer_index: 插入算子的输入索引
         :return: 插入的Squeeze算子对象
         """
-        op_name = 'Squeeze_%s_%s' % (mode, node.name)
+        op_name = f'Squeeze_{mode}_{node.name}'
         if op_name in self._insert_op_names:
             return None
         self._insert_op_names.add(op_name)
@@ -151,7 +151,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             graph.insert_node(node.name, sq, mode=mode, refer_index=refer_index)
         else:
             sq = graph.add_node(op_name, 'Squeeze')
-            axes_name = '%s_axes' % op_name
+            axes_name = f'{op_name}_axes'
             graph.add_initializer(axes_name, np.array([2], dtype=np.int64))
             graph.insert_node(node.name, sq, mode=mode, refer_index=refer_index)
             sq.inputs.append(axes_name)
