@@ -203,7 +203,7 @@ class KnowledgeBase(object):
         apply_method = self.__get_current_apply_method()
         if apply_method is None:
             return False
-        if isinstance(apply_method, types.MethodType):
+        if callable(apply_method):
             if len(match_result.node_dicts) == 0:
                 return False
             return apply_method(graph, match_result)
