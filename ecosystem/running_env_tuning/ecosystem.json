@@ -1,0 +1,29 @@
+{
+  "model_list": [
+    {
+      "model_name": "running_env_tuning",
+      "session_list": [
+        {
+          "python_model_path": "src",
+          "parameter":{
+                  "application_scenarios": 1,
+                  "servers_name": "EG520-G30",
+
+                  "transfer_version": "310pV1",
+                  "target_file_address": "/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem/running_env_tuning/data/knowledge/knowledgeBase/TestFileProject,/home/zjut-msadvisor/group1/yyh/msadvisor_2/ecosystem/running_env_tuning/data/knowledge/knowledgeBase/TestFileProject2",
+
+
+                    "VPC": 1,
+                    "VDEC": 0,
+                    "VENC": 0,
+                    "JPEGD": 1,
+                    "JPEGE":0,
+                    "PNGD": 1
+
+          }
+        }
+      ]
+    }
+
+  ]
+}

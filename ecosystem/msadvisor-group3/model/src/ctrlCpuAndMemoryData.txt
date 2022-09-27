@@ -1,0 +1,265 @@
+	NPU ID                         : 0
+	Chip Count                     : 4
+
+	Chip ID                        : 0
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 1
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 2
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 3
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+end
+	NPU ID                         : 0
+	Chip Count                     : 4
+
+	Chip ID                        : 0
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 1
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 2
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 3
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+end
+	NPU ID                         : 0
+	Chip Count                     : 4
+
+	Chip ID                        : 0
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 1
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 2
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 3
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+end
+	NPU ID                         : 0
+	Chip Count                     : 4
+
+	Chip ID                        : 0
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 1
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 1
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 2
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 3
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+end
+	NPU ID                         : 0
+	Chip Count                     : 4
+
+	Chip ID                        : 0
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 1
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 1
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 2
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 3
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+end
+	NPU ID                         : 0
+	Chip Count                     : 4
+
+	Chip ID                        : 0
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 1
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 1
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 2
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 7
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+	Chip ID                        : 3
+	Memory Capacity(MB)            : 7765
+	Memory Usage Rate(%)           : 8
+	Hugepages Total(page)          : 970
+	Hugepages Usage Rate(%)        : 0
+	Aicore Usage Rate(%)           : 0
+	Aicpu Usage Rate(%)            : 0
+	Ctrlcpu Usage Rate(%)          : 0
+	Memory Bandwidth Usage Rate(%) : 0
+
+end
+1

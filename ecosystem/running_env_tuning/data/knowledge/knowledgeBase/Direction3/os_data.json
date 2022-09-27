@@ -1,0 +1,42 @@
+{
+  "Atlas 300I": [
+    "BC-Linux V7.6",
+    "CentOS 7.4",
+    "CentOS 7.6",
+    "CentOS 8.2",
+    "Kylin Linux Advanced Server V10",
+    "SLES 12 SP4(x86)",
+    "SLES 12 SP5",
+    "Ubuntu 18.04.1 LTS",
+    "Ubuntu 20.04 LTS",
+    "openEuler 20.03 LTS",
+    "BC-Linux V7.6",
+    "Ubuntu 20.04 LTS",
+    "CentOS 7.6 for ARM",
+    "CentOS 8.2 for ARM",
+    "Kylin  Linux Advanced Server V10 SP1 for ARM",
+    "UOS 20 Server for ARM",
+    "Ubuntu 20.04 LTS for ARM",
+    "openEuler 20.03 LTS for ARM",
+    "CentOS 7.6 for ARM",
+    "CentOS 8.2 for ARM"
+  ],
+  "Atlas 300I Pro": [
+    "openEuler 20.03 LTS for ARM",
+    "Kylin  Linux Advanced Server V10 SP1 for ARM",
+    "CentOS 7.6 for ARM",
+    "openEuler 20.03 LTS",
+    "Kylin Linux Advanced Server V10 SP1",
+    "Ubuntu 20.04 LTS for ARM",
+    "Ubuntu 20.04 LTS"
+  ],
+  "Atlas 300V Pro": [
+    "Kylin  Linux Advanced Server V10 SP1 for ARM",
+    "openEuler 20.03 LTS for ARM",
+    "CentOS 7.6 for ARM",
+    "openEuler 20.03 LTS",
+    "CentOS 7.6",
+    "SLES 12 SP5",
+    "Kylin Linux Advanced Server V10 SP1"
+  ]
+}

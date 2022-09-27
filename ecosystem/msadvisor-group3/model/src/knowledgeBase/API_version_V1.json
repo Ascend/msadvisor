@@ -1,0 +1,37 @@
+{
+    "Crop": "acldvppVpcCropAsync",
+
+    "Resize": "acldvppVpcResizeAsync",
+
+    "CropResize": "acldvppVpcCropResizeAsync",
+
+    "CropPaste": "acldvppVpcCropAndPasteAsync",
+
+    "CropResizePaste": "acldvppVpcCropResizePasteAsync",
+
+    "MakeBorder": "acldvppVpcMakeBorderAsync",
+
+    "CropBatch": "acldvppVpcBatchCropAsync",
+
+    "CropResizeBatch": "acldvppVpcBatchCropResizeAsync",
+
+    "CropPasteBatch": "acldvppVpcBatchCropAndPasteAsync",
+
+    "CropResizePasteBatch": "acldvppVpcBatchCropResizePasteAsync",
+
+    "MakeBorderBatch": "acldvppVpcBatchCropResizeMakeBorderAsync",
+
+    "VdecSF": "aclvdecSendFrame",
+
+    "VdecSkip": "aclvdecSendSkippedFrame",
+
+    "VdecCCA": "acldvppVpcConvertColorAsync",
+
+    "AippInputFormat_py": "acl.mdl.set_aipp_input_format",
+
+    "AippInputFormat_cpp": "aclmdlSetAIPPInputFormat",
+
+    "AippCscParams_py": "acl.mdl.set_aipp_csc_params",
+
+    "AippCscParams_cpp": "aclmdlSetAIPPCscParams"
+}

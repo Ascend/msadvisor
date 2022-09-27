@@ -1,0 +1,20 @@
+{"chip_option":[
+    {
+        "310":"--soc_version=Ascend310",
+        "710":"--soc_version=Ascend710",
+        "910":"--soc_version=Ascend910A",
+        "选项":"--soc_version"
+    },
+    {
+        "310":"0.0",
+        "710":"--core_type=VectorCore",
+        "910":"0.0",
+        "选项":"--core_type"
+    },
+    {
+        "310":"0.0",
+        "710":"--aicore_num=32",
+        "910":"0.0",
+        "选项":"--aicore_num"
+    }
+]}
