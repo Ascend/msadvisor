@@ -200,6 +200,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
                         # 如果已插入过 Squeeze 节点则复用
                         if insert_node is not None:
                             next_node.inputs[refer_index] = insert_node.outputs[0]
+                            graph.update_map()
                             continue
                         _insert_node = self._reduce_output_dims(graph, next_node, 'before', refer_index)
                         if _insert_node is not None:
