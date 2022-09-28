@@ -41,7 +41,7 @@ class TestPattern(unittest.TestCase):
         self.assertEqual(len(pattern.node_dict), 1)
         self.assertTrue(pattern.node_dict.get('Conv') is not None)
 
-    def test_node_cann_match_more_func(self):
+    def test_node_can_match_more_func(self):
         pattern = Pattern() \
             .add_node('Conv', ['Conv'], None) \
             .add_node('Relu', ['Relu'], None) \
@@ -51,10 +51,10 @@ class TestPattern(unittest.TestCase):
             .set_node_loop('Conv', MATCH_PATTERN.MATCH_ONCE_OR_MORE) \
             .set_node_loop('Relu', MATCH_PATTERN.MATCH_ZERO_OR_MORE)
 
-        self.assertTrue(pattern.node_cann_match_more('Conv'))
-        self.assertTrue(pattern.node_cann_match_more('Relu'))
+        self.assertTrue(pattern.node_can_match_more('Conv'))
+        self.assertTrue(pattern.node_can_match_more('Relu'))
 
-    def test_node_cann_match_zero_func(self):
+    def test_node_can_match_zero_func(self):
         pattern = Pattern() \
             .add_node('Conv', ['Conv'], None) \
             .add_node('Relu', ['Relu'], None) \
@@ -64,8 +64,8 @@ class TestPattern(unittest.TestCase):
             .set_node_loop('Conv', MATCH_PATTERN.MATCH_ONCE_OR_MORE) \
             .set_node_loop('Relu', MATCH_PATTERN.MATCH_ZERO_OR_MORE)
 
-        self.assertFalse(pattern.node_cann_match_zero('Conv'))
-        self.assertTrue(pattern.node_cann_match_zero('Relu'))
+        self.assertFalse(pattern.node_can_match_zero('Conv'))
+        self.assertTrue(pattern.node_can_match_zero('Relu'))
 
     def test_cann_match_more_func(self):
         pattern = Pattern() \
