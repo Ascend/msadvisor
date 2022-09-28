@@ -162,21 +162,29 @@ class KnowledgeBase(object):
         """
         return True
 
-    def __is_sub_graph_connection(self, match_result, cur_node) -> bool:
+    def __is_sub_graph_connection(self, l_match_result, r_match_result) -> bool:
         """
         判断两个子图之间是否存在连接
-        :param match_result: 子图匹配的结果
-        :param cur_node: 当前子图的关键节点
+        :param l_match_result: 左子图
+        :param r_match_result: 右子图
         :return: 存在连接，则返回True，否则返回False
         """
-        for node_dict in match_result.node_dicts:
+        l_node_inputs  = set()
+        l_node_outputs = set()
+        r_node_inputs  = set()
+        r_node_outputs = set()
+
+        for node_dict in l_match_result.node_dicts:
             for nodes in node_dict.values():
                 for node in nodes:
-                    if node.outputs[0] in cur_node.inputs:
-                        return True
-                    if cur_node.outputs[0] in node.inputs:
-                        return True
-        return False
+                    l_node_inputs.update(node.inputs)
+                    l_node_outputs.update(node.outputs)
+        for node_dict in r_match_result.node_dicts:
+            for nodes in node_dict.values():
+                for node in nodes:
+                    r_node_inputs.update(node.inputs)
+                    r_node_outputs.update(node.outputs)
+        return l_node_inputs & r_node_outputs or l_node_outputs & r_node_inputs
 
     def match_pattern(self, graph: BaseGraph, top_ops_names: List[str] = None) -> List[MatchResult]:
         """
@@ -210,7 +218,7 @@ class KnowledgeBase(object):
             for index, match_res in enumerate(all_match_result):
                 if index == len(all_match_result) - 1:
                     continue
-                if self.__is_sub_graph_connection(match_res, node):
+                if self.__is_sub_graph_connection(match_res, match_result):
                     uf.union(index, len(all_match_result) - 1)
 
         # 合并
