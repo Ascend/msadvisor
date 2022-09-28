@@ -120,6 +120,22 @@ class KnowledgeBase(object):
         """
         return {}
 
+    @abstractmethod
+    def pre_process(self, graph: BaseGraph) -> bool:
+        """
+        整图预处理方法
+        :param graph: 预处理的整图
+        """
+        return True
+
+    @abstractmethod
+    def post_process(self, graph: BaseGraph) -> bool:
+        """
+        整图后处理方法
+        :param graph: 后处理的整图
+        """
+        return True
+
     def __is_sub_graph_connection(self, match_result, cur_node) -> bool:
         """
         判断两个子图之间是否存在连接
