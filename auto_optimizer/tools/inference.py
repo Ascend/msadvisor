@@ -51,11 +51,10 @@ class InferEngine():
             file_len = len(os.listdir(dataset_path))
 
             # 计算inference等进程循环次数，数据考虑对齐
-            remainder = file_len % (worker * batch_size)
-            if remainder:
-                loop = (file_len + (worker * batch_size - remainder)) // batch_size
-            else:
+            if file_len % batch_size == 0:
                 loop = file_len // batch_size
+            else:
+                loop = (file_len + batch_size - file_len % batch_size) // batch_size
             print("loop={}".format(loop))
 
             self._thread(loop, worker, batch_size, engine_cfg)
@@ -77,8 +76,9 @@ class InferEngine():
                                             None, self.dataset))
 
         for i in range(worker):
+            pre_loop = (loop / worker + loop % worker) if i == 0 else loop / worker
             self.pre_process_pool.apply_async(pre_process,
-                                              args=(loop, engine_cfg["pre_process"],
+                                              args=(int(pre_loop), engine_cfg["pre_process"],
                                                     self.dataset, self.pre_queue))
 
         # 除预处理用多进程，其他任务用单进程

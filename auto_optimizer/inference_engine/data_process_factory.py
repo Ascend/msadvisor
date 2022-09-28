@@ -27,10 +27,6 @@ class EngineFactoryBase(object):
     _engine_pool = {}
 
     @classmethod
-    def add_engine(cls, name, engine):
-        cls._engine_pool[name] = engine
-
-    @classmethod
     @typeassert(name=str)
     def get_engine(cls, name):
         return cls._engine_pool.get(name, None)
@@ -39,18 +35,13 @@ class EngineFactoryBase(object):
     @typeassert(name=str)
     def register(cls, name):
         def _wrapper(dataset_cls):
-            cls.add_engine(name, dataset_cls())
+            cls._engine_pool[name] = dataset_cls()
             return dataset_cls
         return _wrapper
 
 
 class DatasetFactory(object):
     _dataset_pool: Dict[str, DatasetBase] = {}
-
-    @classmethod
-    @typeassert(name=str, dataset=DatasetBase)
-    def add_dataset(cls, name, dataset):
-        cls._dataset_pool[name] = dataset
 
     @classmethod
     @typeassert(name=str)
@@ -61,18 +52,13 @@ class DatasetFactory(object):
     @typeassert(name=str)
     def register(cls, name):
         def _wrapper(dataset_cls: Type[DatasetBase]):
-            cls.add_dataset(name, dataset_cls())
+            cls._dataset_pool[name] = dataset_cls()
             return dataset_cls
         return _wrapper
 
 
 class PreProcessFactory(object):
     _pre_process_pool: Dict[str, PreProcessBase] = {}
-
-    @classmethod
-    @typeassert(name=str, pre_process=PreProcessBase)
-    def add_pre_process(cls, name, pre_process):
-        cls._pre_process_pool[name] = pre_process
 
     @classmethod
     @typeassert(name=str)
@@ -83,18 +69,13 @@ class PreProcessFactory(object):
     @typeassert(name=str)
     def register(cls, name):
         def _wrapper(preprocess_cls: Type[PreProcessBase]):
-            cls.add_pre_process(name, preprocess_cls())
+            cls._pre_process_pool[name] = preprocess_cls()
             return preprocess_cls
         return _wrapper
 
 
 class InferenceFactory(object):
     _inference_pool: Dict[str, InferenceBase] = {}
-
-    @classmethod
-    @typeassert(name=str, inference=InferenceBase)
-    def add_inference(cls, name, inference):
-        cls._inference_pool[name] = inference
 
     @classmethod
     @typeassert(name=str)
@@ -105,18 +86,13 @@ class InferenceFactory(object):
     @typeassert(name=str)
     def register(cls, name):
         def _wrapper(inference_cls: Type[InferenceBase]):
-            cls.add_inference(name, inference_cls())
+            cls._inference_pool[name] = inference_cls()
             return inference_cls
         return _wrapper
 
 
 class PostProcessFactory(object):
     _post_process_pool: Dict[str, PostProcessBase] = {}
-
-    @classmethod
-    @typeassert(name=str, post_process=PostProcessBase)
-    def add_post_process(cls, name, post_process):
-        cls._post_process_pool[name] = post_process
 
     @classmethod
     @typeassert(name=str)
@@ -127,18 +103,13 @@ class PostProcessFactory(object):
     @typeassert(name=str)
     def register(cls, name):
         def _wrapper(post_process_cls: Type[PostProcessBase]):
-            cls.add_post_process(name, post_process_cls())
+            cls._post_process_pool[name] = post_process_cls()
             return post_process_cls
         return _wrapper
 
 
 class EvaluateFactory(object):
     _evaluate_pool: Dict[str, EvaluateBase] = {}
-
-    @classmethod
-    @typeassert(name=str, evaluate=EvaluateBase)
-    def add_evaluate(cls, name, evaluate):
-        cls._evaluate_pool[name] = evaluate
 
     @classmethod
     @typeassert(name=str)
@@ -149,6 +120,6 @@ class EvaluateFactory(object):
     @typeassert(name=str)
     def register(cls, name):
         def _wrapper(evaluate_cls: Type[EvaluateBase]):
-            cls.add_evaluate(name, evaluate_cls())
+            cls._evaluate_pool[name] = evaluate_cls()
             return evaluate_cls
         return _wrapper
