@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from typing import List, Dict
-import warnings
+import logging
 import numpy as np
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
@@ -97,17 +97,17 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
         """
         axes_to_merge = np.concatenate(axes)
         if np.unique(axes_to_merge).size != axes_to_merge.size:
-            warnings.warn(f"Nodes has duplicate slice axis: {axes_to_merge}")
+            logging.info(f"Nodes has duplicate slice axis: {axes_to_merge}")
             return False
 
         for node in nodes[:-1]:
             if not isinstance(node, (Node, )):
-                warnings.warn(f"Node of slice match is invalid: name {node.name} type {type(node)}")
+                logging.info(f"Node of slice match is invalid: name {node.name} type {type(node)}")
                 return False
             next_nodes = graph.get_next_nodes(node.outputs[0])
             if len(next_nodes) > 1:
                 names = ", ".join([node.name for node in next_nodes])
-                warnings.warn(f"Node {node.name} has multiple outputs: {names} len {len(next_nodes)}")
+                logging.info(f"Node {node.name} has multiple outputs: {names} len {len(next_nodes)}")
                 return False
         return True
 
@@ -116,7 +116,7 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
             nodes = [graph[node[0].name] for node in matchinfo.values()]
             input_lists = [[graph[node.inputs[i]].value for node in nodes] for i in range(1, 5)]
         except (KeyError, IndexError, AttributeError) as e:
-            warnings.warn(f"Failed get node list or input list: {e}")
+            logging.info(f"Failed get node list or input list: {e}")
             return False
 
         if not self.check_matchinfo_need_to_optimize(graph, nodes, input_lists[2]):
@@ -129,7 +129,7 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
 
         last_node = nodes[-1]
         if not isinstance(last_node, (Node, )):
-            warnings.warn(f"Node is invalid: name {last_node.name} type {type(last_node)}")
+            logging.info(f"Node is invalid: name {last_node.name} type {type(last_node)}")
             return False
         params = ["starts_", "ends_", "axes_", "steps_"]
         for i in range(4):

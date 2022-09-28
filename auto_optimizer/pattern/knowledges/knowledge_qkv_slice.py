@@ -14,7 +14,7 @@
 
 from typing import List, Dict, Type, Union
 import operator as op
-import warnings
+import logging
 
 import numpy as np
 
@@ -309,7 +309,7 @@ class KnowledgeQKVSlice(KnowledgeBase):
         matmul_weight = try_access(graph, name=matmul_node.inputs[1], type_=Initializer)
         resh_weight = try_access(graph, name=reshape_node.inputs[1], type_=Initializer)
         if matmul_weight is None or resh_weight is None:
-            warnings.warn("The multiplicand of MatMul or shape parameter of Reshape operator is not Initializer.")
+            logging.info("The multiplicand of MatMul or shape parameter of Reshape operator is not Initializer.")
             return False
 
         # 假设矩阵乘法是(a,b)x(b,c), 结果为(a,c)，reshape算子将结果reshape为(d,e,...,n,k,...)
@@ -320,7 +320,7 @@ class KnowledgeQKVSlice(KnowledgeBase):
         dim_to_split = matmul_weight.value.shape[-1]
         first_dim_of_split = self.__get_first_dim_of_split_after_reshape(dim_to_split, new_shape)
         if first_dim_of_split == -1:
-            warnings.warn(f"The Reshape operator {reshape_node.name} does not meet specific requirement.")
+            logging.info(f"The Reshape operator {reshape_node.name} does not meet specific requirement.")
             return False
 
         gather_nodes = graph.get_next_nodes(transpose_node.outputs[0])
@@ -329,25 +329,25 @@ class KnowledgeQKVSlice(KnowledgeBase):
         perm = transpose_node.attrs.get('perm', [])
         if not perm or not isinstance(perm, (list, )) or perm[0] != first_dim_of_split:
             # reshape后(d,e,...n,k,r,...)中的n这个维度应该被transpose至最前面
-            warnings.warn(f"The transpose operator {transpose_node.name} does not meet specific requirement.")
+            logging.info(f"The transpose operator {transpose_node.name} does not meet specific requirement.")
             return False
 
         if split_num != new_shape[perm[0]]:
             # gather算子的数量与transpose后数据首维度的size相等
-            warnings.warn(f"The number of Gather operators {split_num} is not equal to {new_shape[perm[0]]}.")
+            logging.info(f"The number of Gather operators {split_num} is not equal to {new_shape[perm[0]]}.")
             return False
 
         indices = self.__get_gather_nodes_indices(gather_nodes, graph)
         if sorted(indices) != [i for i in range(split_num)]:
             # 几个Gather算子的indices不重不漏的对应[0, n)，即平分首维度
-            warnings.warn("The gather nodes does not split the first axis.")
+            logging.info("The gather nodes does not split the first axis.")
             return False
 
         for node in element_wise_nodes:
             input0 = try_access(graph, name=node.inputs[0], type_=Initializer)
             input1 = try_access(graph, name=node.inputs[1], type_=Initializer)
             if not ((input0 is None) ^ (input1 is None)):
-                warnings.warn(f"There should be exactly one Initializer parameter in Node {node.name}")
+                logging.info(f"There should be exactly one Initializer parameter in Node {node.name}")
                 # 所有逐元素运算算子都应该有且仅有一个参数是Initializer，另一个参数是PlaceHolder
                 return False
 
@@ -357,22 +357,22 @@ class KnowledgeQKVSlice(KnowledgeBase):
         for gather_node in gather_nodes:
             for next_node in graph.get_next_nodes(gather_node.outputs[0]):
                 if not isinstance(next_node, (Node, )):
-                    warnings.warn(f"Successor {next_node.name} of {gather_node.name} is not type Node.")
+                    logging.info(f"Successor {next_node.name} of {gather_node.name} is not type Node.")
                     return False
                 if op.eq(next_node.op_type, "Transpose"):
                     perm1 = next_node.attrs.get("perm", [])
                     if not (isinstance(perm1, (list, )) and len(splitted_perm) == len(perm1)):
-                        warnings.warn(f"The perm attribute of transpose operator {next_node.name} is invalid.")
+                        logging.info(f"The perm attribute of transpose operator {next_node.name} is invalid.")
                         return False
                     for node in graph.get_next_nodes(next_node.outputs[0]):
                         if not isinstance(node, (Node, )):
-                            warnings.warn(f"Node {node.name} is not type Node.")
+                            logging.info(f"Node {node.name} is not type Node.")
                             return False
 
         # pre_nodes用来存储前置节点，用于重新连接
         pre_node = graph.get_prev_node(matmul_node.inputs[0])
         if isinstance(pre_node, (Node, )) and pre_node.outputs[0] != matmul_node.inputs[0]:
-            warnings.warn("The output of previous node of MatMul doesn't match the input of MatMul.")
+            logging.info("The output of previous node of MatMul doesn't match the input of MatMul.")
             return False
         pre_nodes = [matmul_node.inputs[0] if pre_node is None else pre_node] * split_num
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from typing import List, Dict
-import warnings
+import logging
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
@@ -96,22 +96,22 @@ class KnowledgeMergeContinueConcat(KnowledgeBase):
         pre_axis = None
         for idx, node in enumerate(nodes):
             if not isinstance(node, (Node, )):
-                warnings.warn(f"Node is invalid: name {node.name} type {type(node)}")
+                logging.info(f"Node is invalid: name {node.name} type {type(node)}")
                 return False
             axis = node.attrs.get("axis", None)
             if pre_axis is not None and pre_axis != axis:
-                warnings.warn(f"Node: {node.name} axis: {axis} not equal to pre_axis: {pre_axis}")
+                logging.info(f"Node: {node.name} axis: {axis} not equal to pre_axis: {pre_axis}")
                 return False
             pre_axis = axis
             if idx == len(nodes) - 1:
                 continue
             if not node.outputs:
-                warnings.warn(f"Node has no outputs: {node.name}")
+                logging.info(f"Node has no outputs: {node.name}")
                 return False
             next_nodes = graph.get_next_nodes(node.outputs[0])
             if len(next_nodes) > 1:
                 names = [node.name for node in next_nodes]
-                warnings.warn(f"Node {node.name} has multiple outputs: {names} len {len(next_nodes)}")
+                logging.info(f"Node {node.name} has multiple outputs: {names} len {len(next_nodes)}")
                 return False
         return True
 
@@ -126,7 +126,7 @@ class KnowledgeMergeContinueConcat(KnowledgeBase):
         try:
             inputs = graph[name].inputs
         except (KeyError, AttributeError) as e:
-            warnings.warn(f"Node {name} has no input: {e}")
+            logging.info(f"Node {name} has no input: {e}")
             return input_list
         for input_name in inputs:
             pre_node = graph.get_prev_node(input_name)
@@ -140,7 +140,7 @@ class KnowledgeMergeContinueConcat(KnowledgeBase):
         try:
             nodes = [graph[node[0].name] for node in matchinfo.values()]
         except (KeyError, IndexError, AttributeError) as e:
-            warnings.warn(f"Failed to get node list: {e}")
+            logging.info(f"Failed to get node list: {e}")
             return False
 
         if not self.check_matchinfo_need_to_optimize(graph, nodes):
@@ -154,7 +154,7 @@ class KnowledgeMergeContinueConcat(KnowledgeBase):
             graph.remove(node.name)
 
         if not isinstance(last_node, (Node, )):
-            warnings.warn(f"Node is invalid: name {last_node.name} type {type(last_node)}")
+            logging.info(f"Node is invalid: name {last_node.name} type {type(last_node)}")
             return False
         last_node.inputs = input_list
         return True
