@@ -208,7 +208,7 @@ class Pattern(object):
         # 多输入多输出不支持
         return None
 
-    def node_cann_match_more(self, op_name) -> bool:
+    def node_can_match_more(self, op_name) -> bool:
         """
         节点是否支持匹配多个
         :param op_name: 算子节点名称
@@ -219,7 +219,7 @@ class Pattern(object):
         return self.node_match_pattern_dict[op_name] == MATCH_PATTERN.MATCH_ONCE_OR_MORE or \
             self.node_match_pattern_dict[op_name] == MATCH_PATTERN.MATCH_ZERO_OR_MORE
 
-    def node_cann_match_zero(self, op_name) -> bool:
+    def node_can_match_zero(self, op_name) -> bool:
         """
         节点是否支持匹配0个
         :param op_name: 算子节点名称
