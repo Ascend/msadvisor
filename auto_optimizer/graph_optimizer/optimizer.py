@@ -41,10 +41,11 @@ class GraphOptimizer:
 
     def apply_knowledges(self, graph):
         for knowledge in self.knowledges:
-            if not knowledge.pre_process(graph):
+            _knowledge = knowledge()
+            if not _knowledge.pre_process(graph):
                 continue
-            GraphOptimizer.optimize(graph, knowledge())
-            knowledge.post_process(graph)
+            GraphOptimizer.optimize(graph, _knowledge)
+            _knowledge.post_process(graph)
 
         return graph
 
