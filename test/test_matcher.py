@@ -49,7 +49,7 @@ class Conv1dMatch(MatchBase):
 
 # element_wise允许出现0次，或者多次
 pattern = Pattern() \
-    .add_node('Conv', ['Conv'], [Conv1dMatch]) \
+    .add_node('Conv', ['Conv'], [Conv1dMatch()]) \
     .add_node('element_wise', ['Mul', 'Add', 'Sub', 'Div', 'BatchNormalization', 'LeakyRelu', 'Relu']) \
     .add_edge('Conv', 'element_wise') \
     .set_input('Conv') \

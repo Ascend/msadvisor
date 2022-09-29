@@ -70,8 +70,8 @@ class PatternNode(object):
             return False
         if self.op_matchs is None:
             return True
-        for match_class in self.op_matchs:
-            if not match_class().match(node, graph):
+        for op_match in self.op_matchs:
+            if not op_match.match(node, graph):
                 return False
         return True
 
