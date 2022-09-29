@@ -114,13 +114,13 @@ class AllOutputsAreGatherMatch(MatchBase):
 #
 # 尽量使用简单的pattern，将复杂的判断逻辑放在apply函数内
 pattern0 = Pattern() \
-    .add_node("MatMul_0", ["MatMul"], [SingleOutputMatch, ConstSecondInput]) \
-    .add_node('ElementWise_0', ['Mul', 'Add', 'Sub', 'Div'], [SingleOutputMatch]) \
+    .add_node("MatMul_0", ["MatMul"], [SingleOutputMatch(), ConstSecondInput()]) \
+    .add_node('ElementWise_0', ['Mul', 'Add', 'Sub', 'Div'], [SingleOutputMatch()]) \
     .set_node_loop('ElementWise_0', MATCH_PATTERN.MATCH_ZERO_OR_MORE) \
     .add_edge("MatMul_0", "ElementWise_0") \
-    .add_node("Reshape_0", ["Reshape"], [SingleOutputMatch, ConstSecondInput]) \
+    .add_node("Reshape_0", ["Reshape"], [SingleOutputMatch(), ConstSecondInput()]) \
     .add_edge("ElementWise_0", "Reshape_0") \
-    .add_node("Transpose_0", ["Transpose"], [AllOutputsAreGatherMatch]) \
+    .add_node("Transpose_0", ["Transpose"], [AllOutputsAreGatherMatch()]) \
     .add_edge("Reshape_0", "Transpose_0") \
     .set_input("MatMul_0") \
     .set_output("Transpose_0") \

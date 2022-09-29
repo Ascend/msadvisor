@@ -14,7 +14,7 @@
 
 from abc import abstractmethod
 from enum import Enum, unique
-from typing import List, Type
+from typing import List
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 
@@ -50,7 +50,7 @@ class MatchBase(object):
 
 
 class PatternNode(object):
-    def __init__(self, op_name: str, op_types: List[str], op_matchs: List[Type[MatchBase]] = None):
+    def __init__(self, op_name: str, op_types: List[str], op_matchs: List[MatchBase] = None):
         self.op_name = op_name
         self.op_types = op_types
         self.op_matchs = op_matchs
@@ -98,7 +98,7 @@ class Pattern(object):
         self.node_match_pattern_dict = {}
         self.graph_match_pattern = MATCH_PATTERN.MATCH_ONCE
 
-    def add_node(self, op_name, op_types, op_matchs: List[Type[MatchBase]] = None):
+    def add_node(self, op_name, op_types, op_matchs: List[MatchBase] = None):
         """
         创建PatternNode，并增加到节点列表
         :param op_name: 算子节点名
