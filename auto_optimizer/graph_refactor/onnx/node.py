@@ -104,16 +104,15 @@ class OnnxPlaceHolder(PlaceHolder):
         super(OnnxPlaceHolder, self).__init__(name, dtype, shape)
 
     @classmethod
-    def parse(cls, node:ValueInfoProto):
-        tensor_type = node.type.tensor_type
-        dtype = TENSOR_TYPE_TO_NP_TYPE[tensor_type.elem_type]
-        if not tensor_type.shape.dim:
-            shape = None 
-        else:
-            shape = [
-                dim.dim_value if dim.dim_value > 0 else -1
-                for dim in tensor_type.shape.dim
-            ]
+    def parse(cls, node:ValueInfoProto, dtype=None, shape=None):
+        if node.HasField('type'):
+            tensor_type = node.type.tensor_type
+            dtype = TENSOR_TYPE_TO_NP_TYPE[tensor_type.elem_type]
+            if tensor_type.HasField('shape'):
+                shape = [
+                    dim.dim_value if dim.dim_value > 0 else -1
+                    for dim in tensor_type.shape.dim
+                ]
         return cls(
             name = node.name, 
             dtype = dtype,
