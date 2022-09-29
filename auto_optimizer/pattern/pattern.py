@@ -66,7 +66,7 @@ class PatternNode(object):
         """
         if node is None:
             return False
-        if self.op_types.count(node.op_type) == 0:
+        if self.op_types and self.op_types.count(node.op_type) == 0:
             return False
         if self.op_matchs is None:
             return True
