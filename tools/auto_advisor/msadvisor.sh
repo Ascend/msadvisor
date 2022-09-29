@@ -329,6 +329,7 @@ function check_data_path() {
 
 function collect_data() {
     check_data_path
+    output_path=$(realpath "$output_path")
 
     # support scene type: 0: inference; 1: operator
     if [ $scene_type -eq 0 ]; then
