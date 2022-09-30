@@ -62,15 +62,7 @@ pattern = Pattern() \
 class Knowledge_Example(KnowledgeBase):
     def __init__(self):
         super().__init__()
-
-    def _build_patterns(self) -> List[Pattern]:
-        return [pattern]
-
-    def _build_pattern_apply_map(self) -> Dict[Pattern, List]:
-        apply_dict = {
-            pattern: [self._example_apply]
-        }
-        return apply_dict
+        self._register_apply_funcs(pattern, [self._example_apply])
 
     def _example_apply(self, graph, result):
         return True

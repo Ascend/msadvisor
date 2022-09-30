@@ -46,11 +46,30 @@ class UnionFind(object):
 
 class KnowledgeBase(object):
     def __init__(self):
-        self._patterns = self._build_patterns()
-        self._pattern_apply_dict = self._build_pattern_apply_map()
+        self._patterns = [] # pattern object list
+        self._pattern_apply_dict = {} # key is pattern object, value is apply func list
 
         self._pattern_idx = -1
         self._apply_idx = -1
+
+    def _register_apply_funcs(self, pattern, apply_funcs):
+        '''
+        注册pattern的apply方法
+        '''
+        if pattern is None or apply_funcs is None:
+            return False
+        if not isinstance(pattern, Pattern) or \
+            not isinstance(apply_funcs, List):
+            return False
+        for apply_func in apply_funcs:
+            if not callable(apply_func):
+                return False
+        if pattern in self._patterns:
+            self._pattern_apply_dict[pattern].extend(apply_funcs)
+        else:
+            self._patterns.append(pattern)
+            self._pattern_apply_dict[pattern] = apply_funcs
+        return True
 
     def __get_current_pattern(self):
         if len(self._patterns) == 0:
@@ -126,22 +145,6 @@ class KnowledgeBase(object):
             return False
         self._apply_idx = apply_id
         return True
-
-    @abstractmethod
-    def __build_patterns(self) -> List[Pattern]:
-        """
-        知识库对应多个子图
-        :return: 返回多个子图定义
-        """
-        return []
-
-    @abstractmethod
-    def __build_pattern_apply_map(self) -> Dict[Pattern, List]:
-        """
-        构建pattern和apply的映射关系
-        :return: 返回pattern和apply方法的字典
-        """
-        return {}
 
     def __is_sub_graph_connection(self, match_result, cur_node) -> bool:
         """

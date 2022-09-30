@@ -58,23 +58,8 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
     def __init__(self):
         super().__init__()
         self._insert_op_names = set()
-
-    def _build_patterns(self) -> List[Pattern]:
-        """
-        知识库对应多个子图
-        :return: 返回多个子图定义
-        """
-        return [pattern]
-
-    def _build_pattern_apply_map(self) -> Dict[Pattern, List]:
-        """
-        构建pattern和apply的映射关系
-        :return: 返回pattern和apply方法的字典
-        """
-        apply_dict = {
-            pattern: [self._conv1d2conv2d_apply]
-        }
-        return apply_dict
+        # 注册pattern的apply方法
+        self._register_apply_funcs(pattern, [self._conv1d2conv2d_apply])
 
     def __is_lower_onnx_version(self) -> bool:
         """
