@@ -16,7 +16,9 @@ import copy
 import types
 import operator as op
 from abc import abstractmethod
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Callable
+from collections import defaultdict
+
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.pattern import DIRECTION
 from auto_optimizer.pattern.matcher import MatchResult
@@ -46,29 +48,27 @@ class UnionFind(object):
 
 class KnowledgeBase(object):
     def __init__(self):
-        self._patterns = [] # pattern object list
-        self._pattern_apply_dict = {} # key is pattern object, value is apply func list
+        self._pattern_apply_dict = defaultdict(list)  # key is pattern object, value is apply func list
+        self.reset()
 
+    def reset(self):
         self._pattern_idx = -1
         self._apply_idx = -1
 
-    def _register_apply_funcs(self, pattern, apply_funcs):
+    @property
+    def _patterns(self):
+        return [*self._pattern_apply_dict]
+
+    def _register_apply_funcs(self, pattern: Pattern, apply_funcs: List[Callable]):
         '''
         注册pattern的apply方法
         '''
-        if pattern is None or apply_funcs is None:
-            return False
         if not isinstance(pattern, Pattern) or \
             not isinstance(apply_funcs, List):
             return False
-        for apply_func in apply_funcs:
-            if not callable(apply_func):
-                return False
-        if pattern in self._patterns:
-            self._pattern_apply_dict[pattern].extend(apply_funcs)
-        else:
-            self._patterns.append(pattern)
-            self._pattern_apply_dict[pattern] = apply_funcs
+        if not all(callable(func) for func in apply_funcs):
+            return False
+        self._pattern_apply_dict[pattern].extend(apply_funcs)
         return True
 
     def __get_current_pattern(self):
@@ -123,7 +123,7 @@ class KnowledgeBase(object):
             return
         self._apply_idx += 1
 
-    def get_apply_ids(self) -> int:
+    def get_apply_ids(self) -> List[int]:
         """
         返回当前pattern对应的所有apply_id
         """
