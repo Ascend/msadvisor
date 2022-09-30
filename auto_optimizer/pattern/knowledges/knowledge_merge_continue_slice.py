@@ -63,7 +63,6 @@ pattern2 = Pattern() \
 class KnowledgeMergeContinueSlice(KnowledgeBase):
     def __init__(self):
         super().__init__()
-        self._insert_op_names = set()
         # 注册pattern的apply方法
         self._register_apply_funcs(pattern0, [self._merge_continue_slice_apply])
         self._register_apply_funcs(pattern1, [self._merge_continue_slice_apply])
