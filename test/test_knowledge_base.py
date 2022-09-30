@@ -220,7 +220,7 @@ class TestKnowledgeBase(unittest.TestCase):
         graph = OnnxGraph.parse(onnx_path)
         knowledge_example = Knowledge_Example()
 
-        result = knowledge_example.get_candidate_sub_graphs(graph)
+        result = knowledge_example.match_pattern(graph)
         self.assertEqual(len(result), 1)
         self.assertEqual(len(result[0].node_dicts), 2)
         self.assertEqual(len(result[0].node_dicts[0]), 1)
@@ -237,7 +237,7 @@ class TestKnowledgeBase(unittest.TestCase):
         graph = OnnxGraph.parse(onnx_path)
         knowledge_example = Knowledge_Example()
 
-        result = knowledge_example.get_candidate_sub_graphs(graph)
+        result = knowledge_example.match_pattern(graph)
         self.assertEqual(len(result), 1)
         self.assertEqual(len(result[0].node_dicts), 3)
 
@@ -255,7 +255,7 @@ class TestKnowledgeBase(unittest.TestCase):
         graph = OnnxGraph.parse(onnx_path)
         knowledge_example = Knowledge_Example()
 
-        results = knowledge_example.get_candidate_sub_graphs(graph)
+        results = knowledge_example.match_pattern(graph)
         self.assertEqual(len(results), 3)
 
         for result in results:
@@ -273,7 +273,7 @@ class TestKnowledgeBase(unittest.TestCase):
         graph = OnnxGraph.parse(onnx_path)
         knowledge_example = Knowledge_Example()
 
-        match_result = knowledge_example.get_candidate_sub_graphs(graph)
+        match_result = knowledge_example.match_pattern(graph)
         self.assertEqual(len(match_result), 1)
 
         res = knowledge_example.apply(graph, match_result[0])

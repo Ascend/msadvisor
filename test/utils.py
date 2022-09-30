@@ -31,7 +31,7 @@ def optimize(graph, knowledge, onnx_path):
     res = True
     while knowledge.has_next_pattern():
         knowledge.next_pattern()
-        match_results = knowledge.get_candidate_sub_graphs(graph)
+        match_results = knowledge.match_pattern(graph)
         if match_results is None or len(match_results) == 0:
             continue
         while knowledge.has_next_apply():

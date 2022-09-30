@@ -169,7 +169,7 @@ class KnowledgeBase(object):
                 return False
         return False
 
-    def get_candidate_sub_graphs(self, graph: BaseGraph, top_ops_names: List[str] = None) -> List[MatchResult]:
+    def match_pattern(self, graph: BaseGraph, top_ops_names: List[str] = None) -> List[MatchResult]:
         """
         匹配所有子图
         :param graph: 计算图
