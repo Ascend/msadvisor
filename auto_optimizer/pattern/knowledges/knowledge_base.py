@@ -49,7 +49,9 @@ class UnionFind(object):
 class KnowledgeBase(object):
     def __init__(self):
         self._pattern_apply_dict = defaultdict(list)  # key is pattern object, value is apply func list
+        self.reset()
 
+    def reset(self):
         self._pattern_idx = -1
         self._apply_idx = -1
 
