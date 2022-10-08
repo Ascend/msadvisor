@@ -35,8 +35,6 @@ KnowledgeBase基类还有一些其它的公共方法，参考第2章节，这里
 
 ### 1.1 定义子图
 
-
-
 ```mermaid
 classDiagram
     class Pattern {
@@ -53,8 +51,8 @@ classDiagram
         +set_output()
     }
     class MatchBase {
-    	<<interface>>
-    	+match()
+        <<interface>>
+        +match()
     }
     Pattern "1" --> "1..*" PatternNode
     PatternNode --> MatchBase
@@ -134,7 +132,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         self._register_apply_funcs(pattern, [self._conv1d2conv2d_apply])
 
     def _conv1d2conv2d_apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:
-	    pass
+        pass
 ```
 
 conv1d2conv2d的apply方法有点复杂，资料里面就不粘贴出来了，大家打开代码自行阅读。
@@ -142,7 +140,6 @@ conv1d2conv2d的apply方法有点复杂，资料里面就不粘贴出来了，�
 这里需要说明的是，apply方法会传入两个参数graph和match_result，这两个参数是固定的，不需要修改。
 
 - graph：模型图，BaseGraph实例；
-
 
 - match_result：子图匹配的结果，MatchResult的实例，可以直接访问里面的成员变量node_dicts；
 
