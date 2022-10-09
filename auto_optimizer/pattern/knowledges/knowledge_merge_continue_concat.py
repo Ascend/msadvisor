@@ -62,26 +62,11 @@ pattern2 = Pattern() \
 class KnowledgeMergeContinueConcat(KnowledgeBase):
     def __init__(self):
         super().__init__()
-        self._insert_op_names = set()
 
-    def _build_patterns(self) -> List[Pattern]:
-        """
-        知识库对应多个子图
-        :return: 返回多个子图定义
-        """
-        return [pattern0, pattern1, pattern2]
-
-    def _build_pattern_apply_map(self) -> Dict[Pattern, List]:
-        """
-        构建pattern和apply的映射关系
-        :return: 返回pattern和apply方法的字典
-        """
-        apply_dict = {
-            pattern0: [self._merge_continue_concat_apply],
-            pattern1: [self._merge_continue_concat_apply],
-            pattern2: [self._merge_continue_concat_apply]
-        }
-        return apply_dict
+        # 注册pattern的apply方法
+        self._register_apply_funcs(pattern0, [self._merge_continue_concat_apply])
+        self._register_apply_funcs(pattern1, [self._merge_continue_concat_apply])
+        self._register_apply_funcs(pattern2, [self._merge_continue_concat_apply])
 
     def check_matchinfo_need_to_optimize(self, graph: BaseGraph, nodes: List[BaseNode]) -> bool:
         """判断当前匹配的子图是否需要优化

@@ -131,23 +131,8 @@ pattern0 = Pattern() \
 class KnowledgeQKVSlice(KnowledgeBase):
     def __init__(self):
         super().__init__()
-        self._insert_op_names = set()
-
-    def _build_patterns(self) -> List[Pattern]:
-        """
-        知识库对应多个子图
-        :return: 返回多个子图定义
-        """
-        return [pattern0]
-
-    def _build_pattern_apply_map(self) -> Dict[Pattern, List]:
-        """
-        构建pattern和apply的映射关系
-        :return: 返回pattern和apply方法的字典
-        """
-        return {
-            pattern0: [self._qkv_slice_apply],
-        }
+        # 注册pattern的apply方法
+        self._register_apply_funcs(pattern0, [self._qkv_slice_apply])
 
     def __get_first_dim_of_split_after_reshape(self, size_of_dim_to_split: int, shape: np.ndarray) -> int:
         """

@@ -16,7 +16,9 @@ import copy
 import types
 import operator as op
 from abc import abstractmethod
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Callable
+from collections import defaultdict
+
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.pattern import DIRECTION
 from auto_optimizer.pattern.matcher import MatchResult
@@ -46,11 +48,28 @@ class UnionFind(object):
 
 class KnowledgeBase(object):
     def __init__(self):
-        self._patterns = self._build_patterns()
-        self._pattern_apply_dict = self._build_pattern_apply_map()
+        self._pattern_apply_dict = defaultdict(list)  # key is pattern object, value is apply func list
+        self.reset()
 
+    def reset(self):
         self._pattern_idx = -1
         self._apply_idx = -1
+
+    @property
+    def _patterns(self):
+        return [*self._pattern_apply_dict]
+
+    def _register_apply_funcs(self, pattern: Pattern, apply_funcs: List[Callable]):
+        '''
+        注册pattern的apply方法
+        '''
+        if not isinstance(pattern, Pattern) or \
+            not isinstance(apply_funcs, List):
+            return False
+        if not all(callable(func) for func in apply_funcs):
+            return False
+        self._pattern_apply_dict[pattern].extend(apply_funcs)
+        return True
 
     def __get_current_pattern(self):
         if len(self._patterns) == 0:
@@ -104,7 +123,7 @@ class KnowledgeBase(object):
             return
         self._apply_idx += 1
 
-    def get_apply_ids(self) -> int:
+    def get_apply_ids(self) -> List[int]:
         """
         返回当前pattern对应的所有apply_id
         """
@@ -126,22 +145,6 @@ class KnowledgeBase(object):
             return False
         self._apply_idx = apply_id
         return True
-
-    @abstractmethod
-    def __build_patterns(self) -> List[Pattern]:
-        """
-        知识库对应多个子图
-        :return: 返回多个子图定义
-        """
-        return []
-
-    @abstractmethod
-    def __build_pattern_apply_map(self) -> Dict[Pattern, List]:
-        """
-        构建pattern和apply的映射关系
-        :return: 返回pattern和apply方法的字典
-        """
-        return {}
 
     def __is_sub_graph_connection(self, match_result, cur_node) -> bool:
         """
@@ -166,7 +169,7 @@ class KnowledgeBase(object):
                 return False
         return False
 
-    def get_candidate_sub_graphs(self, graph: BaseGraph, top_ops_names: List[str] = None) -> List[MatchResult]:
+    def match_pattern(self, graph: BaseGraph, top_ops_names: List[str] = None) -> List[MatchResult]:
         """
         匹配所有子图
         :param graph: 计算图
