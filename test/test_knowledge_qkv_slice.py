@@ -26,7 +26,7 @@ from onnx import (
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_qkv_slice import KnowledgeQKVSlice
-from utils import infer_run, optimize
+from utils import inference, optimize
 
 
 def make_basic_qkv_slice_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=1,
@@ -223,15 +223,15 @@ class TestKnowledgeQKVSlice(unittest.TestCase):
                 graph = OnnxGraph.parse(onnx_path)
 
                 knowledge = KnowledgeQKVSlice()
-                res = optimize(graph, knowledge, optimize_onnx_path)
-
+                res = optimize(graph, knowledge)
                 self.assertEqual(res, expect)
                 if not res:
                     continue
+                graph.save(optimize_onnx_path)
 
                 x = np.random.randn(1, 10, 112).astype(np.float32)
-                ret0 = infer_run(onnx_path, x)
-                ret1 = infer_run(optimize_onnx_path, x)
+                ret0 = inference(onnx_path, x)
+                ret1 = inference(optimize_onnx_path, x)
                 self.assertTrue(np.array_equal(ret0, ret1))
 
 
