@@ -24,7 +24,7 @@ inference_engine是一个包括推理全流程的组件库，推理端到端流�
 
 数据队列建议存放数据格式：[[batch_label], [[batch_data_0], [batch_data_1], [batch_data_n]]]
 
-- [x] batch_file_name：表示多batch时，对应标签
+- [x] batch_lable：表示多batch时，对应标签
 - [x] batch_data_n：表示第n个输出，batch_data_n包含batch组数据
 - [x] 数据格式为numpy
 

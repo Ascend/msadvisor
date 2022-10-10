@@ -35,7 +35,7 @@ class ImageNetDataset(DatasetBase, ABC):
             data = []
             labels = []
             with open(label_path, 'r') as f:
-                for label_file in f.readlines():
+                for label_file in f:
                     image_name, label = re.split(r"\s+", label_file.strip())
                     file_path = os.path.join(dataset_path, image_name)
 
