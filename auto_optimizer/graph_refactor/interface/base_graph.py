@@ -192,7 +192,7 @@ class BaseGraph(ABC):
             self._next_map[new_out_name] = [insert_node]
             self._prev_map[refer_out_name] = insert_node
             # deal with situation of inserting node before output
-            if output_flag and self._next_map[refer_out_name]:
+            if output_flag and self._next_map.get(refer_out_name):
                 for node in self._next_map[refer_out_name]:
                     index = node.get_input_id(refer_out_name)
                     node.inputs[index] = new_out_name
