@@ -256,7 +256,7 @@ class TestKnowledgeBase(unittest.TestCase):
         knowledge_example = Knowledge_Example()
 
         results = knowledge_example.match_pattern(graph)
-        self.assertEqual(len(results), 3)
+        self.assertEqual(len(results), 2)
 
         for result in results:
             for node_dict in result.node_dicts:
