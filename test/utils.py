@@ -47,4 +47,4 @@ def optimize(graph: BaseGraph, knowledge: KnowledgeBase):
             knowledge.next_apply()
             for match_result in match_results:
                 res |= knowledge.apply(graph, match_result)
-    return res and knowledge.post_process(graph)
+    return knowledge.post_process(graph) and res
