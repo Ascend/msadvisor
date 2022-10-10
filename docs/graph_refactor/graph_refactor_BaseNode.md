@@ -4,7 +4,7 @@
 
 如图所示，BaseNode 的三个子类 PlaceHolder、Initializer 和 Node 覆盖了一个模型所包含的所有节点：
 
-![basenode](./img/basenode.png)
+![basenode](../img/basenode.png)
 
 - PlaceHolder 整网输入输出节点
   - 可理解为占位符，因此具有属性 `shape` 和 `dtype`，不具有具体数值；
