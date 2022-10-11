@@ -28,12 +28,12 @@ class ImageParam:
     std: list
     center_crop: int
     resize: int
-    dataset_path: str
     dtype: str
 
 
+@PreProcessFactory.register("classification")
 class ImageNetPreProcess(PreProcessBase, ABC):
-    def __call__(self, index, batch_size, worker, cfg, in_queue, out_queue):
+    def __call__(self, loop, cfg, in_queue, out_queue):
         """
         和基类的参数顺序和个数需要一致
         """
@@ -41,36 +41,28 @@ class ImageNetPreProcess(PreProcessBase, ABC):
         try:
             image_param = ImageNetPreProcess._get_params(cfg)
 
-            files = os.listdir(image_param.dataset_path)
-            files.sort()
+            output = []
+            for i in range(loop):
+                in_data = in_queue.get()
+                if len(in_data) < 2:  # include lable and data
+                    raise RuntimeError("input params error len={}".format(len(in_data)))
 
-            data = []
-            file_paths = []
-            file_len = len(files)
-            for i in range(index, file_len, worker):
-                img, file_path = ImageNetPreProcess.image_process(i, files, image_param)
-                data.append(img)
-                file_paths.append(file_path)
+                label, datas = in_data[0], in_data[1]
+                for data in datas:
+                    img = ImageNetPreProcess.image_process(data, image_param)
+                    output.append(img)
 
-                if len(data) == batch_size:
-                    out_queue.put([file_paths, np.stack(data)])
-                    file_paths.clear()
-                    data.clear()
-
-            while len(data) and len(data) < batch_size:
-                file_paths.append(file_paths[0])
-                data.append(data[0])  # 数据集尾部补齐
-                out_queue.put([file_paths, np.stack(data)])
+                out_queue.put([label, output])
+                output.clear()
         except Exception as err:
             print("pre_process failed error={}".format(err))
 
         print("pre_process end")
 
     @staticmethod
-    def image_process(i, files, image_param):
+    def image_process(file_path, image_param):
         # RGBA to RGB
-        tmp_path = os.path.join(image_param.dataset_path, files[i])
-        image = Image.open(tmp_path).convert('RGB')
+        image = Image.open(file_path).convert('RGB')
         image = ImageNetPreProcess.resize(image, image_param.resize)
         image = ImageNetPreProcess.center_crop(image, image_param.center_crop)
         if image_param.dtype == "fp32":
@@ -84,7 +76,7 @@ class ImageNetPreProcess(PreProcessBase, ABC):
         else:
             raise RuntimeError("dtype is not support")
 
-        return img, tmp_path
+        return img
 
     @staticmethod
     def center_crop(img, output_size):
@@ -131,16 +123,11 @@ class ImageNetPreProcess(PreProcessBase, ABC):
             std = cfg["std"]
             center_crop = cfg["center_crop"]
             resize = cfg["resize"]
-            dataset_path = cfg["dataset_path"]
             dtype = cfg["dtype"]
-            real_path = os.path.realpath(dataset_path)
 
-            image_param = ImageParam(mean, std, center_crop, resize, real_path, dtype)
+            image_param = ImageParam(mean, std, center_crop, resize, dtype)
             ImageNetPreProcess._check_params(image_param)
 
             return image_param
         except Exception as err:
             raise RuntimeError("get params failed error={}".format(err))
-
-
-PreProcessFactory.add_pre_process("ImageNet", ImageNetPreProcess())

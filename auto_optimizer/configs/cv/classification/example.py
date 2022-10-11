@@ -14,15 +14,17 @@
 
 
 model = dict(
-    name='Resnet50',
-    type='onnx',
-    dataset='ImageNet',
+    type='cv',
     batch_size=1,
     engine=dict(
-        pre_process=dict(
-            type='ImageNet',
-            worker=1,
+        dataset=dict(
+            type='imagenet',
             dataset_path='./dataset/test_img/',
+            label_path='./dataset/label.txt',
+        ),
+        pre_process=dict(
+            type='classification',
+            worker=1,
             resize=256,
             center_crop=[224, 224],
             mean=[0.485, 0.456, 0.406],
@@ -41,7 +43,6 @@ model = dict(
         ),
         evaluate=dict(
             type='classification',
-            ground_truth='./dataset/label.txt',
             topk=[1, 5]
         ),
     )

@@ -20,16 +20,14 @@ class PreProcessBase(object):
         pass
 
     @abstractmethod
-    def __call__(self, index, batch_size, worker, cfg, in_queue, out_queue):
+    def __call__(self, loop, cfg, in_queue, out_queue):
         """
-        index: 多线程的索引
-        batch_size: batch_size
-        worker: 多线程的数量
-        cfg: 配置文件，参考auto_optimizer\configs\cv\classification\resnet50.py
+        loop: 迭代次数
+        cfg: 配置文件，参考auto_optimizer\configs\cv\classification\example.py
         in_queue: 输入数据队列，预处理输入队列为空
         out_queue： 输出数据队列
-        数据队列建议存放数据格式：[[batch_file_name], [[batch_data_0], [batch_data_1]]]
-        batch_file_name：表示多batch时，对应数据集的文件名，用于精度评测
+        数据队列建议存放数据格式：[[batch_lable], [[batch_data_0], [batch_data_1]]]
+        batch_lable：表示多batch时，对应数据集的label，用于精度评测
         batch_data_n：表示第n个输入or输出，batch_data_n包含batch组数据
         """
         pass

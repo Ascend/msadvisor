@@ -15,6 +15,8 @@
 
 import onnxruntime as ort
 
+ort.set_default_logger_severity(3)
+
 
 def infer_run(onnx_path, x):
     session = ort.InferenceSession(onnx_path)

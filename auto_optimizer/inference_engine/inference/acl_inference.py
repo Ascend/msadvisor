@@ -20,12 +20,12 @@ from .inference_base import InferenceBase
 from ..data_process_factory import InferenceFactory
 
 
+@InferenceFactory.register("acl")
 class AclInference(InferenceBase, ABC):
 
-    def __init__(self, tool):
-        if tool not in ['msame', 'pyacl']:
-            raise RuntimeError("Invalid tool type! Only support 'msame', 'pyacl', but got {}.".format(tool))
-        self.tool = tool
+    def __init__(self):
+        # support msame and pyacl
+        self.tool = 'pyacl'
 
     def __call__(self, loop, cfg, in_queue, out_queue):
         print("inference start")
@@ -72,6 +72,3 @@ class AclInference(InferenceBase, ABC):
                 time += exe_time
         print("inference end")
         return time
-
-
-InferenceFactory.add_inference("acl", AclInference('pyacl'))

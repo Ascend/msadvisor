@@ -22,11 +22,11 @@ class InferenceBase(object):
     def __call__(self, loop, cfg, in_queue, out_queue):
         """
         loop: 循环次数，根据数据集大小、batch_size及worker计算得到loop次数
-        cfg: 配置文件，参考auto_optimizer\configs\cv\classification\resnet50.py
+        cfg: 配置文件，参考auto_optimizer\configs\cv\classification\example.py
         in_queue: 输入数据队列
         out_queue： 输出数据队列
-        数据队列建议存放数据格式：[[batch_file_name], [[batch_data_0], [batch_data_1]]]
-        batch_file_name：表示多batch时，对应数据集的文件名，用于精度评测
+        数据队列建议存放数据格式：[[batch_lable], [[batch_data_0], [batch_data_1]]]
+        batch_lable：表示多batch时，对应数据集的label，用于精度评测
         batch_data_n：表示第n个输入or输出，batch_data_n包含batch组数据
         """
         pass
