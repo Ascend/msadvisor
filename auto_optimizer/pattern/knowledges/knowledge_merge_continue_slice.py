@@ -18,44 +18,104 @@ import numpy as np
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node
-from auto_optimizer.pattern.pattern import MATCH_PATTERN
-from auto_optimizer.pattern.pattern import MatchBase
-from auto_optimizer.pattern.pattern import Pattern
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Initializer, Node
+from auto_optimizer.pattern.pattern import MATCH_PATTERN, MatchBase, Pattern
 from auto_optimizer.pattern.matcher import MatchResult
 from .knowledge_base import KnowledgeBase
+from .utils import try_access, NextNodeCount
+
+
+class NonNegetiveAxes(MatchBase):
+    # the axes to be sliced should not be negetive
+    # as we need infershape to determine if some negetive axis is the same with positive axis
+    # in reallity, a lot of models failed to infershape, so we add this constraint here
+    def __init__(self):
+        super().__init__()
+
+    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
+        if not isinstance(node, (Node, )):
+            return False
+        if len(node.inputs) < 4:
+            return False
+        axes = try_access(graph, node.inputs[3], Initializer)
+        return axes is not None and all(v >= 0 for v in axes.value)
+
 
 # continue 4 slice op
+r"""
+
+       X
+       |
+       |
+    Slice_0
+       |
+       |                      X
+    Slice_1     Merge         |
+       |       ======>        |
+       |                Slice_to_keep
+    Slice_2
+       |
+       |
+ Slice_to_keep
+
+
+"""
 pattern0 = Pattern() \
-    .add_node("Slice_0", ["Slice"]) \
-    .add_node("Slice_1", ["Slice"]) \
-    .add_node("Slice_2", ["Slice"]) \
-    .add_node("Slice_3", ["Slice"]) \
+    .add_node("Slice_0", ["Slice"], [NonNegetiveAxes(), NextNodeCount(1)]) \
+    .add_node("Slice_1", ["Slice"], [NonNegetiveAxes(), NextNodeCount(1)]) \
+    .add_node("Slice_2", ["Slice"], [NonNegetiveAxes(), NextNodeCount(1)]) \
+    .add_node("Slice_to_keep", ["Slice"], [NonNegetiveAxes()]) \
     .add_edge("Slice_0", "Slice_1") \
     .add_edge("Slice_1", "Slice_2") \
-    .add_edge("Slice_2", "Slice_3") \
+    .add_edge("Slice_2", "Slice_to_keep") \
     .set_input("Slice_0") \
-    .set_output("Slice_3") \
+    .set_output("Slice_to_keep") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 # continue 3 slice op
+r"""
+
+       X
+       |
+       |
+    Slice_0                    X
+       |         Merge         |
+       |        ======>        |
+    Slice_1              Slice_to_keep
+       |
+       |
+ Slice_to_keep
+
+
+"""
 pattern1 = Pattern() \
-    .add_node("Slice_0", ["Slice"]) \
-    .add_node("Slice_1", ["Slice"]) \
-    .add_node("Slice_2", ["Slice"]) \
+    .add_node("Slice_0", ["Slice"], [NonNegetiveAxes(), NextNodeCount(1)]) \
+    .add_node("Slice_1", ["Slice"], [NonNegetiveAxes(), NextNodeCount(1)]) \
+    .add_node("Slice_to_keep", ["Slice"], [NonNegetiveAxes()]) \
     .add_edge("Slice_0", "Slice_1") \
-    .add_edge("Slice_1", "Slice_2") \
+    .add_edge("Slice_1", "Slice_to_keep") \
     .set_input("Slice_0") \
-    .set_output("Slice_2") \
+    .set_output("Slice_to_keep") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 # continue 2 slice op
+r"""
+
+       X
+       |                       X
+       |         Merge         |
+    Slice_0     ======>        |
+       |                 Slice_to_keep
+       |
+ Slice_to_keep
+
+"""
 pattern2 = Pattern() \
-    .add_node("Slice_0", ["Slice"]) \
-    .add_node("Slice_1", ["Slice"]) \
-    .add_edge("Slice_0", "Slice_1") \
+    .add_node("Slice_0", ["Slice"], [NonNegetiveAxes(), NextNodeCount(1)]) \
+    .add_node("Slice_to_keep", ["Slice"], [NonNegetiveAxes()]) \
+    .add_edge("Slice_0", "Slice_to_keep") \
     .set_input("Slice_0") \
-    .set_output("Slice_1") \
+    .set_output("Slice_to_keep") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 
@@ -68,60 +128,44 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
         self._register_apply_funcs(pattern1, [self._merge_continue_slice_apply])
         self._register_apply_funcs(pattern2, [self._merge_continue_slice_apply])
 
-    def check_matchinfo_need_to_optimize(self, graph: BaseGraph, nodes: List[BaseNode], axes: List[np.ndarray]) -> bool:
-        """判断当前匹配的子图是否需要优化
-
-        Args:
-            graph: 整个模型的图
-            nodes: 子图的节点列表
-            axes: 全部需要合并的Slice算子操作的轴列表
-
-        Return:
-            是否需要优化
-        """
-        axes_to_merge = np.concatenate(axes)
-        if np.unique(axes_to_merge).size != axes_to_merge.size:
-            logging.info(f"Nodes has duplicate slice axis: {axes_to_merge}")
-            return False
-
-        for node in nodes[:-1]:
-            if not isinstance(node, (Node, )):
-                logging.info(f"Node of slice match is invalid: name {node.name} type {type(node)}")
-                return False
-            next_nodes = graph.get_next_nodes(node.outputs[0])
-            if len(next_nodes) > 1:
-                names = ", ".join([node.name for node in next_nodes])
-                logging.info(f"Node {node.name} has multiple outputs: {names} len {len(next_nodes)}")
-                return False
-        return True
-
     def merge_slice_nodes(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
-        try:
-            nodes = [graph[node[0].name] for node in matchinfo.values()]
-            input_lists = [[graph[node.inputs[i]].value for node in nodes] for i in range(1, 5)]
-        except (KeyError, IndexError, AttributeError) as e:
-            logging.info(f"Failed get node list or input list: {e}")
+        # get slice operators here, we only kept the last slice operator after optimization
+        slice_to_keep = try_access(graph, matchinfo['Slice_to_keep'][0].name, Node)
+        slices_to_remove = [try_access(graph, v[0].name, Node) for k, v in matchinfo.items() if k != 'Slice_to_keep']
+        slices_total = [*slices_to_remove, slice_to_keep]
+        # in case previous apply functions modified the graph and removed/renamed any node of current matching subgraph
+        if any(node is None for node in slices_total):
             return False
 
-        if not self.check_matchinfo_need_to_optimize(graph, nodes, input_lists[2]):
+        input_initializers = [[try_access(graph, inp) for inp in node.inputs[1:]] for node in slices_total]
+        if any(inp is None for inp in input_initializers):
+            return False
+        input_values = [[inp.value for inp in lst] for lst in input_initializers]
+        # add optional steps input, input_values should look like this now
+        # for example: [[start0, end0, axes0, step0], [start1, end1, axes1, step1], ...]
+        input_values = [lst if len(lst) > 3 else lst + [np.array([1])] for lst in input_values]
+        # after transposed -> [[start0, start1, ...], [end0, end1, ...], [axes0, axes1, ...], [step0, step1, ...]]
+        input_values = list(zip(*input_values))
+
+        # duplicate axes means we can't merge these slice nodes together
+        axes_to_merge = np.concatenate(input_values[2])
+        if np.unique(axes_to_merge).size != axes_to_merge.size:
+            logging.info(f"Slice nodes has duplicate slice axis: {axes_to_merge}")
             return False
 
-        nodes_to_merge = [node.name for node in nodes]
-
-        for node in nodes[:-1]:
+        # we start modify the graph from here, as all validations are finished so we can make sure optimize will success
+        # remove all other slice nodes except the last one
+        for node in slices_to_remove:
             graph.remove(node.name)
 
-        last_node = nodes[-1]
-        if not isinstance(last_node, (Node, )):
-            logging.info(f"Node is invalid: name {last_node.name} type {type(last_node)}")
-            return False
-        params = ["starts_", "ends_", "axes_", "steps_"]
-        for i in range(4):
+        # construct new initializers and replace the inputs of last slice node with them
+        for i, param in enumerate(["starts_", "ends_", "axes_", "steps_"]):
             new_input = graph.add_initializer(
-                name=params[i] + "_".join(nodes_to_merge),
-                value=np.concatenate(input_lists[i])
+                name=param + "_".join(node.name for node in slices_total),
+                value=np.concatenate(input_values[i])
             )
-            last_node.inputs[i + 1] = new_input.name
+            # the first input of slice operator is input data, so off by 1
+            slice_to_keep.inputs[i + 1] = new_input.name
         return True
 
     def _merge_continue_slice_apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:
