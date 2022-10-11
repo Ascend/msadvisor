@@ -48,6 +48,7 @@ class BaseGraph(ABC):
         self.name = name
 
         self._node_map = {}
+        self._value_map = {}
         self._prev_map = {}
         self._next_map = {}
 
