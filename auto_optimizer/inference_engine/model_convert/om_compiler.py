@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import subprocess
+import logging
 
-from auto_optimizer.common.config import Config
 from .compiler import Compiler
+
+logging = logging.getLogger("auto-optimizer")
+
 
 class OmCompiler(Compiler):
 
@@ -42,5 +45,5 @@ class OmCompiler(Compiler):
             raise RuntimeError("Invalid cmd type! Only support 'atc', 'aoe', but got '{}'.".format(cmd_type))
 
     def build_model(self):
-        print(self.atc_cmd)
+        logging.debug(self.atc_cmd)
         subprocess.run(self.atc_cmd, shell=False)

@@ -13,11 +13,14 @@
 # limitations under the License.
 
 import re
+import logging
 from abc import ABC
 import subprocess
 
 from .inference_base import InferenceBase
 from ..data_process_factory import InferenceFactory
+
+logging = logging.getLogger("auto-optimizer")
 
 
 @InferenceFactory.register("acl")
@@ -28,7 +31,7 @@ class AclInference(InferenceBase, ABC):
         self.tool = 'pyacl'
 
     def __call__(self, loop, cfg, in_queue, out_queue):
-        print("inference start")
+        logging.debug("inference start")
 
         if self.tool == 'msame':
             msame_cmd = [
@@ -51,24 +54,24 @@ class AclInference(InferenceBase, ABC):
             try:
                 init_acl(device_id)
             except Exception as err:
-                print("acl init failed! error message: {}".format(err))
+                logging.error("acl init failed! error message: {}".format(err))
                 raise RuntimeError("acl init failed! {}".format(err))
             try:
                 net = AclNet(model_path=cfg['model'], device_id=device_id)
             except Exception as err:
-                print("load model failed! error message: {}".format(err))
+                logging.error("load model failed! error message: {}".format(err))
                 raise RuntimeError("load model failed! {}".format(err))
             time = 0
             for i in range(loop):
                 data = in_queue.get()
                 if len(data) < 2:   # include file_name and data
-                    print("data len less than 2! data should include label and data!")
+                    logging.error("data len less than 2! data should include label and data!")
                     raise RuntimeError("input params error len={}".format(len(data)))
                 try:
                     outputs, exe_time = net(data[1])    
                 except Exception as err:
-                    print("acl infer failed! error message: {}".format(err))
+                    logging.error("acl infer failed! error message: {}".format(err))
                 out_queue.put([data[0], outputs])
                 time += exe_time
-        print("inference end")
+        logging.debug("inference end")
         return time

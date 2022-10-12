@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 
 from typing import Dict, Type
 from .pre_process.pre_process_base import PreProcessBase
@@ -22,22 +23,7 @@ from .datasets.dataset_base import DatasetBase
 
 from ..common.utils import typeassert
 
-
-class EngineFactoryBase(object):
-    _engine_pool = {}
-
-    @classmethod
-    @typeassert(name=str)
-    def get_engine(cls, name):
-        return cls._engine_pool.get(name, None)
-
-    @classmethod
-    @typeassert(name=str)
-    def register(cls, name):
-        def _wrapper(dataset_cls):
-            cls._engine_pool[name] = dataset_cls()
-            return dataset_cls
-        return _wrapper
+logging = logging.getLogger("auto-optimizer")
 
 
 class DatasetFactory(object):
@@ -52,6 +38,9 @@ class DatasetFactory(object):
     @typeassert(name=str)
     def register(cls, name):
         def _wrapper(dataset_cls: Type[DatasetBase]):
+            if cls.get_dataset(name) is not None:
+                logging.warning(f"register name is the same, please check! {name}")
+                raise RuntimeError(f"register name is the same, please check! {name}")
             cls._dataset_pool[name] = dataset_cls()
             return dataset_cls
         return _wrapper
@@ -69,6 +58,9 @@ class PreProcessFactory(object):
     @typeassert(name=str)
     def register(cls, name):
         def _wrapper(preprocess_cls: Type[PreProcessBase]):
+            if cls.get_pre_process(name) is not None:
+                logging.warning(f"register name is the same, please check! {name}")
+                raise RuntimeError(f"register name is the same, please check! {name}")
             cls._pre_process_pool[name] = preprocess_cls()
             return preprocess_cls
         return _wrapper
@@ -86,6 +78,9 @@ class InferenceFactory(object):
     @typeassert(name=str)
     def register(cls, name):
         def _wrapper(inference_cls: Type[InferenceBase]):
+            if cls.get_inference(name) is not None:
+                logging.warning(f"register name is the same, please check! {name}")
+                raise RuntimeError(f"register name is the same, please check! {name}")
             cls._inference_pool[name] = inference_cls()
             return inference_cls
         return _wrapper
@@ -103,6 +98,9 @@ class PostProcessFactory(object):
     @typeassert(name=str)
     def register(cls, name):
         def _wrapper(post_process_cls: Type[PostProcessBase]):
+            if cls.get_post_process(name) is not None:
+                logging.warning(f"register name is the same, please check! {name}")
+                raise RuntimeError(f"register name is the same, please check! {name}")
             cls._post_process_pool[name] = post_process_cls()
             return post_process_cls
         return _wrapper
@@ -120,6 +118,9 @@ class EvaluateFactory(object):
     @typeassert(name=str)
     def register(cls, name):
         def _wrapper(evaluate_cls: Type[EvaluateBase]):
+            if cls.get_evaluate(name) is not None:
+                logging.warning(f"register name is the same, please check! {name}")
+                raise RuntimeError(f"register name is the same, please check! {name}")
             cls._evaluate_pool[name] = evaluate_cls()
             return evaluate_cls
         return _wrapper

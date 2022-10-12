@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+import logging
 from abc import ABC
 from dataclasses import dataclass
 
@@ -20,6 +20,8 @@ import numpy as np
 from PIL import Image
 from ..pre_process_base import PreProcessBase
 from ...data_process_factory import PreProcessFactory
+
+logging = logging.getLogger("auto-optimizer")
 
 
 @dataclass
@@ -37,7 +39,7 @@ class ImageNetPreProcess(PreProcessBase, ABC):
         """
         和基类的参数顺序和个数需要一致
         """
-        print("pre_process start")
+        logging.debug("pre_process start")
         try:
             image_param = ImageNetPreProcess._get_params(cfg)
 
@@ -55,9 +57,9 @@ class ImageNetPreProcess(PreProcessBase, ABC):
                 out_queue.put([label, output])
                 output.clear()
         except Exception as err:
-            print("pre_process failed error={}".format(err))
+            logging.error("pre_process failed error={}".format(err))
 
-        print("pre_process end")
+        logging.debug("pre_process end")
 
     @staticmethod
     def image_process(file_path, image_param):
