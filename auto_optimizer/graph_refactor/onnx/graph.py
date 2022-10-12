@@ -152,6 +152,7 @@ class OnnxGraph(BaseGraph):
         
         print('Begin to extract the model.')
         old_model_save_path = '{}_tmp.onnx'.format(new_model_save_path)
+        self.save(old_model_save_path)
         onnx.utils.extract_model(
             old_model_save_path, new_model_save_path, input_name_list, output_name_list)
         print('Extract the model completed, model saved in {}.'.format(
