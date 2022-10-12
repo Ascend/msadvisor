@@ -4,12 +4,12 @@
 
 ### 查询节点
 
-**g[name] -> Union[Node, Initializer, PlaceHolder]** 
+**g[name] -> Union[Node, Initializer, PlaceHolder]**
 
 - 根据节点名称查询单个节点，返回该节点。
 - `name(str)` - 节点名称
 
-**get_nodes(op_type) -> Union[List[Node], List[PlaceHolder], List[Initializer]]** 
+**get_nodes(op_type) -> Union[List[Node], List[PlaceHolder], List[Initializer]]**
 
 - 根据节点类型名称查询节点，返回由该类型节点组成的列表。
 - `op_type(str)` - 节点类型名称，如 `'Add'` 。
@@ -34,18 +34,18 @@
 
 ```python
 # 加载模型
-g = OnnxGraph.parse('model.onnx') 
+g = OnnxGraph.parse('model.onnx')
 
 # 获取名称为'Add_0'的节点
-node = g['Add_0'] 
+node = g['Add_0']
 
 # 获取所有Add类型节点
-nodes = g.get_nodes('Add') 
+nodes = g.get_nodes('Add')
 
 # 获取 node 的所有前驱节点
 prev_nodes = []
 for i in node.inputs:
-	prev_nodes.append(g.get_prev_node(i)) 
+	prev_nodes.append(g.get_prev_node(i))
 
 # 获取 node 的所有后继节点
 next_nodes = []
@@ -131,7 +131,7 @@ new_op = g.add_node('Transpose_new', 'Transpose', {'perm':[1,0,2]})
 - 将节点插入图中指定位置，自动连边。
 - `insert_node(Node)` - 待插入节点 \
   `prev_nodes_info(List[str])` - 指定前驱节点，列表中的每个字符串对应待插入节点的一个输入 \
-  `next_nodes_info(List[str])` - 指定后继节点，列表中的每个字符串对应待插入节点的一个输出 
+  `next_nodes_info(List[str])` - 指定后继节点，列表中的每个字符串对应待插入节点的一个输出
 
 <details>
   <summary> sample code </summary>
@@ -139,7 +139,7 @@ new_op = g.add_node('Transpose_new', 'Transpose', {'perm':[1,0,2]})
 ```python
 # 添加并插入单输入单输出算子
 new_cast_0 = g.add_node('new_cast_0', 'Cast', {'to':6}) 
-new_cast_1 = g.add_node('new_cast_1', 'Cast', {'to':6}) 
+new_cast_1 = g.add_node('new_cast_1', 'Cast', {'to':6})
 g.insert_node('reference_node', new_cast_0) # 在参考节点后插入Cast算子
 g.insert_node('reference_node', new_cast_1, 1, 'before') # 在参考节点的第1条输入边插入Cast算子
 
@@ -149,7 +149,7 @@ split_ini = g.add_initializer('split_ini', np.array([1,1,1]))
 new_split = g.add_node('new_split', 'Split')
 g.connect_node(
                 new_split,
-                ['Add_0', 'split_ini'], 
+                ['Add_0', 'split_ini'],
                 ['Transpose_0', 'Transpose_1', 'Transpose_2']
             )
 
@@ -157,7 +157,7 @@ g.connect_node(
 new_add = g.add_node('new_add', 'Add')
 g.connect_node(
                 new_add,
-                ['Conv_7', 'Conv_8'], 
+                ['Conv_7', 'Conv_8'],
                 ['Add_9:0,1;Reshape_10']
             )
 ```
@@ -207,7 +207,7 @@ g.remove('Node_text', {0:0,1:1}) # 删除节点，将节点的第0个输入和�
 
 <details>
   <summary> sample code </summary>
-  
+
 ```python
 # 加载模型
 g.parse('model.onnx')

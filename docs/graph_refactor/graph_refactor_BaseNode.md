@@ -9,9 +9,11 @@
 - PlaceHolder 整网输入输出节点
   - 可理解为占位符，因此具有属性 `shape` 和 `dtype`，不具有具体数值；
   - 在 onnx 框架中对应于 [onnx.proto3](https://gitee.com/link?target=https%3A%2F%2Fgithub.com%2Fonnx%2Fonnx%2Fblob%2Fmaster%2Fonnx%2Fonnx.proto3) 的 `ValueInfoProto`；
+
 - Initializer 整网常量节点
   - 为具体常量（权重），因此具有属性 `value`；
   - 在 onnx 框架中对应于 [onnx.proto3](https://gitee.com/link?target=https%3A%2F%2Fgithub.com%2Fonnx%2Fonnx%2Fblob%2Fmaster%2Fonnx%2Fonnx.proto3) 的 `TensorProto` 和 [onnx 标准库算子](https://gitee.com/link?target=https%3A%2F%2Fgithub.com%2Fonnx%2Fonnx%2Fblob%2Fmaster%2Fdocs%2FOperators.md) 的 `Constant` 算子；
+  
 - Node 整网算子节点
   - 具有属性 `inputs` 和 `outputs`，用于确定网络的连边关系；
   - 具有属性 `attrs`，不同类型算子节点的属性参见 [onnx 标准库算子](https://gitee.com/link?target=https%3A%2F%2Fgithub.com%2Fonnx%2Fonnx%2Fblob%2Fmaster%2Fdocs%2FOperators.md)；

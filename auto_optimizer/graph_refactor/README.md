@@ -43,7 +43,6 @@ g.insert_node('dummy_add', argmax, mode='before') # 由于 argmax 为单输入�
 g.save('layernorm_modify.onnx')
 ```
 
-
 ## 使用方法
 
 - 接口详见 [API 说明和示例](../../docs/graph_refactor/graph_refactor_API.md)
