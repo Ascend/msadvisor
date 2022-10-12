@@ -33,5 +33,5 @@ python setup.py install
 #### 免责声明
 
 auto-optimizer仅提高基于ONNX的改图及调优参考，不对其质量或维护负责。
-如果您遇到了问题，请在Github/Gitee提交issue，我们将根据您的issue跟踪解决。
+如果您遇到了问题，Gitee/Ascend/auto-optimizer提交issue，我们将根据您的issue跟踪解决。
 衷心感谢您对我们社区的理解和贡献。
