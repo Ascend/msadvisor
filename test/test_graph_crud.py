@@ -184,7 +184,7 @@ class TestGraphCrud(unittest.TestCase):
         self.assertEqual(self.graph_1.get_prev_node('test_node_out_0'), test_node)
     
     def test_connect_node_case_3(self):
-        test_node = self.graph_1.add_node('test_node', 'Split', {'axis':1})
+        test_node = self.graph_1.add_node('test_node', 'Split', attrs={'axis':1})
         test_ini = self.graph_1.add_initializer('test_ini', np.array([1,2]))
         self.graph_1.connect_node(
             test_node,
