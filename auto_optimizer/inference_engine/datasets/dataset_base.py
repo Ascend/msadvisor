@@ -12,21 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from abc import abstractmethod
 
-class PostProcessBase(object):
+
+class DatasetBase(object):
     def __init__(self):
         pass
 
     @abstractmethod
-    def __call__(self, loop, cfg, in_queue, out_queue):
+    def __call__(self, batch_size, cfg, in_queue, out_queue):
         """
-        loop: 循环次数，根据数据集大小、batch_size及worker计算得到loop次数
+        batch_size: batch_size
         cfg: 配置文件，参考auto_optimizer\configs\cv\classification\example.py
-        in_queue: 输入数据队列
+        in_queue: 输入数据队列, 此处为空
         out_queue： 输出数据队列
         数据队列建议存放数据格式：[[batch_lable], [[batch_data_0], [batch_data_1]]]
         batch_lable：表示多batch时，对应数据集的label，用于精度评测
         batch_data_n：表示第n个输入or输出，batch_data_n包含batch组数据
         """
         pass
+
+    def _get_params(self, cfg):
+        try:
+            dataset_path = cfg["dataset_path"]
+            label_path = cfg["label_path"]
+            real_dataset = os.path.realpath(dataset_path)
+
+            real_label = os.path.realpath(label_path)
+
+            return real_dataset, real_label
+        except Exception as err:
+            raise RuntimeError("get params failed error={}".format(err))

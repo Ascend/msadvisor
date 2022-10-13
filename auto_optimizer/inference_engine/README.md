@@ -4,6 +4,7 @@
 
 inference_engine是一个包括推理全流程的组件库，推理端到端流程包含4个引擎，具体引擎如下所示：
 
+- [x] dataset：数据集引擎
 - [x] pre process：数据预处理引擎
 - [x] inference：离线推理引擎
 - [x] post process：后处理引擎
@@ -21,11 +22,39 @@ inference_engine是一个包括推理全流程的组件库，推理端到端流�
 
 ## 数据传输约束
 
-数据队列建议存放数据格式：[[batch_file_name], [[batch_data_0], [batch_data_1], [batch_data_n]]]
+数据队列建议存放数据格式：[[batch_label], [[batch_data_0], [batch_data_1], [batch_data_n]]]
 
-- [x] batch_file_name：表示多batch时，对应数据集的文件名，用于精度评测
+- [x] batch_lable：表示多batch时，对应标签
 - [x] batch_data_n：表示第n个输出，batch_data_n包含batch组数据
 - [x] 数据格式为numpy
+
+## 数据集引擎
+
+### 数据集介绍
+
+对数据集进行数据处理，处理后的数据满足推理引擎要求。输出数据格式需满足数据格式要求。
+
+示例代码参考[imagenet.py](datasets/vision/imagenet.py)
+
+### 数据集API
+
+- [x] 数据集注册接口
+
+```python
+def DatasetFactory.add_dataset(name, dataset)
+# name: 预处理名称，名称唯一，不能重复
+# dataset：数据集实现类，继承DatasetBase类
+```
+
+- [x] 数据集实现接口
+
+```python
+def __call__(batch_size, cfg, in_queue, out_queue)
+# batch_size：数据batch_size，和模型一致
+# cfg：预处理配置文件
+# in_queue：输入队列，输入为None
+# out_queue：输出队列
+```
 
 ## 预处理引擎
 
@@ -33,7 +62,7 @@ inference_engine是一个包括推理全流程的组件库，推理端到端流�
 
 对数据集进行数据处理，处理后的数据满足推理引擎要求。输出数据格式需满足数据格式要求。
 
-示例代码参考[imagenet.py](./pre_process/vision/imagenet.py)
+示例代码参考[classification.py](pre_process/vision/classification.py)
 
 ### 预处理API
 
@@ -48,12 +77,10 @@ def PreProcessFactory.add_pre_process(name, pre_process)
 - [x] 预处理实现接口
 
 ```python
-def __call__(index, batch_size, worker, cfg, in_queue, out_queue)
-# index: 预处理多进程序号，用于多进程唯一标识
-# batch_size：数据batch_size，和模型一致
-# worker：预处理进程数量
+def __call__(index, loop, cfg, in_queue, out_queue)
+# loop: 推理循环次数，根据数据集大小、batch_size及worker计算得到loop次数
 # cfg：预处理配置文件
-# in_queue：输入队列，输入为None
+# in_queue：输入队列，前一个节点的输出，前一个节点一般指Dataset
 # out_queue：输出队列
 ```
 

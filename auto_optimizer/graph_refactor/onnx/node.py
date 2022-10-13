@@ -119,9 +119,11 @@ class OnnxPlaceHolder(PlaceHolder):
             shape = shape
         )
     
-    def proto(self) -> ValueInfoProto:
+    def proto(self, shape=None) -> ValueInfoProto:
+        if self.shape:
+            shape = ['-1' if dim == -1 else dim for dim in self.shape]
         return helper.make_tensor_value_info(
             self._name,
             NP_TYPE_TO_TENSOR_TYPE[self._dtype],
-            self._shape
+            shape 
         )
