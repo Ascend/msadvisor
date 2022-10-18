@@ -24,7 +24,7 @@ from onnx import (
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_merge_continue_concat import KnowledgeMergeContinueConcat
-from utils import infer_run, optimize
+from utils import inference, optimize
 
 
 def make_c2_concat_model(onnx_name, x, y, z, diff_axis=False):
@@ -60,14 +60,15 @@ class TestKnowledgeMergeContinueConcat(unittest.TestCase):
         os.system("rm -rf {} {}".format(c2_concat_onnx, c2_concat_optimize_onnx))
 
         make_c2_concat_model(c2_concat_onnx, x, y, z, False)
-        ret = infer_run(c2_concat_onnx, (x, y, z))
+        ret = inference(c2_concat_onnx, (x, y, z))
 
         graph = OnnxGraph.parse(c2_concat_onnx)
         knowledge = KnowledgeMergeContinueConcat()
-        res = optimize(graph, knowledge, c2_concat_optimize_onnx)
+        res = optimize(graph, knowledge)
         self.assertTrue(res)
+        graph.save(c2_concat_optimize_onnx)
 
-        ret1 = infer_run(c2_concat_optimize_onnx, (x, y, z))
+        ret1 = inference(c2_concat_optimize_onnx, (x, y, z))
         self.assertTrue(np.array_equal(ret[0], ret1[0]))
 
     def test_merge_c2_diff_axis_concat(self):
@@ -80,12 +81,13 @@ class TestKnowledgeMergeContinueConcat(unittest.TestCase):
         os.system("rm -rf {} {}".format(c2_concat_onnx, c2_concat_optimize_onnx))
 
         make_c2_concat_model(c2_concat_onnx, x, y, z, True)
-        _ = infer_run(c2_concat_onnx, (x, y, z))
+        _ = inference(c2_concat_onnx, (x, y, z))
 
         graph = OnnxGraph.parse(c2_concat_onnx)
         knowledge = KnowledgeMergeContinueConcat()
-        res = optimize(graph, knowledge, c2_concat_optimize_onnx)
+        res = optimize(graph, knowledge)
         self.assertFalse(res)
+        graph.save(c2_concat_optimize_onnx)
 
 
 if __name__ == "__main__":
