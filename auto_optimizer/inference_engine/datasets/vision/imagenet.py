@@ -14,12 +14,13 @@
 
 import os
 import re
+import logging
 from abc import ABC
-
-import numpy as np
 
 from ..dataset_base import DatasetBase
 from ...data_process_factory import DatasetFactory
+
+logging = logging.getLogger("auto-optimizer")
 
 
 @DatasetFactory.register("imagenet")
@@ -28,7 +29,7 @@ class ImageNetDataset(DatasetBase, ABC):
         """
         和基类的参数顺序和个数需要一致
         """
-        print("dataset start")
+        logging.debug("dataset start")
         try:
             dataset_path, label_path = super()._get_params(cfg)
 
@@ -53,7 +54,7 @@ class ImageNetDataset(DatasetBase, ABC):
                     out_queue.put([labels, data])
 
         except Exception as err:
-            print("pre_process failed error={}".format(err))
+            logging.error("pre_process failed error={}".format(err))
 
-        print("dataset end")
+        logging.debug("dataset end")
 

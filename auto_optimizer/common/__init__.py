@@ -15,5 +15,6 @@
 from .register import Register
 from .config import Config
 from .utils import format_to_module, typeassert, check_file_exist
+from .log import setup_logging
 
-__all__ = ["Register", "Config", "format_to_module", "typeassert", "check_file_exist"]
+__all__ = ["Register", "Config", "format_to_module", "typeassert", "check_file_exist", "setup_logging"]

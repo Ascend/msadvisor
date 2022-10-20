@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 from abc import ABC
 
 import onnxruntime as rt
@@ -19,6 +20,8 @@ import numpy as np
 
 from .inference_base import InferenceBase
 from ..data_process_factory import InferenceFactory
+
+logging = logging.getLogger("auto-optimizer")
 
 
 @InferenceFactory.register("onnx")
@@ -49,7 +52,7 @@ class ONNXInference(InferenceBase, ABC):
         """
         和基类的参数顺序和个数需要一致
         """
-        print("inference start")
+        logging.debug("inference start")
         try:
             model = super()._get_params(cfg)
             session, input_name, output_name = self._session_init(model)
@@ -63,9 +66,9 @@ class ONNXInference(InferenceBase, ABC):
 
                 out_queue.put([data[0], out_data])
         except Exception as err:
-            print("inference failed error={}".format(err))
+            logging.error("inference failed error={}".format(err))
 
-        print("inference end")
+        logging.debug("inference end")
 
 
 
