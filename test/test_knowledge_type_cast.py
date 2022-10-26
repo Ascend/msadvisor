@@ -17,7 +17,7 @@ import numpy as np
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_type_cast import KnowledgeTypeCast
-from utils import infer_run, optimize
+from utils import inference, optimize
 
 
 def make_type_cast_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np.dtype):
@@ -60,8 +60,8 @@ class TestKnowledgeTypeCast(unittest.TestCase):
             result = optimize(graph, knowledge, optimized_file)
             self.assertTrue(result)
 
-            matrix_before_apply = infer_run(origin_file, [X, Y])
-            matrix_after_apply = infer_run(optimized_file, [X, Y])
+            matrix_before_apply = inference(origin_file, [X, Y])
+            matrix_after_apply = inference(optimized_file, [X, Y])
             self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
             for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
                 self.assertTrue(np.allclose(lmatrix, rmatrix))
