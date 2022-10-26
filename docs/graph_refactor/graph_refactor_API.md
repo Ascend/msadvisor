@@ -92,7 +92,7 @@ value_info = g.get_value_info(node.outputs[0])
 - `name(str)` - 常量节点名称 \
   `value(np.ndarray)` - 常量值
 
-**add_node(name, op_type, attrs=None) -> Node:**
+**add_node(name, op_type, inputs=[], outputs=[], attrs=None) -> Node:**
 
 - 添加孤立的算子节点。
 - `name(str)` - 算子节点名称 \
@@ -111,7 +111,7 @@ new_output = g.add_output('new_output', 'float32', [1,3,224,224])
 new_ini = g.add_initializer('new_ini', np.array([1,1,1]))
 
 # 添加算子节点
-new_op = g.add_node('Transpose_new', 'Transpose', {'perm':[1,0,2]})
+new_op = g.add_node('Transpose_new', 'Transpose', attrs={'perm':[1,0,2]})
 ```
 
 </details>
@@ -138,8 +138,8 @@ new_op = g.add_node('Transpose_new', 'Transpose', {'perm':[1,0,2]})
 
 ```python
 # 添加并插入单输入单输出算子
-new_cast_0 = g.add_node('new_cast_0', 'Cast', {'to':6}) 
-new_cast_1 = g.add_node('new_cast_1', 'Cast', {'to':6})
+new_cast_0 = g.add_node('new_cast_0', 'Cast', attrs={'to':6}) 
+new_cast_1 = g.add_node('new_cast_1', 'Cast', attrs={'to':6})
 g.insert_node('reference_node', new_cast_0) # 在参考节点后插入Cast算子
 g.insert_node('reference_node', new_cast_1, 1, 'before') # 在参考节点的第1条输入边插入Cast算子
 

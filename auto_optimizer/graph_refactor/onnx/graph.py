@@ -112,8 +112,9 @@ class OnnxGraph(BaseGraph):
         initializer = OnnxInitializer(name, value)
         return self._add_initializer(initializer)
 
-    def add_node(self, name, op_type, attrs=None, domain=None) -> OnnxNode:
-        node = OnnxNode(name, op_type, attrs=attrs, domain=domain)
+    def add_node(self, name, op_type, inputs=[], outputs=[], attrs=None, domain=None) -> OnnxNode:
+        node = OnnxNode(name, op_type, inputs, outputs, attrs=attrs, domain=domain)
+        self.update_map()
         return self._add_node(node)
 
     def proto(self) -> GraphProto:

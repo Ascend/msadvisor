@@ -104,7 +104,7 @@ class BaseGraph(ABC):
         pass
 
     @abstractmethod
-    def add_node(self, name, op_type, attrs=None, domain=None) -> Node:
+    def add_node(self, name, op_type, inputs=[], outputs=[], attrs=None, domain=None) -> Node:
         pass
 
     def _add_input(self, graph_input) -> PlaceHolder:

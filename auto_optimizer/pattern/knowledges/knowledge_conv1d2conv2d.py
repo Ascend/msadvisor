@@ -85,7 +85,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             return None
         self._insert_op_names.add(op_name)
         if self.__is_lower_onnx_version(graph):
-            us = graph.add_node(op_name, 'Unsqueeze', {'axes': np.array([2], dtype=np.int64)})
+            us = graph.add_node(op_name, 'Unsqueeze', attrs={'axes': np.array([2], dtype=np.int64)})
             graph.insert_node(conv.name, us, mode='before', refer_index=refer_index)
         else:
             us = graph.add_node(op_name, 'Unsqueeze')
@@ -132,7 +132,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
             return None
         self._insert_op_names.add(op_name)
         if self.__is_lower_onnx_version(graph):
-            sq = graph.add_node(op_name, 'Squeeze', {'axes': np.array([2], dtype=np.int64)})
+            sq = graph.add_node(op_name, 'Squeeze', attrs={'axes': np.array([2], dtype=np.int64)})
             graph.insert_node(node.name, sq, mode=mode, refer_index=refer_index)
         else:
             sq = graph.add_node(op_name, 'Squeeze')
