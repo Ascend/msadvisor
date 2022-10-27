@@ -14,9 +14,9 @@
 
 from typing import List, Dict
 import operator as op
-import numpy as np
 from enum import Enum
 from itertools import chain
+import numpy as np
 from onnx.onnx_cpp2py_export.shape_inference import InferenceError
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
@@ -301,7 +301,8 @@ class TypeCastApply(object):
 
         return True
 
-    def _insert_cast_node(self, graph: BaseGraph, node: BaseNode, mode: str, refer_index, cast_to: np.dtype) -> BaseNode:
+    def _insert_cast_node(self, graph: BaseGraph, node: BaseNode,
+                          mode: str, refer_index, cast_to: np.dtype) -> BaseNode:
         """ 插入类型转换节点
         :param graph      : 待插入节点整图
         :param node       : 参考节点
