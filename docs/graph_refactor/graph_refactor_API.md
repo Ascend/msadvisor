@@ -172,13 +172,21 @@ g.connect_node(
 - `name(str)` - 待删除节点名称 \
   `maps(Dict[int])` - 可选参数。`maps` 中的`key` 值表示待删除节点的输入下标，`value` 值为待删除节点的输出下标。若不提供 `maps`，默认将前驱节点的第一个输出和后继节点的第一个输入相连；若 `maps={}`，仅删除指定节点，不连边。
 
+**remove_invalid_nodes()**
+
+- 删除图中多余的无效节点（即不影响输出的多余节点）。
+
 <details>
   <summary> sample code </summary>
 
 ```python
+# 删除单个节点
 g.remove('Cast_0') # 删除节点， 默认将第0个输入和第0个输出相连
 g.remove('Split_0', {}) # 删除节点，不连边
 g.remove('Node_text', {0:0,1:1}) # 删除节点，将节点的第0个输入和第0个输出相连，第1个输入和第1个输出相连
+
+# 删除无效节点
+g.remove_invalid_nodes()
 ```
 
 </details>

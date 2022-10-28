@@ -36,7 +36,7 @@ class OnnxGraph(BaseGraph):
     ):
         super(OnnxGraph, self).__init__(nodes, inputs, outputs, initializers, value_infos, name)
         
-        opsets = kwargs.get('opset_imports', None)
+        opsets = kwargs.get('opset_imports', 11)
         if isinstance(opsets, int):
             opset_imports = onnx.OperatorSetIdProto()
             opset_imports.version = opsets

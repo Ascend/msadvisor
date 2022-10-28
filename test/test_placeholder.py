@@ -37,7 +37,7 @@ class TestPlaceHolder(unittest.TestCase):
     def test_placeholder_set_shape(self):
         ph = create_node('OnnxPlaceHolder')
         ph.shape = [-1,3,224,224]
-        self.assertEqual(ph.shape, [-1,3,224,224])
+        self.assertEqual(ph.shape, ['-1',3,224,224])
 
 if __name__ == "__main__":
     unittest.main()
