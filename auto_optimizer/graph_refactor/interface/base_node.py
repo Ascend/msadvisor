@@ -200,6 +200,8 @@ class PlaceHolder(BaseNode):
     
     @shape.setter
     def shape(self, shape:List[Union[str,int]]):
+        if -1 in shape:
+            warnings.warn('To represent the dynamic dimension int -1 is converted to str "-1".')
         self._shape = ['-1' if dim == -1 else dim for dim in shape]
     
     def __str__(self) -> str:

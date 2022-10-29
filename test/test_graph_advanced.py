@@ -54,9 +54,9 @@ class TestGraphAdvanced(unittest.TestCase):
         self.assertEqual(graph.get_value_info('0_out_0'), OnnxPlaceHolder('0_out_0', np.dtype('float32'), [2, 5000]))
         self.assertEqual(graph.get_value_info('1_out_0'), OnnxPlaceHolder('1_out_0', np.dtype('float32'), [4, 2500]))
     
-    def test_remove_invalid_node(self):
-        invalid_node = self.graph.add_node('invalid_node', 'Add')
-        self.graph.remove_invalid_nodes()
+    def test_remove_unused_node(self):
+        unused_node = self.graph.add_node('unused_node', 'Add')
+        self.graph.remove_unused_nodes()
         self.assertEqual(
             self.graph.nodes, 
             [

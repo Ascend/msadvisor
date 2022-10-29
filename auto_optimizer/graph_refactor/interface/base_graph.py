@@ -536,7 +536,7 @@ class BaseGraph(ABC):
         else:           
             self._nodes = sorted_nodes
         
-    def remove_invalid_nodes(self):
+    def remove_unused_nodes(self):
         self.update_map()
 
         # Initialize out_degree dict
@@ -550,7 +550,7 @@ class BaseGraph(ABC):
                 next_nodes.extend(self.get_next_nodes(output_name))
             out_degree[node] = len(set(next_nodes))
 
-        # remove invalid node
+        # remove unused operator nodes
         removed = set()
         queue = deque([n for n in out_degree.keys() if out_degree[n] == 0])
         while queue:
@@ -563,6 +563,10 @@ class BaseGraph(ABC):
                     out_degree[prev_node] -= 1
                     if out_degree[prev_node] == 0:
                         queue.append(prev_node)
+        
+        # remove unused graph inputs
+        op_names = [n.name for n in self._nodes]
+        self._inputs = list(filter(lambda x:x.name in op_names, self._inputs))
         
         self.update_map()
 

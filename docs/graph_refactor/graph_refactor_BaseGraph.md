@@ -25,7 +25,7 @@ BaseGraph 类提供了基本的接口用于增删改查节点：
 | [插入节点](./graph_refactor_API.md#插入节点) | 插入单输入单输出节点        | g.insert_node(refer_name, insert_node,refer_index, mode)     |
 |                                              | 插入多输入多输出节点        | g.connect_node(insert_node, prev_nodes_info, next_nodes_info) |
 | [删除节点](./graph_refactor_API.md#删除节点) | 删除单个节点                | g.remove(name)                                               |
-|                                             | 删除多余节点                | g.remove_invalid_nodes()                                               |
+|                                             | 删除多余节点                | g.remove_unused_nodes()                                               |
 
 除此之外，BaseGraph 类提供的其它功能如下所示：
 
