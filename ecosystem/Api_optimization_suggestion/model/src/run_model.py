@@ -41,11 +41,8 @@ def evaluate(dataPath,parameter):
     profilepath = dataPath + "/profiler/"+os.listdir(dataPath + "/profiler")[0]+'/device_0'
     project_dir = dataPath + '/project'
     result = class_result.Result()
-    # print(profilepath + "/summary/acl_0_1.csv")
     acl_profile_data = get_profile_data(profilepath)
-    # print(acl_profile_data)
     acl_statistic_data = get_statistic_profile_data(profilepath)
-    # print(acl_statistic_data)
     extend_result = init_extent_result()
     extend_result = process_profiling_file(acl_profile_data, acl_statistic_data, extend_result)
     extend_result = process_profiling_file_with_json(acl_statistic_data, extend_result)
@@ -86,9 +83,7 @@ def process_profiling_file(profile_data, statistic_profile_data, extend_result):
     aclrtSetDevice_num = 0
     aclrtCreateContext_first = 0
     contend = profile_data.readline()
-    # print(contend)
     while contend:
-        # print(contend)
         if aclrtSetDevice_num == 0:
             if contend.count('aclrtCreateContext') and aclrtCreateContext_first == 0:
                 stream_num += 2
@@ -120,19 +115,12 @@ def process_profiling_file(profile_data, statistic_profile_data, extend_result):
                 value.append('-')
                 extend_result.value.append(value)
         contend = profile_data.readline()
-    # value=[]
-    # value.append("Stream_num")
-    # value.append("The num of streams is "+str(max_stream))
-    # extend_result.value.append(value)
     return extend_result
 
 
 # 昇腾310 AI处理器媒体数据处理V1->昇腾310P AI处理器媒体数据处理V1迁移指引
 def process_profiling_file_with_json(profile_data, extend_result):
-    # with open('./suggestion.json', 'r', encoding='UTF-8') as task_json_file:
-    # task_data = json.load(task_json_file)
     contend = profile_data.readline()
-    # print(contend)
     while contend:
         api = str(contend).split(',')[0]
         if api in V1_transformer.keys():
@@ -149,7 +137,6 @@ def datatype_process(file_pathname, extend_result):
     # 遍历该目录下的所有code文件
     dvppmem = []
     for filename in os.listdir(file_pathname):
-        # print(filename)
         if filename.endswith('.cpp') or filename.endswith('.py') or filename.endswith('.h'):
             line_num = 0
             path = os.path.join(file_pathname, filename)
@@ -256,7 +243,6 @@ def datatype_process(file_pathname, extend_result):
                         extend_result.value.append(value)
 
                     for datatypeparam in task_data.keys():
-                        # print(datatypeparam)
                         if datatypeparam in line:
                             if datatypeparam == "ACL_VENC_BUF_SIZE_UINT32":
                                 ACL_VENC_BUF_SIZE_UINT32_flag = 1
@@ -335,14 +321,6 @@ def datatype_process(file_pathname, extend_result):
                                 value.append(filename + ' Line:' + str(line_num))
                                 extend_result.value.append(value)
 
-                            # print(datatypeparam)
-                            # print(data_para)
-                            # extend_result.value.append(datatypeparam)
-                            # extend_result.value.append(task_data[datatypeparam])
-
-
-
-
     return extend_result
 
 
@@ -357,11 +335,3 @@ def result_parse(result, extend_result):
     result.summary = "710 API operations need to be optimized"
     result.extend_result.append(extend_result)
     return result.generate()
-
-
-'''if __name__ == "__main__":
-    time1 = time.time()
-
-    ret = evaluate("/home/zjut-msadvisor/group2_test/data/",1)
-
-    print(ret)'''
