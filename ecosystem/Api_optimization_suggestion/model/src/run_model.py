@@ -48,6 +48,7 @@ def evaluate(dataPath, parameter):
         extend_result = process_profiling_file(acl_profile_fp, extend_result)
         extend_result = process_profiling_file_with_json(acl_statistic_fp, extend_result)
         extend_result = process_memory_suggestions(acl_profile_fp, acl_statistic_fp, extend_result)
+        extend_result = process_async_suggestions(acl_statistic_fp, extend_result)
         extend_result = datatype_process(project_dir, extend_result)
     return result_parse(result, extend_result)
 
@@ -152,6 +153,25 @@ def process_memory_suggestions(profile_fp, statistic_fp, extend_result):
     return extend_result
 
 
+def process_async_suggestions(statistic_fp, extend_result):
+    statistic_fp.seek(0)
+    excute_async_call = False
+    for line in statistic_fp.readlines():
+        api = line.split(',')[0]
+        if 'aclmdlExecuteAsync' in api:
+            excute_async_call = True
+        if 'aclrtSynchronizeStream' in api:
+            return extend_result
+
+    if excute_async_call:
+        value = []
+        value.append("aclmdlExecuteAsync")
+        value.append('Please use aclrtSynchronizeStream to block the Host run')
+        value.append('-')
+        extend_result.value.append(value)
+    return extend_result
+
+
 # 昇腾310 AI处理器媒体数据处理V1->昇腾310P AI处理器媒体数据处理V1迁移指引
 def process_profiling_file_with_json(profile_fp, extend_result):
     for line in profile_fp.readlines():
@@ -174,27 +194,11 @@ def datatype_process(file_pathname, extend_result):
             path = os.path.join(file_pathname, filename)
             with open(path, encoding='UTF-8') as f:
                 contents = f.readlines()
-                synch_need = 0
                 ACL_VENC_BUF_SIZE_UINT32_flag = 0
                 ACL_VENC_MAX_BITRATE_UINT32_flag = 0
                 ACL_VENC_RC_MODE_UINT32_flag = 0
-                memcpy_num = 1
                 for line in contents:
                     line_num += 1
-
-                    if synch_need == 1 and line.count('aclrtSynchronizeStream') == 0:
-                        synch_need = 0
-                        value = []
-                        value.append("aclmdlExecuteAsync")
-                        value.append('Please use aclrtSynchronizeStream to block the Host run')
-                        value.append(filename + ' Line:' + str(line_num))
-                        extend_result.value.append(value)
-                        memcpy_num += 1
-                    if synch_need == 1 and line.count('aclrtSynchronizeStream'):
-                        synch_need = 0
-                    if line.count('aclmdlExecuteAsync'):
-                        synch_need = 1
-
 
                     # 0 copy
                     if line.count('acldvppMalloc'):
