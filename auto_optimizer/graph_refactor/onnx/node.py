@@ -110,7 +110,7 @@ class OnnxPlaceHolder(PlaceHolder):
             dtype = TENSOR_TYPE_TO_NP_TYPE[tensor_type.elem_type]
             if tensor_type.HasField('shape'):
                 shape = [
-                    dim.dim_value if dim.dim_value > 0 else -1
+                    dim.dim_value if dim.HasField('dim_value') else dim.dim_param
                     for dim in tensor_type.shape.dim
                 ]
         return cls(

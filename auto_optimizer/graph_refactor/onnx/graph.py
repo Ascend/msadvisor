@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import warnings
+import os
 from typing import List, Dict, Union, Sequence, Optional
 
 import onnx
@@ -36,7 +37,7 @@ class OnnxGraph(BaseGraph):
     ):
         super(OnnxGraph, self).__init__(nodes, inputs, outputs, initializers, value_infos, name)
         
-        opsets = kwargs.get('opset_imports', None)
+        opsets = kwargs.get('opset_imports', 11)
         if isinstance(opsets, int):
             opset_imports = onnx.OperatorSetIdProto()
             opset_imports.version = opsets
@@ -152,10 +153,12 @@ class OnnxGraph(BaseGraph):
             onnx.checker.check_model = check_model
         
         print('Begin to extract the model.')
-        old_model_save_path = '{}_tmp.onnx'.format(new_model_save_path)
+        old_model_save_path = '{}_tmp.onnx'.format(new_model_save_path.split('.')[0])
         self.save(old_model_save_path)
         onnx.utils.extract_model(
             old_model_save_path, new_model_save_path, input_name_list, output_name_list)
+        os.remove(old_model_save_path)
+        
         print('Extract the model completed, model saved in {}.'.format(
             new_model_save_path))
         

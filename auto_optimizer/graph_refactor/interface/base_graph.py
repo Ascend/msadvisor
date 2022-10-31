@@ -535,6 +535,40 @@ class BaseGraph(ABC):
             raise RuntimeError('Cycle detected in graph!') 
         else:           
             self._nodes = sorted_nodes
+        
+    def remove_unused_nodes(self):
+        self.update_map()
+
+        # Initialize out_degree dict
+        out_degree = dict()
+        for node in self._nodes:
+            out_degree[node] = 0
+            next_nodes = []
+            for output_name in node.outputs:
+                if output_name in [output.name for output in self.outputs]:
+                    next_nodes.append(self._node_map[output_name])
+                next_nodes.extend(self.get_next_nodes(output_name))
+            out_degree[node] = len(set(next_nodes))
+
+        # remove unused operator nodes
+        removed = set()
+        queue = deque([n for n in out_degree.keys() if out_degree[n] == 0])
+        while queue:
+            node = queue.popleft()
+            self._nodes.remove(node)
+            removed.add(node) 
+            for input_name in node.inputs:
+                prev_node = self.get_prev_node(input_name)
+                if prev_node and prev_node not in queue and prev_node not in removed:
+                    out_degree[prev_node] -= 1
+                    if out_degree[prev_node] == 0:
+                        queue.append(prev_node)
+        
+        # remove unused graph inputs
+        op_names = [n.name for n in self._nodes]
+        self._inputs = list(filter(lambda x:x.name in op_names, self._inputs))
+        
+        self.update_map()
 
     @abstractmethod
     def save(self, path):

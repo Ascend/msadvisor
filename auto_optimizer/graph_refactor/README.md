@@ -47,4 +47,4 @@ g.save('layernorm_modify.onnx')
 
 - 接口详见 [API 说明和示例](../../docs/graph_refactor/graph_refactor_API.md)
 - BaseNode 使用方法参见 [BaseNode 说明](../../docs/graph_refactor/graph_refactor_BaseNode.md)
-- BaseGraph 使用方法参见 [BaseGraph 说明](../../docs/graph_fefactor/graph_refactor_BaseGraph.md)
+- BaseGraph 使用方法参见 [BaseGraph 说明](../../docs/graph_refactor/graph_refactor_BaseGraph.md)
