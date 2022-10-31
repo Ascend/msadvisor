@@ -1,0 +1,12 @@
+{
+  "model_list": [
+    {
+      "model_name": "group2_model",
+      "session_list": [
+        {
+          "python_model_path": "/home/zjut-msadvisor/group2_test/model/src/"
+	}
+      ]
+    }
+  ]
+}
