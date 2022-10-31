@@ -47,6 +47,7 @@ def evaluate(dataPath, parameter):
         extend_result = init_extent_result()
         extend_result = process_profiling_file(acl_profile_fp, extend_result)
         extend_result = process_profiling_file_with_json(acl_statistic_fp, extend_result)
+        extend_result = process_memory_suggestions(acl_profile_fp, acl_statistic_fp, extend_result)
         extend_result = datatype_process(project_dir, extend_result)
     return result_parse(result, extend_result)
 
@@ -116,6 +117,40 @@ def process_profiling_file(profile_fp, extend_result):
                 extend_result.value.append(value)
     return extend_result
 
+def process_memory_suggestions(profile_fp, statistic_fp, extend_result):
+    profile_fp.seek(0)
+    statistic_fp.seek(0)
+    if all(map(lambda l: 'aclrtMemcpy' not in l.split(',')[0], statistic_fp.readlines())):
+        return extend_result
+
+    can_access_peer_call = False
+    enable_peer_access_call = False
+    for line in profile_fp.readlines():
+        api = line.split(',')[0]
+        if 'aclrtDeviceCanAccessPeer' in api:
+            can_access_peer_call = True
+        if 'aclrtDeviceEnablePeerAccess' in api:
+            enable_peer_access_call = True
+        if can_access_peer_call and enable_peer_access_call:
+            return extend_result
+        if 'aclrtMemcpy' in api:
+            break
+
+    value = []
+    value.append("aclrtMemcpy")
+    if not can_access_peer_call and not enable_peer_access_call:
+        value.append(
+            "Please use aclrtDeviceCanAccessPeer and aclrtDeviceEnablePeerAccess to check whether supported memory copy")
+    elif not can_access_peer_call:
+        value.append(
+            "Please use aclrtDeviceCanAccessPeer to check whether supported memory copy")
+    elif not enable_peer_access_call:
+        value.append(
+            "Please use aclrtDeviceEnablePeerAccess to check whether supported memory copy")
+    value.append('-')
+    extend_result.value.append(value)
+    return extend_result
+
 
 # 昇腾310 AI处理器媒体数据处理V1->昇腾310P AI处理器媒体数据处理V1迁移指引
 def process_profiling_file_with_json(profile_fp, extend_result):
@@ -143,43 +178,9 @@ def datatype_process(file_pathname, extend_result):
                 ACL_VENC_BUF_SIZE_UINT32_flag = 0
                 ACL_VENC_MAX_BITRATE_UINT32_flag = 0
                 ACL_VENC_RC_MODE_UINT32_flag = 0
-                EnablePeerAccess_num = 1
-                CanAccessPeer_num = 1
                 memcpy_num = 1
                 for line in contents:
                     line_num += 1
-                    if line.count('aclrtDeviceCanAccessPeer'):
-                        CanAccessPeer_num += 1
-                    if line.count('aclrtDeviceEnablePeerAccess'):
-                        EnablePeerAccess_num += 1
-                    if line.count('aclrtMemcpy'):
-                        memcpy_num += 1
-                        if memcpy_num > EnablePeerAccess_num and memcpy_num == CanAccessPeer_num:
-                            EnablePeerAccess_num += 1
-                            value = []
-                            value.append("aclrtMemcpy")
-                            value.append(
-                                "Please use aclrtDeviceEnablePeerAccess to check whether supported memory copy")
-                            value.append(filename + ' Line:' + str(line_num))
-                            extend_result.value.append(value)
-                        elif memcpy_num == EnablePeerAccess_num and memcpy_num > CanAccessPeer_num:
-                            CanAccessPeer_num += 1
-                            value = []
-                            value.append("aclrtMemcpy")
-                            value.append(
-                                "Please use aclrtDeviceCanAccessPeer to check whether supported memory copy")
-                            value.append(filename + ' Line:' + str(line_num))
-                            extend_result.value.append(value)
-                        elif memcpy_num > EnablePeerAccess_num and memcpy_num > CanAccessPeer_num:
-                            EnablePeerAccess_num += 1
-                            CanAccessPeer_num += 1
-                            value = []
-                            value.append("aclrtMemcpy")
-                            value.append(
-                                "Please use aclrtDeviceCanAccessPeer and aclrtDeviceEnablePeerAccess to check whether supported memory copy")
-                            value.append(filename + ' Line:' + str(line_num))
-                            extend_result.value.append(value)
-
 
                     if synch_need == 1 and line.count('aclrtSynchronizeStream') == 0:
                         synch_need = 0
