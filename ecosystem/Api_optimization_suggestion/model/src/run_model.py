@@ -39,27 +39,46 @@ task_data={
 
 
 def evaluate(dataPath, parameter):
-    profilepath = dataPath + "/profiler/"+os.listdir(dataPath + "/profiler")[0]+'/device_0'
-    project_dir = dataPath + '/project'
-    result = class_result.Result()
-    with open(get_profile_path(profilepath)) as acl_profile_fp, \
-         open(get_statistic_profile_path(profilepath)) as acl_statistic_fp:
-        extend_result = init_extent_result()
-        extend_result = process_profiling_file(acl_profile_fp, extend_result)
-        extend_result = process_profiling_file_with_json(acl_statistic_fp, extend_result)
+    profilepath = os.path.join(dataPath, 'profiler')
+    if os.path.isdir(profilepath):
+        subdirs = os.listdir(profilepath)
+        if subdirs:
+            profilepath = os.path.join(os.path.join(profilepath, subdirs[0]), 'device_0')
+    project_dir = os.path.join(dataPath, 'project')
+
+    acl_profile_fp = get_profile_fp(profilepath)
+    acl_statistic_fp = get_statistic_profile_fp(profilepath)
+    extend_result = init_extent_result()
+    if acl_profile_fp and acl_statistic_fp:
         extend_result = process_memory_suggestions(acl_profile_fp, acl_statistic_fp, extend_result)
+    elif acl_profile_fp:
+        extend_result = process_profiling_file(acl_profile_fp, extend_result)
+    elif acl_statistic_fp:
+        extend_result = process_profiling_file_with_json(acl_statistic_fp, extend_result)
         extend_result = process_async_suggestions(acl_statistic_fp, extend_result)
-        extend_result = datatype_process(project_dir, extend_result)
+    extend_result = datatype_process(project_dir, extend_result)
+
+    if acl_profile_fp:
+        acl_profile_fp.close()
+    if acl_statistic_fp:
+        acl_statistic_fp.close()
+
+    result = class_result.Result()
     return result_parse(result, extend_result)
 
 
 # read profiling file
-def get_profile_path(profilepath):
-    return profilepath + "/summary/acl_0_1_1.csv"
+def get_profile_fp(profilepath):
+    try:
+        return open(profilepath + "/summary/acl_0_1_1.csv")
+    except IOError:
+        return None
 
-
-def get_statistic_profile_path(profilepath):
-    return profilepath + "/summary/acl_statistic_0_1_1.csv"
+def get_statistic_profile_fp(profilepath):
+    try:
+        return open(profilepath + "/summary/acl_statistic_0_1_1.csv")
+    except IOError:
+        return None
 
 
 def get_code_data(codepath):
@@ -279,7 +298,7 @@ def datatype_process(file_pathname, extend_result):
 
                                 ACL_VENC_SRC_RATE_UINT32_para = line.split('=')[1]
                                 ACL_VENC_SRC_RATE_UINT32_para = int(ACL_VENC_SRC_RATE_UINT32_para.split(',')[0])
-                                if ACL_VENC_SRC_RATE_UINT32_para > 240 or ACL_VENC_SRC_RATE_UINT32_para < 1 or (
+                                if (ACL_VENC_SRC_RATE_UINT32_para > 240 or ACL_VENC_SRC_RATE_UINT32_para < 1) and (
                                         ACL_VENC_SRC_RATE_UINT32_para != 0):
                                     value = []
                                     value.append(datatypeparam)
@@ -291,7 +310,7 @@ def datatype_process(file_pathname, extend_result):
                             elif datatypeparam == "ACL_VENC_RC_MODE_UINT32":
                                 ACL_VENC_RC_MODE_UINT32_flag = 1
                                 ACL_VENC_RC_MODE_UINT32_para = line.split('=')[1]
-                                ACL_VENC_RC_MODE_UINT32_para = ACL_VENC_RC_MODE_UINT32_para.split(',')[0]
+                                ACL_VENC_RC_MODE_UINT32_para = int(ACL_VENC_RC_MODE_UINT32_para.split(',')[0])
                                 if ACL_VENC_RC_MODE_UINT32_para == 0:
                                     value = []
                                     value.append(datatypeparam)
@@ -304,24 +323,25 @@ def datatype_process(file_pathname, extend_result):
                                 value.append(task_data[datatypeparam])
                                 value.append(filename + ' Line:' + str(line_num))
                                 extend_result.value.append(value)
-                            if ACL_VENC_BUF_SIZE_UINT32_flag == 0:
-                                value = []
-                                value.append("ACL_VENC_BUF_SIZE_UINT32")
-                                value.append("The parameter value defaults to 8m")
-                                value.append(filename + ' Line:' + str(line_num))
-                                extend_result.value.append(value)
-                            if ACL_VENC_MAX_BITRATE_UINT32_flag == 0:
-                                value = []
-                                value.append("ACL_VENC_MAX_BITRATE_UINT32")
-                                value.append("The default value of 0 indicates VBR mode")
-                                value.append(filename + ' Line:' + str(line_num))
-                                extend_result.value.append(value)
-                            if ACL_VENC_RC_MODE_UINT32_flag == 0:
-                                value = []
-                                value.append("ACL_VENC_RC_MODE_UINT32")
-                                value.append("The parameter value defaults to 2000")
-                                value.append(filename + ' Line:' + str(line_num))
-                                extend_result.value.append(value)
+
+                if ACL_VENC_BUF_SIZE_UINT32_flag == 0:
+                    value = []
+                    value.append("ACL_VENC_BUF_SIZE_UINT32")
+                    value.append("The parameter value defaults to 8m")
+                    value.append(f'{filename} Line:-')
+                    extend_result.value.append(value)
+                if ACL_VENC_MAX_BITRATE_UINT32_flag == 0:
+                    value = []
+                    value.append("ACL_VENC_MAX_BITRATE_UINT32")
+                    value.append("The parameter value defaults to 2000")
+                    value.append(f'{filename} Line:-')
+                    extend_result.value.append(value)
+                if ACL_VENC_RC_MODE_UINT32_flag == 0:
+                    value = []
+                    value.append("ACL_VENC_RC_MODE_UINT32")
+                    value.append("The default value of 0 indicates VBR mode")
+                    value.append(f'{filename} Line:-')
+                    extend_result.value.append(value)
 
     return extend_result
 
