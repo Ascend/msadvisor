@@ -197,13 +197,13 @@ def process_async_suggestions(statistic_fp, extend_result):
 
 # 昇腾310 AI处理器媒体数据处理V1->昇腾310P AI处理器媒体数据处理V1迁移指引
 def process_profiling_file_with_json(profile_fp, extend_result):
-    for line in profile_fp.readlines():
+    for line_num, line in enumerate(profile_fp.readlines()):
         api = str(line).split(',')[0]
         if api in V1_transformer.keys():
             value = []
             value.append(api)
             value.append(V1_transformer[api])
-            value.append('-')
+            value.append(f'Line:{line_num}')
             extend_result.value.append(value)
     return extend_result
 
