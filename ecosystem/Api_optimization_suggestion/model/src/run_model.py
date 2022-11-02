@@ -235,8 +235,6 @@ def datatype_process(file_pathname, extend_result):
                     if line.count('aclrtMemcpy') and dvppmem != []:
                         para = line.split('aclrtMemcpy')[1]
                         para = para.split(',')[2]
-                        print(para)
-                        print(dvppmem)
                         if para in dvppmem:
                             value = []
                             value.append('aclrtMemcpy')
