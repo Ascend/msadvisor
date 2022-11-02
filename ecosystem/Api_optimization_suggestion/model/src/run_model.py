@@ -207,6 +207,9 @@ def process_profiling_file_with_json(profile_fp, extend_result):
 def datatype_process(file_pathname, extend_result):
     # 遍历该目录下的所有code文件
     dvppmem = []
+    if not os.path.isdir(file_pathname):
+        return extend_result
+
     for filename in os.listdir(file_pathname):
         if filename.endswith('.cpp') or filename.endswith('.py') or filename.endswith('.h'):
             line_num = 0
