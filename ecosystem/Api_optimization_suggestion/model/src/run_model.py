@@ -174,20 +174,24 @@ def process_memory_suggestions(profile_fp, statistic_fp, extend_result):
 
 def process_async_suggestions(statistic_fp, extend_result):
     statistic_fp.seek(0)
-    excute_async_call = False
-    for line in statistic_fp.readlines():
+    line_num_stack = []
+    for line_num, line in enumerate(statistic_fp.readlines()):
         api = line.split(',')[0]
         if 'aclmdlExecuteAsync' in api:
-            excute_async_call = True
+            line_num_stack.append(line_num)
         if 'aclrtSynchronizeStream' in api:
-            return extend_result
+            backtrace = line_num
+            while len(line_num_stack) > 0 and backtrace == line_num_stack[-1] + 1:
+                backtrace = line_num_stack.pop()
 
-    if excute_async_call:
-        value = []
-        value.append("aclmdlExecuteAsync")
-        value.append('Please use aclrtSynchronizeStream to block the Host run')
-        value.append('-')
-        extend_result.value.append(value)
+    if len(line_num_stack) == 0:
+        return extend_result
+
+    value = []
+    value.append("aclmdlExecuteAsync")
+    value.append('Please use aclrtSynchronizeStream to block the Host run')
+    value.append('Line:' + ', '.join(map(str, line_num_stack)))
+    extend_result.value.append(value)
     return extend_result
 
 
