@@ -115,12 +115,6 @@ def process_profiling_file(profile_fp, extend_result):
                 max_stream = stream_num
             elif line.count('aclrtDestroyStream') and stream_num > 0:
                 stream_num -= 1
-            if stream_num >= 1024:
-                value = []
-                value.append("aclrtCreateStream")
-                value.append("The max num of streams is 1024")
-                value.append('-')
-                extend_result.value.append(value)
         else:
             if line.count('aclrtCreateStream') or line.count('aclrtCreateContext') or line.count(
                     'aclrtSetDevice'):
@@ -129,13 +123,15 @@ def process_profiling_file(profile_fp, extend_result):
                 max_stream = stream_num
             elif line.count('aclrtDestroyStream') and stream_num > 0:
                 stream_num -= 1
-            if stream_num >= 1024:
-                value = []
-                value.append("aclrtCreateStream")
-                value.append("The max num of streams is 1024")
-                value.append('-')
-                extend_result.value.append(value)
+
+    if stream_num >= 1024:
+        value = []
+        value.append("aclrtCreateStream")
+        value.append(f"The max num of streams is 1024, current is {stream_num}")
+        value.append('-')
+        extend_result.value.append(value)
     return extend_result
+
 
 def process_memory_suggestions(profile_fp, statistic_fp, extend_result):
     profile_fp.seek(0)
@@ -231,10 +227,10 @@ def datatype_process(file_pathname, extend_result):
                         para = line.split('(')[1]
                         para = para.split(',')[0]
                         para = para.split(')')[0]
-                        dvppmem.append(para)
+                        dvppmem.append(para.strip())
                     if line.count('aclrtMemcpy') and dvppmem != []:
                         para = line.split('aclrtMemcpy')[1]
-                        para = para.split(',')[2]
+                        para = para.split(',')[2].strip()
                         if para in dvppmem:
                             value = []
                             value.append('aclrtMemcpy')
