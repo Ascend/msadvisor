@@ -217,27 +217,31 @@ class TypeCastApply(object):
         :param match_result: 子图匹配结果
         :return            : 类型转换是否应用成功
         """
-        node_map       = {}
-        const_inputs   = set()
+        node_map = {}
         # 构建子图节点映射
         for node_dict in match_result.node_dicts:
             for nodes in node_dict.values():
                 for node in nodes:
                     node_map[node.name] = node
 
-        # 构建常量输入集合
-        for initializer in graph.initializers:
-            const_inputs.add(initializer.name)
-
         # 构建边名与数据类型的映射表
-        edge_type_dict = {}
-        for edge in chain(graph.value_infos, graph.inputs, graph.outputs):
-            edge_type_dict[edge.name] = edge.dtype
-        for initializer in graph.initializers:
-            edge_type_dict[initializer.name] = initializer.value.dtype
+        edge_type_dict = self._make_edge_type_dict(graph)
 
+        self._cast_subgraph_inputs(graph, node_map, edge_type_dict)
+        self._cast_subgraph_outputs(graph, node_map, edge_type_dict)
+
+        return True
+
+    def _cast_subgraph_inputs(self, graph: BaseGraph, node_map, edge_type_dict):
+        """ 将子图输入转换为目标类型
+        :param graph         : 整图
+        :param node_map      : 子图节点表
+        :param edge_type_dict: 边名与数据类型的映射表
+        """
+        const_inputs = set([initializer.name for initializer in graph.initializers])
         cast_from = self._strategy.cast_from
         cast_to   = self._strategy.cast_to
+
         # 遍历子图中的所有节点
         for node in node_map.values():
             # 处理节点输入
@@ -267,6 +271,16 @@ class TypeCastApply(object):
                     if node_input == input_node.name:
                         self._insert_cast_node(graph, node, 'before', input_index, cast_to)
 
+    def _cast_subgraph_outputs(self, graph, node_map, edge_type_dict):
+        """ 将子图输出转换为原始类型
+        :param graph         : 整图
+        :param node_map      : 子图节点表
+        :param edge_type_dict: 边名与数据类型的映射表
+        """
+        cast_from = self._strategy.cast_from
+
+        # 遍历子图中的所有节点
+        for node in node_map.values():
             # 处理节点输出
             for output_index, node_output in enumerate(node.outputs):
                 # 如果当前输出不能泛型则不处理
@@ -304,7 +318,17 @@ class TypeCastApply(object):
                     if node_output == output_node.name:
                         self._insert_cast_node(graph, output_node, 'before', 0, cast_from)
 
-        return True
+    def _make_edge_type_dict(self, graph: BaseGraph) -> Dict[str, np.dtype]:
+        """ 构建边名与数据类型的映射表
+        :param graph: 构建映射表的整图
+        :return     : 边名与数据类型的映射表
+        """
+        edge_type_dict = {}
+        for edge in chain(graph.value_infos, graph.inputs, graph.outputs):
+            edge_type_dict[edge.name] = edge.dtype
+        for initializer in graph.initializers:
+            edge_type_dict[initializer.name] = initializer.value.dtype
+        return edge_type_dict
 
     def _insert_cast_node(self, graph: BaseGraph, node: BaseNode,
                           mode: str, refer_index, cast_to: np.dtype) -> BaseNode:
