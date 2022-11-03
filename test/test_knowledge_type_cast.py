@@ -52,7 +52,7 @@ class TestKnowledgeTypeCast(unittest.TestCase):
 
             onnx_name = 'type_cast_test'
             origin_file = f'onnx/{onnx_name}.onnx'
-            optimized_file = f'onnx/{onnx_name}_optimize,onnx'
+            optimized_file = f'onnx/{onnx_name}_optimize.onnx'
             graph = make_type_cast_model(onnx_name, X, Y, value_type)
             graph.save(origin_file)
 
