@@ -218,16 +218,12 @@ class TypeCastApply(object):
         :return            : 类型转换是否应用成功
         """
         node_map       = {}
-        node_inputs    = set()
-        node_outputs   = set()
         const_inputs   = set()
-        # 构建所有输入输出的集合
+        # 构建子图节点映射
         for node_dict in match_result.node_dicts:
             for nodes in node_dict.values():
                 for node in nodes:
                     node_map[node.name] = node
-                    node_inputs.update(node.inputs)
-                    node_outputs.update(node.outputs)
 
         # 构建常量输入集合
         for initializer in graph.initializers:
@@ -258,9 +254,18 @@ class TypeCastApply(object):
                     self._const_type_cast(graph, node_input, cast_to)
                     continue
 
-                # 节点的输入是子图的外部输入，则将输入转换为目标类型
-                if node_input not in node_outputs:
-                    self._insert_cast_node(graph, node, 'before', input_index, cast_to)
+                # 前置节点为子图外部节点或前置节点的当前输出为非泛型输出，则将需要将输入转换为目标类型
+                prev_node = graph.get_prev_node(node_input)
+                if prev_node:
+                    output_index = prev_node.outputs.index(node_input)
+                    _is_generic_output = GenericOpMatch.is_generic_io(prev_node, IOType.NODE_OUTPUT, output_index)
+                    if prev_node.name not in node_map or not _is_generic_output:
+                        self._insert_cast_node(graph, node, 'before', input_index, cast_to)
+                    continue
+                    
+                for input_node in graph.inputs:
+                    if node_input == input_node.name:
+                        self._insert_cast_node(graph, node, 'before', input_index, cast_to)
 
             # 处理节点输出
             for output_index, node_output in enumerate(node.outputs):
