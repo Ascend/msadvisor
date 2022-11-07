@@ -20,8 +20,8 @@ from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node
 from auto_optimizer.pattern.pattern import MATCH_PATTERN, Pattern
 from auto_optimizer.pattern.matcher import MatchResult
-from .knowledge_base import KnowledgeBase
-from .utils import try_access, NextNodeCount
+from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
+from auto_optimizer.pattern.utils import NextNodeCount
 
 
 # continue 4 Concat op
@@ -121,8 +121,10 @@ class KnowledgeMergeContinueConcat(KnowledgeBase):
 
     def merge_concat_nodes(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
         # get concats operators here, we only kept the last concat operator after optimization
-        concat_to_keep = try_access(graph, matchinfo['Concat_to_keep'][0].name, Node)
-        concats_to_remove = [try_access(graph, v[0].name, Node) for k, v in matchinfo.items() if k != 'Concat_to_keep']
+        concat_to_keep = graph.get_node(matchinfo['Concat_to_keep'][0].name, node_type=Node)
+        concats_to_remove = [
+            graph.get_node(v[0].name, node_type=Node) for k, v in matchinfo.items() if k != 'Concat_to_keep'
+        ]
         concats_total = [*concats_to_remove, concat_to_keep]
         # in case previous apply functions modified the graph and removed/renamed any node of current matching subgraph
         if any(node is None for node in concats_total):
@@ -144,6 +146,7 @@ class KnowledgeMergeContinueConcat(KnowledgeBase):
         for node in concats_to_remove:
             graph.remove(node.name, {})
         concat_to_keep.inputs = new_inputs
+        graph.update_map()
         return True
 
     def _merge_continue_concat_apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:

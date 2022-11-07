@@ -25,8 +25,8 @@ from auto_optimizer.pattern.pattern import MATCH_PATTERN
 from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
-from .knowledge_base import KnowledgeBase
-from .utils import try_access, NextNodeCount
+from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
+from auto_optimizer.pattern.utils import NextNodeCount
 
 
 class ConstSecondInput(MatchBase):
@@ -37,7 +37,7 @@ class ConstSecondInput(MatchBase):
     def match(self, node: BaseNode, graph: BaseGraph) -> bool:
         if not isinstance(node, (Node, )):
             return False
-        input1 = try_access(graph, node.inputs[1], type_=Initializer)
+        input1 = graph.get_node(node.inputs[1], node_type=Initializer)
         return input1 is not None
 
 
@@ -242,7 +242,7 @@ class KnowledgeQKVSlice(KnowledgeBase):
         """
         indices = []
         for n in nodes:
-            indice = try_access(graph, name=n.inputs[1], type_=Initializer)
+            indice = graph.get_node(n.inputs[1], node_type=Initializer)
             if indice is None or indice.value.size > 1:
                 return []
             indices.append(int(indice.value))
@@ -261,8 +261,8 @@ class KnowledgeQKVSlice(KnowledgeBase):
         element_wise_nodes = matchinfo.get('ElementWise_0', [])
 
         # 矩阵乘法的被乘数和reshape算子的形状参数都必须是Initializer
-        matmul_weight = try_access(graph, name=matmul_node.inputs[1], type_=Initializer)
-        resh_weight = try_access(graph, name=reshape_node.inputs[1], type_=Initializer)
+        matmul_weight = graph.get_node(matmul_node.inputs[1], node_type=Initializer)
+        resh_weight = graph.get_node(reshape_node.inputs[1], node_type=Initializer)
         if matmul_weight is None or resh_weight is None:
             logging.info("The multiplicand of MatMul or shape parameter of Reshape operator is not Initializer.")
             return False
@@ -299,8 +299,8 @@ class KnowledgeQKVSlice(KnowledgeBase):
             return False
 
         for node in element_wise_nodes:
-            input0 = try_access(graph, name=node.inputs[0], type_=Initializer)
-            input1 = try_access(graph, name=node.inputs[1], type_=Initializer)
+            input0 = graph.get_node(node.inputs[0], node_type=Initializer)
+            input1 = graph.get_node(node.inputs[1], node_type=Initializer)
             if not ((input0 is None) ^ (input1 is None)):
                 logging.info(f"There should be exactly one Initializer parameter in Node {node.name}")
                 # 所有逐元素运算算子都应该有且仅有一个参数是Initializer，另一个参数是PlaceHolder
@@ -338,8 +338,8 @@ class KnowledgeQKVSlice(KnowledgeBase):
         self.__connect_splitted_nodes(new_matmuls, pre_nodes)
 
         for node in element_wise_nodes:
-            input0 = try_access(graph, name=node.inputs[0], type_=Initializer)
-            input1 = try_access(graph, name=node.inputs[1], type_=Initializer)
+            input0 = graph.get_node(node.inputs[0], node_type=Initializer)
+            input1 = graph.get_node(node.inputs[1], node_type=Initializer)
             # 由于这两个参数可以互换，我们改图时需要判断具体哪个是Initializer
             node_weight = input0 if input1 is None else input1
             placeholder_index = 1 if input1 is None else 0
@@ -389,6 +389,7 @@ class KnowledgeQKVSlice(KnowledgeBase):
         for name in [node.name for node in element_wise_nodes]:
             graph.remove(name, {})
         graph.remove(matmul_node.name, {})
+        graph.update_map()
         return True
 
     def _qkv_slice_apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:

@@ -18,11 +18,11 @@ import numpy as np
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Initializer, Node
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node, Initializer
 from auto_optimizer.pattern.pattern import MATCH_PATTERN, MatchBase, Pattern
 from auto_optimizer.pattern.matcher import MatchResult
-from .knowledge_base import KnowledgeBase
-from .utils import try_access, NextNodeCount
+from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
+from auto_optimizer.pattern.utils import NextNodeCount
 
 
 class NonNegetiveAxes(MatchBase):
@@ -37,7 +37,7 @@ class NonNegetiveAxes(MatchBase):
             return False
         if len(node.inputs) < 4:
             return False
-        axes = try_access(graph, node.inputs[3], Initializer)
+        axes = graph.get_node(node.inputs[3], node_type=Initializer)
         return axes is not None and all(v >= 0 for v in axes.value)
 
 
@@ -130,14 +130,20 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
 
     def merge_slice_nodes(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
         # get slice operators here, we only kept the last slice operator after optimization
-        slice_to_keep = try_access(graph, matchinfo['Slice_to_keep'][0].name, Node)
-        slices_to_remove = [try_access(graph, v[0].name, Node) for k, v in matchinfo.items() if k != 'Slice_to_keep']
+        slice_to_keep = graph.get_node(matchinfo['Slice_to_keep'][0].name, node_type=Node)
+        slices_to_remove = [
+            graph.get_node(v[0].name, node_type=Node) for k, v in matchinfo.items() if k != 'Slice_to_keep'
+        ]
         slices_total = [*slices_to_remove, slice_to_keep]
         # in case previous apply functions modified the graph and removed/renamed any node of current matching subgraph
         if any(node is None for node in slices_total):
             return False
 
-        input_initializers = [[try_access(graph, inp) for inp in node.inputs[1:]] for node in slices_total]
+        input_initializers = [
+            [
+                graph.get_node(inp, node_type=Initializer) for inp in node.inputs[1:]
+            ] for node in slices_total
+        ]
         if any(inp is None for inp in input_initializers):
             return False
         input_values = [[inp.value for inp in lst] for lst in input_initializers]
@@ -166,6 +172,7 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
             )
             # the first input of slice operator is input data, so off by 1
             slice_to_keep.inputs[i + 1] = new_input.name
+        graph.update_map()
         return True
 
     def _merge_continue_slice_apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:

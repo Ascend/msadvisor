@@ -21,11 +21,11 @@ import onnx
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node, PlaceHolder, Initializer
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Initializer, Node, PlaceHolder
 from auto_optimizer.pattern.pattern import MATCH_PATTERN, Pattern, MatchBase
 from auto_optimizer.pattern.matcher import MatchResult
-from .knowledge_base import KnowledgeBase
-from .utils import try_access, NextNodeCount
+from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
+from auto_optimizer.pattern.utils import NextNodeCount
 
 SHAPE_THRESHOLD = 20000
 
@@ -44,7 +44,7 @@ class HugeConv(MatchBase):
             return False
         if len(kernel_shape) != 2:
             return False
-        ph = try_access(graph, node.inputs[0], PlaceHolder)
+        ph = graph.get_node(node.inputs[0], node_type=PlaceHolder)
         return ph is not None and ph.shape[-1] >= SHAPE_THRESHOLD
 
 
@@ -136,7 +136,7 @@ class KnowledgeTransposeHugeConv(KnowledgeBase):
         strides[-1], strides[-2] = strides[-2], strides[-1]
         conv.attrs['strides'] = strides
 
-        weight = try_access(graph, conv.inputs[1], Initializer)
+        weight = graph.get_node(conv.inputs[1], node_type=Initializer)
         perm = [i for i in range(len(weight.value.shape))]
         perm[-1], perm[-2] = perm[-2], perm[-1]
         weight_value = np.transpose(weight.value, perm)
@@ -146,13 +146,13 @@ class KnowledgeTransposeHugeConv(KnowledgeBase):
 
     def _aasist_match_apply(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
         # make sure nodes of matching subgraph still exist in case some previous apply functions modified graph
-        if any(try_access(graph, node.name, Node) is None for nodes in matchinfo.values() for node in nodes):
+        if any(graph.get_node(node.name, node_type=Node) is None for nodes in matchinfo.values() for node in nodes):
             return False
 
-        selu_0 = try_access(graph, matchinfo['Selu_0'][0].name, Node)
-        add_0 = try_access(graph, matchinfo['Add_0'][0].name, Node)
-        convs = [try_access(graph, matchinfo[name][0].name, Node) for name in ('Conv_0', 'Conv_1', 'Conv_2')]
-        ph = try_access(graph, selu_0.inputs[0], PlaceHolder)
+        selu_0 = graph.get_node(matchinfo['Selu_0'][0].name, node_type=Node)
+        add_0 = graph.get_node(matchinfo['Add_0'][0].name, node_type=Node)
+        convs = [graph.get_node(matchinfo[name][0].name, node_type=Node) for name in ('Conv_0', 'Conv_1', 'Conv_2')]
+        ph = graph.get_node(selu_0.inputs[0], node_type=PlaceHolder)
         perm = [i for i in range(len(ph.shape))]
         perm[-1], perm[-2] = perm[-2], perm[-1]
 
@@ -175,6 +175,7 @@ class KnowledgeTransposeHugeConv(KnowledgeBase):
             attrs={'perm': perm}
         )
         graph.insert_node(add_0.name, transpose_post, 0, 'after')
+        graph.update_map()
         return True
 
     def _aasist_pattern_apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:

@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Type, Optional
 from functools import wraps
 import time
 
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node, PlaceHolder
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node
 from auto_optimizer.pattern.pattern import MatchBase
 
 
@@ -30,26 +29,6 @@ def timing(func):
         print(f'func:{func.__name__} args:[{args}, {kwargs}] took: {te - ts: 0.3f}s')
         return res
     return wrapper
-
-
-def try_access(graph: BaseGraph, name: str, type_: Type[BaseNode] = BaseNode) -> Optional[BaseNode]:
-    """
-    try access graph node with type check, return None if failed, no exception is thrown
-    :param graph: the whole computation graph
-    :param name: name of the Node
-    :param type_: type of the Node, default to BaseNode, which mean no type check
-    :return: Node or None
-
-    NOTE: Some models have duplicate Initializer and PlaceHolder names, if caller didn't specify type_,
-    this function will return the Initializer in this case.
-    """
-    try:
-        node = graph.get_value_info(name) if type_ is PlaceHolder else graph[name]
-    except KeyError:
-        return None
-    if not isinstance(node, type_):
-        return None
-    return node
 
 
 class NextNodeCount(MatchBase):
