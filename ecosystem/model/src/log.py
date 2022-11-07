@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 """
-Copyright Huawei Technologies Co., Ltd. 2021-2022. All rights reserved.
+Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 """
 
 import msadvisor as m
