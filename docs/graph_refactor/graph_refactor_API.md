@@ -6,7 +6,7 @@
 
 **g[name] -> Union[Node, Initializer, PlaceHolder]**
 
-- 根据节点名称查询单个节点，返回该节点。
+- 根据节点名称查询单个节点，返回该节点，若不存在报错。
 - `name(str)` - 节点名称
 
 **get_nodes(op_type) -> Union[List[Node], List[PlaceHolder], List[Initializer]]**
@@ -14,7 +14,13 @@
 - 根据节点类型名称查询节点，返回由该类型节点组成的列表。
 - `op_type(str)` - 节点类型名称，如 `'Add'` 。
 
-**get_prev_node(input_name) -> Node**
+**get_node(self, name: str, node_type=Node) -> Optional[Node，Initializer，PlaceHolder]**:
+
+- 根据节点名称和节点类型名称查询单个节点， 若存在符合节点名称的该类型节点则返回，若不存在返回 `None`。默认指定类型为`Node`。
+- `name(str)` - 节点名称
+- `node_type(Type)` - 节点类型`Node`、`Initializer`或`PlaceHolder`。
+
+**get_prev_node(input_name) -> Optional[Node]**
 
 - 查询某条边的前驱节点并返回该节点。若不存在返回 `None` 。
 - `input_name(str)` - 图中存在的边的名称
@@ -41,6 +47,9 @@ node = g['Add_0']
 
 # 获取所有Add类型节点
 nodes = g.get_nodes('Add')
+
+# 获取名称为`ini_0`类型为Initializer的节点
+ini = g.get_node('ini_0', Initializer)
 
 # 获取 node 的所有前驱节点
 prev_nodes = []
@@ -97,6 +106,8 @@ value_info = g.get_value_info(node.outputs[0])
 - 添加孤立的算子节点。
 - `name(str)` - 算子节点名称 \
   `op_type(str)` - 算子类型。参见 [Onnx 算子标准 IR](https://github.com/onnx/onnx/blob/main/docs/Operators.md) 。\
+  `inputs(List[str])` - 算子节点的输入列表 。\
+  `inputs(List[str])` - 算子节点的输出列表 。\
   `attrs(Dict[str, Object])` - 算子属性。参见 [Onnx 算子标准 IR](https://github.com/onnx/onnx/blob/main/docs/Operators.md) 。
 
 <details>
@@ -299,7 +310,7 @@ g.extract('extracted_model.onnx', ['5'], ['12'])
 
 | API       | 说明                                                         |
 | --------- | ------------------------------------------------------------ |
-| ini.value | 可读写属性，借助 `numpy.ndarray` 获取和修改常量节点的具体数值 |
+| ini.value | 可读写属性，借助 `numpy.ndarray` 获取和修改常量节点的具体数值<br>因此，可通过 `ini.value.shape` 和 `ini.value.dtype` 获取和修改维度信息和数据类型。 |
 
 ### 输入/输出节点
 
