@@ -21,10 +21,10 @@ import onnx
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node, PlaceHolder, Initializer
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node, Initializer
 from auto_optimizer.pattern.pattern import MATCH_PATTERN, Pattern, MatchBase
 from auto_optimizer.pattern.matcher import MatchResult
-from .knowledge_base import KnowledgeBase
+from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 
 
 class LargeKernel(MatchBase):
@@ -34,8 +34,6 @@ class LargeKernel(MatchBase):
 
     def match(self, node: BaseNode, graph: BaseGraph) -> bool:
         if not isinstance(node, (Node, )) or op.ne(node.op_type, 'Conv'):
-            return False
-        if graph.get_node(node.inputs[0], node_type=PlaceHolder) is None:
             return False
         auto_pad: str = node.attrs.get('auto_pad', 'NOTSET')
         if auto_pad != 'NOTSET':
@@ -103,30 +101,31 @@ class KnowledgeSplitLargeKernel(KnowledgeBase):
         return True
 
     def _pads_and_slices(
-        self, kslice: List[Tuple[int, int]], kshape: List[int], input_: List[int], pads: List[int],
+        self, kslice: List[Tuple[int, int]], kshape: List[int], pads: List[int],
     ) -> Tuple[List[int], List[int], List[int], List[int]]:
         '''Calculate new pads and slice parameters.'''
-        length, length_extra = len(kslice), len(input_) - len(kslice)
-        kinput = input_[length_extra:]
+        i32 = np.iinfo(np.int32)
+        length = len(kslice)
         lpads, rpads = pads[:length], pads[length:]
-        # this is the input range where kernel slice could move
+        # this is the relative input range where kernel slice could move
         input_slices = [
             (
-                0 - pad_l + slice_k_l,                    # start
-                slice_inp + pad_r - (size_k - slice_k_r)  # end
+                -pad_l + slice_k_l,           # start
+                pad_r - (size_k - slice_k_r)  # end
             )
-            for slice_inp, pad_l, pad_r, (slice_k_l, slice_k_r), size_k in zip(kinput, lpads, rpads, kslice, kshape)
+            for pad_l, pad_r, (slice_k_l, slice_k_r), size_k in zip(lpads, rpads, kslice, kshape)
         ]
         new_lpads = [max(0, -start) for start, _ in input_slices]
-        new_rpads = [max(0, end - inp) for (_, end), inp in zip(input_slices, kinput)]
-        starts = [max(0, start) for start, _ in input_slices]
-        ends = [min(inp, end) for (_, end), inp in zip(input_slices, kinput)]
-        axes = [i + length_extra for i in range(length)]
-        return new_lpads + new_rpads, starts, ends, axes
+        new_rpads = [max(0, end) for _, end in input_slices]
+        slices_ = [
+            [max(0, start), end if end < 0 else i32.max, axis - length]
+            for axis, (start, end) in enumerate(input_slices)
+            if start > 0 or end < 0
+        ]
+        return new_lpads + new_rpads, [s[0] for s in slices_], [s[1] for s in slices_], [s[2] for s in slices_]
 
     def _slice_kernel(self, conv: Node, graph: BaseGraph, kslice: List[Tuple[int, int]], keep_bias: bool) -> Node:
         '''Add slice and conv operators to slice kernel.'''
-        input_: PlaceHolder = graph.get_node(conv.inputs[0], node_type=PlaceHolder)
         kweight: Initializer = graph.get_node(conv.inputs[1], node_type=Initializer)
         pads: List[int] = conv.attrs.get('pads', [1])
 
@@ -151,14 +150,14 @@ class KnowledgeSplitLargeKernel(KnowledgeBase):
         slice_output_name = f'{slice_name}_output'
 
         kshape: List[int] = conv.attrs.get('kernel_shape', [1])
-        new_pads, start, end, axes = self._pads_and_slices(kslice, kshape, input_.shape, pads)
+        new_pads, start, end, axes = self._pads_and_slices(kslice, kshape, pads)
         graph.add_initializer(name=slice_start_name, value=np.array(start))
         graph.add_initializer(name=slice_end_name, value=np.array(end))
         graph.add_initializer(name=slice_axes_name, value=np.array(axes))
         graph.add_node(
             name=slice_name,
             op_type='Slice',
-            inputs=[input_.name, slice_start_name, slice_end_name, slice_axes_name],
+            inputs=[conv.inputs[0], slice_start_name, slice_end_name, slice_axes_name],
             outputs=[slice_output_name]
         )
 
@@ -218,10 +217,9 @@ class KnowledgeSplitLargeKernel(KnowledgeBase):
             logging.warning('Conv operator is no longer exists.')
             return False
 
-        input_: Optional[PlaceHolder] = graph.get_node(conv0.inputs[0], node_type=PlaceHolder)
         kweight: Optional[Initializer] = graph.get_node(conv0.inputs[1], node_type=Initializer)
-        if kweight is None or input_ is None:
-            logging.warning('Failed to get conv input or weight.')
+        if kweight is None:
+            logging.warning('Failed to get conv kernel weight.')
             return False
 
         # modification start from here
