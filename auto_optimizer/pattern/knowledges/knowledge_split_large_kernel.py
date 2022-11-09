@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from itertools import accumulate
 from typing import List, Dict, Optional, Tuple
 import logging
 import operator as op
@@ -48,32 +49,30 @@ class LargeKernel(MatchBase):
 
 # pattern
 r"""
-                                  __________PreNode_________
-                                 /          __/|\__         \
-                                /        __/   |   \__       \
-                               /        /      |      \       \
-                             slice0  slice1  slice2  slice3  slice4
-                               |       |       |       |       |
-                               |       |       |       |       |
-                             conv_0  conv_1  conv_2  conv_3  conv_4
-                                \     /        |       \       /
-       PreNode                   \   /          \       \     /
-          |                      add_0           \       add_1
-          |          slice          \             \       /
-   LargeKernelConv  ======>          \             \     /
-          |                           \             add_2
-          |                            \_           _/
-       NextNode                          \_       _/
-                                           \     /
-                                            add_3
-                                              |
-                                           NextNode
-
+                                            _________PreNode_________
+                                       ____/         /  |  \         \____
+                                      /         ____/   |   \____         \
+                                     /         /        |        \         \
+                                slice0     slice1     slice2     slice3     slice4
+          |                       |          |          |          |          |
+       PreNode                  conv0      conv1      conv2      conv3      conv4
+          |                       |          |          |          |          |
+          |                   Unsqueeze0 Unsqueeze1 Unsqueeze2 Unsqueeze3 Unsqueeze4
+          |          slice           \         \        |        /         /
+    LargeKernelConv  ======>          \         \___    |   ____/         /
+          |                            \___         \   |  /          ___/
+          |                                \_________concat__________/
+          |                                             |
+       NextNode                                     ReduceSum
+          |                                             |
+                                                     NextNode
+                                                        |
 """
 
 
 @KnowledgeFactory.register("KnowledgeSplitLargeKernel")
 class KnowledgeSplitLargeKernel(KnowledgeBase):
+    """Split Large Conv Kernel to speed up inference."""
     def __init__(self):
         super().__init__()
         # large kernel threshold, test with real model
@@ -162,14 +161,15 @@ class KnowledgeSplitLargeKernel(KnowledgeBase):
         )
 
         new_inputs = [slice_output_name, sliced_weight_name]
-        # only one conv operator keeps bias
+        # only one conv operator can keeps bias
         if keep_bias:
             new_inputs += conv.inputs[2:]
+        conv_name = f'conv_{conv.name}_{identifier}'
         return graph.add_node(
-            name=f'conv_{identifier}',
+            name=conv_name,
             op_type='Conv',
             inputs=new_inputs,
-            outputs=[f'conv_{identifier}_output'],
+            outputs=[f'{conv_name}_output'],
             attrs={
                 'pads': new_pads,
                 'group': conv.attrs.get('group', 1),
@@ -177,39 +177,16 @@ class KnowledgeSplitLargeKernel(KnowledgeBase):
             }
         )
 
-    def _slice_kernel_shape(self, kslice: List[Tuple[int, int]]) -> Tuple[List[Tuple[int, int]], ...]:
-        '''Slice kernel shape in half if possible, else return origin slice as a tuple.'''
-        first, second = kslice[:], kslice[:]
-        for idx, (start, end) in enumerate(kslice):
-            if end - start > self.threshold:
-                mid = (end - start) // 2
-                first[idx] = start, start + mid
-                second[idx] = start + mid, end
-                return first, second
-        return (kslice, )
-
-    def _split_kernel(self, conv: Node, graph: BaseGraph, kslice: List[Tuple[int, int]], keep_bias: bool) -> Node:
-        '''Split kernel in half recursively if possible, else slice kernel.'''
-        kslices = self._slice_kernel_shape(kslice)
-        if len(kslices) == 1:
-            # can't split anymore, end recursion here, add slice and conv operator
-            return self._slice_kernel(conv, graph, kslice, keep_bias)
-        # otherwise split kernel into two halves recursively
-        # the reason we use recursion is Add operator only support 2 inputs
-        first = self._split_kernel(conv, graph, kslices[0], keep_bias)
-        second = self._split_kernel(conv, graph, kslices[1], False)
-
-        # add two halves back together
-        # we use slices to generate unique names
-        name_f = '#'.join(str(x) for x, _ in kslices[0])
-        name_s = '#'.join(str(x) for x, _ in kslices[1])
-        add_name = f'add_{conv.name}_f{name_f}_s{name_s}'
-        return graph.add_node(
-            name=add_name,
-            op_type='Add',
-            inputs=[first.outputs[0], second.outputs[0]],
-            outputs=[f'{add_name}_output']
-        )
+    def _kernel_slices(self, kshape: List[int]) -> List[List[Tuple[int, int]]]:
+        kslices = [[]]
+        for ksize in kshape:
+            n = (ksize - 1) // self.threshold + 1
+            k, e = ksize // n, ksize % n
+            o = (n - e) // 2
+            ksizes = [k + 1 if o <= i < o + e else k for i in range(n)]
+            indices = list(accumulate([0, *ksizes[:-1]]))
+            kslices = [[*slc, (i, i + s)] for i, s in zip(indices, ksizes) for slc in kslices]
+        return kslices
 
     def _split_large_kernel(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
         conv0: Optional[Node] = graph.get_node(matchinfo['LargeKernelConv'][0].name, node_type=Node)
@@ -224,9 +201,35 @@ class KnowledgeSplitLargeKernel(KnowledgeBase):
 
         # modification start from here
         kshape: List[int] = conv0.attrs.get('kernel_shape', [1])
-        kslice = [(0, s) for s in kshape]
-        last_node = self._split_kernel(conv0, graph, kslice, True)
-        last_node.outputs = [conv0.outputs[0]]
+        slices = self._kernel_slices(kshape)
+        convs = [self._slice_kernel(conv0, graph, slc, idx == 0) for idx, slc in enumerate(slices)]
+
+        outputs = []
+        for conv in convs:
+            unsqueeze_name = f'unsqueeze_after_{conv.name}'
+            unsqueeze_node = graph.add_node(
+                name=unsqueeze_name,
+                op_type='Unsqueeze',
+                inputs=[conv.outputs[0]],
+                outputs=[f'{unsqueeze_name}_output'],
+                attrs={'axes': [0]}
+            )
+            outputs.extend(unsqueeze_node.outputs)
+
+        concat_node = graph.add_node(
+            name=f'concat_{conv0.name}',
+            op_type='Concat',
+            inputs=outputs,
+            outputs=[f'concat_{conv0.name}_output'],
+            attrs={'axis': 0}
+        )
+        graph.add_node(
+            name=f'reducesum_after_{concat_node.name}',
+            op_type='ReduceSum',
+            inputs=[concat_node.outputs[0]],
+            outputs=[conv0.outputs[0]],
+            attrs={'axes': [0], 'keepdims': 0}
+        )
         graph.remove(conv0.name, {})
         return True
 
