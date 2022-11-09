@@ -115,18 +115,30 @@ class GenericOpMatch(MatchBase):
         , 'Tanh'
         , 'LeakyRelu'
         , 'Relu'
+        , 'Sigmoid'
         , 'BatchNormalization'
         , 'ReduceSum'
         , 'Concat'
         , 'Unsqueeze'
+        , 'Squeeze'
+        , 'Gemm'
+        , 'Split'
+        , 'Slice'
+        , 'Transpose'
         ]
 
     # 半泛型节点，部分输入通道类型为泛型 T，剩余输入通道类型为固定类型，对于此类算子需
     # 要将泛型的输入通道转换为目标类型
     partial_generic_ops = \
-        { 'Expand' : GenericIO([0], [0])
-        , 'Less'   : GenericIO([0, 1], [])
-        , 'Gather' : GenericIO([0], [0])
+        { 'Expand'   : GenericIO([0], [0])
+        , 'Less'     : GenericIO([0, 1], [])
+        , 'Gather'   : GenericIO([0], [0])
+        , 'Shape'    : GenericIO([0], [])
+        , 'Where'    : GenericIO([1, 2], [0])
+        , 'Equal'    : GenericIO([0, 1], [])
+        , 'Reshape'  : GenericIO([0], [0])
+        , 'Tile'     : GenericIO([0], [0])
+        , 'ScatterND': GenericIO([0, 2], [0])
         }
 
     def __init__(self, strategy: TypeCastStrategy):
