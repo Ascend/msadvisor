@@ -1,0 +1,7 @@
+fake_data_path = '../data/fakedata'
+key_class_type = 'classType'
+key_error_code = 'errorCode'
+key_summary = 'summary'
+key_extend_result = 'extendResult'
+key_type = 'type'
+key_value = 'value'
