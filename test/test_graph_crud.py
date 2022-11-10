@@ -17,6 +17,7 @@ from itertools import chain
 import unittest
 import numpy as np
 
+from auto_optimizer.graph_refactor.interface.base_node import PlaceHolder, Initializer, Node
 from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from test_node_common import is_ph_equal, is_ini_equal, is_node_equal
@@ -83,6 +84,17 @@ class TestGraphCrud(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "node name '.+' already exists!"):
             self.graph.add_node('test_node', 'Add')
 
+    def test_get_node(self):
+        self.assertEqual(self.graph.get_node('input_0', PlaceHolder), self.graph['input_0'])
+        self.assertEqual(self.graph.get_node('input_1', PlaceHolder), None)
+        self.assertEqual(self.graph.get_node('input_0', Initializer), None)
+        self.assertEqual(self.graph.get_node('ini_0', Initializer), self.graph['ini_0'])
+        self.assertEqual(self.graph.get_node('ini_1', Initializer), None)
+        self.assertEqual(self.graph.get_node('ini_0', PlaceHolder), None)
+        self.assertEqual(self.graph.get_node('Node_0', Node), self.graph['Node_0'])
+        self.assertEqual(self.graph.get_node('Node_8', Node), None)
+        self.assertEqual(self.graph.get_node('Node_0', Initializer), None)
+    
     def test_get_nodes(self):
         self.assertEqual(self.graph.get_nodes('Mul'), [self.graph['Node_1'], self.graph['Node_5']])
         self.assertEqual(self.graph.get_nodes('Sub'), [self.graph['Node_0'], self.graph['Node_3']])

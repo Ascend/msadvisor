@@ -15,12 +15,14 @@
 from abc import ABC, abstractmethod
 from collections import deque
 from itertools import chain
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional, Type, TypeVar
 import warnings
 
 import numpy as np
 
-from .base_node import PlaceHolder, Initializer, Node   
+from .base_node import PlaceHolder, Initializer, Node
+
+N = TypeVar('N', PlaceHolder, Initializer, Node)
 
 class NodeNotExistException(KeyError):
     def __init__(self, node_name):
@@ -63,9 +65,17 @@ class BaseGraph(ABC):
 
         for n in chain(self._inputs, self._outputs, self._nodes, self._initializers):
             if self._node_map.get(n.name, None):
-                raise RuntimeError("Duplicate names! {}: '{}' and {}: '{}' have same name,\
-                    please use add_name_suffix=True in graph parse"\
-                    .format(type(n).__name__, n.name, type(self._node_map[n.name]).__name__, n.name))
+                # Initializer and PlaceHolder have same name
+                if isinstance(n, Initializer) and isinstance(self._node_map[n.name], PlaceHolder):
+                    if self._node_map[n.name] in self._inputs:
+                        self._inputs.remove(self._node_map[n.name])
+                    else:
+                        self._outputs.remove(self._node_map[n.name])
+                # Node and PlaceHolder have same name
+                else:
+                    raise RuntimeError("Duplicate names! {}: '{}' and {}: '{}' have same name,\
+                        please use add_name_suffix=True in graph parse"\
+                        .format(type(n).__name__, n.name, type(self._node_map[n.name]).__name__, n.name))
             self._node_map[n.name] = n
         
         self._value_map = {v.name: v for v in self._value_infos}
@@ -367,6 +377,25 @@ class BaseGraph(ABC):
         # update map for old_output
         self._prev_map.pop(old_output_name, None)
         self._next_map.pop(old_output_name, None)
+
+    def get_node(self, name: str, node_type: Type[N] = Node) -> Optional[N]:
+        """Return node with specificed type and name. 
+        If the node does not exist, return None.
+        """
+        # return a placeholder 
+        if node_type == PlaceHolder:
+            node = self._value_map.get(name, None)
+            if isinstance(node, node_type):
+                return node
+            for ph in [*self.inputs, *self.outputs]:
+                if ph.name == name and isinstance(ph, node_type):
+                    return ph
+            return None
+        # return an initializer/operator
+        node = self._node_map.get(name, None)
+        if isinstance(node, node_type):
+            return node
+        return None
 
     def get_nodes(self, op_type):
         nodes = [node for node in self._node_map.values() if node.op_type == op_type]
