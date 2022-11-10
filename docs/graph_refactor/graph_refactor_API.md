@@ -92,7 +92,7 @@ value_info = g.get_value_info(node.outputs[0])
 - `name(str)` - 常量节点名称 \
   `value(np.ndarray)` - 常量值
 
-**add_node(name, op_type, attrs=None) -> Node:**
+**add_node(name, op_type, inputs=[], outputs=[], attrs=None) -> Node:**
 
 - 添加孤立的算子节点。
 - `name(str)` - 算子节点名称 \
@@ -111,7 +111,7 @@ new_output = g.add_output('new_output', 'float32', [1,3,224,224])
 new_ini = g.add_initializer('new_ini', np.array([1,1,1]))
 
 # 添加算子节点
-new_op = g.add_node('Transpose_new', 'Transpose', {'perm':[1,0,2]})
+new_op = g.add_node('Transpose_new', 'Transpose', attrs={'perm':[1,0,2]})
 ```
 
 </details>
@@ -138,8 +138,8 @@ new_op = g.add_node('Transpose_new', 'Transpose', {'perm':[1,0,2]})
 
 ```python
 # 添加并插入单输入单输出算子
-new_cast_0 = g.add_node('new_cast_0', 'Cast', {'to':6}) 
-new_cast_1 = g.add_node('new_cast_1', 'Cast', {'to':6})
+new_cast_0 = g.add_node('new_cast_0', 'Cast', attrs={'to':6}) 
+new_cast_1 = g.add_node('new_cast_1', 'Cast', attrs={'to':6})
 g.insert_node('reference_node', new_cast_0) # 在参考节点后插入Cast算子
 g.insert_node('reference_node', new_cast_1, 1, 'before') # 在参考节点的第1条输入边插入Cast算子
 
@@ -172,13 +172,21 @@ g.connect_node(
 - `name(str)` - 待删除节点名称 \
   `maps(Dict[int])` - 可选参数。`maps` 中的`key` 值表示待删除节点的输入下标，`value` 值为待删除节点的输出下标。若不提供 `maps`，默认将前驱节点的第一个输出和后继节点的第一个输入相连；若 `maps={}`，仅删除指定节点，不连边。
 
+**remove_unused_nodes()**
+
+- 删除图中多余的无效节点（即不影响输出的多余节点）。
+
 <details>
   <summary> sample code </summary>
 
 ```python
+# 删除单个节点
 g.remove('Cast_0') # 删除节点， 默认将第0个输入和第0个输出相连
 g.remove('Split_0', {}) # 删除节点，不连边
 g.remove('Node_text', {0:0,1:1}) # 删除节点，将节点的第0个输入和第0个输出相连，第1个输入和第1个输出相连
+
+# 删除无效节点
+g.remove_unused_nodes()
 ```
 
 </details>

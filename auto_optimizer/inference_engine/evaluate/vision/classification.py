@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import logging
 from abc import ABC
 
 import numpy as np
@@ -20,6 +21,8 @@ from tqdm import tqdm
 
 from ..evaluate_base import EvaluateBase
 from ...data_process_factory import EvaluateFactory
+
+logging = logging.getLogger("auto-optimizer")
 
 
 @EvaluateFactory.register("classification")
@@ -29,7 +32,7 @@ class ClassificationEvaluate(EvaluateBase, ABC):
         """
         和基类的参数顺序和个数需要一致
         """
-        print("evaluate start")
+        logging.debug("evaluate start")
         try:
             topk = ClassificationEvaluate._get_params(cfg)
 
@@ -57,11 +60,11 @@ class ClassificationEvaluate(EvaluateBase, ABC):
             for idx, k in enumerate(topk):
                 if count:
                     top_k_accuracy = np.count_nonzero(count_hit[idx]) / count
-                    print("top_{}_accuracy={}".format(k, top_k_accuracy))
+                    logging.info("top_{}_accuracy={}".format(k, top_k_accuracy))
         except Exception as err:
-            print("evaluate failed error={}".format(err))
+            logging.error("evaluate failed error={}".format(err))
 
-        print("evaluate end")
+        logging.debug("evaluate end")
 
     def _is_hit_ground_truth(self, data, targets, k):
         values, indices = self._get_top_k(data, k)

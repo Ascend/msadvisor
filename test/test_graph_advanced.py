@@ -53,6 +53,22 @@ class TestGraphAdvanced(unittest.TestCase):
         graph.infershape()
         self.assertEqual(graph.get_value_info('0_out_0'), OnnxPlaceHolder('0_out_0', np.dtype('float32'), [2, 5000]))
         self.assertEqual(graph.get_value_info('1_out_0'), OnnxPlaceHolder('1_out_0', np.dtype('float32'), [4, 2500]))
+    
+    def test_remove_unused_node(self):
+        unused_node = self.graph.add_node('unused_node', 'Add')
+        self.graph.remove_unused_nodes()
+        self.assertEqual(
+            self.graph.nodes, 
+            [
+                self.graph['Node_0'], 
+                self.graph['Node_1'], 
+                self.graph['Node_2'], 
+                self.graph['Node_3'], 
+                self.graph['Node_4'], 
+                self.graph['Node_5'], 
+                ]
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

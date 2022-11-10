@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 from abc import ABC
 
 from ..post_process_base import PostProcessBase
 from ...data_process_factory import PostProcessFactory
+
+logging = logging.getLogger("auto-optimizer")
 
 
 @PostProcessFactory.register("classification")
@@ -25,13 +28,13 @@ class ClassificationPostProcess(PostProcessBase, ABC):
         """
         和基类的参数顺序和个数需要一致
         """
-        print("post_process start")
+        logging.debug("post_process start")
         try:
             for i in range(loop):
                 data = in_queue.get()
 
                 out_queue.put(data)
         except Exception as err:
-            print("post_process failed error={}".format(err))
+            logging.error("post_process failed error={}".format(err))
 
-        print("post_process end")
+        logging.debug("post_process end")

@@ -25,6 +25,7 @@ from onnx import (
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_conv1d2conv2d import KnowledgeConv1d2Conv2d
+from utils import inference, optimize
 
 
 class TestKnowledgeConv1d2Conv2d(unittest.TestCase):
@@ -108,43 +109,22 @@ class TestKnowledgeConv1d2Conv2d(unittest.TestCase):
         opset.version = 14
         onnx.save(model, onnx_name)
 
-    def infer_run(self, onnx_path, x):
-        session = ort.InferenceSession(onnx_path)
-        inputs = session.get_inputs()
-        outputs_name = [meta.name for meta in session.get_outputs()]
-
-        feed = {inputs[0].name: x}
-        return session.run(outputs_name, feed)
-
-    def optimize(self, graph, knowledge):
-        res = True
-        while knowledge.has_next_pattern():
-            knowledge.next_pattern()
-            match_results = knowledge.match_pattern(graph)
-            if match_results is None or len(match_results) == 0:
-                continue
-            while knowledge.has_next_apply():
-                knowledge.next_apply()
-                for match_result in match_results:
-                    res &= knowledge.apply(graph, match_result)
-        return res
-
     def test_conv1d2conv2d_optimizer_0(self):
         x = np.random.randn(1, 3, 2500).astype(np.float32)
         onnx_path = './twice_conv1d.onnx'
 
         self.make_twice_conv1d_model(onnx_path, x)
-        run_result_0 = self.infer_run(onnx_path, x)
+        run_result_0 = inference(onnx_path, x)
 
         graph = OnnxGraph.parse(onnx_path)
 
         conv1d2conv2d = KnowledgeConv1d2Conv2d()
-        res = self.optimize(graph, conv1d2conv2d)
+        res = optimize(graph, conv1d2conv2d)
         self.assertTrue(res)
         new_onnx_path = '%s_new.onnx' % onnx_path
         graph.save(new_onnx_path)
 
-        run_result_1 = self.infer_run(new_onnx_path, x)
+        run_result_1 = inference(new_onnx_path, x)
         result_item_sum = abs(np.array(run_result_1) - np.array(run_result_0)).sum()
         result_0_item_sum = abs(np.array(run_result_0)).sum()
         acc = result_item_sum / result_0_item_sum
@@ -155,17 +135,17 @@ class TestKnowledgeConv1d2Conv2d(unittest.TestCase):
         onnx_path = './multi_conv1d_and_split_graph.onnx'
 
         self.make_multi_conv1d_and_split_graph_model(onnx_path, x)
-        run_result_0 = self.infer_run(onnx_path, x)
+        run_result_0 = inference(onnx_path, x)
 
         graph = OnnxGraph.parse(onnx_path)
 
         conv1d2conv2d = KnowledgeConv1d2Conv2d()
-        res = self.optimize(graph, conv1d2conv2d)
+        res = optimize(graph, conv1d2conv2d)
         self.assertTrue(res)
         new_onnx_path = '%s_new.onnx' % onnx_path
         graph.save(new_onnx_path)
 
-        run_result_1 = self.infer_run(new_onnx_path, x)
+        run_result_1 = inference(new_onnx_path, x)
         result_item_sum = abs(np.array(run_result_1) - np.array(run_result_0)).sum()
         result_0_item_sum = abs(np.array(run_result_0)).sum()
         acc = result_item_sum / result_0_item_sum

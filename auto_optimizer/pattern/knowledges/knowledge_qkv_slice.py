@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict, Type, Union
+from typing import List, Dict, Union
 import operator as op
 import logging
 
@@ -26,23 +26,7 @@ from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
 from .knowledge_base import KnowledgeBase
-
-
-def try_access(graph: BaseGraph, name: str, type_: Type[BaseNode] = BaseNode) -> Union[None, BaseNode]:
-    """
-    尝试访问图graph上的name节点，返回BaseNode或者None
-    :param graph: 图
-    :param name: node的名称
-    :param type_: node的类型，默认值为BaseNode即不判定类型
-    :return: 返回BaseNode，访问失败时返回None
-    """
-    try:
-        node = graph[name]
-    except KeyError:
-        return None
-    if not isinstance(node, type_):
-        return None
-    return node
+from .utils import try_access, NextNodeCount
 
 
 class ConstSecondInput(MatchBase):
@@ -55,20 +39,6 @@ class ConstSecondInput(MatchBase):
             return False
         input1 = try_access(graph, node.inputs[1], type_=Initializer)
         return input1 is not None
-
-
-class SingleOutputMatch(MatchBase):
-    # 限制节点的后置节点只有一个
-    def __init__(self):
-        super().__init__()
-
-    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
-        if not isinstance(node, (Node, )):
-            return False
-        if len(node.outputs) != 1:
-            return False
-        nodes = graph.get_next_nodes(node.outputs[0])
-        return len(nodes) == 1
 
 
 class AllOutputsAreGatherMatch(MatchBase):
@@ -114,11 +84,11 @@ class AllOutputsAreGatherMatch(MatchBase):
 #
 # 尽量使用简单的pattern，将复杂的判断逻辑放在apply函数内
 pattern0 = Pattern() \
-    .add_node("MatMul_0", ["MatMul"], [SingleOutputMatch(), ConstSecondInput()]) \
-    .add_node('ElementWise_0', ['Mul', 'Add', 'Sub', 'Div'], [SingleOutputMatch()]) \
+    .add_node("MatMul_0", ["MatMul"], [NextNodeCount(1), ConstSecondInput()]) \
+    .add_node('ElementWise_0', ['Mul', 'Add', 'Sub', 'Div'], [NextNodeCount(1)]) \
     .set_node_loop('ElementWise_0', MATCH_PATTERN.MATCH_ZERO_OR_MORE) \
     .add_edge("MatMul_0", "ElementWise_0") \
-    .add_node("Reshape_0", ["Reshape"], [SingleOutputMatch(), ConstSecondInput()]) \
+    .add_node("Reshape_0", ["Reshape"], [NextNodeCount(1), ConstSecondInput()]) \
     .add_edge("ElementWise_0", "Reshape_0") \
     .add_node("Transpose_0", ["Transpose"], [AllOutputsAreGatherMatch()]) \
     .add_edge("Reshape_0", "Transpose_0") \

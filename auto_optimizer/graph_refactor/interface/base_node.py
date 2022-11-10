@@ -14,7 +14,7 @@
 
 import warnings
 from abc import ABC, abstractmethod
-from typing import List, Dict
+from typing import List, Dict, Union
 
 import numpy as np
 
@@ -195,12 +195,14 @@ class PlaceHolder(BaseNode):
         self._dtype = dtype
 
     @property
-    def shape(self) -> List[int]:
+    def shape(self) -> List[Union[str,int]]:
         return self._shape
     
     @shape.setter
-    def shape(self, shape:List[int]):
-        self._shape = shape
+    def shape(self, shape:List[Union[str,int]]):
+        if -1 in shape:
+            warnings.warn('To represent the dynamic dimension int -1 is converted to str "-1".')
+        self._shape = ['-1' if dim == -1 else dim for dim in shape]
     
     def __str__(self) -> str:
         return f'{self.op_type}({self.name}): (shape={self.shape}, dtype={self.dtype})\n'

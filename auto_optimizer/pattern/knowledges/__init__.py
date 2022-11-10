@@ -1,2 +1,5 @@
 from .knowledge_conv1d2conv2d import KnowledgeConv1d2Conv2d
 from .knowledge_merge_continue_slice import KnowledgeMergeContinueSlice
+from .knowledge_transpose_huge_conv import KnowledgeTransposeHugeConv
+from .knowledge_merge_continue_concat import KnowledgeMergeContinueConcat
+from .knowledge_type_cast import KnowledgeTypeCast
