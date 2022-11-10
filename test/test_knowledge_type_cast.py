@@ -65,7 +65,7 @@ class TestKnowledgeTypeCast(unittest.TestCase):
             matrix_after_apply = inference(optimized_file, [X, Y])
             self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
             for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
-                self.assertTrue(np.allclose(lmatrix, rmatrix))
+                self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
 
             result = optimize(graph, knowledge)
             self.assertFalse(result)
