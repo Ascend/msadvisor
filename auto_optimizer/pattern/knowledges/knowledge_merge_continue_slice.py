@@ -137,6 +137,7 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
         slices_total = [*slices_to_remove, slice_to_keep]
         # in case previous apply functions modified the graph and removed/renamed any node of current matching subgraph
         if any(node is None for node in slices_total):
+            logging.info("Some matching node have been removed or renamed, failed to optimizd.")
             return False
 
         input_initializers = [
@@ -145,6 +146,7 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
             ] for node in slices_total
         ]
         if any(inp is None for inp in input_initializers):
+            logging.info("Failed to get slices parameters.")
             return False
         input_values = [[inp.value for inp in lst] for lst in input_initializers]
         # add optional steps input, input_values should look like this now
@@ -156,7 +158,7 @@ class KnowledgeMergeContinueSlice(KnowledgeBase):
         # duplicate axes means we can't merge these slice nodes together
         axes_to_merge = np.concatenate(input_values[2])
         if np.unique(axes_to_merge).size != axes_to_merge.size:
-            logging.info(f"Slice nodes has duplicate slice axis: {axes_to_merge}")
+            logging.info(f"Slice nodes have duplicate slice axis: {axes_to_merge}")
             return False
 
         # we start modify the graph from here, as all validations are finished so we can make sure optimize will success

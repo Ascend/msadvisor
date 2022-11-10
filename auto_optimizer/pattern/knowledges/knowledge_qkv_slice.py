@@ -255,6 +255,10 @@ class KnowledgeQKVSlice(KnowledgeBase):
         :param matchinfo: 匹配到的子图信息
         :return: 返回是否修改成功
         """
+        if any(graph.get_node(node.name, node_type=Node) is None for nodes in matchinfo.values() for node in nodes):
+            logging.info("Some matching node have been removed or renamed, failed to optimizd.")
+            return False
+
         matmul_node = matchinfo['MatMul_0'][0]
         reshape_node = matchinfo['Reshape_0'][0]
         transpose_node = matchinfo['Transpose_0'][0]

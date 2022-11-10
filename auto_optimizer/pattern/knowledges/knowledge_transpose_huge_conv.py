@@ -45,7 +45,9 @@ class HugeConv(MatchBase):
         if len(kernel_shape) != 2:
             return False
         ph = graph.get_node(node.inputs[0], node_type=PlaceHolder)
-        return ph is not None and ph.shape[-1] >= SHAPE_THRESHOLD
+        if ph is None or ph.shape is None or isinstance(ph.shape[-1], str):
+            return False
+        return ph.shape[-1] >= SHAPE_THRESHOLD
 
 
 # AASIST pattern
@@ -106,14 +108,14 @@ class KnowledgeTransposeHugeConv(KnowledgeBase):
         try:
             graph.infershape()
         except onnx.onnx_cpp2py_export.shape_inference.InferenceError:
-            logging.warning('infershape failed before optimization.')
+            logging.info('infershape failed before optimization.')
         return True
 
     def post_process(self, graph: BaseGraph) -> bool:
         try:
             graph.infershape()
         except onnx.onnx_cpp2py_export.shape_inference.InferenceError:
-            logging.warning('infershape failed after optimization.')
+            logging.info('infershape failed after optimization.')
         return True
 
     def _transpose_conv(self, graph: BaseGraph, conv: Node):
@@ -147,12 +149,16 @@ class KnowledgeTransposeHugeConv(KnowledgeBase):
     def _aasist_match_apply(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
         # make sure nodes of matching subgraph still exist in case some previous apply functions modified graph
         if any(graph.get_node(node.name, node_type=Node) is None for nodes in matchinfo.values() for node in nodes):
+            logging.info("Some matching node have been removed or renamed, failed to optimizd.")
             return False
 
         selu_0 = graph.get_node(matchinfo['Selu_0'][0].name, node_type=Node)
         add_0 = graph.get_node(matchinfo['Add_0'][0].name, node_type=Node)
         convs = [graph.get_node(matchinfo[name][0].name, node_type=Node) for name in ('Conv_0', 'Conv_1', 'Conv_2')]
         ph = graph.get_node(selu_0.inputs[0], node_type=PlaceHolder)
+        if ph is None or ph.shape is None:
+            logging.info("Failed to get input shape of subgraph.")
+            return False
         perm = [i for i in range(len(ph.shape))]
         perm[-1], perm[-2] = perm[-2], perm[-1]
 
