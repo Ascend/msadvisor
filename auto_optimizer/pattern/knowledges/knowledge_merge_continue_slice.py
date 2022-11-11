@@ -121,6 +121,7 @@ pattern2 = Pattern() \
 
 @KnowledgeFactory.register("KnowledgeMergeContinueSlice")
 class KnowledgeMergeContinueSlice(KnowledgeBase):
+    """Combine consecutive slice operators together"""
     def __init__(self):
         super().__init__()
         # 注册pattern的apply方法

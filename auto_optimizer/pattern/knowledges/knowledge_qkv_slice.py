@@ -99,6 +99,7 @@ pattern0 = Pattern() \
 
 @KnowledgeFactory.register("KnowledgeQKVSlice")
 class KnowledgeQKVSlice(KnowledgeBase):
+    """Split MatMul/Reshape/Transpose/Gathers Structure"""
     def __init__(self):
         super().__init__()
         # 注册pattern的apply方法
