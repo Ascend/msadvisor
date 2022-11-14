@@ -25,11 +25,11 @@ from onnx import (
 )
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges.knowledge_qkv_slice import KnowledgeQKVSlice
+from auto_optimizer.pattern.knowledges.knowledge_split_qkv_matmul import KnowledgeSplitQKVMatmul
 from utils import inference, optimize
 
 
-def make_basic_qkv_slice_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=1,
+def make_basic_qkv_matmul_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=1,
                                valid_gather=True, valid_reshape=True) -> bool:
     if gathers not in [2, 3, 4, 5, 6, 7, 8]:
         return False
@@ -50,7 +50,9 @@ def make_basic_qkv_slice_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=
         _name = f"{_op}_{_op_idx}"
         _input = [last_output, _weight]
         random.shuffle(_input)
-        inits.append(helper.make_tensor(_weight, TensorProto.FLOAT, [112], np.random.randn(112)))
+        inits.append(
+            helper.make_tensor(_weight, TensorProto.FLOAT, [112], np.random.rand(112).astype(np.float32) + 0.5)
+        )
         nodes.append(helper.make_node(_op, _input, [_output], _name))
         last_output = _output
 
@@ -60,7 +62,9 @@ def make_basic_qkv_slice_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=
     _weight = f"{_op}{_op_idx}_w"
     _output = f"{_op}{_op_idx}_o"
     _name = f"{_op}_{_op_idx}"
-    inits.append(helper.make_tensor(_weight, TensorProto.FLOAT, [112, 8400], np.random.randn(112, 8400)))
+    inits.append(
+        helper.make_tensor(_weight, TensorProto.FLOAT, [112, 8400], np.random.rand(112, 8400).astype(np.float32) + 0.5)
+    )
     nodes.append(helper.make_node(_op, [last_output, _weight], [_output], _name))
     last_output = _output
 
@@ -73,7 +77,9 @@ def make_basic_qkv_slice_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=
         _name = f"{_op}_{_op_idx}"
         _input = [last_output, _weight]
         random.shuffle(_input)
-        inits.append(helper.make_tensor(_weight, TensorProto.FLOAT, [8400], np.random.randn(8400)))
+        inits.append(
+            helper.make_tensor(_weight, TensorProto.FLOAT, [8400], np.random.rand(8400).astype(np.float32) + 0.5)
+        )
         nodes.append(helper.make_node(_op, _input, [_output], _name))
         last_output = _output
 
@@ -172,7 +178,7 @@ def make_basic_qkv_slice_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=
     return True
 
 
-class TestKnowledgeQKVSlice(unittest.TestCase):
+class TestKnowledgeSplitQKVMatmul(unittest.TestCase):
 
     def test_basic_qkv_slice(self):
         params = [
@@ -201,12 +207,12 @@ class TestKnowledgeQKVSlice(unittest.TestCase):
             os.mkdir("./onnx")
         for expect, perm, gathers, axis, s1, s2, vg, vr in params:
             pstr = ''.join(str(k) for k in perm)
-            onnx_path = f"./onnx/qkv_slice_p{pstr}_g{gathers}_a{axis}_s_{s1}_{s2}_g{vg}_r{vr}.onnx"
-            with self.subTest(onnx_path):
-                optimize_onnx_path = "{}_optimize.onnx".format(os.path.splitext(onnx_path)[0])
-                os.system("rm -rf {} {}".format(onnx_path, optimize_onnx_path))
+            name = f"qkv_slice_p{pstr}_g{gathers}_a{axis}_s_{s1}_{s2}_g{int(vg)}_r{int(vr)}"
+            with self.subTest(name):
+                onnx_path = f"./onnx/{name}.onnx"
+                optimize_onnx_path = f"./onnx/{name}_optimize.onnx"
 
-                ok = make_basic_qkv_slice_model(
+                ok = make_basic_qkv_matmul_model(
                     onnx_path,
                     perm=perm,
                     gathers=gathers,
@@ -222,17 +228,22 @@ class TestKnowledgeQKVSlice(unittest.TestCase):
 
                 graph = OnnxGraph.parse(onnx_path)
 
-                knowledge = KnowledgeQKVSlice()
-                res = optimize(graph, knowledge)
-                self.assertEqual(res, expect)
-                if not res:
+                knowledge = KnowledgeSplitQKVMatmul()
+                result = optimize(graph, knowledge)
+                self.assertEqual(result, expect)
+                if not result:
                     continue
                 graph.save(optimize_onnx_path)
 
-                x = np.random.randn(1, 10, 112).astype(np.float32)
-                ret0 = inference(onnx_path, x)
-                ret1 = inference(optimize_onnx_path, x)
-                self.assertTrue(np.array_equal(ret0, ret1))
+                input_ = np.random.rand(1, 10, 112).astype(np.float32) + 0.5
+                matrix_before_apply = inference(onnx_path, [input_])
+                matrix_after_apply = inference(optimize_onnx_path, [input_])
+                self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
+                for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
+                    self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
+
+                result = optimize(graph, knowledge)
+                self.assertFalse(result)
 
 
 if __name__ == "__main__":

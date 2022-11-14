@@ -15,22 +15,15 @@
 import unittest
 
 import os
-import time
-import random
 
 import numpy as np
-import onnx
-from onnx import (
-    helper,
-    TensorProto,
-)
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges.knowledge_transpose_huge_conv import KnowledgeTransposeHugeConv
+from auto_optimizer.pattern.knowledges.knowledge_transpose_large_input_conv import KnowledgeTransposeLargeInputConv
 from utils import inference, optimize
 
 
-class TestKnowledgeTransposeHugeConv(unittest.TestCase):
+class TestKnowledgeTransposeLargeInputConv(unittest.TestCase):
 
     def test_aasist(self):
         models = [
@@ -40,19 +33,20 @@ class TestKnowledgeTransposeHugeConv(unittest.TestCase):
             with self.subTest(path):
                 optimized_path = f'{os.path.splitext(path)[0]}_transpose_conv.onnx'
                 graph = OnnxGraph.parse(path)
-                knowledge = KnowledgeTransposeHugeConv()
-                res = optimize(graph, knowledge)
-                self.assertEqual(res, expect)
+                knowledge = KnowledgeTransposeLargeInputConv()
+                result = optimize(graph, knowledge)
+                self.assertEqual(result, expect)
                 graph.save(optimized_path)
                 for _ in range(count):
-                    x = np.random.randn(*shape).astype(np.float32)
-                    ret0 = inference(path, x)
-                    ret1 = inference(optimized_path, x)
-                    for r0, r1 in zip(ret0, ret1):
-                        diff = np.sum(np.abs(r0 - r1))
-                        base = np.sum(np.abs(r0))
-                        acc = diff / base
-                        self.assertTrue(acc < 0.000001)
+                    input_ = np.random.rand(*shape).astype(np.float32) + 0.5
+                    matrix_before_apply = inference(path, [input_])
+                    matrix_after_apply = inference(optimized_path, [input_])
+                    self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
+                    for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
+                        self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
+
+                result = optimize(graph, knowledge)
+                self.assertFalse(result)
 
 
 if __name__ == "__main__":
