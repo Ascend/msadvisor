@@ -17,7 +17,7 @@ import unittest
 import numpy as np
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges.knowledge_split_large_kernel import KnowledgeSplitLargeKernel
+from auto_optimizer.pattern.knowledges.knowledge_split_large_kernel import KnowledgeSplitLargeKernelConv
 from utils import inference, optimize
 
 
@@ -129,7 +129,7 @@ class TestKnowledgeSplitLargeKernel(unittest.TestCase):
                 graph_.save(origin_file)
                 with self.subTest(name=name_):
                     optimized_file = f'onnx/{name_}_th{threshold}.onnx'
-                    knowledge = KnowledgeSplitLargeKernel()
+                    knowledge = KnowledgeSplitLargeKernelConv()
                     # change threshold to small number to speed up unittest
                     knowledge.threshold = threshold
                     knowledge.large_kernel_match.threshold = threshold
