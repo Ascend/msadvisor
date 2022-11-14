@@ -24,7 +24,7 @@ from onnx import (
 )
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges.knowledge_merge_continue_slice import KnowledgeMergeContinueSlice
+from auto_optimizer.pattern.knowledges.knowledge_merge_consecutive_slice import KnowledgeMergeConsecutiveSlice
 from utils import inference, optimize
 
 
@@ -209,7 +209,7 @@ def make_c4_slice_model(onnx_name, x, same_axis=False):
     onnx.save(model, onnx_name)
 
 
-class TestKnowledgeMergeContinueSlice(unittest.TestCase):
+class TestKnowledgeMergeConsecutiveSlice(unittest.TestCase):
 
     def test_merge_c2_slice(self):
         x = np.random.rand(50, 50, 50).astype(np.float32) + 0.5
@@ -221,7 +221,7 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         make_c2_slice_model(c2_slice_onnx, x)
 
         graph = OnnxGraph.parse(c2_slice_onnx)
-        knowledge = KnowledgeMergeContinueSlice()
+        knowledge = KnowledgeMergeConsecutiveSlice()
         res = optimize(graph, knowledge)
         self.assertTrue(res)
         graph.save(c2_slice_optimize_onnx)
@@ -245,7 +245,7 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         make_c3_slice_model(c3_slice_onnx, x)
 
         graph = OnnxGraph.parse(c3_slice_onnx)
-        knowledge = KnowledgeMergeContinueSlice()
+        knowledge = KnowledgeMergeConsecutiveSlice()
         res = optimize(graph, knowledge)
         self.assertTrue(res)
         graph.save(c3_slice_optimize_onnx)
@@ -269,7 +269,7 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         make_c4_slice_model(c4_slice_onnx, x, False)
 
         graph = OnnxGraph.parse(c4_slice_onnx)
-        knowledge = KnowledgeMergeContinueSlice()
+        knowledge = KnowledgeMergeConsecutiveSlice()
         res = optimize(graph, knowledge)
         self.assertTrue(res)
         graph.save(c4_slice_optimize_onnx)
@@ -292,7 +292,7 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         make_c4_slice_model(c4_slice_onnx, x, True)
 
         graph = OnnxGraph.parse(c4_slice_onnx)
-        knowledge = KnowledgeMergeContinueSlice()
+        knowledge = KnowledgeMergeConsecutiveSlice()
         res = optimize(graph, knowledge)
         self.assertFalse(res)
 
@@ -306,7 +306,7 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         make_c2_slice_2dim_model(c2_slice_2dims_onnx, x, False)
 
         graph = OnnxGraph.parse(c2_slice_2dims_onnx)
-        knowledge = KnowledgeMergeContinueSlice()
+        knowledge = KnowledgeMergeConsecutiveSlice()
         res = optimize(graph, knowledge)
         self.assertTrue(res)
         graph.save(c2_slice_2dims_optimize_onnx)
@@ -329,7 +329,7 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         make_c2_slice_2dim_model(c2_slice_2dims_onnx, x, True)
 
         graph = OnnxGraph.parse(c2_slice_2dims_onnx)
-        knowledge = KnowledgeMergeContinueSlice()
+        knowledge = KnowledgeMergeConsecutiveSlice()
         res = optimize(graph, knowledge)
         self.assertFalse(res)
 
@@ -343,7 +343,7 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         make_c2_slice_2dim_model(c2_slice_2dims_1dims_onnx, x, False)
 
         graph = OnnxGraph.parse(c2_slice_2dims_1dims_onnx)
-        knowledge = KnowledgeMergeContinueSlice()
+        knowledge = KnowledgeMergeConsecutiveSlice()
         res = optimize(graph, knowledge)
         self.assertTrue(res)
         graph.save(c2_slice_2dims_1dims_optimize_onnx)
@@ -366,7 +366,7 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         make_c2_slice_2dim_model(c2_slice_2dims_1dims_onnx, x, True)
 
         graph = OnnxGraph.parse(c2_slice_2dims_1dims_onnx)
-        knowledge = KnowledgeMergeContinueSlice()
+        knowledge = KnowledgeMergeConsecutiveSlice()
         res = optimize(graph, knowledge)
         self.assertFalse(res)
 
@@ -380,7 +380,7 @@ class TestKnowledgeMergeContinueSlice(unittest.TestCase):
         _ = inference(c2_slice_onnx, x)
 
         graph = OnnxGraph.parse(c2_slice_onnx)
-        knowledge = KnowledgeMergeContinueSlice()
+        knowledge = KnowledgeMergeConsecutiveSlice()
         res = optimize(graph, knowledge)
         self.assertFalse(res)
 

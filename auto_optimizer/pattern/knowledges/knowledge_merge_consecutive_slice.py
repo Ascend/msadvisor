@@ -119,8 +119,8 @@ pattern2 = Pattern() \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 
-@KnowledgeFactory.register("KnowledgeMergeContinueSlice")
-class KnowledgeMergeContinueSlice(KnowledgeBase):
+@KnowledgeFactory.register("KnowledgeMergeConsecutiveSlice")
+class KnowledgeMergeConsecutiveSlice(KnowledgeBase):
     """Combine consecutive slice operators together"""
     def __init__(self):
         super().__init__()

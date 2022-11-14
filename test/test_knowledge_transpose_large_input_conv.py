@@ -19,11 +19,11 @@ import os
 import numpy as np
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges.knowledge_transpose_huge_conv import KnowledgeTransposeHugeConv
+from auto_optimizer.pattern.knowledges.knowledge_transpose_large_input_conv import KnowledgeTransposeLargeInputConv
 from utils import inference, optimize
 
 
-class TestKnowledgeTransposeHugeConv(unittest.TestCase):
+class TestKnowledgeTransposeLargeInputConv(unittest.TestCase):
 
     def test_aasist(self):
         models = [
@@ -33,7 +33,7 @@ class TestKnowledgeTransposeHugeConv(unittest.TestCase):
             with self.subTest(path):
                 optimized_path = f'{os.path.splitext(path)[0]}_transpose_conv.onnx'
                 graph = OnnxGraph.parse(path)
-                knowledge = KnowledgeTransposeHugeConv()
+                knowledge = KnowledgeTransposeLargeInputConv()
                 result = optimize(graph, knowledge)
                 self.assertEqual(result, expect)
                 graph.save(optimized_path)

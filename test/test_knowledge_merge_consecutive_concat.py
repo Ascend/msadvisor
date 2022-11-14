@@ -23,7 +23,7 @@ from onnx import (
 )
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges.knowledge_merge_continue_concat import KnowledgeMergeContinueConcat
+from auto_optimizer.pattern.knowledges.knowledge_merge_consecutive_concat import KnowledgeMergeConsecutiveConcat
 from utils import inference, optimize
 
 
@@ -48,7 +48,7 @@ def make_c2_concat_model(onnx_name, x, y, z, diff_axis=False):
     onnx.save(model, onnx_name)
 
 
-class TestKnowledgeMergeContinueConcat(unittest.TestCase):
+class TestKnowledgeMergeConsecutiveConcat(unittest.TestCase):
 
     def test_merge_c2_concat(self):
         x = np.random.rand(2, 1, 2).astype(np.float32) + 0.5
@@ -62,7 +62,7 @@ class TestKnowledgeMergeContinueConcat(unittest.TestCase):
         make_c2_concat_model(c2_concat_onnx, x, y, z, False)
 
         graph = OnnxGraph.parse(c2_concat_onnx)
-        knowledge = KnowledgeMergeContinueConcat()
+        knowledge = KnowledgeMergeConsecutiveConcat()
         res = optimize(graph, knowledge)
         self.assertTrue(res)
         graph.save(c2_concat_optimize_onnx)
@@ -87,7 +87,7 @@ class TestKnowledgeMergeContinueConcat(unittest.TestCase):
         make_c2_concat_model(c2_concat_onnx, x, y, z, True)
 
         graph = OnnxGraph.parse(c2_concat_onnx)
-        knowledge = KnowledgeMergeContinueConcat()
+        knowledge = KnowledgeMergeConsecutiveConcat()
         res = optimize(graph, knowledge)
         self.assertFalse(res)
 

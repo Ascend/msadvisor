@@ -97,8 +97,8 @@ pattern_aasist = Pattern() \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 
-@KnowledgeFactory.register("KnowledgeTransposeHugeConv")
-class KnowledgeTransposeHugeConv(KnowledgeBase):
+@KnowledgeFactory.register("KnowledgeTransposeLargeInputConv")
+class KnowledgeTransposeLargeInputConv(KnowledgeBase):
     """Swap H/W axis of conv operator with large input shape."""
     def __init__(self):
         super().__init__()

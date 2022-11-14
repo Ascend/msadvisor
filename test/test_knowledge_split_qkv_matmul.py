@@ -25,11 +25,11 @@ from onnx import (
 )
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges.knowledge_qkv_slice import KnowledgeQKVSlice
+from auto_optimizer.pattern.knowledges.knowledge_split_qkv_matmul import KnowledgeSplitQKVMatmul
 from utils import inference, optimize
 
 
-def make_basic_qkv_slice_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=1,
+def make_basic_qkv_matmul_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=1,
                                valid_gather=True, valid_reshape=True) -> bool:
     if gathers not in [2, 3, 4, 5, 6, 7, 8]:
         return False
@@ -178,7 +178,7 @@ def make_basic_qkv_slice_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=
     return True
 
 
-class TestKnowledgeQKVSlice(unittest.TestCase):
+class TestKnowledgeSplitQKVMatmul(unittest.TestCase):
 
     def test_basic_qkv_slice(self):
         params = [
@@ -212,7 +212,7 @@ class TestKnowledgeQKVSlice(unittest.TestCase):
                 onnx_path = f"./onnx/{name}.onnx"
                 optimize_onnx_path = f"./onnx/{name}_optimize.onnx"
 
-                ok = make_basic_qkv_slice_model(
+                ok = make_basic_qkv_matmul_model(
                     onnx_path,
                     perm=perm,
                     gathers=gathers,
@@ -228,7 +228,7 @@ class TestKnowledgeQKVSlice(unittest.TestCase):
 
                 graph = OnnxGraph.parse(onnx_path)
 
-                knowledge = KnowledgeQKVSlice()
+                knowledge = KnowledgeSplitQKVMatmul()
                 result = optimize(graph, knowledge)
                 self.assertEqual(result, expect)
                 if not result:
