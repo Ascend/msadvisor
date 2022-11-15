@@ -119,8 +119,6 @@ class GenericOpMatch(MatchBase):
         , 'BatchNormalization'
         , 'ReduceSum'
         , 'Concat'
-        , 'Unsqueeze'
-        , 'Squeeze'
         , 'Gemm'
         , 'Split'
         , 'Slice'
@@ -139,6 +137,8 @@ class GenericOpMatch(MatchBase):
         , 'Reshape'  : GenericIO([0], [0])
         , 'Tile'     : GenericIO([0], [0])
         , 'ScatterND': GenericIO([0, 2], [0])
+        , 'Unsqueeze': GenericIO([0], [0])
+        , 'Squeeze'  : GenericIO([0], [0])
         }
 
     def __init__(self, strategy: TypeCastStrategy):
