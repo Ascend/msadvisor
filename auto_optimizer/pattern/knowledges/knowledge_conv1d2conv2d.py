@@ -127,7 +127,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         :param refer_index: 插入算子的输入索引
         :return: 插入的Squeeze算子对象
         """
-        op_name = f'Squeeze_{mode}_{node.name}'
+        op_name = f'Squeeze_{mode}_{node.name}_{refer_index}'
         if op_name in self._insert_op_names:
             return None
         self._insert_op_names.add(op_name)
