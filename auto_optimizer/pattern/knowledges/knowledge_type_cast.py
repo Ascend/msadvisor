@@ -277,9 +277,17 @@ class TypeCastApply(object):
                     output_index = prev_node.outputs.index(node_input)
                     _is_generic_output = GenericOpMatch.is_generic_io(prev_node, IOType.NODE_OUTPUT, output_index)
                     if prev_node.name not in node_map or not _is_generic_output:
-                        self._insert_cast_node(graph, node, 'before', input_index, cast_to)
+                        # 如果前置节点当前输出通道后面存在转换到目标类型的 Cast 节点时，复用此节点
+                        next_nodes = graph.get_next_nodes(node_input)
+                        casts = list(filter(lambda node: node.op_type == 'Cast' and \
+                            node['to'] == numpy_onnx_type_map.get(cast_to, 0), next_nodes))
+                        if casts:
+                            graph[node.name].inputs[input_index] = casts[0].outputs[0]
+                            graph.update_map()
+                        else:
+                            self._insert_cast_node(graph, node, 'before', input_index, cast_to)
                     continue
-                    
+
                 for input_node in graph.inputs:
                     if node_input == input_node.name:
                         self._insert_cast_node(graph, node, 'before', input_index, cast_to)
@@ -312,9 +320,8 @@ class TypeCastApply(object):
                     # 后继节点为子图外部节点或后继节点当前的输入为非泛型输入，则需要将当前节点输出转回原始类型
                     _is_generic_input = GenericOpMatch.is_generic_io(next_node, IOType.NODE_INPUT, input_index)
                     if next_node.name not in node_map or not _is_generic_input:
-                        elem_type = numpy_onnx_type_map.get(cast_from, 0)
-                        # 不进行重复转换
-                        if next_node.op_type == 'Cast' and next_node['to'] == elem_type.value:
+                        # 后继节点为 Cast 节点时再插入 Cast 节点没有意义
+                        if next_node.op_type == 'Cast':
                             continue
                         # 复用 Cast 节点
                         if cast_node is not None:
