@@ -5,3 +5,4 @@ from .knowledge_merge_consecutive_concat import KnowledgeMergeConsecutiveConcat
 from .knowledge_type_cast import KnowledgeTypeCast
 from .knowledge_split_qkv_matmul import KnowledgeSplitQKVMatmul
 from .knowledge_split_large_kernel import KnowledgeSplitLargeKernelConv
+from .knowledge_resize_mode import KnowledgeResizeMode
