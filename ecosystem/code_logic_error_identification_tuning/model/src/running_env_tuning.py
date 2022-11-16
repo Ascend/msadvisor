@@ -35,6 +35,4 @@ def evaluate(datapath, parameter):
         ret = model_EN.Evaluate(datapath_pf, version_data)
     if not ret:
         print('The address of the knowledge base file is incorrect. Please check the file name')
-    print(ret)
     return ret
-evaluate("../..",1)
