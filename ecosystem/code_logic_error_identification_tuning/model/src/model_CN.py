@@ -73,7 +73,6 @@ def Evaluate(datapath, API):
         "3、DVPP VDEC接口的选择和使用可优化，如：VDEC抽帧功能的应用可使得大部分场景应用性能获得极大的提升;\n"
         "4、AI CPU自定义算子开发可优化，针对可能成为阻塞业务流性能的算子提出调优建议;\n"
         "5、DVPP VPC输出YUV 400格式可优化，晟腾310p已经对该方面的业务进行了较好的封装，用户可根据调优建议做出修改。")
-    print(tyTitle)
     os.chdir(sys.path[0])
     result = Result()
     sequence = 0
