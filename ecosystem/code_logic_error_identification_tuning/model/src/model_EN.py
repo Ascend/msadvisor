@@ -79,7 +79,6 @@ def Evaluate(datapath, API):
         "for operators that may block service flow performance\n"
         "5. DVPP VPC output YUV 400 format can be optimized, ShengTeng 310p has carried out a good encapsulation of "
         "this aspect of the business, users can make changes according to the optimization suggestions")
-    print(tyTitle)
     os.chdir(sys.path[0])
     result = Result()
     sequence = 0
