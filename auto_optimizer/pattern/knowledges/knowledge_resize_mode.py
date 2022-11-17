@@ -24,7 +24,7 @@ from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 
 class ResizeModeOptimize:
     def __init__(self):
-        self._mode_from = ['linear', 'cubic']
+        self._mode_from = ['linear', 'cubic', 'area', 'random']
         self._mode_to   = 'nearest'
 
     @property
@@ -49,22 +49,17 @@ class ResizeOpMatch(MatchBase):
             return True
         return False
 
-
-class ResizeOpPattern(Pattern):
-    def __init__(self):
-        super().__init__()
-        self.add_node('resize_operator', ['Resize'], [ResizeOpMatch()]) \
-            .set_input('resize_operator') \
-            .set_output('resize_operator') \
-            .set_node_loop('resize_operator', MATCH_PATTERN.MATCH_ONCE) \
-            .set_loop(MATCH_PATTERN.MATCH_ONCE)
-
-
 @KnowledgeFactory.register("KnowledgeResizeMode")
 class KnowledgeResizeMode(KnowledgeBase):
     def __init__(self):
         super().__init__()
-        self._register_apply_funcs(ResizeOpPattern(), self._resize_mode_apply)
+        self.resize_op_pattern = Pattern() \
+            .add_node("resize_operator", ["Resize"], [ResizeOpMatch()]) \
+            .set_input("resize_operator") \
+            .set_output("resize_operator") \
+            .set_node_loop('resize_operator', MATCH_PATTERN.MATCH_ONCE) \
+            .set_loop(MATCH_PATTERN.MATCH_ONCE)
+        self._register_apply_funcs(self.resize_op_pattern, [self._resize_mode_apply])
 
     def _resize_mode_apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:
         """ Resize 模型转换应用方法
@@ -80,8 +75,8 @@ class KnowledgeResizeMode(KnowledgeBase):
                         continue
                     if node['mode'] not in mode.mode_from:
                         continue
-                    node['mode'] = mode.mode_to
+                    _node = graph[node.name]
+                    _node['mode'] = mode.mode_to
                     if mode.mode_to == 'nearest':
-                        node['nearest_mode'] = 'round_prefer_floor'
-        
+                        _node['nearest_mode'] = 'round_prefer_floor'        
         return True

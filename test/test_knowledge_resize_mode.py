@@ -29,7 +29,7 @@ def make_resize_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np.dt
     scales = np.random.randn(0).astype(np.float32)
     graph.add_initializer('roi', roi)
     graph.add_initializer('scales', scales)
-    graph.add_node('Resize0', 'Resize', ['input', 'roi', 'scales',], ['11'], attrs={
+    graph.add_node('Resize0', 'Resize', ['input', 'roi', 'scales'], ['11'], attrs={
             'coordinate_transformation_mode': str("half_pixel"),
             'cubic_coeff_a': -0.75,
             'exclude_outside': 0,
@@ -54,7 +54,7 @@ class TestKnowledgeResizeMode(unittest.TestCase):
             graph = make_resize_model(onnx_name, X, Y, value_type)
             graph.save(origin_file)
 
-            knowledge = KnowledgeTypeCast()
+            knowledge = KnowledgeResizeMode()
             result = optimize(graph, knowledge)
             graph.save(optimized_file)
             self.assertTrue(result)
