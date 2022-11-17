@@ -16,7 +16,7 @@ import unittest
 import numpy as np
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges.knowledge_type_cast import KnowledgeTypeCast
+from auto_optimizer.pattern.knowledges.knowledge_resize_mode import KnowledgeResizeMode
 from utils import inference, optimize
 
 
@@ -43,7 +43,7 @@ def make_resize_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np.dt
 
 
 class TestKnowledgeResizeMode(unittest.TestCase):
-    def test_basic_type_cast(self):
+    def test_basic_resize_mode(self):
         for value_type in [np.int64, np.float64]:
             X = np.random.randn(10, 10).astype(value_type)
             Y = np.random.randn(10, 10).astype(value_type)
