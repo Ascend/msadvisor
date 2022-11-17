@@ -25,15 +25,15 @@ def make_resize_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np.dt
     graph.add_input('input', value_type, x.shape)
     graph.add_output('11', value_type, None)
 
-    roi = np.random.randn(0).astype(np.float32)
-    scales = np.random.randn(0).astype(np.float32)
+    roi = np.random.randn(0).astype(np.int64)
+    scales = np.random.randn(0).astype(np.int64)
     graph.add_initializer('roi', roi)
     graph.add_initializer('scales', scales)
     graph.add_node('Resize0', 'Resize', ['input', 'roi', 'scales'], ['11'], attrs={
             'coordinate_transformation_mode': str("half_pixel"),
             'cubic_coeff_a': -0.75,
             'exclude_outside': 0,
-            'mode': "nearest",
+            'mode': "linear",
             'nearest_mode': "round_prefer_floor",
         })
     graph.update_map()
@@ -44,7 +44,7 @@ def make_resize_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np.dt
 
 class TestKnowledgeResizeMode(unittest.TestCase):
     def test_basic_resize_mode(self):
-        for value_type in [np.int64, np.float64]:
+        for value_type in [np.int64]:
             X = np.random.randn(10, 10).astype(value_type)
             Y = np.random.randn(10, 10).astype(value_type)
 
