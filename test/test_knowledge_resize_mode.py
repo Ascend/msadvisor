@@ -49,14 +49,14 @@ class TestKnowledgeResizeMode(unittest.TestCase):
             Y = np.random.randn(10, 10).astype(value_type)
 
             onnx_name = 'resize_mode_test'
-            origin_file = f'onnx/{onnx_name}.onnx'
-            optimized_file = f'onnx/{onnx_name}_optimize.onnx'
+            origin_file = f'onnx/{onnx_name}1.onnx'
+            optimized_file = f'onnx/{onnx_name}_optimize1.onnx'
             graph = make_resize_model(onnx_name, X, Y, value_type)
             graph.save(origin_file)
-
+            newgraph = OnnxGraph.parse(origin_file)
             knowledge = KnowledgeResizeMode()
-            result = optimize(graph, knowledge)
-            graph.save(optimized_file)
+            result = optimize(newgraph, knowledge)
+            newgraph.save(optimized_file)
             self.assertTrue(result)
 
 if __name__ == '__main__':
