@@ -49,8 +49,8 @@ class ResizeOpMatch(MatchBase):
             return True
         return False
 
-@KnowledgeFactory.register("KnowledgeResizeMode")
-class KnowledgeResizeMode(KnowledgeBase):
+@KnowledgeFactory.register("KnowledgeResizeModeToNearest")
+class KnowledgeResizeModeToNearest(KnowledgeBase):
     def __init__(self):
         super().__init__()
         self.resize_op_pattern = Pattern() \
