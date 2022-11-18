@@ -45,7 +45,7 @@ class ResizeOpMatch(MatchBase):
             return False
         if not node.op_type == 'Resize':
             return False
-        if node['mode'] in ResizeModeOptimize().mode_from:
+        if str(node['mode'], encoding='utf-8') in ResizeModeOptimize().mode_from:
             return True
         return False
 
@@ -73,7 +73,7 @@ class KnowledgeResizeMode(KnowledgeBase):
                 for node in nodes:
                     if node.op_type != 'Resize':
                         continue
-                    if node['mode'] not in mode.mode_from:
+                    if str(node['mode'], encoding='utf-8') not in mode.mode_from:
                         continue
                     _node = graph[node.name]
                     _node['mode'] = mode.mode_to
