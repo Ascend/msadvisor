@@ -16,7 +16,7 @@ import unittest
 import numpy as np
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges.knowledge_resize_mode import KnowledgeResizeMode
+from auto_optimizer.pattern.knowledges.knowledge_resize_mode_to_nearest import KnowledgeResizeModeToNearest
 from utils import inference, optimize
 
 
@@ -42,7 +42,7 @@ def make_resize_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np.dt
     return graph
 
 
-class TestKnowledgeResizeMode(unittest.TestCase):
+class TestKnowledgeResizeModeToNearest(unittest.TestCase):
     def test_basic_resize_mode(self):
         for value_type in [np.int64]:
             X = np.random.randn(10, 10).astype(value_type)
@@ -54,7 +54,7 @@ class TestKnowledgeResizeMode(unittest.TestCase):
             graph = make_resize_model(onnx_name, X, Y, value_type)
             graph.save(origin_file)
             newgraph = OnnxGraph.parse(origin_file)
-            knowledge = KnowledgeResizeMode()
+            knowledge = KnowledgeResizeModeToNearest()
             result = optimize(newgraph, knowledge)
             newgraph.save(optimized_file)
             self.assertTrue(result)
