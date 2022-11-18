@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from ctypes import cast
 from typing import List, Dict
 import operator as op
 from enum import Enum
@@ -114,18 +115,30 @@ class GenericOpMatch(MatchBase):
         , 'Tanh'
         , 'LeakyRelu'
         , 'Relu'
+        , 'Sigmoid'
         , 'BatchNormalization'
         , 'ReduceSum'
         , 'Concat'
-        , 'Unsqueeze'
+        , 'Gemm'
+        , 'Split'
+        , 'Slice'
+        , 'Transpose'
         ]
 
     # 半泛型节点，部分输入通道类型为泛型 T，剩余输入通道类型为固定类型，对于此类算子需
     # 要将泛型的输入通道转换为目标类型
     partial_generic_ops = \
-        { 'Expand' : GenericIO([0], [0])
-        , 'Less'   : GenericIO([0, 1], [])
-        , 'Gather' : GenericIO([0], [0])
+        { 'Expand'   : GenericIO([0], [0])
+        , 'Less'     : GenericIO([0, 1], [])
+        , 'Gather'   : GenericIO([0], [0])
+        , 'Shape'    : GenericIO([0], [])
+        , 'Where'    : GenericIO([1, 2], [0])
+        , 'Equal'    : GenericIO([0, 1], [])
+        , 'Reshape'  : GenericIO([0], [0])
+        , 'Tile'     : GenericIO([0], [0])
+        , 'ScatterND': GenericIO([0, 2], [0])
+        , 'Unsqueeze': GenericIO([0], [0])
+        , 'Squeeze'  : GenericIO([0], [0])
         }
 
     def __init__(self, strategy: TypeCastStrategy):
@@ -217,31 +230,31 @@ class TypeCastApply(object):
         :param match_result: 子图匹配结果
         :return            : 类型转换是否应用成功
         """
-        node_map       = {}
-        node_inputs    = set()
-        node_outputs   = set()
-        const_inputs   = set()
-        # 构建所有输入输出的集合
+        node_map = {}
+        # 构建子图节点映射
         for node_dict in match_result.node_dicts:
             for nodes in node_dict.values():
                 for node in nodes:
                     node_map[node.name] = node
-                    node_inputs.update(node.inputs)
-                    node_outputs.update(node.outputs)
-
-        # 构建常量输入集合
-        for initializer in graph.initializers:
-            const_inputs.add(initializer.name)
 
         # 构建边名与数据类型的映射表
-        edge_type_dict = {}
-        for edge in chain(graph.value_infos, graph.inputs, graph.outputs):
-            edge_type_dict[edge.name] = edge.dtype
-        for initializer in graph.initializers:
-            edge_type_dict[initializer.name] = initializer.value.dtype
+        edge_type_dict = self._make_edge_type_dict(graph)
 
+        self._cast_subgraph_inputs(graph, node_map, edge_type_dict)
+        self._cast_subgraph_outputs(graph, node_map, edge_type_dict)
+
+        return True
+
+    def _cast_subgraph_inputs(self, graph: BaseGraph, node_map, edge_type_dict):
+        """ 将子图输入转换为目标类型
+        :param graph         : 整图
+        :param node_map      : 子图节点表
+        :param edge_type_dict: 边名与数据类型的映射表
+        """
+        const_map = dict([(initializer.name, initializer) for initializer in graph.initializers])
         cast_from = self._strategy.cast_from
         cast_to   = self._strategy.cast_to
+
         # 遍历子图中的所有节点
         for node in node_map.values():
             # 处理节点输入
@@ -254,14 +267,41 @@ class TypeCastApply(object):
                     continue
 
                 # 常量输入直接对 initializer 节点的数据类型进行转换
-                if node_input in const_inputs:
-                    self._const_type_cast(graph, node_input, cast_to)
+                if node_input in const_map:
+                    self._const_type_cast(graph, node, input_index, const_map, cast_to)
                     continue
 
-                # 节点的输入是子图的外部输入，则将输入转换为目标类型
-                if node_input not in node_outputs:
-                    self._insert_cast_node(graph, node, 'before', input_index, cast_to)
+                # 前置节点为子图外部节点或前置节点的当前输出为非泛型输出，则将需要将输入转换为目标类型
+                prev_node = graph.get_prev_node(node_input)
+                if prev_node:
+                    output_index = prev_node.outputs.index(node_input)
+                    _is_generic_output = GenericOpMatch.is_generic_io(prev_node, IOType.NODE_OUTPUT, output_index)
+                    if prev_node.name not in node_map or not _is_generic_output:
+                        # 如果前置节点当前输出通道后面存在转换到目标类型的 Cast 节点时，复用此节点
+                        next_nodes = graph.get_next_nodes(node_input)
+                        casts = list(filter(lambda node: node.op_type == 'Cast' and \
+                            node['to'] == numpy_onnx_type_map.get(cast_to, 0), next_nodes))
+                        if casts:
+                            graph[node.name].inputs[input_index] = casts[0].outputs[0]
+                            graph.update_map()
+                        else:
+                            self._insert_cast_node(graph, node, 'before', input_index, cast_to)
+                    continue
 
+                for input_node in graph.inputs:
+                    if node_input == input_node.name:
+                        self._insert_cast_node(graph, node, 'before', input_index, cast_to)
+
+    def _cast_subgraph_outputs(self, graph, node_map, edge_type_dict):
+        """ 将子图输出转换为原始类型
+        :param graph         : 整图
+        :param node_map      : 子图节点表
+        :param edge_type_dict: 边名与数据类型的映射表
+        """
+        cast_from = self._strategy.cast_from
+
+        # 遍历子图中的所有节点
+        for node in node_map.values():
             # 处理节点输出
             for output_index, node_output in enumerate(node.outputs):
                 # 如果当前输出不能泛型则不处理
@@ -280,9 +320,8 @@ class TypeCastApply(object):
                     # 后继节点为子图外部节点或后继节点当前的输入为非泛型输入，则需要将当前节点输出转回原始类型
                     _is_generic_input = GenericOpMatch.is_generic_io(next_node, IOType.NODE_INPUT, input_index)
                     if next_node.name not in node_map or not _is_generic_input:
-                        elem_type = numpy_onnx_type_map.get(cast_from, 0)
-                        # 不进行重复转换
-                        if next_node.op_type == 'Cast' and next_node['to'] == elem_type.value:
+                        # 后继节点为 Cast 节点时再插入 Cast 节点没有意义
+                        if next_node.op_type == 'Cast':
                             continue
                         # 复用 Cast 节点
                         if cast_node is not None:
@@ -299,7 +338,17 @@ class TypeCastApply(object):
                     if node_output == output_node.name:
                         self._insert_cast_node(graph, output_node, 'before', 0, cast_from)
 
-        return True
+    def _make_edge_type_dict(self, graph: BaseGraph) -> Dict[str, np.dtype]:
+        """ 构建边名与数据类型的映射表
+        :param graph: 构建映射表的整图
+        :return     : 边名与数据类型的映射表
+        """
+        edge_type_dict = {}
+        for edge in chain(graph.value_infos, graph.inputs, graph.outputs):
+            edge_type_dict[edge.name] = edge.dtype
+        for initializer in graph.initializers:
+            edge_type_dict[initializer.name] = initializer.value.dtype
+        return edge_type_dict
 
     def _insert_cast_node(self, graph: BaseGraph, node: BaseNode,
                           mode: str, refer_index, cast_to: np.dtype) -> BaseNode:
@@ -345,16 +394,47 @@ class TypeCastApply(object):
         node.value = value.astype(cast_to)
         return node
 
-    def _const_type_cast(self, graph: BaseGraph, const_input: str, cast_to: np.dtype):
+    def _const_type_cast(self, graph: BaseGraph, node: BaseNode, input_index, const_map, cast_to: np.dtype):
         """ 常量输入类型转换
         :param graph      : 整图
-        :param const_input: 常量输入名称
-        :param cast_to    : 转换类型
+        :param node       : 常量输入的算子节点
+        :param input_index: 常量输入的通道索引
+        :param const_map  : 常量输入映射表
+        :param cast_to    : 转换目标类型
         """
-        for const_node in graph.initializers:
-            if const_node.name == const_input:
-                self._value_type_cast(const_node, cast_to)
-                return
+        const_input = node.inputs[input_index]
+        if const_input not in node.inputs or const_input not in const_map:
+            return
+
+        const_node = const_map[const_input]
+        if const_node.value.dtype == cast_to:
+            return
+
+        # 如果常量输入后面任意一个节点输入不支持泛型则不能直接将常量进行类型转换
+        next_nodes = graph.get_next_nodes(const_node.name)
+        cast_const_directly = True
+        for next_node in next_nodes:
+            next_input_index = next_node.inputs.index(const_node.name)
+            if not GenericOpMatch.is_generic_io(next_node, IOType.NODE_INPUT, next_input_index):
+                cast_const_directly = False
+                break
+
+        # 直接对常量输入进行类型转换
+        if cast_const_directly:
+            self._value_type_cast(const_node, cast_to)
+            return
+
+        # 构造的新常量输入节点的名字
+        new_const_name = f'{const_node.name}_{numpy_onnx_type_map.get(cast_to, 0).name}'
+        if new_const_name in const_map:
+            return
+
+        new_const_node = graph.add_initializer(new_const_name, const_node.value.copy())
+        const_map[new_const_name] = new_const_node
+        self._value_type_cast(new_const_node, cast_to)
+        graph[node.name].inputs[input_index] = new_const_name
+        graph.update_map()
+
 
 @KnowledgeFactory.register("KnowledgeTypeCast")
 class KnowledgeTypeCast(KnowledgeBase):
