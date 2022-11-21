@@ -65,11 +65,9 @@ def getCard310P():
     get_npu_id = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     npu_id = get_npu_id.stdout.decode('gb2312')
     npu_id = re.findall(r'NPU ID.+: [0-9]', npu_id, re.M)
-    npu_id = npu_id[-1]
-    if npu_id == '0':
-        cmd = 'npu-smi info -t memory -i 0'
-    else:
-        cmd = 'npu-smi info -t memory -i 1'
+    num = len(npu_id[0])
+    npu_id = npu_id[0][33:num]
+    cmd = 'npu-smi info -t memory -i ' + npu_id
     # shell=True是为了让cmd为string（而非list，我更喜欢用string）的时候能正常执行
     p = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     # 一定要decode，不然output的type会是bytes！
@@ -94,9 +92,9 @@ def getSystem_all():
     output = p.stdout.decode('gb2312')
     # 获取stderr！
     error = p.stderr.decode('gb2312')
-    os_version = re.findall(r'^DISTRIB_DESCRIPTION=".+"$', output, re.M)
+    os_version = re.findall(r'^PRETTY_NAME=".+"$', output, re.M)
     num = len(os_version[0])
-    temp_name = os_version[0][21:num - 1]
+    temp_name = os_version[0][13:num - 1]
     return temp_name
 
 
@@ -108,10 +106,14 @@ def getSystemAndArch():
     # 一定要decode，不然output的type会是bytes！
     output = p.stdout.decode('gb2312')
     output = output.split("\n")
+    for key in output:
+        if key.find("PRETTY_NAME", 0, len(key)) != -1:
+            continue
+        elif key.find("NAME", 0, len(key)) != -1:
+            DISTRIB_ID = key[6:len(key) - 1]
+        elif key.find("VERSION_ID", 0, len(key)) != -1:
+            VERSION_ID = key[12:len(key) - 1]    
     os_Architecture = output[0]
-    DISTRIB_ID = output[1][11:]
-    VERSION_ID = output[10]
-    VERSION_ID = VERSION_ID[12:len(VERSION_ID) - 1]
     os_version = DISTRIB_ID + " " + VERSION_ID
 
     return os_Architecture, os_version, DISTRIB_ID
