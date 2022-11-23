@@ -196,3 +196,30 @@ graph TD
 ```
 
 如图所示，我们将大kernel卷积算子根据kernel拆分为若干个，根据其kernel切片的移动范围将输入进行Slice切片，再将各个拆分后的卷积算子结果全部加起来，即得到了等效的结果。
+
+---
+
+## TopK的indices输出类型修复(KnowledgeTopkIndicesTypeFix)
+
+### 原理
+
+在ONNX标准中，TopK算子的输入K和输出indices其类型定义为int64[]，而在om的实现中为int32[]，由于ATC转换工具在某些情况下未正确处理这个问题，因此如果模型中存在TopK算子且其k或indices存在类型不匹配，则ATC有可能报错退出，无法转换该模型。这里通过对TopK算子相应的输入输出进行类型转换来处理这个问题。经过修改后，模型不再符合ONNX标准，因此仅推荐模型转换om时遇到TopK类型问题时才启用这个知识库。
+
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        X(Node0) --> Y(Cast)
+        Y --> |k| D(TopK)
+        D --> E(Node1)
+        D --> |indices| F(Cast)
+        F --> G(Node2)
+    end
+
+    subgraph Before
+        Z(Node0) -->|k| A(TopK)
+        A --> B(Node1)
+        A --> |indices| C(Node2)
+    end
+```
