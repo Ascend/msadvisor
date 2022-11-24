@@ -68,6 +68,14 @@ class TestGraphAdvanced(unittest.TestCase):
                 self.graph['Node_5'], 
                 ]
             )
+        self.assertEqual(
+            self.graph.inputs,
+            [self.graph['input_0']]
+        )
+        self.assertEqual(
+            self.graph.outputs,
+            [self.graph['output_0']]
+        )
 
 
 if __name__ == "__main__":

@@ -594,8 +594,8 @@ class BaseGraph(ABC):
                         queue.append(prev_node)
         
         # remove unused graph inputs
-        op_names = [n.name for n in self._nodes]
-        self._inputs = list(filter(lambda x:x.name in op_names, self._inputs))
+        inputs = [inp for n in self._nodes for inp in n.inputs]
+        self._inputs = list(filter(lambda x:x.name in inputs, self._inputs))
         
         self.update_map()
 
