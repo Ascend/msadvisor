@@ -436,7 +436,7 @@ class TypeCastApply(object):
         graph.update_map()
 
 
-@KnowledgeFactory.register("KnowledgeTypeCast")
+@KnowledgeFactory.register()
 class KnowledgeTypeCast(KnowledgeBase):
     def __init__(self):
         super().__init__()

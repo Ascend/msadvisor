@@ -53,7 +53,7 @@ pattern = Pattern() \
     .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
 
 
-@KnowledgeFactory.register("KnowledgeConv1d2Conv2d")
+@KnowledgeFactory.register()
 class KnowledgeConv1d2Conv2d(KnowledgeBase):
     def __init__(self):
         super().__init__()

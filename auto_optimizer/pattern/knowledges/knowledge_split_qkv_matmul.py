@@ -97,7 +97,7 @@ pattern0 = Pattern() \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 
-@KnowledgeFactory.register("KnowledgeSplitQKVMatmul")
+@KnowledgeFactory.register()
 class KnowledgeSplitQKVMatmul(KnowledgeBase):
     """Split MatMul/Reshape/Transpose/Gathers Structure"""
     def __init__(self):
