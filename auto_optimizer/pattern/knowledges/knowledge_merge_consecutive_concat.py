@@ -109,7 +109,7 @@ pattern2 = Pattern() \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 
-@KnowledgeFactory.register("KnowledgeMergeConsecutiveConcat")
+@KnowledgeFactory.register()
 class KnowledgeMergeConsecutiveConcat(KnowledgeBase):
     """Combine consecutive concat operators together"""
     def __init__(self):

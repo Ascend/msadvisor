@@ -70,7 +70,7 @@ r"""
 """
 
 
-@KnowledgeFactory.register("KnowledgeSplitLargeKernelConv")
+@KnowledgeFactory.register()
 class KnowledgeSplitLargeKernelConv(KnowledgeBase):
     """Split Large Conv Kernel to speed up inference."""
     def __init__(self):
