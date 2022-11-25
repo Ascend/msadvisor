@@ -101,4 +101,3 @@ if __name__ == "__main__":
     data_path = "./"
     ret = evaluate(data_path, "")
     print("sample in:{} out:{}".format(data_path, ret))
->>>>>>> b1d71aec1293583eb73b352c5adc5de284a7ee9a
