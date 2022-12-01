@@ -41,7 +41,7 @@ class DIRECTION(Enum):
 
 
 class MatchBase(object):
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @abstractmethod
@@ -80,14 +80,14 @@ class PatternNode(object):
                 return False
         return True
 
-    def set_input(self, prev_node):
+    def set_input(self, prev_node: 'PatternNode') -> None:
         """
         设置前置节点
         :param prev_node: 前置节点
         """
         self.inputs.append(prev_node)
 
-    def set_output(self, next_node):
+    def set_output(self, next_node: 'PatternNode') -> None:
         """
         设置后置节点
         :param next_node: 设置后置节点
@@ -96,14 +96,19 @@ class PatternNode(object):
 
 
 class Pattern(object):
-    def __init__(self):
-        self.node_dict = {} # Dict[str, PatternNode]
-        self.in_nodes = [] # PatternNode
-        self.out_nodes = [] # PatternNode
-        self.node_match_pattern_dict = {}
+    def __init__(self) -> None:
+        self.node_dict: Dict[str, PatternNode] = {}
+        self.in_nodes: List[PatternNode] = []
+        self.out_nodes: List[PatternNode] = []
+        self.node_match_pattern_dict: Dict[str, MATCH_PATTERN] = {}
         self.graph_match_pattern = MATCH_PATTERN.MATCH_ONCE
 
-    def add_node(self, op_name, op_types, op_matchs: List[MatchBase] = None):
+    def add_node(
+        self,
+        op_name: str,
+        op_types: Optional[List[str]],
+        op_matchs: Optional[List[MatchBase]] = None
+    ) -> 'Pattern':
         """
         创建PatternNode，并增加到节点列表
         :param op_name: 算子节点名
@@ -116,7 +121,7 @@ class Pattern(object):
         self.node_dict[op_name] = PatternNode(op_name, op_types, op_matchs)
         return self
 
-    def add_edge(self, prev_op_name: str, next_op_name: str):
+    def add_edge(self, prev_op_name: str, next_op_name: str) -> 'Pattern':
         prev_node = self.node_dict.get(prev_op_name)
         if prev_node is None:
             raise RuntimeError(f'Operator({prev_op_name}) not exists.')
@@ -127,7 +132,7 @@ class Pattern(object):
         prev_node.set_output(next_node)
         return self
 
-    def set_input(self, op_name):
+    def set_input(self, op_name: str) -> 'Pattern':
         """
         设置子图的输入节点
         :param op_name: 算子节点名
@@ -141,7 +146,7 @@ class Pattern(object):
         self.in_nodes.append(in_node)
         return self
 
-    def set_output(self, op_name):
+    def set_output(self, op_name: str) -> 'Pattern':
         """
         设置子图的输出节点
         :param op_name: 输出节点名
@@ -155,7 +160,11 @@ class Pattern(object):
         self.out_nodes.append(out_node)
         return self
 
-    def set_node_loop(self, op_name, match_pattern):
+    def set_node_loop(
+        self,
+        op_name: str,
+        match_pattern: MATCH_PATTERN
+    ) -> 'Pattern':
         """
         设置算子节点匹配模式
         :param op_name: 算子节点名称
@@ -168,7 +177,7 @@ class Pattern(object):
         self.node_match_pattern_dict[op_name] = match_pattern
         return self
 
-    def set_loop(self, match_pattern):
+    def set_loop(self, match_pattern: MATCH_PATTERN) -> 'Pattern':
         """
         设置子图循环模式
         单输入多输出、多输入单输出、多输入多输出不支持子图循环匹配
@@ -182,7 +191,7 @@ class Pattern(object):
                     'input nodes size should be equal to output nodes size.')
         return self
 
-    def get_visit_direction(self):
+    def get_visit_direction(self) -> DIRECTION:
         """
         获取子图匹配的遍历方式：
           1、多输入单输出，从下往上遍历
@@ -199,7 +208,7 @@ class Pattern(object):
         # 多输入多输出场景，没法确定遍历方向，暂时不支持
         return DIRECTION.UNKNOWN
 
-    def get_start_node(self):
+    def get_start_node(self) -> Optional[PatternNode]:
         """
         获取子图匹配遍历的起始节点
         :return: 返回子图遍历的起始节点
@@ -213,7 +222,7 @@ class Pattern(object):
         # 多输入多输出不支持
         return None
 
-    def node_can_match_more(self, op_name) -> bool:
+    def node_can_match_more(self, op_name: str) -> bool:
         """
         节点是否支持匹配多个
         :param op_name: 算子节点名称
@@ -224,7 +233,7 @@ class Pattern(object):
         return self.node_match_pattern_dict[op_name] == MATCH_PATTERN.MATCH_ONCE_OR_MORE or \
             self.node_match_pattern_dict[op_name] == MATCH_PATTERN.MATCH_ZERO_OR_MORE
 
-    def node_can_match_zero(self, op_name) -> bool:
+    def node_can_match_zero(self, op_name: str) -> bool:
         """
         节点是否支持匹配0个
         :param op_name: 算子节点名称

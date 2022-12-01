@@ -30,15 +30,15 @@ class BaseNode(ABC):
         raise NotImplementedError()
     
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
-    def name(self, name:str):
+    def name(self, name: str) -> None:
         self._name = name
 
     @property
-    def op_type(self):
+    def op_type(self) -> str:
         return self._op_type
 
 
@@ -77,10 +77,10 @@ class Node(BaseNode):
         return self._inputs
     
     @inputs.setter
-    def inputs(self, inputs:List[str]):
+    def inputs(self, inputs: List[str]) -> None:
         self._inputs = inputs
     
-    def get_input_id(self, node_input:str) -> str:
+    def get_input_id(self, node_input: str) -> int:
         if node_input not in self._inputs:
             raise RuntimeError(
                 f'Name of input should be one of {self._inputs}')
@@ -91,10 +91,10 @@ class Node(BaseNode):
         return self._outputs
     
     @outputs.setter
-    def outputs(self, outputs:List[str]):
+    def outputs(self, outputs: List[str]) -> None:
         self._outputs = outputs
     
-    def get_output_id(self, output:str) -> str:
+    def get_output_id(self, output: str) -> int:
         if output not in self._outputs:
             raise RuntimeError(
                 f'Name of output should be one of {self._outputs}')
@@ -104,20 +104,20 @@ class Node(BaseNode):
     def attrs(self) -> Dict[str, object]:
         return self._attrs
     
-    def __getitem__(self, key) -> object:
+    def __getitem__(self, key: str) -> object:
         if key not in self._attrs:
             raise KeyError(
                 f'Node({self.name}) do not have {key} attribute.')
         return self._attrs[key]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: object) -> None:
         if key not in self._attrs:
             warnings.warn(
                 f'Node({self.name}) do not have {key} attribute.')
         self._attrs[key] = value
 
     @property
-    def domain(self):
+    def domain(self) -> str:
         return self._domain
 
     def __str__(self) -> str:
@@ -152,7 +152,7 @@ class Initializer(BaseNode):
         return self._value
     
     @value.setter
-    def value(self, value:np.ndarray):
+    def value(self, value: np.ndarray) -> None:
         self._value = value
     
     def __str__(self) -> str:
@@ -190,15 +190,15 @@ class PlaceHolder(BaseNode):
         return self._dtype
     
     @dtype.setter
-    def dtype(self, dtype:np.dtype):
+    def dtype(self, dtype: np.dtype) -> None:
         self._dtype = dtype
 
     @property
-    def shape(self) -> List[Union[str,int]]:
+    def shape(self) -> Sequence[Union[str, int]]:
         return self._shape
     
     @shape.setter
-    def shape(self, shape:List[Union[str,int]]):
+    def shape(self, shape: Sequence[Union[str, int]]) -> None:
         if -1 in shape:
             warnings.warn('To represent the dynamic dimension int -1 is converted to str "-1".')
         self._shape = ['-1' if dim == -1 else dim for dim in shape]

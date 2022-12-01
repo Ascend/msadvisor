@@ -60,7 +60,7 @@ class OnnxGraph(BaseGraph):
         }
 
     @classmethod
-    def parse(cls, path_or_bytes: Union[str, ModelProto, GraphProto], add_name_suffix=False) -> 'OnnxGraph':
+    def parse(cls, path_or_bytes: Union[str, ModelProto, GraphProto], add_name_suffix: bool = False) -> 'OnnxGraph':
         if isinstance(path_or_bytes, str):
             onnx_model = onnx.load(path_or_bytes)
         if isinstance(path_or_bytes, ModelProto):
@@ -99,17 +99,17 @@ class OnnxGraph(BaseGraph):
         graph = cls(onnx_graph.name, nodes, inputs, outputs, initializers, value_infos, **meta)
         return graph
 
-    def add_input(self, name, dtype, shape) -> OnnxPlaceHolder:
+    def add_input(self, name: str, dtype: str, shape: Sequence[Union[int, str]]) -> OnnxPlaceHolder:
         dtype = np.dtype(dtype)
         graph_input = OnnxPlaceHolder(name, dtype, shape)
         return self._add_input(graph_input)
 
-    def add_output(self, name, dtype, shape) -> OnnxPlaceHolder:
+    def add_output(self, name: str, dtype, shape) -> OnnxPlaceHolder:
         dtype = np.dtype(dtype)
         graph_output = OnnxPlaceHolder(name, dtype, shape)
         return self._add_output(graph_output)
 
-    def add_initializer(self, name, value) -> OnnxInitializer:
+    def add_initializer(self, name: str, value: np.ndarray) -> OnnxInitializer:
         initializer = OnnxInitializer(name, value)
         return self._add_initializer(initializer)
 
@@ -139,10 +139,10 @@ class OnnxGraph(BaseGraph):
     def model(self) -> ModelProto:
         return helper.make_model(self.proto(), **self._meta)
 
-    def save(self, path: str):
+    def save(self, path: str) -> None:
         onnx.save(self.model(), path)
 
-    def infershape(self):
+    def infershape(self) -> None:
         # clear value_infos
         self._value_infos = []
         self._value_map = {}
@@ -153,7 +153,13 @@ class OnnxGraph(BaseGraph):
         self._value_infos = [OnnxPlaceHolder.parse(v) for v in graph.value_info]
         self._value_map = {v.name: v for v in self._value_infos}
 
-    def extract(self, new_model_save_path, input_name_list, output_name_list, enable_model_check=True):
+    def extract(
+        self,
+        new_model_save_path: str,
+        input_name_list: List[str],
+        output_name_list: List[str],
+        enable_model_check: bool = True
+    ) -> 'OnnxGraph':
         # TODO: reimplement
         def check_model(model):
             pass
@@ -172,7 +178,7 @@ class OnnxGraph(BaseGraph):
         
         return OnnxGraph.parse(new_model_save_path)
     
-    def simplify(self, **kwargs):
+    def simplify(self, **kwargs) -> 'OnnxGraph':
         try:
             from onnxsim import simplify
         except ImportError:
@@ -191,7 +197,7 @@ class OnnxGraph(BaseGraph):
         return self._meta['opset_imports']
     
     @opset_imports.setter
-    def opset_imports(self, opset:Union[int, None]):
+    def opset_imports(self, opset: Union[int, None]) -> None:
         if not opset:
             self._meta['opset_imports'] = None
         else:

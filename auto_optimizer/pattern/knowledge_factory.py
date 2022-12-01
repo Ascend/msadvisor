@@ -13,8 +13,10 @@
 # limitations under the License.
 
 
-from typing import Dict, Optional, Type
+from typing import Callable, Dict, Optional, Type
 from .knowledges.knowledge_base import KnowledgeBase
+
+KnowledgeType = Type[KnowledgeBase]
 
 
 class KnowledgeFactory(object):
@@ -33,8 +35,8 @@ class KnowledgeFactory(object):
         return cls._knowledge_pool
 
     @classmethod
-    def register(cls, name: str = ''):
-        def _deco(knowledge_cls: Type[KnowledgeBase]):
+    def register(cls, name: str = '') -> Callable[[KnowledgeType], KnowledgeType]:
+        def _deco(knowledge_cls: KnowledgeType) -> KnowledgeType:
             registered_name = name if name else knowledge_cls.__name__
             cls.add_knowledge(registered_name, knowledge_cls())
             return knowledge_cls

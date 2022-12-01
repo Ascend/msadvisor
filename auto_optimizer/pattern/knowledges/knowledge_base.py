@@ -25,41 +25,44 @@ from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.pattern.matcher import Matcher
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 
+ApplyFunc = Callable[[BaseGraph, MatchResult], bool]
+ApplyFuncs = List[ApplyFunc]
+
 
 class UnionFind(object):
-    def __init__(self):
-        self.uf = []
+    def __init__(self) -> None:
+        self.uf: List[int] = []
 
-    def find(self, cur):
+    def find(self, cur: int):
         if self.uf[cur] != cur:
             return self.find(self.uf[cur])
         return cur
 
-    def union(self, pos0, pos1):
+    def union(self, pos0: int, pos1: int) -> None:
         u0 = self.find(pos0)
         u1 = self.find(pos1)
         if u0 != u1:
             self.uf[pos1] = u0
 
-    def expand(self):
+    def expand(self) -> None:
         last_index = len(self.uf)
         self.uf.append(last_index)
 
 
 class KnowledgeBase(object):
-    def __init__(self):
-        self._pattern_apply_dict = defaultdict(list)  # key is pattern object, value is apply func list
+    def __init__(self) -> None:
+        self._pattern_apply_dict: Dict[Pattern, ApplyFuncs] = defaultdict(list)
         self.reset()
 
-    def reset(self):
+    def reset(self) -> None:
         self._pattern_idx = -1
         self._apply_idx = -1
 
     @property
-    def _patterns(self):
+    def _patterns(self) -> List[Pattern]:
         return [*self._pattern_apply_dict]
 
-    def _register_apply_funcs(self, pattern: Pattern, apply_funcs: List[Callable]):
+    def _register_apply_funcs(self, pattern: Pattern, apply_funcs: ApplyFuncs) -> bool:
         '''
         注册pattern的apply方法
         '''
@@ -71,7 +74,7 @@ class KnowledgeBase(object):
         self._pattern_apply_dict[pattern].extend(apply_funcs)
         return True
 
-    def __get_current_pattern(self):
+    def __get_current_pattern(self) -> Optional[Pattern]:
         if len(self._patterns) == 0:
             return None
         if self._pattern_idx == -1:
@@ -89,15 +92,17 @@ class KnowledgeBase(object):
             return True
         return False
 
-    def next_pattern(self):
+    def next_pattern(self) -> Optional[Pattern]:
         if not self.has_next_pattern():
             return None
         self._pattern_idx += 1
         self._apply_idx = -1
         return self._patterns[self._pattern_idx]
 
-    def __get_current_apply_method(self):
+    def __get_current_apply_method(self) -> Optional[ApplyFunc]:
         pattern = self.__get_current_pattern()
+        if pattern is None:
+            return None
         apply_methods = self._pattern_apply_dict[pattern]
         if len(apply_methods) == 0:
             return None
@@ -107,7 +112,7 @@ class KnowledgeBase(object):
             return apply_methods[self._apply_idx]
         return None
 
-    def has_next_apply(self):
+    def has_next_apply(self) -> bool:
         pattern = self.__get_current_pattern()
         if pattern is None:
             return False
@@ -120,7 +125,7 @@ class KnowledgeBase(object):
             return True
         return False
 
-    def next_apply(self):
+    def next_apply(self) -> None:
         if not self.has_next_apply():
             return
         self._apply_idx += 1
@@ -168,7 +173,7 @@ class KnowledgeBase(object):
         """
         return True
 
-    def __is_sub_graph_connection(self, l_match_result, r_match_result) -> bool:
+    def __is_sub_graph_connection(self, l_match_result: MatchResult, r_match_result: MatchResult) -> bool:
         """
         判断两个子图之间是否存在连接
         :param l_match_result: 左子图
@@ -192,7 +197,7 @@ class KnowledgeBase(object):
                     r_node_outputs.update(node.outputs)
         return bool(l_node_inputs & r_node_outputs) or bool(l_node_outputs & r_node_inputs)
 
-    def match_pattern(self, graph: BaseGraph, top_ops_names: List[str] = None) -> List[MatchResult]:
+    def match_pattern(self, graph: BaseGraph, top_ops_names: Optional[List[str]] = None) -> List[MatchResult]:
         """
         匹配所有子图
         :param graph: 计算图

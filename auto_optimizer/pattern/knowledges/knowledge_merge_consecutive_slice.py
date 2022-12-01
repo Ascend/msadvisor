@@ -129,7 +129,7 @@ class KnowledgeMergeConsecutiveSlice(KnowledgeBase):
         self._register_apply_funcs(pattern1, [self._merge_continue_slice_apply])
         self._register_apply_funcs(pattern2, [self._merge_continue_slice_apply])
 
-    def merge_slice_nodes(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
+    def merge_slice_nodes(self, graph: BaseGraph, matchinfo: Dict[str, List[Node]]) -> bool:
         # get slice operators here, we only kept the last slice operator after optimization
         slice_to_keep = graph.get_node(matchinfo['Slice_to_keep'][0].name, node_type=Node)
         slices_to_remove = [
