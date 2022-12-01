@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from typing import Set
+from onnx.mapping import NP_TYPE_TO_TENSOR_TYPE
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
@@ -20,7 +21,6 @@ from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
-from auto_optimizer.pattern.knowledges.value_type import OnnxType, numpy_onnx_type_map, make_edge_type_dict
 
 
 class MergeCastsPattern(Pattern):
@@ -72,17 +72,11 @@ class MergeCastsPattern(Pattern):
             .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 
-@KnowledgeFactory.register('KnowledgeMergeCasts')
+@KnowledgeFactory.register()
 class KnowledgeMergeCasts(KnowledgeBase):
     def __init__(self):
         super().__init__()
         self._register_apply_funcs(MergeCastsPattern(), [self._apply_method])
-
-    def pre_process(self, graph: BaseGraph) -> bool:
-        return super().pre_process(graph)
-
-    def post_process(self, graph: BaseGraph) -> bool:
-        return super().post_process(graph)
 
     def _is_cast_node(self, node: BaseNode) -> bool:
         """ 判断节点是否为 Cast 节点
@@ -96,7 +90,7 @@ class KnowledgeMergeCasts(KnowledgeBase):
         :param match_result: 子图匹配结果
         :return            : 类型转换是否应用成功
         """
-        edge_type_dict = make_edge_type_dict(graph)
+        edge_type_dict = self._make_edge_type_dict(graph)
         for root_output in self._build_root_outputs(graph, match_result):
             for cast_node in filter(self._is_cast_node, graph.get_next_nodes(root_output)):
                 self._merge_cast_tree(graph, cast_node, root_output, 10)
@@ -105,9 +99,25 @@ class KnowledgeMergeCasts(KnowledgeBase):
             if root_output not in edge_type_dict:
                 continue
             # 设法移除根节点下方的 Cast 节点
-            output_type = numpy_onnx_type_map.get(edge_type_dict[root_output].type, OnnxType.UNDEFINED)
+            output_type = NP_TYPE_TO_TENSOR_TYPE.get(edge_type_dict[root_output], 0)
             self._remove_cast_after_root(graph, root_output, output_type)
         return True
+
+    def _make_edge_type_dict(self, graph: BaseGraph):
+        """ 生成图边类型信息
+        :param graph: 整图
+        :return     : 图边信息字典
+        """
+        edge_type_dict = {}
+        for edge in graph.value_infos:
+            edge_type_dict[edge.name] = edge.dtype
+        for input_node in graph.inputs:
+            edge_type_dict[input_node.name] = input_node.dtype
+        for output_node in graph.outputs:
+            edge_type_dict[output_node.name] = output_node.dtype
+        for initializer in graph.initializers:
+            edge_type_dict[initializer.name] = initializer.value.dtype
+        return edge_type_dict
 
     def _build_root_outputs(self, graph: BaseGraph, match_result: MatchResult) -> Set[str]:
         """ 构建根节点输出集合
@@ -175,14 +185,14 @@ class KnowledgeMergeCasts(KnowledgeBase):
         if len(next_nodes) == 1 and next_nodes[0].op_type == 'Cast':
             graph.remove(node.name)
 
-    def _remove_cast_after_root(self, graph: BaseGraph, root_output, output_type: OnnxType):
+    def _remove_cast_after_root(self, graph: BaseGraph, root_output, output_type):
         """ 根节点后的 Cast 算子如果与输出类型相同则进行消除
         :param graph      : 整图
         :param root_output: 根节点输出
         :param output_type: 输出类型
         """
         for next_node in graph.get_next_nodes(root_output):
-            if next_node.op_type == 'Cast' and next_node['to'] == output_type.value:
+            if next_node.op_type == 'Cast' and next_node['to'] == output_type:
                 graph.remove(next_node.name)
 
     def _merge_cast_tree(self, graph: BaseGraph, cast_node: BaseNode, root_output, max_recursion):
