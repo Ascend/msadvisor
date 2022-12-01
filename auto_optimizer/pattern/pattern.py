@@ -14,7 +14,7 @@
 
 from abc import abstractmethod
 from enum import Enum, unique
-from typing import List
+from typing import Dict, List, Optional
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 
@@ -50,12 +50,17 @@ class MatchBase(object):
 
 
 class PatternNode(object):
-    def __init__(self, op_name: str, op_types: List[str], op_matchs: List[MatchBase] = None):
-        self.op_name = op_name
-        self.op_types = op_types
-        self.op_matchs = op_matchs
-        self.inputs = []
-        self.outputs = []
+    def __init__(
+        self,
+        op_name: str,
+        op_types: Optional[List[str]],
+        op_matchs: Optional[List[MatchBase]] = None
+    ) -> None:
+        self.op_name: str = op_name
+        self.op_types: List[str] = [] if op_types is None else op_types
+        self.op_matchs: List[MatchBase] = [] if op_matchs is None else op_matchs
+        self.inputs: List['PatternNode'] = []
+        self.outputs: List['PatternNode'] = []
 
     def match(self, node: BaseNode, graph: BaseGraph) -> bool:
         """
@@ -107,17 +112,17 @@ class Pattern(object):
         :return: 返回实例
         """
         if self.node_dict.get(op_name) is not None:
-            raise RuntimeError('Operator({}) has bean existed.'.format(op_name))
+            raise RuntimeError(f'Operator({op_name}) already exists.')
         self.node_dict[op_name] = PatternNode(op_name, op_types, op_matchs)
         return self
 
     def add_edge(self, prev_op_name: str, next_op_name: str):
         prev_node = self.node_dict.get(prev_op_name)
         if prev_node is None:
-            raise RuntimeError('Operator({}) has not bean added.'.format(prev_op_name))
+            raise RuntimeError(f'Operator({prev_op_name}) not exists.')
         next_node = self.node_dict.get(next_op_name)
         if next_node is None:
-            raise RuntimeError('Operator({}) has not bean added.'.foramt(next_op_name))
+            raise RuntimeError(f'Operator({next_op_name}) not exists.')
         next_node.set_input(prev_node)
         prev_node.set_output(next_node)
         return self
@@ -130,9 +135,9 @@ class Pattern(object):
         """
         in_node = self.node_dict.get(op_name)
         if in_node is None:
-            raise RuntimeError('Operator({}) has not bean added.'.format(op_name))
+            raise RuntimeError(f'Operator({op_name}) not exists.')
         if len(in_node.inputs) > 0:
-            raise RuntimeError('Operator({}) is not output node.'.format(op_name))
+            raise RuntimeError(f'Operator({op_name}) is not an input node.')
         self.in_nodes.append(in_node)
         return self
 
@@ -144,9 +149,9 @@ class Pattern(object):
         """
         out_node = self.node_dict.get(op_name)
         if out_node is None:
-            raise RuntimeError('Operator({}) has not bean added.'.format(op_name))
+            raise RuntimeError(f'Operator({op_name}) not exists.')
         if len(out_node.outputs) > 0:
-            raise RuntimeError('Operator({}) is not output node.'.format(op_name))
+            raise RuntimeError(f'Operator({op_name}) is not an output node.')
         self.out_nodes.append(out_node)
         return self
 
@@ -159,7 +164,7 @@ class Pattern(object):
         """
         node = self.node_dict.get(op_name)
         if node is None:
-            raise RuntimeError('Operator({}) has not bean added.'.format(op_name))
+            raise RuntimeError(f'Operator({op_name}) not exists.')
         self.node_match_pattern_dict[op_name] = match_pattern
         return self
 

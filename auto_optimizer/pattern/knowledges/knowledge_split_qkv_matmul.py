@@ -105,7 +105,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
         # 注册pattern的apply方法
         self._register_apply_funcs(pattern0, [self._qkv_slice_apply])
 
-    def __get_first_dim_of_split_after_reshape(self, size_of_dim_to_split: int, shape: np.ndarray) -> int:
+    def _get_first_dim_of_split_after_reshape(self, size_of_dim_to_split: int, shape: np.ndarray) -> int:
         """
         计算矩阵乘法结果最后一个维度reshape后对应的首维度
         :param size_of_dim_to_split: 矩阵乘法结果最后一个维度的size
@@ -122,7 +122,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             first_dim_of_split -= 1
         return first_dim_of_split if size_tmp == size_of_dim_to_split else -1
 
-    def __dup_branch_node(self, node: Node, graph: BaseGraph, weight: np.ndarray,
+    def _dup_branch_node(self, node: Node, graph: BaseGraph, weight: np.ndarray,
                           axis: int, num: int, indices: List[int], placeholder_index: int = 0) -> List[Node]:
         """
         复制逐元素算子和MatMul算子，这些算子的常数参数被切分为若干份，由各个分支平分
@@ -160,7 +160,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             ret.append(added_node)
         return ret
 
-    def __dup_reshape_node(self, node: Node, graph: BaseGraph, weight: np.ndarray, axis: int, num: int) -> List[Node]:
+    def _dup_reshape_node(self, node: Node, graph: BaseGraph, weight: np.ndarray, axis: int, num: int) -> List[Node]:
         """
         复制Reshape算子，Reshape算子的shape参数需要删除被拆分的轴，各个分支的shape参数是相同的
         :param node: 要复制的算子
@@ -189,7 +189,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             ret.append(added_node)
         return ret
 
-    def __dup_transpose_node(self, node: Node, graph: BaseGraph, perm: List[int], num: int) -> List[Node]:
+    def _dup_transpose_node(self, node: Node, graph: BaseGraph, perm: List[int], num: int) -> List[Node]:
         """
         复制Transpose算子，Transpose算子的perm属性需要重新计算，计算过程在外部
         :param node: 要复制的算子
@@ -211,7 +211,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             ret.append(new_node)
         return ret
 
-    def __reconnect_input_to_new_node(self, node_to_reconnect: Node, old_node: Node, new_node: Node):
+    def _reconnect_input_to_new_node(self, node_to_reconnect: Node, old_node: Node, new_node: Node):
         """
         将节点连接至新节点
         :param node_to_reconnect: 需要重新连接的节点
@@ -222,7 +222,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             if node_to_reconnect.inputs[idx] == old_node.outputs[0]:
                 node_to_reconnect.inputs[idx] = new_node.outputs[0]
 
-    def __connect_splitted_nodes(self, new_nodes: List[Node],
+    def _connect_splitted_nodes(self, new_nodes: List[Node],
                                  pre_nodes: List[Union[Node, str]], placeholder_index: int = 0):
         """
         连接复制出来的新节点
@@ -234,7 +234,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             node.inputs[placeholder_index] = pre_node.outputs[0] if isinstance(pre_node, (Node, )) else pre_node
             pre_nodes[idx] = node
 
-    def __get_gather_nodes_indices(self, nodes: List[Node], graph: BaseGraph) -> List[int]:
+    def _get_gather_nodes_indices(self, nodes: List[Node], graph: BaseGraph) -> List[int]:
         """
         获取Gather算子取的全部下标
         :param nodes: gather算子列表
@@ -249,7 +249,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             indices.append(int(indice.value))
         return indices
 
-    def __split_branches(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
+    def _split_branches(self, graph: BaseGraph, matchinfo: Dict[str, List[Node]]) -> bool:
         """
         QKV Slice改图，将MatMul算子到Transpose算子拆分为若干份，去掉原本的Gather算子
         :param graph: 完整的图结构
@@ -278,7 +278,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
         # 该维度由多个gather平分，此时可以利用分块矩阵乘法将矩阵乘法分为n份，形成n个分支
         new_shape = resh_weight.value
         dim_to_split = matmul_weight.value.shape[-1]
-        first_dim_of_split = self.__get_first_dim_of_split_after_reshape(dim_to_split, new_shape)
+        first_dim_of_split = self._get_first_dim_of_split_after_reshape(dim_to_split, new_shape)
         if first_dim_of_split == -1:
             logging.info(f"The Reshape operator {reshape_node.name} does not meet specific requirement.")
             return False
@@ -297,7 +297,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             logging.info(f"The number of Gather operators {split_num} is not equal to {new_shape[perm[0]]}.")
             return False
 
-        indices = self.__get_gather_nodes_indices(gather_nodes, graph)
+        indices = self._get_gather_nodes_indices(gather_nodes, graph)
         if sorted(indices) != [i for i in range(split_num)]:
             # 几个Gather算子的indices不重不漏的对应[0, n)，即平分首维度
             logging.info("The gather nodes does not split the first axis.")
@@ -338,9 +338,9 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
 
         # 执行到这里已经完全确认可以做优化，接下来开始改图，防止出现改图到一半发现无法继续修改的情况
         matmul_weight_length = len(matmul_weight.value.shape)
-        new_matmuls = self.__dup_branch_node(matmul_node, graph, matmul_weight.value,
+        new_matmuls = self._dup_branch_node(matmul_node, graph, matmul_weight.value,
                                              matmul_weight_length - 1, split_num, indices)
-        self.__connect_splitted_nodes(new_matmuls, pre_nodes)
+        self._connect_splitted_nodes(new_matmuls, pre_nodes)
 
         for node in element_wise_nodes:
             input0 = graph.get_node(node.inputs[0], node_type=Initializer)
@@ -349,22 +349,22 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             node_weight = input0 if input1 is None else input1
             placeholder_index = 1 if input1 is None else 0
             matmul_weight_length = len(node_weight.value.shape)
-            new_nodes = self.__dup_branch_node(node, graph, node_weight.value,
+            new_nodes = self._dup_branch_node(node, graph, node_weight.value,
                                                matmul_weight_length - 1, split_num, indices, placeholder_index)
-            self.__connect_splitted_nodes(new_nodes, pre_nodes, placeholder_index)
+            self._connect_splitted_nodes(new_nodes, pre_nodes, placeholder_index)
 
-        new_reshapes = self.__dup_reshape_node(reshape_node, graph, resh_weight.value, first_dim_of_split, split_num)
-        self.__connect_splitted_nodes(new_reshapes, pre_nodes)
+        new_reshapes = self._dup_reshape_node(reshape_node, graph, resh_weight.value, first_dim_of_split, split_num)
+        self._connect_splitted_nodes(new_reshapes, pre_nodes)
 
-        new_transposes = self.__dup_transpose_node(transpose_node, graph, splitted_perm, split_num)
-        self.__connect_splitted_nodes(new_transposes, pre_nodes)
+        new_transposes = self._dup_transpose_node(transpose_node, graph, splitted_perm, split_num)
+        self._connect_splitted_nodes(new_transposes, pre_nodes)
 
         for new_transpose, gather_node in zip(new_transposes, gather_nodes):
             for next_node in graph.get_next_nodes(gather_node.outputs[0]):
                 if op.ne(next_node.op_type, "Transpose"):
                     # 如果gather节点后面不是Transpose节点，只需要删除该gather节点，重新连接其余节点
                     # 删除统一在最后进行
-                    self.__reconnect_input_to_new_node(
+                    self._reconnect_input_to_new_node(
                         node_to_reconnect=next_node,
                         old_node=gather_node,
                         new_node=new_transpose
@@ -379,7 +379,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
                 new_perm = [perm0[p] for p in perm1]
                 new_transpose.attrs["perm"] = new_perm
                 for node in graph.get_next_nodes(next_node.outputs[0]):
-                    self.__reconnect_input_to_new_node(
+                    self._reconnect_input_to_new_node(
                         node_to_reconnect=node,
                         old_node=next_node,
                         new_node=new_transpose
@@ -401,5 +401,5 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
         flag = False
         for matchinfo in match_result.node_dicts:
             if matchinfo:
-                flag |= self.__split_branches(graph, matchinfo)
+                flag |= self._split_branches(graph, matchinfo)
         return flag

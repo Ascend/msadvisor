@@ -14,16 +14,20 @@
 
 import warnings
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union
+from typing import List, Dict, Optional, Sequence, Union
 
 import numpy as np
 
 class BaseNode(ABC):
+    def __init__(self, name: str, op_type: str) -> None:
+        super().__init__()
+        self._name: str = name
+        self._op_type: str = op_type
 
     @classmethod
     @abstractmethod
-    def parse(self, node):
-        pass
+    def parse(cls, _) -> 'BaseNode':
+        raise NotImplementedError()
     
     @property
     def name(self):
@@ -41,13 +45,13 @@ class BaseNode(ABC):
 class Node(BaseNode):
     def __init__(
         self,
-        name: str = None,
-        op_type: str = None,
-        inputs: List[str] = None,
-        outputs: List[str] = None,
-        attrs: Dict[str, object] = None,
-        domain: str = None
-    ):
+        name: str,
+        op_type: str,
+        inputs: Optional[List[str]] = None,
+        outputs: Optional[List[str]] = None,
+        attrs: Optional[Dict[str, object]] = None,
+        domain: str = ''
+    ) -> None:
         """
         A node represents a computation operator in a graph.
 
@@ -58,16 +62,15 @@ class Node(BaseNode):
             inputs (List[Tensor]): A list of zero or more input names.
             outputs (List[Tensor]): A list of zero or more output names.
         """
-        self._name = name
-        self._op_type = op_type
-        self._inputs = inputs or []
-        self._outputs = outputs or []
-        self._attrs = attrs or {}
-        self._domain = domain
+        super().__init__(name, op_type)
+        self._inputs: List[str] = [] if inputs is None else inputs
+        self._outputs: List[str] = [] if outputs is None else outputs
+        self._attrs: Dict[str, object] = {} if attrs is None else attrs
+        self._domain: str = domain if domain is not None else ''
     
     @classmethod
-    def parse(cls, node):
-        pass
+    def parse(cls, _) -> 'Node':
+        raise NotImplementedError()
 
     @property
     def inputs(self) -> List[str]:
@@ -81,8 +84,7 @@ class Node(BaseNode):
         if node_input not in self._inputs:
             raise RuntimeError(
                 f'Name of input should be one of {self._inputs}')
-        else:
-            return self._inputs.index(node_input)
+        return self._inputs.index(node_input)
 
     @property
     def outputs(self) -> List[str]:
@@ -96,8 +98,7 @@ class Node(BaseNode):
         if output not in self._outputs:
             raise RuntimeError(
                 f'Name of output should be one of {self._outputs}')
-        else:
-            return self._outputs.index(output)
+        return self._outputs.index(output)
     
     @property
     def attrs(self) -> Dict[str, object]:
@@ -129,9 +130,9 @@ class Node(BaseNode):
 class Initializer(BaseNode):
     def __init__(
         self,
-        name: str = None,
-        value: np.ndarray = None
-    ):
+        name: str,
+        value: Optional[np.ndarray] = None
+    ) -> None:
         """
         An initializer represents a tensor which specifies for a graph input or a constant node.
 
@@ -139,13 +140,12 @@ class Initializer(BaseNode):
             name(str): The name of this initializer.
             value(np.ndarray): The constant value of this initializer.
         """
-        self._name = name
-        self._op_type = 'Initializer'
-        self._value = value
+        super().__init__(name, 'Initializer')
+        self._value: np.ndarray = value if value is not None else np.array([])
 
     @classmethod
-    def parse(cls, node):
-        pass
+    def parse(cls, _) -> 'Initializer':
+        raise NotImplementedError()
 
     @property
     def value(self) -> np.ndarray:
@@ -165,10 +165,10 @@ class Initializer(BaseNode):
 class PlaceHolder(BaseNode):
     def __init__(
         self,
-        name: str = None,
-        dtype: np.dtype = None,
-        shape: List[int] = None
-    ):
+        name: str,
+        dtype: np.dtype = np.dtype('int64'),
+        shape: Optional[Sequence[Union[int, str]]] = None
+    ) -> None:
         """
         A placeholder used to store the type and shape information.
 
@@ -177,14 +177,13 @@ class PlaceHolder(BaseNode):
             dtype(np.dtype): The data type of this placeHolder.
             shape(List[int]): The shape of this placeHolder.
         """
-        self._name = name
-        self._op_type = 'PlaceHolder'
-        self._dtype = dtype
-        self._shape = shape
+        super().__init__(name, 'PlaceHolder')
+        self._dtype: np.dtype = dtype
+        self._shape: Sequence[Union[str, int]] = shape if shape is not None else []
 
     @classmethod
-    def parse(cls, node):
-        pass
+    def parse(cls, _) -> 'PlaceHolder':
+        raise NotImplementedError()
 
     @property
     def dtype(self) -> np.dtype:

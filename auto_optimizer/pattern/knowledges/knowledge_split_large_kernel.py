@@ -94,14 +94,14 @@ class KnowledgeSplitLargeKernelConv(KnowledgeBase):
             graph.infershape()
         except onnx.onnx_cpp2py_export.shape_inference.InferenceError:
             logging.info('infershape failed before optimization.')
-        return True
+        return super().pre_process(graph)
 
     def post_process(self, graph: BaseGraph) -> bool:
         try:
             graph.infershape()
         except onnx.onnx_cpp2py_export.shape_inference.InferenceError:
             logging.info('infershape failed after optimization.')
-        return True
+        return super().post_process(graph)
 
     def _calculate_pads_and_slices(
         self, kslice: List[Tuple[int, int]], kshape: List[int], pads: List[int],
@@ -149,8 +149,8 @@ class KnowledgeSplitLargeKernelConv(KnowledgeBase):
 
         # 卷积核权重切片，通过python内置的slice函数进行动态切片
         weight_slice = [slice(None)] * len(kweight.value.shape)
-        for axes, (first, last) in enumerate(kslice):
-            weight_slice[axes + len_extra] = slice(first, last)
+        for axis, (first, last) in enumerate(kslice):
+            weight_slice[axis + len_extra] = slice(first, last)
         graph.add_initializer(
             name=sliced_weight_name,
             value=kweight.value[tuple(weight_slice)]
