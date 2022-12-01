@@ -6,3 +6,4 @@ from .knowledge_type_cast import KnowledgeTypeCast
 from .knowledge_split_qkv_matmul import KnowledgeSplitQKVMatmul
 from .knowledge_split_large_kernel import KnowledgeSplitLargeKernelConv
 from .knowledge_resize_mode_to_nearest import KnowledgeResizeModeToNearest
+from .knowledge_topk_fix import KnowledgeTopkFix
