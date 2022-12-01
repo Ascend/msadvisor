@@ -374,8 +374,8 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
                 # 如果gather节点后面是Transpose节点
                 # 则去除gather后是两个连续的Transpose节点，可以进行合并
                 # 这里new_transpose在old_transpose的前面
-                perm0 = new_transpose.attrs.get("perm", [])
-                perm1 = next_node.attrs.get("perm", [])
+                perm0: List[int] = new_transpose.attrs.get("perm", [])
+                perm1: List[int] = next_node.attrs.get("perm", [])
                 new_perm = [perm0[p] for p in perm1]
                 new_transpose.attrs["perm"] = new_perm
                 for node in graph.get_next_nodes(next_node.outputs[0]):

@@ -25,10 +25,10 @@ N = TypeVar('N', PlaceHolder, Initializer, Node)
 NodeType = Union[PlaceHolder, Initializer, Node]
 
 class NodeNotExistException(KeyError):
-    def __init__(self, node_name):
+    def __init__(self, node_name: str) -> None:
         self.value = '{} is not exist in graph'.format(node_name)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return repr(self.value)
 
 class BaseGraph(ABC):
@@ -56,7 +56,7 @@ class BaseGraph(ABC):
 
         self.update_map()
     
-    def update_map(self):
+    def update_map(self) -> None:
         # clear map first
         self._node_map.clear()
         self._value_map.clear()
@@ -133,28 +133,34 @@ class BaseGraph(ABC):
         self._inputs.append(graph_input)
         return graph_input
 
-    def _add_output(self, graph_output) -> PlaceHolder:
+    def _add_output(self, graph_output: PlaceHolder) -> PlaceHolder:
         if self._node_map.get(graph_output.name, None):
             raise ValueError("node name '{}' already exists!".format(graph_output.name))
         self._node_map[graph_output.name] = graph_output
         self._outputs.append(graph_output)
         return graph_output
 
-    def _add_initializer(self, initializer) -> Initializer:
+    def _add_initializer(self, initializer: Initializer) -> Initializer:
         if self._node_map.get(initializer.name, None):
             raise ValueError("node name '{}' already exists!".format(initializer.name))
         self._node_map[initializer.name] = initializer
         self._initializers.append(initializer)
         return initializer
 
-    def _add_node(self, node) -> Node:
+    def _add_node(self, node: Node) -> Node:
         if self._node_map.get(node.name, None):
             raise ValueError("node name '{}' already exists!".format(node.name))
         self._node_map[node.name] = node
         self._nodes.append(node)
         return node
 
-    def insert_node(self, refer_name, insert_node, refer_index=0, mode='after'):
+    def insert_node(
+        self,
+        refer_name: str,
+        insert_node: Node,
+        refer_index: int = 0,
+        mode: Literal['after', 'before'] = 'after'
+    ) -> None:
         """Insert a node with single input and output
 
         Args:
@@ -241,7 +247,12 @@ class BaseGraph(ABC):
 
         self._node_map[insert_node.name] = insert_node
     
-    def connect_node(self, insert_node, prev_nodes_info:List[str], next_nodes_info:List[str]):
+    def connect_node(
+        self,
+        insert_node: Node,
+        prev_nodes_info: List[str],
+        next_nodes_info: List[str]
+    ) -> None:
         """Insert a node with multiple inputs and outputs, 
         connect the input and output of insert_node automatically.
 
@@ -298,7 +309,11 @@ class BaseGraph(ABC):
                 # the next node is operator
                 self._set_input_of_node(node, insert_node.outputs[out_idx], input_index=in_idx, prev_node=insert_node)
 
-    def _parse_nodes_info(self, prev_nodes_info:List[str], next_nodes_info:List[str]):
+    def _parse_nodes_info(
+        self,
+        prev_nodes_info: List[str],
+        next_nodes_info: List[str]
+    ) -> Tuple[List[Dict[str, Union[int, str]]], List[Dict[str, Union[int, str]]]]:
         """Parse information of prev_nodes_info and next_nodes_info
 
         Example:
@@ -312,11 +327,11 @@ class BaseGraph(ABC):
                 {'next_node_name': 'Transpose_2', 'next_node_input_idx': 0, 'insert_node_output_idx': 2}
                 ]
         """  
-        prev_info_list = []
-        next_info_list = []
+        prev_info_list: List[Dict[str, Union[int, str]]] = []
+        next_info_list: List[Dict[str, Union[int, str]]] = []
 
         for idx, node_info in enumerate(prev_nodes_info):
-            info = {}
+            info: Dict[str, Union[int, str]] = {}
             info_splits = node_info.split(':')
             info['prev_node_name'] = info_splits[0]
             if len(info_splits) == 1:
@@ -351,7 +366,7 @@ class BaseGraph(ABC):
                         next_info_list.append(info)                            
         return prev_info_list, next_info_list
 
-    def _set_input_of_node(self, node, new_input_name, input_index, prev_node=None):
+    def _set_input_of_node(self, node, new_input_name, input_index, prev_node=None) -> None:
         """Change one input edge of the node
         """  
         old_input_name = node.inputs[input_index]
@@ -367,7 +382,7 @@ class BaseGraph(ABC):
         if prev_node is not None:
             self._prev_map[new_input_name] = prev_node
     
-    def _set_output_of_node(self, node, new_output_name, output_index, next_node=None):
+    def _set_output_of_node(self, node, new_output_name, output_index, next_node=None) -> None:
         """Change one output edge of the node
         """  
         old_output_name = node.outputs[output_index]
@@ -468,12 +483,12 @@ class BaseGraph(ABC):
             return True
         return False
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> NodeType:
         if not self._node_map.get(key, None):
             raise KeyError("node '{}' not in graph!".format(key))
         return self._node_map[key]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: NodeType) -> None:
         src_node = self._node_map.pop(key, None)
         if not src_node:
             raise KeyError("You are trying to replace node '{}', which does not exist!".format(key))
@@ -530,14 +545,14 @@ class BaseGraph(ABC):
     def value_infos(self) -> List[PlaceHolder]:
         return self._value_infos
 
-    def get_prev_node(self, input_name: str) -> Union[Node, PlaceHolder, Initializer]:
+    def get_prev_node(self, input_name: str) -> Optional[Node]:
         return self._prev_map.get(input_name, None)
 
-    def get_next_nodes(self, output_name: str) -> Union[List[Node], List[PlaceHolder], List[Initializer]]:
+    def get_next_nodes(self, output_name: str) -> List[Node]:
         return self._next_map.get(output_name, [])
 
-    def toposort(self):
-        def visited_all_prev_nodes(node, visited):
+    def toposort(self) -> None:
+        def visited_all_prev_nodes(node: Node, visited: Set[Node]) -> bool:
             for input_name in node.inputs:
                 prev_node = self.get_prev_node(input_name)
                 if prev_node not in visited and prev_node:
@@ -546,13 +561,13 @@ class BaseGraph(ABC):
 
         self.update_map()
         
-        queue = deque()
-        visited = set()
+        queue: Deque[Node] = deque()
+        visited: Set[Node] = set()
         for node in self._nodes:
             if visited_all_prev_nodes(node, visited):
                 queue.append(node)
         
-        sorted_nodes = []
+        sorted_nodes: List[Node] = []
         while queue:
             node = queue.popleft()
             if visited_all_prev_nodes(node, visited):
@@ -570,11 +585,11 @@ class BaseGraph(ABC):
         else:           
             self._nodes = sorted_nodes
         
-    def remove_unused_nodes(self):
+    def remove_unused_nodes(self) -> None:
         self.update_map()
 
         # Initialize out_degree dict
-        out_degree = dict()
+        out_degree: Dict[Node, int] = dict()
         for node in self._nodes:
             out_degree[node] = 0
             next_nodes = []
@@ -585,8 +600,8 @@ class BaseGraph(ABC):
             out_degree[node] = len(set(next_nodes))
 
         # remove unused operator nodes
-        removed = set()
-        queue = deque([n for n in out_degree.keys() if out_degree[n] == 0])
+        removed: Set[Node] = set()
+        queue: Deque[Node] = deque([n for n in out_degree.keys() if out_degree[n] == 0])
         while queue:
             node = queue.popleft()
             self._nodes.remove(node)

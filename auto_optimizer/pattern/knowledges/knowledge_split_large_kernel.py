@@ -226,7 +226,7 @@ class KnowledgeSplitLargeKernelConv(KnowledgeBase):
             kslices = [[*slc, (i, i + s)] for i, s in zip(indices, ksizes) for slc in kslices]
         return kslices
 
-    def _split_large_kernel(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
+    def _split_large_kernel(self, graph: BaseGraph, matchinfo: Dict[str, List[Node]]) -> bool:
         conv0: Optional[Node] = graph.get_node(matchinfo['LargeKernelConv'][0].name, node_type=Node)
         if conv0 is None:
             logging.warning('Conv operator is no longer exists.')

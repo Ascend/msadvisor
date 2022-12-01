@@ -14,13 +14,14 @@
 
 from functools import wraps
 import time
+from typing import Callable
 
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node
 from auto_optimizer.pattern.pattern import MatchBase
 
 
-def timing(func):
+def timing(func: Callable):
     @wraps(func)
     def wrapper(*args, **kwargs):
         ts = time.time()
@@ -37,7 +38,7 @@ class NextNodeCount(MatchBase):
     In practice, this means this node can be merged/sliced/modified/removed without affects other nodes,
     which is a common requirement in computation graph optimization.
     """
-    def __init__(self, cnt: int = 1):
+    def __init__(self, cnt: int = 1) -> None:
         super().__init__()
         self._count = cnt
 

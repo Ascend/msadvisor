@@ -32,7 +32,7 @@ class OnnxNode(Node):
         super(OnnxNode, self).__init__(name, op_type, inputs, outputs, attrs, domain)
     
     @classmethod
-    def parse(cls, node:NodeProto, add_name_suffix=False):
+    def parse(cls, node: NodeProto, add_name_suffix: bool = False) -> 'OnnxNode':
         
         if not node.name:
             node.name = '{}_{}'.format(node.op_type, node.output[0])
@@ -130,7 +130,7 @@ class OnnxPlaceHolder(PlaceHolder):
             shape = shape
         )
     
-    def proto(self, dtype=1, shape=None) -> ValueInfoProto:
+    def proto(self, dtype: int = 1, shape: Optional[Sequence[Union[int, str]]] = None) -> ValueInfoProto:
         if self.shape:
             shape = ['-1' if dim == -1 else dim for dim in self.shape]
         if self.dtype:

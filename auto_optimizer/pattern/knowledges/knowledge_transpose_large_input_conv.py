@@ -147,7 +147,7 @@ class KnowledgeTransposeLargeInputConv(KnowledgeBase):
         graph.add_initializer(name=name, value=weight_value)
         conv.inputs[1] = name
 
-    def _aasist_match_apply(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
+    def _aasist_match_apply(self, graph: BaseGraph, matchinfo: Dict[str, List[Node]]) -> bool:
         # make sure nodes of matching subgraph still exist in case some previous apply functions modified graph
         if any(graph.get_node(node.name, node_type=Node) is None for nodes in matchinfo.values() for node in nodes):
             logging.info("Some matching node have been removed or renamed, failed to optimizd.")

@@ -17,7 +17,7 @@ import logging
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node
+from auto_optimizer.graph_refactor.interface.base_node import Node
 from auto_optimizer.pattern.pattern import MATCH_PATTERN, Pattern
 from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
@@ -120,7 +120,7 @@ class KnowledgeMergeConsecutiveConcat(KnowledgeBase):
         self._register_apply_funcs(pattern1, [self._merge_continue_concat_apply])
         self._register_apply_funcs(pattern2, [self._merge_continue_concat_apply])
 
-    def merge_concat_nodes(self, graph: BaseGraph, matchinfo: Dict[str, List[BaseNode]]) -> bool:
+    def merge_concat_nodes(self, graph: BaseGraph, matchinfo: Dict[str, List[Node]]) -> bool:
         # get concats operators here, we only kept the last concat operator after optimization
         concat_to_keep = graph.get_node(matchinfo['Concat_to_keep'][0].name, node_type=Node)
         concats_to_remove = [
