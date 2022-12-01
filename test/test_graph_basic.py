@@ -94,8 +94,7 @@ def create_graph():
                 attrs={'mode':b'constant'}, 
                 domain=''
     )
-    graph = OnnxGraph([node_0], [input_0], [output_0], [ini_0, ini_1, ini_2], name='test_graph')
-    return graph
+    return OnnxGraph(name='test_graph', nodes=[node_0], inputs=[input_0], outputs=[output_0], initializers=[ini_0, ini_1, ini_2])
 
 def create_graph_1():
     input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [1,3,224,224])
@@ -106,8 +105,7 @@ def create_graph_1():
     node_1 = OnnxNode('Node_1', 'Sqrt', inputs=['input_0'], outputs=['1_out_0'], attrs={})
     node_2 = OnnxNode('Node_2', 'Add', inputs=['0_out_0', 'ini_0'], outputs=['2_out_0'], attrs={})
     node_3 = OnnxNode('Node_3', 'Add', inputs=['2_out_0', '1_out_0'], outputs=['3_out_0'], attrs={})
-    graph_1 = OnnxGraph([node_0,node_1,node_2,node_3], [input_0], [output_0, output_1], [ini_0], name='graph_1')
-    return graph_1
+    return OnnxGraph(name='graph_1', nodes=[node_0, node_1, node_2, node_3], inputs=[input_0], outputs=[output_0, output_1], initializers=[ini_0])
 
 class TestGraphBasic(unittest.TestCase):
     
@@ -223,7 +221,7 @@ class TestGraphBasic(unittest.TestCase):
         opset_1 = OperatorSetIdProto()
         opset_1.domain = "ai.onnx.ml"
         opset_1.version = 2
-        graph = OnnxGraph(opset_imports = [opset_0, opset_1])
+        graph = OnnxGraph(name='test_opset_imports', opset_imports = [opset_0, opset_1])
         self.assertEqual(graph.opset_imports, [opset_0])
 
 if __name__ == '__main__':

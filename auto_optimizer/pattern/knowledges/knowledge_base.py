@@ -16,7 +16,7 @@ import copy
 import types
 import operator as op
 from abc import abstractmethod
-from typing import Dict, Tuple, List, Callable
+from typing import Dict, Optional, Tuple, List, Callable
 from collections import defaultdict
 
 from auto_optimizer.pattern.pattern import Pattern
@@ -109,6 +109,8 @@ class KnowledgeBase(object):
 
     def has_next_apply(self):
         pattern = self.__get_current_pattern()
+        if pattern is None:
+            return False
         apply_methods = self._pattern_apply_dict.get(pattern)
         if apply_methods is None or len(apply_methods) == 0:
             return False
@@ -128,6 +130,8 @@ class KnowledgeBase(object):
         返回当前pattern对应的所有apply_id
         """
         pattern = self.__get_current_pattern()
+        if pattern is None:
+            return []
         apply_methods = self._pattern_apply_dict.get(pattern)
         if apply_methods is None:
             return []
@@ -138,6 +142,8 @@ class KnowledgeBase(object):
         基于当前pattern，设置apply_id
         """
         pattern = self.__get_current_pattern()
+        if pattern is None:
+            return False
         apply_methods = self._pattern_apply_dict.get(pattern)
         if apply_methods is None:
             return False
@@ -184,7 +190,7 @@ class KnowledgeBase(object):
                 for node in nodes:
                     r_node_inputs.update(node.inputs)
                     r_node_outputs.update(node.outputs)
-        return l_node_inputs & r_node_outputs or l_node_outputs & r_node_inputs
+        return bool(l_node_inputs & r_node_outputs) or bool(l_node_outputs & r_node_inputs)
 
     def match_pattern(self, graph: BaseGraph, top_ops_names: List[str] = None) -> List[MatchResult]:
         """
@@ -196,11 +202,13 @@ class KnowledgeBase(object):
         if graph is None:
             return []
         pattern = self.__get_current_pattern()
+        if pattern is None:
+            return []
         matcher = Matcher(graph, pattern)
         candidate_nodes = matcher.get_candidate_nodes()
         direction = pattern.get_visit_direction()
         if direction == DIRECTION.DOWN_UP:
-            candidate_nodes.reverse() # 从下往上遍历，遍历结果排序取反
+            candidate_nodes.reverse()  # 从下往上遍历，遍历结果排序取反
 
         uf = UnionFind()
         all_match_result = []

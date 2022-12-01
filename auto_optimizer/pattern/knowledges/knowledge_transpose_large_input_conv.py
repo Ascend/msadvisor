@@ -110,14 +110,14 @@ class KnowledgeTransposeLargeInputConv(KnowledgeBase):
             graph.infershape()
         except onnx.onnx_cpp2py_export.shape_inference.InferenceError:
             logging.info('infershape failed before optimization.')
-        return True
+        return super().pre_process(graph)
 
     def post_process(self, graph: BaseGraph) -> bool:
         try:
             graph.infershape()
         except onnx.onnx_cpp2py_export.shape_inference.InferenceError:
             logging.info('infershape failed after optimization.')
-        return True
+        return super().post_process(graph)
 
     def _transpose_conv(self, graph: BaseGraph, conv: Node):
         # we need to transpose H/W axes of dilations/kernel_shape/pads/strides attrs and weight input

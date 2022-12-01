@@ -48,7 +48,7 @@ class TestGraphAdvanced(unittest.TestCase):
         node_0 = OnnxNode('Node_0', 'Reshape', inputs=['input_0', 'ini_0'], outputs=['0_out_0'], attrs={})
         node_1 = OnnxNode('Node_1', 'Reshape', inputs=['0_out_0', 'ini_1'], outputs=['1_out_0'], attrs={})
         node_2 = OnnxNode('Node_2', 'Reshape', inputs=['1_out_0', 'ini_2'], outputs=['output_0'], attrs={})
-        graph = OnnxGraph([node_0,node_1,node_2], [input_0], [output_0], [ini_0,ini_1,ini_2], name='test')
+        graph = OnnxGraph(name='test', nodes=[node_0, node_1, node_2], inputs=[input_0], outputs=[output_0], initializers=[ini_0, ini_1, ini_2])
 
         graph.infershape()
         self.assertEqual(graph.get_value_info('0_out_0'), OnnxPlaceHolder('0_out_0', np.dtype('float32'), [2, 5000]))

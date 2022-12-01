@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict, Union
+from typing import List, Dict, Optional, Sequence, Union
 
 import numpy as np
 from onnx import NodeProto, TensorProto, ValueInfoProto, helper, numpy_helper
@@ -23,13 +23,13 @@ from .. import Node, PlaceHolder, Initializer
 class OnnxNode(Node):
     def __init__(
         self,
-        name: str = None,
-        op_type: str = None,
-        inputs: List[str] = [],
-        outputs: List[str] = [],
-        attrs: Dict[str, object] = {},
-        domain: str = None
-    ):
+        name: str,
+        op_type: str,
+        inputs: Optional[List[str]] = None,
+        outputs: Optional[List[str]] = None,
+        attrs: Optional[Dict[str, object]] = None,
+        domain: str = ''
+    ) -> None:
         super(OnnxNode, self).__init__(name, op_type, inputs, outputs, attrs, domain)
     
     @classmethod
@@ -67,16 +67,19 @@ class OnnxNode(Node):
 class OnnxInitializer(Initializer):
     def __init__(
         self,
-        name: str = None,
-        value: np.ndarray = None
-    ):
+        name: str,
+        value: Optional[np.ndarray] = None
+    ) -> None:
         super(OnnxInitializer, self).__init__(name, value)
 
     @classmethod
-    def parse(cls, node:Union[NodeProto, TensorProto]):
-        if hasattr(node, 'op_type') and node.op_type == 'Constant':
-            name = node.output[0]
-            value = numpy_helper.to_array(node.attribute[0].t)
+    def parse(cls, node: Union[NodeProto, TensorProto]) -> 'OnnxInitializer':
+        if isinstance(node, NodeProto):
+            if hasattr(node, 'op_type') and node.op_type == 'Constant':
+                name = node.output[0]
+                value = numpy_helper.to_array(node.attribute[0].t)
+            else:
+                raise RuntimeError('Can\'t parse a Non-Constant Node into a OnnxInitializer.')
         else:
             name = node.name
             value = numpy_helper.to_array(node)
@@ -97,14 +100,19 @@ class OnnxInitializer(Initializer):
 class OnnxPlaceHolder(PlaceHolder):
     def __init__(
         self,
-        name: str = None,
-        dtype: np.dtype = None,
-        shape: List[int] = None
-    ):
+        name: str,
+        dtype: np.dtype = np.dtype('int64'),
+        shape: Optional[Sequence[Union[int, str]]] = None
+    ) -> None:
         super(OnnxPlaceHolder, self).__init__(name, dtype, shape)
 
     @classmethod
-    def parse(cls, node:ValueInfoProto, dtype=None, shape=None):
+    def parse(
+        cls,
+        node: ValueInfoProto,
+        dtype: np.dtype = np.dtype('int64'),
+        shape: Optional[Sequence[Union[int, str]]] = None
+    ) -> 'OnnxPlaceHolder':
         if node.HasField('type'):
             tensor_type = node.type.tensor_type
             dtype = TENSOR_TYPE_TO_NP_TYPE[tensor_type.elem_type]

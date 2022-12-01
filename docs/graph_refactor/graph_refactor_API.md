@@ -177,7 +177,7 @@ g.connect_node(
 
 ### 删除节点
 
-**remove(name, maps={0:0}) -> bool**
+**remove(name, mapping={0:0}) -> bool**
 
 - 删除图中指定节点，支持自动连边。
 - `name(str)` - 待删除节点名称 \

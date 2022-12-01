@@ -14,10 +14,10 @@
 
 import copy
 import types
-import operator as op
-from typing import List, Dict
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode
-from .pattern import PatternNode
+from typing import Callable, List, Dict, Optional, Set
+from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node
+from .pattern import Pattern, PatternNode
 from .pattern import DIRECTION
 
 

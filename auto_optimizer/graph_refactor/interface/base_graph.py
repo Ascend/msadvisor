@@ -15,14 +15,14 @@
 from abc import ABC, abstractmethod
 from collections import deque
 from itertools import chain
-from typing import List, Dict, Union, Optional, Type, TypeVar
-import warnings
+from typing import Deque, List, Dict, Literal, Sequence, Set, Tuple, Union, Optional, Type, TypeVar
 
 import numpy as np
 
 from .base_node import PlaceHolder, Initializer, Node
 
 N = TypeVar('N', PlaceHolder, Initializer, Node)
+NodeType = Union[PlaceHolder, Initializer, Node]
 
 class NodeNotExistException(KeyError):
     def __init__(self, node_name):
@@ -35,42 +35,43 @@ class BaseGraph(ABC):
 
     def __init__(
         self,
-        nodes: List[Node] = None,
-        inputs: List[PlaceHolder] = None,
-        outputs: List[PlaceHolder] = None,
-        initializers: List[Initializer] = None,
-        value_infos: List[PlaceHolder] = None,
-        name: str = None
-    ):
-        self._nodes = nodes or []
-        self._inputs = inputs or []
-        self._outputs = outputs or []
-        self._initializers = initializers or []
-        self._value_infos = value_infos or []
-        self.name = name
+        name: str,
+        nodes: Optional[List[Node]] = None,
+        inputs: Optional[List[PlaceHolder]] = None,
+        outputs: Optional[List[PlaceHolder]] = None,
+        initializers: Optional[List[Initializer]] = None,
+        value_infos: Optional[List[PlaceHolder]] = None,
+    ) -> None:
+        self.name: str = name
+        self._nodes: List[Node] = [] if nodes is None else nodes
+        self._inputs: List[PlaceHolder] = [] if inputs is None else inputs
+        self._outputs: List[PlaceHolder] = [] if outputs is None else outputs
+        self._initializers: List[Initializer] = [] if initializers is None else initializers
+        self._value_infos: List[PlaceHolder] = [] if value_infos is None else value_infos
 
-        self._node_map = {}
-        self._value_map = {}
-        self._prev_map = {}
-        self._next_map = {}
+        self._node_map: Dict[str, NodeType] = {}
+        self._value_map: Dict[str, PlaceHolder] = {}
+        self._prev_map: Dict[str, Node] = {}
+        self._next_map: Dict[str, List[Node]] = {}
 
         self.update_map()
     
     def update_map(self):
         # clear map first
-        self._node_map = {}
-        self._value_map = {}
-        self._prev_map = {}
-        self._next_map = {}
+        self._node_map.clear()
+        self._value_map.clear()
+        self._prev_map.clear()
+        self._next_map.clear()
 
         for n in chain(self._inputs, self._outputs, self._nodes, self._initializers):
-            if self._node_map.get(n.name, None):
+            _init = self._node_map.get(n.name, None)
+            if _init is not None:
                 # Initializer and PlaceHolder have same name
-                if isinstance(n, Initializer) and isinstance(self._node_map[n.name], PlaceHolder):
+                if isinstance(n, Initializer) and isinstance(_init, PlaceHolder):
                     if self._node_map[n.name] in self._inputs:
-                        self._inputs.remove(self._node_map[n.name])
+                        self._inputs.remove(_init)
                     else:
-                        self._outputs.remove(self._node_map[n.name])
+                        self._outputs.remove(_init)
                 # Node and PlaceHolder have same name
                 else:
                     raise RuntimeError("Duplicate names! {}: '{}' and {}: '{}' have same name,\
@@ -98,26 +99,34 @@ class BaseGraph(ABC):
 
     @classmethod
     @abstractmethod
-    def parse(cls, model):
-        pass
+    def parse(cls, model) -> 'BaseGraph':
+        raise NotImplementedError()
 
     @abstractmethod
-    def add_input(self, name, dtype, shape) -> PlaceHolder:
-        pass
+    def add_input(self, name: str, dtype: np.dtype, shape: Sequence[Union[int, str]]) -> PlaceHolder:
+        raise NotImplementedError()
 
     @abstractmethod
-    def add_output(self, name, dtype, shape) -> PlaceHolder:
-        pass
+    def add_output(self, name: str, dtype: np.dtype, shape: Sequence[Union[int, str]]) -> PlaceHolder:
+        raise NotImplementedError()
     
     @abstractmethod
-    def add_initializer(self, name, value) -> Initializer:
-        pass
+    def add_initializer(self, name: str, value: np.ndarray) -> Initializer:
+        raise NotImplementedError()
 
     @abstractmethod
-    def add_node(self, name, op_type, inputs=[], outputs=[], attrs=None, domain=None) -> Node:
-        pass
+    def add_node(
+        self,
+        name: str,
+        op_type: str,
+        inputs: Optional[List[str]] = None,
+        outputs: Optional[List[str]] = None,
+        attrs: Optional[Dict[str, object]] = None,
+        domain: str = ''
+    ) -> Node:
+        raise NotImplementedError()
 
-    def _add_input(self, graph_input) -> PlaceHolder:
+    def _add_input(self, graph_input: PlaceHolder) -> PlaceHolder:
         if self._node_map.get(graph_input.name, None):
             raise ValueError("node name '{}' already exists!".format(graph_input.name))
         self._node_map[graph_input.name] = graph_input
@@ -248,16 +257,16 @@ class BaseGraph(ABC):
         insert_node.outputs = [f'{insert_node.name}_out_{idx}' for idx in range(len(next_nodes_info))]
 
         # parse information of previous and next nodes
-        prev_nodes_info, next_nodes_info = self._parse_nodes_info(prev_nodes_info, next_nodes_info)
+        prev_info_list, next_info_list = self._parse_nodes_info(prev_nodes_info, next_nodes_info)
         
         # check if next nodes include the graph output
         output_flag = False
-        for node_info in next_nodes_info:
+        for node_info in next_info_list:
             if self._node_map[node_info['next_node_name']] in self._outputs:
                 output_flag = True     
         
         # connect the insert node to previous nodes
-        for node_info in prev_nodes_info:
+        for node_info in prev_info_list:
             node = self._node_map[node_info['prev_node_name']]
             out_idx = node_info['prev_node_output_idx']
             in_idx = node_info['insert_node_input_idx']
@@ -275,7 +284,7 @@ class BaseGraph(ABC):
                 self._set_input_of_node(insert_node, node.outputs[out_idx], input_index=in_idx)               
     
         # connect the insert node to next nodes
-        for node_info in next_nodes_info:
+        for node_info in next_info_list:
             node = self._node_map[node_info['next_node_name']]
             out_idx = node_info['insert_node_output_idx']
             in_idx = node_info['next_node_input_idx']
@@ -378,35 +387,31 @@ class BaseGraph(ABC):
         self._prev_map.pop(old_output_name, None)
         self._next_map.pop(old_output_name, None)
 
-    def get_node(self, name: str, node_type: Type[N] = Node) -> Optional[N]:
-        """Return node with specificed type and name. 
+    def get_node(self, name: str, node_type: Type[N]) -> Optional[N]:
+        """Return node with specificed type and name.
         If the node does not exist, return None.
         """
-        # return a placeholder 
-        if node_type == PlaceHolder:
-            node = self._value_map.get(name, None)
-            if isinstance(node, node_type):
-                return node
-            for ph in [*self.inputs, *self.outputs]:
-                if ph.name == name and isinstance(ph, node_type):
-                    return ph
-            return None
-        # return an initializer/operator
-        node = self._node_map.get(name, None)
-        if isinstance(node, node_type):
+        # try get initializer/operator/input/output from _node_map
+        node: Optional[NodeType] = self._node_map.get(name)
+        if node and isinstance(node, node_type):
             return node
+        # fallback to value_info from _value_map
+        if node_type == PlaceHolder:
+            ph = self._value_map.get(name)
+            if ph and isinstance(ph, node_type):
+                return ph
         return None
 
-    def get_nodes(self, op_type):
+    def get_nodes(self, op_type: str) -> List[NodeType]:
         nodes = [node for node in self._node_map.values() if node.op_type == op_type]
         return nodes
     
-    def get_value_info(self, io_name):
+    def get_value_info(self, io_name: str) -> PlaceHolder:
         if not self._value_map.get(io_name, None):
             raise KeyError("'{}' does not have value_info or does not exist!".format(io_name))
         return self._value_map[io_name]
 
-    def remove(self, name, maps=None):
+    def remove(self, name: str, mapping: Optional[Dict[int, int]] = None) -> bool:
         """Remove a specific node from graph
         If map is not provided, it will simply connect the previous node of first input and next nodes of first output.
 
@@ -418,7 +423,7 @@ class BaseGraph(ABC):
         Return:
             True if remove succeeds, otherwise False
         """
-        maps = {0:0} if maps is None else maps
+        maps: Dict[int, int] = {0: 0} if mapping is None else mapping
         node = self._node_map.get(name, None)
         if not node:
             raise KeyError("You are trying to remove node '{}', which does not exist!".format(name))
@@ -600,13 +605,19 @@ class BaseGraph(ABC):
         self.update_map()
 
     @abstractmethod
-    def save(self, path):
-        pass
+    def save(self, path: str) -> None:
+        raise NotImplementedError()
 
     @abstractmethod
-    def extract(self, new_model_save_path, input_name_list, output_name_list, enable_model_check=True):
-        pass
+    def extract(
+        self,
+        new_model_save_path: str,
+        input_name_list: List[str],
+        output_name_list: List[str],
+        enable_model_check: bool = True
+    ) -> 'BaseGraph':
+        raise NotImplementedError()
 
     @abstractmethod
-    def simplify(self, **kwargs):
-        pass
+    def simplify(self, **kwargs) -> 'BaseGraph':
+        raise NotImplementedError()

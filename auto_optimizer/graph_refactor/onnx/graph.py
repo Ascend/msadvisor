@@ -27,15 +27,15 @@ class OnnxGraph(BaseGraph):
 
     def __init__(
         self,
-        nodes: List[OnnxNode] = None,
-        inputs: List[OnnxPlaceHolder] = None,
-        outputs: List[OnnxPlaceHolder] = None,
-        initializers: List[OnnxInitializer] = None,
-        value_infos: List[OnnxPlaceHolder] = None,
-        name: str = None,
+        name: str,
+        nodes: Optional[List[OnnxNode]] = None,
+        inputs: Optional[List[OnnxPlaceHolder]] = None,
+        outputs: Optional[List[OnnxPlaceHolder]] = None,
+        initializers: Optional[List[OnnxInitializer]] = None,
+        value_infos: Optional[List[OnnxPlaceHolder]] = None,
         **kwargs: Dict[str, object]
     ):
-        super(OnnxGraph, self).__init__(nodes, inputs, outputs, initializers, value_infos, name)
+        super(OnnxGraph, self).__init__(name, nodes, inputs, outputs, initializers, value_infos)
         
         opsets = kwargs.get('opset_imports', 11)
         if isinstance(opsets, int):
@@ -96,7 +96,7 @@ class OnnxGraph(BaseGraph):
             if value_info.name not in useless_value_infos:
                 value_infos.append(OnnxPlaceHolder.parse(value_info))
 
-        graph = cls(nodes, inputs, outputs, initializers, value_infos, onnx_graph.name, **meta)
+        graph = cls(onnx_graph.name, nodes, inputs, outputs, initializers, value_infos, **meta)
         return graph
 
     def add_input(self, name, dtype, shape) -> OnnxPlaceHolder:
@@ -113,7 +113,15 @@ class OnnxGraph(BaseGraph):
         initializer = OnnxInitializer(name, value)
         return self._add_initializer(initializer)
 
-    def add_node(self, name, op_type, inputs=[], outputs=[], attrs=None, domain=None) -> OnnxNode:
+    def add_node(
+        self,
+        name: str,
+        op_type: str,
+        inputs: Optional[List[str]] = None,
+        outputs: Optional[List[str]] = None,
+        attrs: Optional[Dict[str, object]] = None,
+        domain: str = ''
+    ) -> OnnxNode:
         node = OnnxNode(name, op_type, inputs, outputs, attrs=attrs, domain=domain)
         self.update_map()
         return self._add_node(node)

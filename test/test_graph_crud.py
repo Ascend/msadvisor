@@ -23,7 +23,7 @@ from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from test_node_common import is_ph_equal, is_ini_equal, is_node_equal
 from test_graph_basic import is_graph_equal, create_graph_1
 
-def create_graph():
+def create_graph(name: str = 'test_graph'):
     input_0 = OnnxPlaceHolder('input_0', np.dtype('float32'), [1,3,224,224])
     output_0 = OnnxPlaceHolder('output_0', np.dtype('float32'), [1,3,224,224])
     ini_0 = OnnxInitializer('ini_0', np.array([1,2,3], dtype='float32'))
@@ -33,7 +33,7 @@ def create_graph():
     node_3 = OnnxNode('Node_3', 'Sub', inputs=['1_out_0', 'ini_0', 'ini_0'], outputs=['3_out_0'], attrs={})
     node_4 = OnnxNode('Node_4', 'Add', inputs=['1_out_0', '2_out_0'], outputs=['4_out_0'], attrs={})
     node_5 = OnnxNode('Node_5', 'Mul', inputs=['3_out_0', '4_out_0', '2_out_1'], outputs=['output_0'], attrs={})
-    return OnnxGraph([node_0,node_1,node_2,node_3,node_4,node_5], [input_0], [output_0], [ini_0])
+    return OnnxGraph(name=name, nodes=[node_0,node_1,node_2,node_3,node_4,node_5], inputs=[input_0], outputs=[output_0], initializers=[ini_0])
     
 class TestGraphCrud(unittest.TestCase):
 
@@ -224,7 +224,7 @@ class TestGraphCrud(unittest.TestCase):
         node_2 = OnnxNode('Node_2', 'Add', inputs=['0_out_0', '0_out_1'], outputs=['2_out_0', '2_out_1'], attrs={})
         node_4 = OnnxNode('Node_4', 'Add', inputs=['1_out_0', '2_out_0'], outputs=['4_out_0'], attrs={})
         node_5 = OnnxNode('Node_5', 'Mul', inputs=['1_out_0', '4_out_0', '2_out_1'], outputs=['output_0'], attrs={})
-        target = OnnxGraph([node_0,node_1,node_2,node_4,node_5], [input_0], [output_0], [ini_0])
+        target = OnnxGraph(name='test_graph_remove_defualt', nodes=[node_0,node_1,node_2,node_4,node_5], inputs=[input_0], outputs=[output_0], initializers=[ini_0])
 
         self.graph.remove('Node_3')
         self.assertEqual(self.graph, target)
@@ -240,7 +240,7 @@ class TestGraphCrud(unittest.TestCase):
         node_2 = OnnxNode('Node_2', 'Add', inputs=['0_out_0', '0_out_1'], outputs=['2_out_0', '2_out_1'], attrs={})
         node_4 = OnnxNode('Node_4', 'Add', inputs=['1_out_0', '2_out_0'], outputs=['4_out_0'], attrs={})
         node_5 = OnnxNode('Node_5', 'Mul', inputs=['1_out_0', '4_out_0', '2_out_1'], outputs=['output_0'], attrs={})
-        target = OnnxGraph([node_0,node_1,node_2,node_4,node_5], [input_0], [output_0])
+        target = OnnxGraph(name='test_graph_remove_ini_node', nodes=[node_0,node_1,node_2,node_4,node_5], inputs=[input_0], outputs=[output_0])
         target._next_map.pop('ini_0')
 
         self.graph.remove('ini_0')
@@ -258,7 +258,7 @@ class TestGraphCrud(unittest.TestCase):
         node_2 = OnnxNode('Node_2', 'Add', inputs=['0_out_0', '0_out_1'], outputs=['2_out_0', '2_out_1'], attrs={})
         node_4 = OnnxNode('Node_4', 'Add', inputs=['1_out_0', '2_out_0'], outputs=['4_out_0'], attrs={})
         node_5 = OnnxNode('Node_5', 'Mul', inputs=['1_out_0', '4_out_0', '2_out_1'], outputs=['output_0'], attrs={})
-        target = OnnxGraph([node_0,node_1,node_2,node_4,node_5], [input_0], [output_0], [ini_0])
+        target = OnnxGraph(name='test_graph_remove_duplicate_input', nodes=[node_0,node_1,node_2,node_4,node_5], inputs=[input_0], outputs=[output_0], initializers=[ini_0])
 
         self.graph.remove('Node_3')
         self.assertEqual(self.graph, target)
@@ -285,7 +285,7 @@ class TestGraphCrud(unittest.TestCase):
         node_0 = OnnxNode('Node_0', 'Sqrt', inputs=['input_0'], outputs=['0_out_0'], attrs={})
         node_2 = OnnxNode('test_node', 'Sub', inputs=['0_out_0', 'test_input_0'], outputs=['2_out_0'], attrs={})
         node_3 = OnnxNode('Node_3', 'Add', inputs=['2_out_0', 'test_input_1'], outputs=['3_out_0'], attrs={})
-        target = OnnxGraph([node_0, node_2, node_3], [input_0, input_1, input_2], [output_0, output_1])
+        target = OnnxGraph(name='test_graph_setitem', nodes=[node_0, node_2, node_3], inputs=[input_0, input_1, input_2], outputs=[output_0, output_1])
 
         test_input_0 = self.graph_1.add_input('test_input_0', 'float32', [1,3,224,224])
         test_input_1 = self.graph_1.add_input('test_input_1', 'float32', [1,3,224,224])
