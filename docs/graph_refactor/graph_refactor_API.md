@@ -62,7 +62,7 @@ for o in node.outputs:
 	next_nodes.extend(g.get_next_nodes(o))
 next_nodes = list(set(next_nodes))
 
-# 获取 node 节点输出的维度形状
+# 获取 node 节点输出的维度
 value_info = g.get_value_info(node.outputs[0])
 ```
 
@@ -86,7 +86,7 @@ value_info = g.get_value_info(node.outputs[0])
 - 添加整网输入节点。
 - `name(str)` - 输入节点名称 \
   `dtype(str)` - 输入数据类型 \
-  `shape(List[int])` - 输入数据形状
+  `shape(List[int])` - 输入数据维度
 
 **add_output(name, dtype, shape) -> PlaceHolder**
 
@@ -270,7 +270,7 @@ g.save('model_fix.onnx')
   <summary> sample code </summary>
 
 ```python
-# 形状推断并保存
+# 维度推断并保存
 g.infershape()
 g.save('inferred_model.onnx')
 
@@ -293,7 +293,7 @@ g.extract('extracted_model.onnx', ['5'], ['12'])
 | g.outputs       | 只读属性，返回整网输出节点组成的列表 `List[PlaceHolder]`     |
 | g.nodes         | 只读属性，返回整网算子节点组成的列表  `List[Node]`           |
 | g.initializers  | 只读属性，返回整网常量节点组成的列表 `List[Initializer]`     |
-| g.value_infos   | 只读属性，返回整网形状信息组成的列表  `List[PlaceHolder]`    |
+| g.value_infos   | 只读属性，返回整网存在的维度信息组成的列表  `List[PlaceHolder]`<br>备注：一般情况下，只有在`infershape()`之后才会有维度信息 |
 | g.opset_imports | 可读写属性，返回算子版本信息 `List[OperatorSetIdProto]`<br>修改时输入版本号 `int`，比如 `g.opset_imports = 13` |
 
 ## BaseNode API

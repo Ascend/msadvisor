@@ -36,7 +36,7 @@ BaseGraph 类提供了基本的接口用于增删改查节点：
 |                                              | 获取整网输出节点   | g.outputs                                               |
 |                                              | 获取所有算子节点   | g.nodes                                                 |
 |                                              | 获取所有常量节点   | g.initializers                                          |
-|                                              | 获取所有形状信息   | g.value_infos                                           |
+|                                              | 获取所有维度信息   | g.value_infos                                           |
 |                                              | 获取opset_imports  | g.opset_imports                                         |
 |                                              | 修改opset_imports  | g.opset_imports = int                                   |
 | [基础功能](./graph_refactor_API.md#基础功能) | 解析模型文件       | OnnxGraph.parse(path_or_bytes)                          |
@@ -46,5 +46,5 @@ BaseGraph 类提供了基本的接口用于增删改查节点：
 |                                              | 更新前后节点关系   | g.update_map()                                          |
 |                                              | 算子节点拓扑排序   | g.toposort()                                            |
 | [实用功能](./graph_refactor_API.md#实用功能) | 模型截断           | g.extract(save_path, input_name_list, output_name_list) |
-|                                              | 形状推断           | g.infershape()                                          |
+|                                              | 维度推断           | g.infershape()                                          |
 |                                              | 模型简化           | g.simplify(**kwargs)                                    |
