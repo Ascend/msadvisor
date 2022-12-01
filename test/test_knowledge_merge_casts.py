@@ -14,11 +14,10 @@
 
 import unittest
 import numpy as np
-from typing import List
+from onnx import TensorProto
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_merge_casts import KnowledgeMergeCasts
-from auto_optimizer.pattern.knowledges.value_type import OnnxType
 from utils import optimize
 
 
@@ -30,9 +29,9 @@ class TestKnowledgeMergeCasts(unittest.TestCase):
         graph.add_input('X', x.dtype, x.shape)
         graph.add_initializer('Add_value', np.random.randn(*x.shape).astype(x.dtype))
         graph.add_node('Add0', 'Add', ['X', 'Add_value'], ['Add_O'])
-        graph.add_node('Cast1', 'Cast', ['Add_O'], ['Cast_O1'], attrs={'to': OnnxType.INT32.value})
-        graph.add_node('Cast2', 'Cast', ['Add_O'], ['Cast_O2'], attrs={'to': OnnxType.INT32.value})
-        graph.add_node('Cast3', 'Cast', ['Add_O'], ['Cast_O3'], attrs={'to': OnnxType.INT64.value})
+        graph.add_node('Cast1', 'Cast', ['Add_O'], ['Cast_O1'], attrs={'to': TensorProto.INT32})
+        graph.add_node('Cast2', 'Cast', ['Add_O'], ['Cast_O2'], attrs={'to': TensorProto.INT32})
+        graph.add_node('Cast3', 'Cast', ['Add_O'], ['Cast_O3'], attrs={'to': TensorProto.INT64})
         graph.update_map()
         graph.infershape()
 
@@ -49,9 +48,9 @@ class TestKnowledgeMergeCasts(unittest.TestCase):
         graph.add_input('X', x.dtype, x.shape)
         graph.add_initializer('Add_value', np.random.randn(*x.shape).astype(x.dtype))
         graph.add_node('Add0', 'Add', ['X', 'Add_value'], ['Add_O1'])
-        graph.add_node('Cast1', 'Cast', ['Add_O1'], ['Cast_O1'], attrs={'to': OnnxType.INT64.value})
-        graph.add_node('Cast2', 'Cast', ['Add_O1'], ['Cast_O2'], attrs={'to': OnnxType.INT32.value})
-        graph.add_node('Cast3', 'Cast', ['Cast_O1'], ['Cast_O3'], attrs={'to': OnnxType.INT32.value})
+        graph.add_node('Cast1', 'Cast', ['Add_O1'], ['Cast_O1'], attrs={'to': TensorProto.INT64})
+        graph.add_node('Cast2', 'Cast', ['Add_O1'], ['Cast_O2'], attrs={'to': TensorProto.INT32})
+        graph.add_node('Cast3', 'Cast', ['Cast_O1'], ['Cast_O3'], attrs={'to': TensorProto.INT32})
         graph.add_initializer('Add_value2', x.astype(np.int64))
         graph.add_node('Add1', 'Add', ['Cast_O1', 'Add_value2'], ['Add_O2'])
         graph.update_map()
@@ -74,8 +73,8 @@ class TestKnowledgeMergeCasts(unittest.TestCase):
         graph.add_input('X', x.dtype, x.shape)
         graph.add_initializer('Add_value', np.random.randn(*x.shape).astype(x.dtype))
         graph.add_node('Add0', 'Add', ['X', 'Add_value'], ['Add_O1'])
-        graph.add_node('Cast1', 'Cast', ['Add_O1'], ['Cast_O1'], attrs={'to': OnnxType.INT64.value})
-        graph.add_node('Cast2', 'Cast', ['Cast_O1'], ['Cast_O2'], attrs={'to': OnnxType.INT32.value})
+        graph.add_node('Cast1', 'Cast', ['Add_O1'], ['Cast_O1'], attrs={'to': TensorProto.INT64})
+        graph.add_node('Cast2', 'Cast', ['Cast_O1'], ['Cast_O2'], attrs={'to': TensorProto.INT32})
         graph.update_map()
         graph.infershape()
 
@@ -93,8 +92,8 @@ class TestKnowledgeMergeCasts(unittest.TestCase):
         graph.add_input('X', x.dtype, x.shape)
         graph.add_initializer('Add_value', np.random.randn(*x.shape).astype(x.dtype))
         graph.add_node('Add0', 'Add', ['X', 'Add_value'], ['Add_O1'])
-        graph.add_node('Cast1', 'Cast', ['Add_O1'], ['Cast_O1'], attrs={'to': OnnxType.INT64.value})
-        graph.add_node('Cast2', 'Cast', ['Add_O1'], ['Cast_O2'], attrs={'to': OnnxType.INT32.value})
+        graph.add_node('Cast1', 'Cast', ['Add_O1'], ['Cast_O1'], attrs={'to': TensorProto.INT64})
+        graph.add_node('Cast2', 'Cast', ['Add_O1'], ['Cast_O2'], attrs={'to': TensorProto.INT32})
         graph.update_map()
         graph.infershape()
 

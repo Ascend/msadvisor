@@ -14,6 +14,8 @@
 
 from typing import Set
 from onnx.mapping import NP_TYPE_TO_TENSOR_TYPE
+from onnx.onnx_cpp2py_export.shape_inference import InferenceError
+
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
@@ -77,6 +79,13 @@ class KnowledgeMergeCasts(KnowledgeBase):
     def __init__(self):
         super().__init__()
         self._register_apply_funcs(MergeCastsPattern(), [self._apply_method])
+
+    def pre_process(self, graph: BaseGraph) -> bool:
+        try:
+            graph.infershape()
+        except InferenceError as e:
+            return False
+        return True
 
     def _is_cast_node(self, node: BaseNode) -> bool:
         """ 判断节点是否为 Cast 节点
