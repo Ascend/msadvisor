@@ -67,7 +67,7 @@ class KnowledgeBase(object):
         注册pattern的apply方法
         '''
         if not isinstance(pattern, Pattern) or \
-            not isinstance(apply_funcs, List):
+                not isinstance(apply_funcs, List):
             return False
         if not all(callable(func) for func in apply_funcs):
             return False
@@ -140,7 +140,7 @@ class KnowledgeBase(object):
         apply_methods = self._pattern_apply_dict.get(pattern)
         if apply_methods is None:
             return []
-        return [ i for i, _ in enumerate(apply_methods) ]
+        return [i for i, _ in enumerate(apply_methods)]
 
     def set_apply_id(self, apply_id) -> bool:
         """
@@ -180,9 +180,9 @@ class KnowledgeBase(object):
         :param r_match_result: 右子图
         :return: 存在连接，则返回True，否则返回False
         """
-        l_node_inputs  = set()
+        l_node_inputs = set()
         l_node_outputs = set()
-        r_node_inputs  = set()
+        r_node_inputs = set()
         r_node_outputs = set()
 
         for node_dict in l_match_result.node_dicts:

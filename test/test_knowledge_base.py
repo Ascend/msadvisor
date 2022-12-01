@@ -73,24 +73,24 @@ class TestKnowledgeBase(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
-            np.random.randn(64, 3, 1).astype(np.float32))
-        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), \
-            np.random.randn(128, 64, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1),
+                                      np.random.randn(64, 3, 1).astype(np.float32))
+        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1),
+                                      np.random.randn(128, 64, 1).astype(np.float32))
 
-        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
 
-        conv_1 = helper.make_node("Conv", ['out_0', 'weight_1'], ['Z'], 'Conv_1', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_1 = helper.make_node("Conv", ['out_0', 'weight_1'], ['Z'], 'Conv_1', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
 
         graph = helper.make_graph([conv_0, conv_1], "conv1d_test", [X], [Z], [weight_0, weight_1])
         model = helper.make_model(graph)
@@ -105,42 +105,42 @@ class TestKnowledgeBase(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
-            np.random.randn(64, 3, 1).astype(np.float32))
-        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), \
-            np.random.randn(128, 64, 1).astype(np.float32))
-        weight_2 = helper.make_tensor('weight_2', TensorProto.FLOAT, (128, 64, 1), \
-            np.random.randn(128, 64, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1),
+                                      np.random.randn(64, 3, 1).astype(np.float32))
+        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1),
+                                      np.random.randn(128, 64, 1).astype(np.float32))
+        weight_2 = helper.make_tensor('weight_2', TensorProto.FLOAT, (128, 64, 1),
+                                      np.random.randn(128, 64, 1).astype(np.float32))
 
-        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['conv_0_out'], 'Conv_0', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['conv_0_out'], 'Conv_0', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
         relu_0 = helper.make_node('Relu', ['conv_0_out'], ['relu_0_out'], 'Relu_0', None, None)
         relu_1 = helper.make_node('Relu', ['relu_0_out'], ['relu_1_out'], 'Relu_1', None, None)
 
-        conv_1 = helper.make_node("Conv", ['relu_1_out', 'weight_1'], ['conv_1_out'], 'Conv_1', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_1 = helper.make_node("Conv", ['relu_1_out', 'weight_1'], ['conv_1_out'], 'Conv_1', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
         relu_2 = helper.make_node('Relu', ['conv_1_out'], ['relu_2_out'], 'Relu_2', None, None)
 
-        conv_2 = helper.make_node("Conv", ['relu_1_out', 'weight_2'], ['conv_2_out'], 'Conv_2', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_2 = helper.make_node("Conv", ['relu_1_out', 'weight_2'], ['conv_2_out'], 'Conv_2', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
         relu_3 = helper.make_node('Relu', ['conv_2_out'], ['relu_3_out'], 'Relu_3', None, None)
 
         add = helper.make_node('Add', ['relu_2_out', 'relu_3_out'], ['Z'], 'Add_0', None, None)
 
-        graph = helper.make_graph([conv_0, relu_0, relu_1, conv_1, relu_2, relu_3, conv_2, add], "conv1d_test", \
-            [X], [Z], [weight_0, weight_1, weight_2])
+        graph = helper.make_graph([conv_0, relu_0, relu_1, conv_1, relu_2, relu_3, conv_2, add], "conv1d_test",
+                                  [X], [Z], [weight_0, weight_1, weight_2])
         model = helper.make_model(graph)
 
         del model.opset_import[:]
@@ -153,44 +153,44 @@ class TestKnowledgeBase(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
-            np.random.randn(64, 3, 1).astype(np.float32))
-        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), \
-            np.random.randn(128, 64, 1).astype(np.float32))
-        weight_2 = helper.make_tensor('weight_2', TensorProto.FLOAT, (128, 64, 1), \
-            np.random.randn(128, 64, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1),
+                                      np.random.randn(64, 3, 1).astype(np.float32))
+        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1),
+                                      np.random.randn(128, 64, 1).astype(np.float32))
+        weight_2 = helper.make_tensor('weight_2', TensorProto.FLOAT, (128, 64, 1),
+                                      np.random.randn(128, 64, 1).astype(np.float32))
 
-        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['conv_0_out'], 'Conv_0', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['conv_0_out'], 'Conv_0', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
         relu_0 = helper.make_node('Relu', ['conv_0_out'], ['relu_0_out'], 'Relu_0', None, None)
         relu_1 = helper.make_node('Relu', ['relu_0_out'], ['relu_1_out'], 'Relu_1', None, None)
 
         shape = helper.make_node('Shape', ['relu_1_out'], ['shape_out'], 'Shape_0', None, None)
 
-        conv_1 = helper.make_node("Conv", ['shape_out', 'weight_1'], ['conv_1_out'], 'Conv_1', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_1 = helper.make_node("Conv", ['shape_out', 'weight_1'], ['conv_1_out'], 'Conv_1', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
         relu_2 = helper.make_node('Relu', ['conv_1_out'], ['relu_2_out'], 'Relu_2', None, None)
 
-        conv_2 = helper.make_node("Conv", ['shape_out', 'weight_2'], ['conv_2_out'], 'Conv_2', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_2 = helper.make_node("Conv", ['shape_out', 'weight_2'], ['conv_2_out'], 'Conv_2', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
         relu_3 = helper.make_node('Relu', ['conv_2_out'], ['relu_3_out'], 'Relu_4', None, None)
 
         add = helper.make_node('Add', ['relu_2_out', 'relu_3_out'], ['Z'], 'Add_0', None, None)
 
-        graph = helper.make_graph([conv_0, relu_0, relu_1, conv_1, relu_2, relu_3, conv_2, add, shape], \
-            "conv1d_test", [X], [Z], [weight_0, weight_1, weight_2])
+        graph = helper.make_graph([conv_0, relu_0, relu_1, conv_1, relu_2, relu_3, conv_2, add, shape],
+                                  "conv1d_test", [X], [Z], [weight_0, weight_1, weight_2])
         model = helper.make_model(graph)
 
         del model.opset_import[:]
@@ -204,7 +204,7 @@ class TestKnowledgeBase(unittest.TestCase):
 
         self.assertTrue(knowledge_example.has_next_pattern())
         knowledge_example.next_pattern()
-        
+
         self.assertTrue(knowledge_example.has_next_apply())
         knowledge_example.next_apply()
 

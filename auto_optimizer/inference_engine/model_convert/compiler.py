@@ -14,6 +14,7 @@
 
 from abc import ABC, abstractmethod
 
+
 class Compiler(ABC):
 
     @abstractmethod

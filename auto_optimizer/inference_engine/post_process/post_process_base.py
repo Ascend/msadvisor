@@ -14,6 +14,7 @@
 
 from abc import abstractmethod
 
+
 class PostProcessBase(object):
     def __init__(self):
         pass

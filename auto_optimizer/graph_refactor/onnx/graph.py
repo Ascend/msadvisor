@@ -23,6 +23,7 @@ from onnx import helper, GraphProto, ModelProto, OperatorSetIdProto, version_con
 from .. import BaseGraph
 from .node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
 
+
 class OnnxGraph(BaseGraph):
 
     def __init__(
@@ -36,7 +37,7 @@ class OnnxGraph(BaseGraph):
         **kwargs: Dict[str, object]
     ):
         super(OnnxGraph, self).__init__(name, nodes, inputs, outputs, initializers, value_infos)
-        
+
         opsets = kwargs.get('opset_imports', 11)
         if isinstance(opsets, int):
             opset_imports = onnx.OperatorSetIdProto()
@@ -51,12 +52,12 @@ class OnnxGraph(BaseGraph):
             opset_imports = opsets
 
         self._meta = {
-                    'ir_version': kwargs.get('ir_version', 4),
-                    'producer_name': kwargs.get('producer_name', 'AutoOptimizer'),
-                    'producer_version': kwargs.get('producer_version', 'alpha'),
-                    'domain': kwargs.get('domain', ''),
-                    'model_version': kwargs.get('model_version', 0),
-                    'opset_imports': opset_imports
+            'ir_version': kwargs.get('ir_version', 4),
+            'producer_name': kwargs.get('producer_name', 'AutoOptimizer'),
+            'producer_version': kwargs.get('producer_version', 'alpha'),
+            'domain': kwargs.get('domain', ''),
+            'model_version': kwargs.get('model_version', 0),
+            'opset_imports': opset_imports
         }
 
     @classmethod
@@ -71,11 +72,11 @@ class OnnxGraph(BaseGraph):
         else:
             onnx_graph = onnx_model.graph
             meta = {
-                    'ir_version': onnx_model.ir_version,
-                    'domain': onnx_model.domain,
-                    'model_version': onnx_model.model_version,
-                    'doc_string': onnx_model.doc_string,
-                    'opset_imports': onnx_model.opset_import
+                'ir_version': onnx_model.ir_version,
+                'domain': onnx_model.domain,
+                'model_version': onnx_model.model_version,
+                'doc_string': onnx_model.doc_string,
+                'opset_imports': onnx_model.opset_import
             }
 
         inputs = [OnnxPlaceHolder.parse(i) for i in onnx_graph.input]
@@ -129,12 +130,12 @@ class OnnxGraph(BaseGraph):
     def proto(self) -> GraphProto:
         self.toposort()
         return helper.make_graph(nodes=[node.proto() for node in self._nodes],
-                                name=self.name,
-                                inputs=[input.proto() for input in self._inputs],
-                                outputs=[output.proto() for output in self._outputs],
-                                initializer=[ini.proto() for ini in self._initializers],
-                                value_info=[val.proto() for val in self._value_infos]
-        )
+                                 name=self.name,
+                                 inputs=[input.proto() for input in self._inputs],
+                                 outputs=[output.proto() for output in self._outputs],
+                                 initializer=[ini.proto() for ini in self._initializers],
+                                 value_info=[val.proto() for val in self._value_infos]
+                                 )
 
     def model(self) -> ModelProto:
         return helper.make_model(self.proto(), **self._meta)
@@ -165,19 +166,19 @@ class OnnxGraph(BaseGraph):
             pass
         if not enable_model_check:
             onnx.checker.check_model = check_model
-        
+
         print('Begin to extract the model.')
         old_model_save_path = '{}_tmp.onnx'.format(new_model_save_path.split('.')[0])
         self.save(old_model_save_path)
         onnx.utils.extract_model(
             old_model_save_path, new_model_save_path, input_name_list, output_name_list)
         os.remove(old_model_save_path)
-        
+
         print('Extract the model completed, model saved in {}.'.format(
             new_model_save_path))
-        
+
         return OnnxGraph.parse(new_model_save_path)
-    
+
     def simplify(self, **kwargs) -> 'OnnxGraph':
         try:
             from onnxsim import simplify
@@ -188,14 +189,13 @@ class OnnxGraph(BaseGraph):
         model_sim, check = simplify(model, **kwargs)
         if not check:
             raise RuntimeError("Simplified ONNX model could not be validated")
-        
-        return OnnxGraph.parse(model_sim) 
-    
+
+        return OnnxGraph.parse(model_sim)
 
     @property
     def opset_imports(self) -> Optional[Sequence[OperatorSetIdProto]]:
         return self._meta['opset_imports']
-    
+
     @opset_imports.setter
     def opset_imports(self, opset: Union[int, None]) -> None:
         if not opset:

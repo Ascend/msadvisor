@@ -18,11 +18,13 @@ import argparse
 from .graph_optimizer.optimizer import GraphOptimizer
 from .graph_refactor.onnx.graph import OnnxGraph
 
+
 def _opt_parser(opt_parser):
     opt_parser.add_argument('input_model', help='Input model path')
     opt_parser.add_argument('output_model', help='Output model path')
-    opt_parser.add_argument('-k', '--knowledge', type=str, 
+    opt_parser.add_argument('-k', '--knowledge', type=str,
                             metavar='knowledge_names', nargs='+', help='name of knwoledges')
+
 
 def main():
     parser = argparse.ArgumentParser(description='AutoOptimizer')
@@ -42,6 +44,7 @@ def main():
             graph = OnnxGraph.parse(args.input_model)
             graph_opt.apply_knowledges(graph)
             graph.save(args.output_model)
+
 
 if __name__ == "__main__":
     main()

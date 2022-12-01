@@ -29,7 +29,7 @@ def make_type_cast_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np
 
     concat_value_0 = np.random.randn(*x.shape).astype(value_type)
     concat_value_1 = np.random.randn(*x.shape).astype(value_type)
-    mul_value_0    = np.random.randn(*x.shape).astype(value_type)
+    mul_value_0 = np.random.randn(*x.shape).astype(value_type)
     graph.add_initializer('Concat_value_0', concat_value_0)
     graph.add_initializer('Concat_value_1', concat_value_1)
     graph.add_initializer('Mul_value_0', mul_value_0)

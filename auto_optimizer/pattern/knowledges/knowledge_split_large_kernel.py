@@ -73,6 +73,7 @@ r"""
 @KnowledgeFactory.register()
 class KnowledgeSplitLargeKernelConv(KnowledgeBase):
     """Split Large Conv Kernel to speed up inference."""
+
     def __init__(self):
         super().__init__()
         # 卷积核阈值，任意一维超过该阈值均认为是大卷积核算子

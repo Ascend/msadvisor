@@ -21,4 +21,3 @@ from typing import Any
 class InferenceResult:
     label: Any = None
     data: Any = None
-

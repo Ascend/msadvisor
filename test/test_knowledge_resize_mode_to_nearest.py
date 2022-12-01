@@ -30,12 +30,12 @@ def make_resize_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np.dt
     graph.add_initializer('roi', roi)
     graph.add_initializer('scales', scales)
     graph.add_node('Resize0', 'Resize', ['input', 'scales'], ['11'], attrs={
-            'coordinate_transformation_mode': str("half_pixel"),
-            'cubic_coeff_a': -0.75,
-            'exclude_outside': 0,
-            'mode': "linear",
-            'nearest_mode': "round_prefer_floor",
-        })
+        'coordinate_transformation_mode': str("half_pixel"),
+        'cubic_coeff_a': -0.75,
+        'exclude_outside': 0,
+        'mode': "linear",
+        'nearest_mode': "round_prefer_floor",
+    })
     graph.update_map()
 
     graph.infershape()
@@ -58,6 +58,7 @@ class TestKnowledgeResizeModeToNearest(unittest.TestCase):
             result = optimize(newgraph, knowledge)
             newgraph.save(optimized_file)
             self.assertTrue(result)
+
 
 if __name__ == '__main__':
     unittest.main()

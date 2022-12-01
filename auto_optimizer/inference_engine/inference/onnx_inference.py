@@ -69,6 +69,3 @@ class ONNXInference(InferenceBase, ABC):
             logging.error("inference failed error={}".format(err))
 
         logging.debug("inference end")
-
-
-

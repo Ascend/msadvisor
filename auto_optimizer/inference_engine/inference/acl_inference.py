@@ -68,7 +68,7 @@ class AclInference(InferenceBase, ABC):
                     logging.error("data len less than 2! data should include label and data!")
                     raise RuntimeError("input params error len={}".format(len(data)))
                 try:
-                    outputs, exe_time = net(data[1])    
+                    outputs, exe_time = net(data[1])
                 except Exception as err:
                     logging.error("acl infer failed! error message: {}".format(err))
                 out_queue.put([data[0], outputs])

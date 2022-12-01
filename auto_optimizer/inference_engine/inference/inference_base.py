@@ -14,6 +14,7 @@
 
 from abc import abstractmethod
 
+
 class InferenceBase(object):
     def __init__(self):
         pass

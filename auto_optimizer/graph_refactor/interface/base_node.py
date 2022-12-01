@@ -18,6 +18,7 @@ from typing import List, Dict, Optional, Sequence, Union
 
 import numpy as np
 
+
 class BaseNode(ABC):
     def __init__(self, name: str, op_type: str) -> None:
         super().__init__()
@@ -28,7 +29,7 @@ class BaseNode(ABC):
     @abstractmethod
     def parse(cls, _) -> 'BaseNode':
         raise NotImplementedError()
-    
+
     @property
     def name(self) -> str:
         return self._name
@@ -67,7 +68,7 @@ class Node(BaseNode):
         self._outputs: List[str] = [] if outputs is None else outputs
         self._attrs: Dict[str, object] = {} if attrs is None else attrs
         self._domain: str = domain if domain is not None else ''
-    
+
     @classmethod
     def parse(cls, _) -> 'Node':
         raise NotImplementedError()
@@ -75,11 +76,11 @@ class Node(BaseNode):
     @property
     def inputs(self) -> List[str]:
         return self._inputs
-    
+
     @inputs.setter
     def inputs(self, inputs: List[str]) -> None:
         self._inputs = inputs
-    
+
     def get_input_id(self, node_input: str) -> int:
         if node_input not in self._inputs:
             raise RuntimeError(
@@ -89,21 +90,21 @@ class Node(BaseNode):
     @property
     def outputs(self) -> List[str]:
         return self._outputs
-    
+
     @outputs.setter
     def outputs(self, outputs: List[str]) -> None:
         self._outputs = outputs
-    
+
     def get_output_id(self, output: str) -> int:
         if output not in self._outputs:
             raise RuntimeError(
                 f'Name of output should be one of {self._outputs}')
         return self._outputs.index(output)
-    
+
     @property
     def attrs(self) -> Dict[str, object]:
         return self._attrs
-    
+
     def __getitem__(self, key: str) -> object:
         if key not in self._attrs:
             raise KeyError(
@@ -150,11 +151,11 @@ class Initializer(BaseNode):
     @property
     def value(self) -> np.ndarray:
         return self._value
-    
+
     @value.setter
     def value(self, value: np.ndarray) -> None:
         self._value = value
-    
+
     def __str__(self) -> str:
         return f'{self.op_type}({self.name}): (shape={self._value.shape}, dtype={self._value.dtype})\n'
 
@@ -188,7 +189,7 @@ class PlaceHolder(BaseNode):
     @property
     def dtype(self) -> np.dtype:
         return self._dtype
-    
+
     @dtype.setter
     def dtype(self, dtype: np.dtype) -> None:
         self._dtype = dtype
@@ -196,13 +197,13 @@ class PlaceHolder(BaseNode):
     @property
     def shape(self) -> Sequence[Union[str, int]]:
         return self._shape
-    
+
     @shape.setter
     def shape(self, shape: Sequence[Union[str, int]]) -> None:
         if -1 in shape:
             warnings.warn('To represent the dynamic dimension int -1 is converted to str "-1".')
         self._shape = ['-1' if dim == -1 else dim for dim in shape]
-    
+
     def __str__(self) -> str:
         return f'{self.op_type}({self.name}): (shape={self.shape}, dtype={self.dtype})\n'
 

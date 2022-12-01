@@ -19,6 +19,7 @@ from onnx import helper
 from auto_optimizer.graph_refactor.onnx.node import OnnxNode
 from test_node_common import create_node
 
+
 class TestNode(unittest.TestCase):
 
     def test_node_op_type(self):
@@ -55,7 +56,7 @@ class TestNode(unittest.TestCase):
     def test_node_get_attrs(self):
         node = create_node('OnnxNode')
         self.assertEqual(node.attrs, {'kernel_shape': 3})
-    
+
     def test_node_get_attr(self):
         node = create_node('OnnxNode')
         self.assertEqual(node['kernel_shape'], 3)
@@ -73,6 +74,7 @@ class TestNode(unittest.TestCase):
     def test_node_domain(self):
         node = create_node('OnnxNode')
         self.assertEqual(node.domain, '')
+
 
 if __name__ == "__main__":
     unittest.main()

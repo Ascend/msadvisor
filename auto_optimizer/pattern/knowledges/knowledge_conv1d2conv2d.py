@@ -68,7 +68,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         :return: onnx版本小于1.11.0，则返回True，否则返回False
         """
         limit_version = 13
-        domain_check = lambda domain: domain == '' or domain == 'ai.onnx'
+        def domain_check(domain): return domain == '' or domain == 'ai.onnx'
         opset_versions = [opset.version for opset in graph.opset_imports if domain_check(opset.domain)]
         return len(opset_versions) == 0 or opset_versions[0] < limit_version
 
@@ -144,8 +144,8 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         return sq
 
     def _conv1d2conv2d_apply(self, graph, match_result: MatchResult) -> bool:
-        node_map     = {}
-        node_inputs  = set()
+        node_map = {}
+        node_inputs = set()
         node_outputs = set()
         const_inputs = set()
         # 构建所有输入输出的集合
@@ -160,13 +160,13 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         # 构建常量输入集合
         for node in graph.initializers:
             const_inputs.add(node.name)
-        
+
         for node in node_map.values():
             for refer_index, node_input in enumerate(node.inputs):
                 # 如果输入不在输出集合中，并且不在常量输入集合中则认为此输入为子图的外部输入
                 if node_input not in node_outputs and node_input not in const_inputs:
                     self._expand_conv_input_dims(graph, node, refer_index)
-            
+
             insert_node = None
             for refer_index, node_output in enumerate(node.outputs):
                 next_nodes = graph.get_next_nodes(node_output).copy()

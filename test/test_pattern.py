@@ -19,7 +19,7 @@ from auto_optimizer.pattern.pattern import Pattern
 
 
 class TestPattern(unittest.TestCase):
-    
+
     def test_add_node_func_0(self):
         pattern = Pattern()
         pattern.add_node('Conv_0', ['Conv'], None)

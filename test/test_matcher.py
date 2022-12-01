@@ -64,15 +64,15 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
-            np.random.randn(64, 3, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1),
+                                      np.random.randn(64, 3, 1).astype(np.float32))
 
-        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['Z'], 'Conv_0', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['Z'], 'Conv_0', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
 
         graph = helper.make_graph([conv_0], "conv1d_test", [X], [Z], [weight_0])
         model = helper.make_model(graph)
@@ -87,24 +87,24 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
-            np.random.randn(64, 3, 1).astype(np.float32))
-        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1), \
-            np.random.randn(128, 64, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1),
+                                      np.random.randn(64, 3, 1).astype(np.float32))
+        weight_1 = helper.make_tensor('weight_1', TensorProto.FLOAT, (128, 64, 1),
+                                      np.random.randn(128, 64, 1).astype(np.float32))
 
-        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
 
-        conv_1 = helper.make_node("Conv", ['out_0', 'weight_1'], ['Z'], 'Conv_1', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_1 = helper.make_node("Conv", ['out_0', 'weight_1'], ['Z'], 'Conv_1', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
 
         graph = helper.make_graph([conv_0, conv_1], "conv1d_test", [X], [Z], [weight_0, weight_1])
         model = helper.make_model(graph)
@@ -119,15 +119,15 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
-            np.random.randn(64, 3, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1),
+                                      np.random.randn(64, 3, 1).astype(np.float32))
 
-        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
         relu_0 = helper.make_node('Relu', ['out_0'], ['Z'], 'Relu_0', None, None)
 
         graph = helper.make_graph([conv_0, relu_0], "conv1d_test", [X], [Z], [weight_0])
@@ -143,15 +143,15 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
-            np.random.randn(64, 3, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1),
+                                      np.random.randn(64, 3, 1).astype(np.float32))
 
-        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
         relu_0 = helper.make_node('Relu', ['out_0'], ['out_1'], 'Relu_0', None, None)
         relu_1 = helper.make_node('Relu', ['out_1'], ['Z'], 'Relu_1', None, None)
 
@@ -168,15 +168,15 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
-            np.random.randn(64, 3, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1),
+                                      np.random.randn(64, 3, 1).astype(np.float32))
 
-        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
         relu_0 = helper.make_node('Relu', ['out_0'], ['out_1'], 'Relu_0', None, None)
         shape = helper.make_node('Shape', ['out_1'], ['out_2'], 'Shape_0', None, None)
         relu_1 = helper.make_node('Relu', ['out_2'], ['Z'], 'Relu_1', None, None)
@@ -194,15 +194,15 @@ class TestMatcher(unittest.TestCase):
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, x.shape)
         Z = helper.make_tensor_value_info("Z", TensorProto.FLOAT, None)
 
-        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1), \
-            np.random.randn(64, 3, 1).astype(np.float32))
+        weight_0 = helper.make_tensor('weight_0', TensorProto.FLOAT, (64, 3, 1),
+                                      np.random.randn(64, 3, 1).astype(np.float32))
 
-        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None, \
-            dilations = np.array([1], dtype=np.int64), \
-            group = 1, \
-            kernel_shape = np.array([1], dtype=np.int64), \
-            pads = np.array([0, 0], dtype=np.int64), \
-            strides = np.array([1], dtype=np.int64))
+        conv_0 = helper.make_node("Conv", ['X', 'weight_0'], ['out_0'], 'Conv_0', None, None,
+                                  dilations=np.array([1], dtype=np.int64),
+                                  group=1,
+                                  kernel_shape=np.array([1], dtype=np.int64),
+                                  pads=np.array([0, 0], dtype=np.int64),
+                                  strides=np.array([1], dtype=np.int64))
         relu_0 = helper.make_node('Relu', ['out_0'], ['out_1'], 'Relu_0', None, None)
         relu_1 = helper.make_node('Relu', ['out_1'], ['Z'], 'Relu_1', None, None)
         relu_2 = helper.make_node('Relu', ['out_1'], ['Z'], 'Relu_2', None, None)
@@ -336,6 +336,7 @@ class TestMatcher(unittest.TestCase):
         self.assertEqual(len(result.node_dicts[0].get('element_wise')), 3)
         self.assertEqual(result.node_dicts[0]['Conv'][0].name, 'Conv_0')
         self.assertEqual(result.node_dicts[0]['element_wise'][0].name, 'Relu_0')
+
 
 if __name__ == "__main__":
     unittest.main()

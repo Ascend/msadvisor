@@ -31,74 +31,78 @@ from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Initiali
 
 
 class ElemType(Enum):
-    FLOAT32    = 1
-    UINT8      = 2
-    INT8       = 3
-    UINT16     = 4
-    INT16      = 5
-    INT32      = 6
-    INT64      = 7
-    STRING     = 8
-    BOOLEAN    = 9
-    FLOAT16    = 10
-    FLOAT64    = 11
-    UINT32     = 12
-    UINT64     = 14
+    FLOAT32 = 1
+    UINT8 = 2
+    INT8 = 3
+    UINT16 = 4
+    INT16 = 5
+    INT32 = 6
+    INT64 = 7
+    STRING = 8
+    BOOLEAN = 9
+    FLOAT16 = 10
+    FLOAT64 = 11
+    UINT32 = 12
+    UINT64 = 14
     COMPLEX128 = 15
-    BFLOAT16   = 16
+    BFLOAT16 = 16
+
 
 numpy_onnx_type_map = \
-    { np.int32   : ElemType.INT32
-    , np.int64   : ElemType.INT64
-    , np.float32 : ElemType.FLOAT32
-    , np.float64 : ElemType.FLOAT64
-    }
+    {np.int32: ElemType.INT32, np.int64: ElemType.INT64, np.float32: ElemType.FLOAT32, np.float64: ElemType.FLOAT64
+     }
+
 
 class TypeCastStrategy(object):
     """ 类型转换策略
     将一个原始的数据类型转换到目标类型的过程描述为一个类型转换策略
     """
+
     def __init__(self, cast_from: np.dtype, cast_to: np.dtype):
         """
         :param cast_from: 原始数据类型
         :param cast_to  : 目标数据类型  
         """
         self._cast_from = cast_from
-        self._cast_to   = cast_to
+        self._cast_to = cast_to
 
     @property
     def cast_from(self):
         return self._cast_from
-    
+
     @property
     def cast_to(self):
         return self._cast_to
 
+
 class IOType(Enum):
     """ 节点输入输出类型枚举
     """
-    NODE_INPUT  = 0 # 节点输入
-    NODE_OUTPUT = 1 # 节点输出
+    NODE_INPUT = 0  # 节点输入
+    NODE_OUTPUT = 1  # 节点输出
+
 
 class GenericIO(object):
     """ 节点支持泛型的输入输出
     描述节点支持泛型的输入输出的索引列表
     """
+
     def __init__(self, generic_inputs: List[int], generic_outputs: List[int]):
         """
         :param generic_inputs  : 泛型输入索引列表
         :param generic_outputs : 泛型输出索引列表
         """
-        self._generic_inputs  = generic_inputs
+        self._generic_inputs = generic_inputs
         self._generic_outputs = generic_outputs
-    
+
     @property
     def generic_inputs(self):
         return self._generic_inputs
-    
+
     @property
     def generic_outputs(self):
         return self._generic_outputs
+
 
 class GenericOpMatch(MatchBase):
     """ 泛型节点匹配
@@ -107,39 +111,14 @@ class GenericOpMatch(MatchBase):
     # 完全泛型节点，此类节点的所有输入输出均为泛型类型，对于此类节点可以将所有满足转换
     # 原始类型的输入输出转换为目标类型
     entire_generic_ops = \
-        [ 'Mul'
-        , 'Add'
-        , 'Sub'
-        , 'Div'
-        , 'Abs'
-        , 'Tanh'
-        , 'LeakyRelu'
-        , 'Relu'
-        , 'Sigmoid'
-        , 'BatchNormalization'
-        , 'ReduceSum'
-        , 'Concat'
-        , 'Gemm'
-        , 'Split'
-        , 'Slice'
-        , 'Transpose'
-        ]
+        ['Mul', 'Add', 'Sub', 'Div', 'Abs', 'Tanh', 'LeakyRelu', 'Relu', 'Sigmoid', 'BatchNormalization', 'ReduceSum', 'Concat', 'Gemm', 'Split', 'Slice', 'Transpose'
+         ]
 
     # 半泛型节点，部分输入通道类型为泛型 T，剩余输入通道类型为固定类型，对于此类算子需
     # 要将泛型的输入通道转换为目标类型
     partial_generic_ops = \
-        { 'Expand'   : GenericIO([0], [0])
-        , 'Less'     : GenericIO([0, 1], [])
-        , 'Gather'   : GenericIO([0], [0])
-        , 'Shape'    : GenericIO([0], [])
-        , 'Where'    : GenericIO([1, 2], [0])
-        , 'Equal'    : GenericIO([0, 1], [])
-        , 'Reshape'  : GenericIO([0], [0])
-        , 'Tile'     : GenericIO([0], [0])
-        , 'ScatterND': GenericIO([0, 2], [0])
-        , 'Unsqueeze': GenericIO([0], [0])
-        , 'Squeeze'  : GenericIO([0], [0])
-        }
+        {'Expand': GenericIO([0], [0]), 'Less': GenericIO([0, 1], []), 'Gather': GenericIO([0], [0]), 'Shape': GenericIO([0], []), 'Where': GenericIO([1, 2], [0]), 'Equal': GenericIO([0, 1], []), 'Reshape': GenericIO([0], [0]), 'Tile': GenericIO([0], [0]), 'ScatterND': GenericIO([0, 2], [0]), 'Unsqueeze': GenericIO([0], [0]), 'Squeeze': GenericIO([0], [0])
+         }
 
     def __init__(self, strategy: TypeCastStrategy):
         """
@@ -197,9 +176,10 @@ class GenericOpMatch(MatchBase):
         # 至少要有一个泛型输入是转换原始类型才能匹配成功
         for index, node_input in enumerate(node.inputs):
             if GenericOpMatch.is_generic_io(node, IOType.NODE_INPUT, index) \
-                and edge_type_dict.get(node_input, 0) == self._strategy.cast_from:
+                    and edge_type_dict.get(node_input, 0) == self._strategy.cast_from:
                 return True
         return False
+
 
 class TypeCastPattern(Pattern):
     """ 可进行类型转换的子图匹配模式
@@ -211,6 +191,7 @@ class TypeCastPattern(Pattern):
        过 Cast 算子转换为 int32 类型，流出子图时重新转换为 int64 类型，保证子图的修改
        不影响整图功能
     """
+
     def __init__(self, strategy: TypeCastStrategy):
         super().__init__()
         self.add_node('generic_operator', None, [GenericOpMatch(strategy)]) \
@@ -218,6 +199,7 @@ class TypeCastPattern(Pattern):
             .set_output('generic_operator') \
             .set_node_loop('generic_operator', MATCH_PATTERN.MATCH_ONCE_OR_MORE) \
             .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
+
 
 class TypeCastApply(object):
     def __init__(self, strategy: TypeCastStrategy):
@@ -253,7 +235,7 @@ class TypeCastApply(object):
         """
         const_map = dict([(initializer.name, initializer) for initializer in graph.initializers])
         cast_from = self._strategy.cast_from
-        cast_to   = self._strategy.cast_to
+        cast_to = self._strategy.cast_to
 
         # 遍历子图中的所有节点
         for node in node_map.values():
@@ -279,8 +261,8 @@ class TypeCastApply(object):
                     if prev_node.name not in node_map or not _is_generic_output:
                         # 如果前置节点当前输出通道后面存在转换到目标类型的 Cast 节点时，复用此节点
                         next_nodes = graph.get_next_nodes(node_input)
-                        casts = list(filter(lambda node: node.op_type == 'Cast' and \
-                            node['to'] == numpy_onnx_type_map.get(cast_to, 0), next_nodes))
+                        casts = list(filter(lambda node: node.op_type == 'Cast' and
+                                            node['to'] == numpy_onnx_type_map.get(cast_to, 0), next_nodes))
                         if casts:
                             graph[node.name].inputs[input_index] = casts[0].outputs[0]
                             graph.update_map()
@@ -442,9 +424,8 @@ class KnowledgeTypeCast(KnowledgeBase):
         super().__init__()
         # 类型转换策略列表
         self._type_cast_strategies = \
-            [ TypeCastStrategy(cast_from=np.int64,   cast_to=np.int32)
-            , TypeCastStrategy(cast_from=np.float64, cast_to=np.float32)
-            ]
+            [TypeCastStrategy(cast_from=np.int64,   cast_to=np.int32), TypeCastStrategy(cast_from=np.float64, cast_to=np.float32)
+             ]
         for strategy in self._type_cast_strategies:
             self._register_apply_funcs(TypeCastPattern(strategy), [TypeCastApply(strategy)])
 

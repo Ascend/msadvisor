@@ -57,4 +57,3 @@ class ImageNetDataset(DatasetBase, ABC):
             logging.error("pre_process failed error={}".format(err))
 
         logging.debug("dataset end")
-

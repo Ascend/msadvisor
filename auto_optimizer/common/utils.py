@@ -37,6 +37,7 @@ def typeassert(*ty_args, **ty_kwargs):
         return wrapper
     return decorate
 
+
 @typeassert(path=str)
 def format_to_module(path):
     """
@@ -52,7 +53,7 @@ def format_to_module(path):
 
     return format_path
 
+
 def check_file_exist(file, msg='file "{}" does not exist'):
     if not os.path.isfile(file):
         raise FileNotFoundError(msg.format(file))
-

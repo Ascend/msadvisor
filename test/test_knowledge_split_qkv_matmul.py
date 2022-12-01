@@ -30,7 +30,7 @@ from utils import inference, optimize
 
 
 def make_basic_qkv_matmul_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=1,
-                               valid_gather=True, valid_reshape=True) -> bool:
+                                valid_gather=True, valid_reshape=True) -> bool:
     if gathers not in [2, 3, 4, 5, 6, 7, 8]:
         return False
     input_ = helper.make_tensor_value_info("input", TensorProto.FLOAT, (1, 10, 112))

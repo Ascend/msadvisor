@@ -187,8 +187,8 @@ class Pattern(object):
         self.graph_match_pattern = match_pattern
         if match_pattern == MATCH_PATTERN.MATCH_ONCE_OR_MORE:
             if len(self.in_nodes) != len(self.out_nodes):
-                raise RuntimeError('if match sub graph continously, ' \
-                    'input nodes size should be equal to output nodes size.')
+                raise RuntimeError('if match sub graph continously, '
+                                   'input nodes size should be equal to output nodes size.')
         return self
 
     def get_visit_direction(self) -> DIRECTION:

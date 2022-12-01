@@ -19,6 +19,7 @@ from onnx import NodeProto, TensorProto, ValueInfoProto, helper, numpy_helper, m
 
 from .. import Node, PlaceHolder, Initializer
 
+
 class OnnxNode(Node):
     def __init__(
         self,
@@ -30,35 +31,35 @@ class OnnxNode(Node):
         domain: str = ''
     ) -> None:
         super(OnnxNode, self).__init__(name, op_type, inputs, outputs, attrs, domain)
-    
+
     @classmethod
     def parse(cls, node: NodeProto, add_name_suffix: bool = False) -> 'OnnxNode':
-        
+
         if not node.name:
             node.name = '{}_{}'.format(node.op_type, node.output[0])
-        
+
         if add_name_suffix:
             name = '{}_{}'.format(node.name, 'op')
         else:
             name = node.name
-            
+
         return cls(
-            name = name, 
-            op_type = node.op_type, 
-            inputs = list(node.input), 
-            outputs = list(node.output), 
-            attrs = {attr.name: helper.get_attribute_value(attr)
-                     for attr in node.attribute}, 
-            domain = node.domain
+            name=name,
+            op_type=node.op_type,
+            inputs=list(node.input),
+            outputs=list(node.output),
+            attrs={attr.name: helper.get_attribute_value(attr)
+                   for attr in node.attribute},
+            domain=node.domain
         )
-    
+
     def proto(self) -> NodeProto:
         return helper.make_node(
-            self.op_type, 
-            self.inputs, 
-            self.outputs, 
-            name=self.name, 
-            domain=self.domain, 
+            self.op_type,
+            self.inputs,
+            self.outputs,
+            name=self.name,
+            domain=self.domain,
             **self.attrs
         )
 
@@ -83,15 +84,15 @@ class OnnxInitializer(Initializer):
             name = node.name
             value = numpy_helper.to_array(node)
         return cls(
-            name = name, 
-            value = value
+            name=name,
+            value=value
         )
-    
+
     def proto(self) -> TensorProto:
         tensor_dtype = mapping.NP_TYPE_TO_TENSOR_TYPE[self._value.dtype]
         storage_np_dtype = mapping.TENSOR_TYPE_TO_NP_TYPE[
-                mapping.TENSOR_TYPE_TO_STORAGE_TENSOR_TYPE[tensor_dtype]
-            ]
+            mapping.TENSOR_TYPE_TO_STORAGE_TENSOR_TYPE[tensor_dtype]
+        ]
         return helper.make_tensor(
             self._name,
             tensor_dtype,
@@ -125,11 +126,11 @@ class OnnxPlaceHolder(PlaceHolder):
                     for dim in tensor_type.shape.dim
                 ]
         return cls(
-            name = node.name, 
-            dtype = dtype,
-            shape = shape
+            name=node.name,
+            dtype=dtype,
+            shape=shape
         )
-    
+
     def proto(self, dtype: int = 1, shape: Optional[Sequence[Union[int, str]]] = None) -> ValueInfoProto:
         if self.shape:
             shape = ['-1' if dim == -1 else dim for dim in self.shape]
@@ -138,5 +139,5 @@ class OnnxPlaceHolder(PlaceHolder):
         return helper.make_tensor_value_info(
             self._name,
             dtype,
-            shape 
+            shape
         )

@@ -19,6 +19,7 @@ import numpy as np
 from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder
 from test_node_common import create_node
 
+
 class TestPlaceHolder(unittest.TestCase):
 
     def test_placeholder_get_dtype(self):
@@ -32,12 +33,13 @@ class TestPlaceHolder(unittest.TestCase):
 
     def test_placeholder_get_shape(self):
         ph = create_node('OnnxPlaceHolder')
-        self.assertEqual(ph.shape, [1,3,224,224])
+        self.assertEqual(ph.shape, [1, 3, 224, 224])
 
     def test_placeholder_set_shape(self):
         ph = create_node('OnnxPlaceHolder')
-        ph.shape = [-1,3,224,224]
-        self.assertEqual(ph.shape, ['-1',3,224,224])
+        ph.shape = [-1, 3, 224, 224]
+        self.assertEqual(ph.shape, ['-1', 3, 224, 224])
+
 
 if __name__ == "__main__":
     unittest.main()

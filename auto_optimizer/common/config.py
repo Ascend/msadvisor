@@ -73,4 +73,3 @@ class Config:
 
     def __getstate__(self):
         return self._config_dict
-

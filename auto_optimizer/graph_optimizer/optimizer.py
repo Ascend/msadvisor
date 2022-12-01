@@ -16,6 +16,7 @@ from typing import List, Dict, Union
 
 from ..common.register import Register
 
+
 class GraphOptimizer:
 
     def __init__(self, knowledges: List[str] = None):
@@ -48,6 +49,7 @@ class GraphOptimizer:
             _knowledge.post_process(graph)
 
         return graph
+
 
 if __name__ == "__main__":
     graph_opt = GraphOptimizer(['KnowledgeConv1d2Conv2d'])

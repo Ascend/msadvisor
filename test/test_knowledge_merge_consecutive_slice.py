@@ -46,7 +46,7 @@ def make_c2_slice_model(onnx_name, x):
     node_slice1 = helper.make_node("Slice", ["X_S", "start1", "end1", "axes1", "step1"], ["Z"], "Slice1")
 
     graph = helper.make_graph([node_slice0, node_slice1], "continue_slice_test",
-        [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1],)
+                              [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1],)
     model = helper.make_model(graph)
 
     del model.opset_import[:]
@@ -70,7 +70,7 @@ def make_c2_slice_optional_args_model(onnx_name, x):
     node_slice1 = helper.make_node("Slice", ["X_S", "start1", "end1"], ["Z"], "Slice1")
 
     graph = helper.make_graph([node_slice0, node_slice1], "continue_slice_test",
-        [X], [Z], [start0, end0, start1, end1],)
+                              [X], [Z], [start0, end0, start1, end1],)
     model = helper.make_model(graph)
 
     del model.opset_import[:]
@@ -102,7 +102,7 @@ def make_c2_slice_2dim_1dims_model(onnx_name, x, same_axis=False):
     node_slice1 = helper.make_node("Slice", ["X_S", "start1", "end1", "axes1", "step1"], ["Z"], "Slice1")
 
     graph = helper.make_graph([node_slice0, node_slice1], "continue_slice_test",
-        [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1],)
+                              [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1],)
     model = helper.make_model(graph)
 
     del model.opset_import[:]
@@ -134,7 +134,7 @@ def make_c2_slice_2dim_model(onnx_name, x, same_axis=False):
     node_slice1 = helper.make_node("Slice", ["X_S", "start1", "end1", "axes1", "step1"], ["Z"], "Slice1")
 
     graph = helper.make_graph([node_slice0, node_slice1], "continue_slice_test",
-        [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1],)
+                              [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1],)
     model = helper.make_model(graph)
 
     del model.opset_import[:]
@@ -168,7 +168,7 @@ def make_c3_slice_model(onnx_name, x):
     node_slice2 = helper.make_node("Slice", ["X_S_S", "start2", "end2", "axes2", "step2"], ["Z"], "Slice2")
 
     graph = helper.make_graph([node_slice0, node_slice1, node_slice2], "continue3_slice_test",
-        [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1, start2, end2, axes2, step2],)
+                              [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1, start2, end2, axes2, step2],)
     model = helper.make_model(graph)
 
     del model.opset_import[:]

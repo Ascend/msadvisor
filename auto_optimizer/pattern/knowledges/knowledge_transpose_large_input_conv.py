@@ -100,6 +100,7 @@ pattern_aasist = Pattern() \
 @KnowledgeFactory.register()
 class KnowledgeTransposeLargeInputConv(KnowledgeBase):
     """Swap H/W axis of conv operator with large input shape."""
+
     def __init__(self):
         super().__init__()
         # 注册pattern的apply方法

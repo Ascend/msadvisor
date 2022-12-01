@@ -38,6 +38,7 @@ class NextNodeCount(MatchBase):
     In practice, this means this node can be merged/sliced/modified/removed without affects other nodes,
     which is a common requirement in computation graph optimization.
     """
+
     def __init__(self, cnt: int = 1) -> None:
         super().__init__()
         self._count = cnt

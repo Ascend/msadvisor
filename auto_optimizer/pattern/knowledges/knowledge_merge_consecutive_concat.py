@@ -112,6 +112,7 @@ pattern2 = Pattern() \
 @KnowledgeFactory.register()
 class KnowledgeMergeConsecutiveConcat(KnowledgeBase):
     """Combine consecutive concat operators together"""
+
     def __init__(self):
         super().__init__()
 

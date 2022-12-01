@@ -100,6 +100,7 @@ pattern0 = Pattern() \
 @KnowledgeFactory.register()
 class KnowledgeSplitQKVMatmul(KnowledgeBase):
     """Split MatMul/Reshape/Transpose/Gathers Structure"""
+
     def __init__(self):
         super().__init__()
         # 注册pattern的apply方法
@@ -123,7 +124,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
         return first_dim_of_split if size_tmp == size_of_dim_to_split else -1
 
     def _dup_branch_node(self, node: Node, graph: BaseGraph, weight: np.ndarray,
-                          axis: int, num: int, indices: List[int], placeholder_index: int = 0) -> List[Node]:
+                         axis: int, num: int, indices: List[int], placeholder_index: int = 0) -> List[Node]:
         """
         复制逐元素算子和MatMul算子，这些算子的常数参数被切分为若干份，由各个分支平分
         :param node: 要复制的算子
@@ -223,7 +224,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
                 node_to_reconnect.inputs[idx] = new_node.outputs[0]
 
     def _connect_splitted_nodes(self, new_nodes: List[Node],
-                                 pre_nodes: List[Union[Node, str]], placeholder_index: int = 0):
+                                pre_nodes: List[Union[Node, str]], placeholder_index: int = 0):
         """
         连接复制出来的新节点
         :param new_nodes: 本次需要连接的节点列表
@@ -339,7 +340,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
         # 执行到这里已经完全确认可以做优化，接下来开始改图，防止出现改图到一半发现无法继续修改的情况
         matmul_weight_length = len(matmul_weight.value.shape)
         new_matmuls = self._dup_branch_node(matmul_node, graph, matmul_weight.value,
-                                             matmul_weight_length - 1, split_num, indices)
+                                            matmul_weight_length - 1, split_num, indices)
         self._connect_splitted_nodes(new_matmuls, pre_nodes)
 
         for node in element_wise_nodes:
@@ -350,7 +351,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             placeholder_index = 1 if input1 is None else 0
             matmul_weight_length = len(node_weight.value.shape)
             new_nodes = self._dup_branch_node(node, graph, node_weight.value,
-                                               matmul_weight_length - 1, split_num, indices, placeholder_index)
+                                              matmul_weight_length - 1, split_num, indices, placeholder_index)
             self._connect_splitted_nodes(new_nodes, pre_nodes, placeholder_index)
 
         new_reshapes = self._dup_reshape_node(reshape_node, graph, resh_weight.value, first_dim_of_split, split_num)
