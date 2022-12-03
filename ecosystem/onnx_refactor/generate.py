@@ -99,7 +99,7 @@ def generate_knowledge_adapter():
         f.flush()
         f.close()
         res = True
-        os.chmod(adapter_path, stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP)
+        os.chmod(adapter_path, stat.S_IRUSR | stat.S_IRGRP)
     return res
 
 if __name__ == '__main__':
