@@ -67,7 +67,8 @@ class MergeCastsPattern(Pattern):
     def __init__(self):
         super().__init__()
         self.add_node('root_node', None) \
-            .add_node('cast_node', 'Cast') \
+            .add_node('cast_node', ['Cast']) \
+            .add_edge('root_node', 'cast_node') \
             .set_input('root_node') \
             .set_output('cast_node') \
             .set_node_loop('root_node', MATCH_PATTERN.MATCH_ONCE) \
