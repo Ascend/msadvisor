@@ -1,0 +1,15 @@
+{
+  "model_list": [
+    {
+      "model_name": "model",
+      "session_list": [
+        {
+          "python_model_path": "src",
+          "parameter": {
+            "om_model": [ "" ]
+          }
+        }
+      ]
+    }
+  ]
+}
