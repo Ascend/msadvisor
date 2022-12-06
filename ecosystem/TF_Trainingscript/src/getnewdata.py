@@ -8,21 +8,37 @@ from tool.python import remove_comments
 import pandas as pd
 
 path_type = {'script': 'data/script', 'profiling': 'data/profiling', 'graph': 'data/graph', 'plog': 'data/log'}
- 
+
 class Data:
-    def __init__(self, tpath, this_path):
+    def __init__(self, tpath, this_path, parameter):
         self.tpath = tpath
         self.this_path = this_path
+        self.parameter = parameter
 
     """ 获得目标目录下名称列表的数据 """
     def get_list(self, second_path):
-        file_path = os.path.join(self.this_path, second_path)
+        # 若用户指定了数据目录则读该目录下的文件
+        if self.parameter[self.tpath] != '':
+            file_path = self.parameter[self.tpath]
+        else:
+            file_path = os.path.join(self.this_path, second_path)
         datanames = os.listdir(file_path)
         list = []
         for i in datanames:
+            if self.tpath == 'script':
+                if i.find('.py') == -1 and i.find('.sh') == -1:
+                    continue
+            if self.tpath == 'profiling':
+                if i.find('.csv') == -1:
+                    continue
+            if self.tpath == 'graph':
+                if i.find('.pbtxt') == -1 and i.find('.txt') == -1:
+                    continue
+            if self.tpath == 'plog':
+                if i.find('.log') == -1:
+                    continue
             path = os.path.join(file_path, i)
             real_file_path = os.path.realpath(path)
-            print(real_file_path)
             list.append(real_file_path)
         return list
 
@@ -34,7 +50,6 @@ class Data:
             for i in list:
                 if self.tpath == 'script' or self.tpath == 'graph':
                     try:
-                        # f = open(i,'rb')
                         f = open(i, encoding='utf-8')
                         data = f.read()
                         f.close()
@@ -51,11 +66,15 @@ class Data:
                     task_data = pd.read_csv(i)
                 datalist.append((task_data, i))
         else:
-            print(self.tpath + '该路径下无需扫描文件')
+            # 若脚本代码数据不存在则无法扫描，直接退出系统
+            if self.tpath == 'script':
+                print("训练脚本数据不存在，请输入数据")
+                sys.exit()
+            print(self.tpath + '路径下无需扫描文件')
         return datalist
 
-def processed_data(type, data_path):
-    new_data = Data(type, data_path)
+def processed_data(type, data_path, parameter):
+    new_data = Data(type, data_path, parameter)
     data = new_data.get_datalist()
     return data
 

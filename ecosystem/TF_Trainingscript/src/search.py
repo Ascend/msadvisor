@@ -6,10 +6,11 @@ Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 
 from buildrealresult import get_r
 import re
+from work.flag import Type
 
 def research(data, keyword, rword, flag):
     searchresult = re.search(keyword, data)
-    if ((searchresult == None and flag == 0) or (searchresult != None and flag == 1)):
+    if ((searchresult == None and flag == Type.ABSENCE) or (searchresult != None and flag == Type.EXIST)):
         return get_r(rword)
 
 def concrete_research(data, keyword, rword):
