@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ctypes import cast
 from typing import List, Dict
-import operator as op
 from enum import Enum
 from itertools import chain
 import numpy as np
@@ -27,7 +25,7 @@ from auto_optimizer.pattern.pattern import MATCH_PATTERN
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Initializer, Node
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 
 
 class ElemType(Enum):
@@ -48,9 +46,12 @@ class ElemType(Enum):
     BFLOAT16 = 16
 
 
-numpy_onnx_type_map = \
-    {np.int32: ElemType.INT32, np.int64: ElemType.INT64, np.float32: ElemType.FLOAT32, np.float64: ElemType.FLOAT64
-     }
+numpy_onnx_type_map = {
+    np.int32: ElemType.INT32,
+    np.int64: ElemType.INT64,
+    np.float32: ElemType.FLOAT32,
+    np.float64: ElemType.FLOAT64
+}
 
 
 class TypeCastStrategy(object):
@@ -61,7 +62,7 @@ class TypeCastStrategy(object):
     def __init__(self, cast_from: np.dtype, cast_to: np.dtype):
         """
         :param cast_from: 原始数据类型
-        :param cast_to  : 目标数据类型  
+        :param cast_to  : 目标数据类型
         """
         self._cast_from = cast_from
         self._cast_to = cast_to
@@ -110,15 +111,40 @@ class GenericOpMatch(MatchBase):
 
     # 完全泛型节点，此类节点的所有输入输出均为泛型类型，对于此类节点可以将所有满足转换
     # 原始类型的输入输出转换为目标类型
-    entire_generic_ops = \
-        ['Mul', 'Add', 'Sub', 'Div', 'Abs', 'Tanh', 'LeakyRelu', 'Relu', 'Sigmoid', 'BatchNormalization', 'ReduceSum', 'Concat', 'Gemm', 'Split', 'Slice', 'Transpose'
-         ]
+    entire_generic_ops = [
+        'Mul',
+        'Add',
+        'Sub',
+        'Div',
+        'Abs',
+        'Tanh',
+        'LeakyRelu',
+        'Relu',
+        'Sigmoid',
+        'BatchNormalization',
+        'ReduceSum',
+        'Concat',
+        'Gemm',
+        'Split',
+        'Slice',
+        'Transpose'
+    ]
 
     # 半泛型节点，部分输入通道类型为泛型 T，剩余输入通道类型为固定类型，对于此类算子需
     # 要将泛型的输入通道转换为目标类型
-    partial_generic_ops = \
-        {'Expand': GenericIO([0], [0]), 'Less': GenericIO([0, 1], []), 'Gather': GenericIO([0], [0]), 'Shape': GenericIO([0], []), 'Where': GenericIO([1, 2], [0]), 'Equal': GenericIO([0, 1], []), 'Reshape': GenericIO([0], [0]), 'Tile': GenericIO([0], [0]), 'ScatterND': GenericIO([0, 2], [0]), 'Unsqueeze': GenericIO([0], [0]), 'Squeeze': GenericIO([0], [0])
-         }
+    partial_generic_ops = {
+        'Expand': GenericIO([0], [0]),
+        'Less': GenericIO([0, 1], []),
+        'Gather': GenericIO([0], [0]),
+        'Shape': GenericIO([0], []),
+        'Where': GenericIO([1, 2], [0]),
+        'Equal': GenericIO([0, 1], []),
+        'Reshape': GenericIO([0], [0]),
+        'Tile': GenericIO([0], [0]),
+        'ScatterND': GenericIO([0, 2], [0]),
+        'Unsqueeze': GenericIO([0], [0]),
+        'Squeeze': GenericIO([0], [0])
+    }
 
     def __init__(self, strategy: TypeCastStrategy):
         """
@@ -423,16 +449,17 @@ class KnowledgeTypeCast(KnowledgeBase):
     def __init__(self):
         super().__init__()
         # 类型转换策略列表
-        self._type_cast_strategies = \
-            [TypeCastStrategy(cast_from=np.int64,   cast_to=np.int32), TypeCastStrategy(cast_from=np.float64, cast_to=np.float32)
-             ]
+        self._type_cast_strategies = [
+            TypeCastStrategy(cast_from=np.int64, cast_to=np.int32),
+            TypeCastStrategy(cast_from=np.float64, cast_to=np.float32)
+        ]
         for strategy in self._type_cast_strategies:
             self._register_apply_funcs(TypeCastPattern(strategy), [TypeCastApply(strategy)])
 
     def pre_process(self, graph: BaseGraph) -> bool:
         try:
             graph.infershape()
-        except InferenceError as e:
+        except InferenceError:
             return False
         return True
 
