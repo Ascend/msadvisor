@@ -22,8 +22,8 @@ class Data:
             value = self.parameter[self.tpath]
         except KeyError:
             print("key not in dict!")
-        if self.parameter[self.tpath] != '':
-            file_path = self.parameter[self.tpath]
+        if value != '':
+            file_path = value
         else:
             file_path = os.path.join(self.this_path, second_path)
         datanames = os.listdir(file_path)
