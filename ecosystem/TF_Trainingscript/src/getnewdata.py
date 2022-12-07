@@ -18,6 +18,10 @@ class Data:
     """ 获得目标目录下名称列表的数据 """
     def get_list(self, second_path):
         # 若用户指定了数据目录则读该目录下的文件
+        try:
+            value = self.parameter[self.tpath]
+        except KeyError:
+            print("key not in dict!")
         if self.parameter[self.tpath] != '':
             file_path = self.parameter[self.tpath]
         else:

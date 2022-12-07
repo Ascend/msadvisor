@@ -13,7 +13,7 @@ def isaicpu(keywords, data):
                     return 1
 
 """获取文件夹下指定的某些数据文件"""
-def getprodata(type,data):
+def getprodata(type, data):
     list = []
     for i in data:
         if re.search(type, i[1]) != None:

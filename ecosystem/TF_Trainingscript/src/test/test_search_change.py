@@ -16,7 +16,7 @@ def get_list(second_path):
         list.append(real_file_path)
     return list
 
-def logdelete(wordlist,path,flag):
+def logdelete(wordlist, path, flag):
     list = get_list(path)
     for item in list:
         f = open(item, "r", encoding='utf-8')
@@ -27,7 +27,7 @@ def logdelete(wordlist,path,flag):
         f.write(data)
         f.close()
 
-def logadd(wordlist,path,flag):
+def logadd(wordlist, path, flag):
     list = get_list(path)
     for item in list:
         f = open(item, "r", encoding='utf-8')
@@ -38,7 +38,7 @@ def logadd(wordlist,path,flag):
         f.write(data)
         f.close()
 
-def change(path,pathtest):
+def change(path, pathtest):
     f = open(path, "r", encoding='utf-8')
     data = f.read()
     ft = open(pathtest, "r", encoding='utf-8')
@@ -52,28 +52,28 @@ def change(path,pathtest):
     f.close()
     ft.close()
 
-def test(word,path,flag):
+def test(word, path, flag):
     logdelete(word, path, flag)
     r = evaluate('./', '')
-    print('删除关键词后结果为:\n'+r)
+    print('删除关键词后结果为:\n' + r)
     logadd(word, path, flag)
     r = evaluate('./', '')
-    print('还原关键词后结果为:\n'+r+'\n')
+    print('还原关键词后结果为:\n' + r + '\n')
 
-def test2(word,path,flag):
+def test2(word, path, flag):
     logadd(word, path, flag)
     r = evaluate('./', '')
-    print('还原关键词后结果为:\n'+r)
-    logdelete(word, path,flag)
+    print('还原关键词后结果为:\n' + r)
+    logdelete(word, path, flag)
     r = evaluate('./', '')
-    print('删除关键词后结果为:\n'+r+'\n')
+    print('删除关键词后结果为:\n' + r + '\n')
 
 def test3():
     r = evaluate('./', '')
-    print('无优化内容时结果为:\n'+r)
+    print('无优化内容时结果为:\n' + r)
     change('./data/profiling/op_summary_0_1_1.csv_test.csv', './data/profiling/summtest.csv')
     change('./data/profiling/op_statistic_0_1_1_test2.csv', './data/profiling/teststat.csv')
     r = evaluate('./', '')
-    print('需优化时结果为:\n'+r+'\n')
+    print('需优化时结果为:\n' + r + '\n')
     change('./data/profiling/op_summary_0_1_1.csv_test.csv', './data/profiling/summtest.csv')
     change('./data/profiling/op_statistic_0_1_1_test2.csv', './data/profiling/teststat.csv')

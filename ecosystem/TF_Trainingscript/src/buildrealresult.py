@@ -30,8 +30,8 @@ class Result:
         res = {"classType": self.class_type, "errorCode": self.error_code,
                "summary": self.summary, "extendResult": extend_data}
         outputstr = json.dumps(res)
-        # 将一个Python数据结构转换为JSON
         return outputstr
+
 class_type = {'op': '0', 'model': '1'}
 error_code = {'success': '0', 'optimized': '1'}
 extend_type = {'list': '0', 'table': '1', 'sourcedata': '2'}
@@ -66,7 +66,7 @@ def build_locationresult(landr, rword, path, result):
         statis_identi_extend.data_types = [extend_data_type['str'], extend_data_type['str']]
         statis_identi_extend.key = ['location', 'recommendation']
         for i in landr[0]:
-            statis_identi_extend.value.append(['In line: ' + str(i[0]) +' '+str(i[1]), landr[1]])
+            statis_identi_extend.value.append(['In line: ' + str(i[0]) + ' ' + str(i[1]), landr[1]])
         result.extend_result.append(statis_identi_extend)
 
 def build_protableresult(kandr, rword, headlist, result):

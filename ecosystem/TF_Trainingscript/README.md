@@ -1,15 +1,5 @@
 # msadvisor
 
-##  **【验证】** 
-
-性能测试所用模型：
-
-[CNN-MC_ID0287_for_TensorFlow](https://gitee.com/ascend/ModelZoo-TensorFlow/tree/master/TensorFlow/built-in/nlp/CNN-MC_ID0287_for_TensorFlow)
-
-系统输出测试：
-
-msadvisor_Trainingscript/src/test下执行：`python3 test.py`
-
 ##  **【简述】**  
 
 TF训练脚本优化：识别TF训练脚本常见问题场景，总结问题pattern，形成训练脚本问题识别-修改自闭环知识库。

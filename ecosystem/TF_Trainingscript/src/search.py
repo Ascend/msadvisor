@@ -19,7 +19,7 @@ def concrete_research(data, keyword, rword):
     for item in datalines:
         searchresult = re.search(keyword, item)
         if searchresult != None:
-            linelist.append((datalines.index(item)+1, searchresult))
+            linelist.append((datalines.index(item) + 1, searchresult))
     if len(linelist) != 0:
         return (linelist, get_r(rword))
     else:

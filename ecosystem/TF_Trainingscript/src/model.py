@@ -5,10 +5,9 @@ Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 """
 
 import re
-from getnewdata import processed_data, joindata
+from getnewdata import processed_data
 import buildrealresult
 from advisor import Advisor
-import find_comparison
 from work.script import script
 from work.graph import graph
 from work.log import log
@@ -18,8 +17,11 @@ from work.profiling import profiling
 def evaluate(data_path, parameter = {'script': '', 'profiling': '', 'graph': '', 'plog': ''}):
     """构造result初始值为需要优化"""
     result = buildrealresult.Result()
-    result.class_type = buildrealresult.class_type['model']
-    result.error_code = buildrealresult.error_code['success']
+    try:
+        result.class_type = buildrealresult.class_type['model']
+        result.error_code = buildrealresult.error_code['success']
+    except KeyError:
+        print("key not in dict!")
     result.summary = "Training scripts need to be optimized"
     # ---------------------------------------------getdata-----------------------------------------------------
     scriptdata = processed_data('script', data_path, parameter)
@@ -42,8 +44,11 @@ def evaluate(data_path, parameter = {'script': '', 'profiling': '', 'graph': '',
     # list type result
     if result.extend_result == []:
         result = buildrealresult.Result()
-        result.class_type = buildrealresult.class_type['model']
-        result.error_code = buildrealresult.error_code['optimized']
+        try:
+            result.class_type = buildrealresult.class_type['model']
+            result.error_code = buildrealresult.error_code['optimized']
+        except KeyError:
+            print("key not in dict!")
         result.summary = "Training scripts are well optimized"
     return result.generate()
 
