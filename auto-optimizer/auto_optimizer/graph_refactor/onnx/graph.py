@@ -207,3 +207,32 @@ class OnnxGraph(BaseGraph):
             converted_model = version_converter.convert_version(model, opset)
             self.graph = OnnxGraph.parse(converted_model)
             self._meta['opset_imports'] = [opset_imports]
+
+    def _run(self, model, datas):
+        import onnxruntime as rt
+        if isinstance(datas, np.ndarray):
+            data = [datas]
+        sess = rt.InferenceSession(model)
+        inputs = [node.name for node in sess.get_inputs()]
+        outputs = [out.name for out in sess.get_outputs()]
+        return sess.run(outputs, {name: data for name, data in zip(inputs, data)})
+
+    def dump(self, data, path = 'dump', outputs = []):
+        try:
+            from skl2onnx.helpers.onnx_helper import (select_model_inputs_outputs, enumerate_model_node_outputs)
+        except ImportError:
+            raise RuntimeError('import sk2onnx failed, please install first.')
+        ori_model = self.model()
+        if len(outputs) == 0:
+            outputs = [name for name in enumerate_model_node_outputs(ori_model)]
+        new_model = select_model_inputs_outputs(ori_model, outputs)
+        new_model_byte = new_model.SerializeToString()
+        arrs = self._run(new_model_byte, data)
+        if not os.path.exists(path):
+            os.makedirs(path, mode = 0o700)
+        idx = 0
+        for node in ori_model.graph.node:
+            for i, output in enumerate(node.output):
+                fname = f'{node.name}_{i}.npy'
+                np.save(os.path.join(path, fname), arrs[idx])
+                idx += 1
