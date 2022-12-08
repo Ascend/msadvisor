@@ -8,3 +8,4 @@ from .knowledge_split_large_kernel import KnowledgeSplitLargeKernelConv
 from .knowledge_resize_mode_to_nearest import KnowledgeResizeModeToNearest
 from .knowledge_topk_fix import KnowledgeTopkFix
 from .knowledge_merge_casts import KnowledgeMergeCasts
+from .knowledge_gather_to_split import KnowledgeGatherToSplit
