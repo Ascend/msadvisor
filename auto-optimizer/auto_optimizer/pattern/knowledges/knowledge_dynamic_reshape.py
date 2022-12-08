@@ -18,7 +18,7 @@ import numpy as np
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.pattern import Pattern, MATCH_PATTERN
 from auto_optimizer.pattern.matcher import MatchResult
-from auto_optimizer.graph_refactor.interface.base_graph import BaseGraphi, Initializer
+from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph, Initializer
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 from auto_optimizer.pattern.knowledges.utils import (insert_squeeze, insert_unsqueeze)

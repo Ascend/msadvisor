@@ -77,6 +77,8 @@ def check_file_permission(filepath):
     return True
 
 def find_one_model_file(path, suffix = '.onnx'):
+    if not os.path.exists(path):
+        return None
     files = os.listdir(path)
     for filename in files:
         if filename.endswith(suffix):
