@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+import logging
 import os
 import sys
 import json
@@ -9,7 +10,14 @@ from parse import parse
 
 
 def evaluate_helper(file_path):
-    root_node, lines = parse(file_path)
+    try:
+        root_node, lines = parse(file_path)
+    except SyntaxError as se:
+        print(f"[ERROR] There are syntax errors in file {file_path}",)
+        print(f"[ERROR] In line {se.lineno}: {se.text.strip()}")
+        print(f"[ERROR] Please check the syntax. This file was skipped.")
+        return
+
     op_type = get_op_type(root_node)
 
     # Build
@@ -39,8 +47,10 @@ def evaluate(data_path, parameters):
     from rules import Rule
     for root, dirs, files in os.walk(data_path):
         for file in files:
-            full_path = os.path.join(root, file)
-            evaluate_helper(full_path)
+            _, ext = os.path.splitext(file)
+            if ext == '.py':
+                full_path = os.path.join(root, file)
+                evaluate_helper(full_path)
     res = Rule.convert_results()
     return res.generate()
 
