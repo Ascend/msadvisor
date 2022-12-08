@@ -22,6 +22,7 @@ from auto_optimizer.graph_refactor.interface.base_graph import BaseGraphi, Initi
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 from auto_optimizer.pattern.knowledges.utils import (insert_squeeze, insert_unsqueeze)
+from auto_optimizer.common.utils import dump_op_outputs
 
 
 pattern = Pattern() \
@@ -69,7 +70,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
                 input_data.append(data)
                 np.save(os.path.join(real_dump_path, f'{x.name}.npy'), data)
             # inference
-            graph.dump(input_data, real_dump_path)
+            dump_op_outputs(graph, input_data, real_dump_path)
 
     def remove_dump_data(self):
         for j in range(self._dump_num):
