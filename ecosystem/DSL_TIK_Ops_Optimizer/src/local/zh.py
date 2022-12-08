@@ -3,7 +3,7 @@ class Advice:
     算子优化建议的文本
     """
     class AvoidLongRuntimeInterface:
-        message = '避免调用运行时间过程的接口'
+        message = '避免调用运行时间过长的接口'
         vrec2vdiv = f"<{message}> 可将取倒数计算改为除法计算"
         vexp2neg = f"<{message}> 可将分母中的指数运算中幂改为其相反数"
 

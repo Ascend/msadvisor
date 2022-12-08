@@ -23,8 +23,9 @@ class ExtendResult:
             extend_data_type['str'],  # Origin(Code)
             extend_data_type['str'],  # Advice
             extend_data_type['int'],  # AdviceNo
+            extend_data_type['str'],  # FileName
         ]
-        self.key = ['Line', 'Column', 'Origin', 'Advice', 'AdviceNo']
+        self.key = ['Line', 'Column', 'Origin', 'Advice', 'AdviceNo', 'FileName']
         self.value = value
 
 

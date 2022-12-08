@@ -10,7 +10,7 @@ from model import evaluate
 class TestFuncDef(unittest.TestCase):
     def setUp(self):
         dir_name = os.path.dirname(os.path.realpath(__file__))
-        self.data_path = dir_name + '/test_ops_file/3_BesselY1.py'
+        self.data_path = dir_name + '/test_ops_file/3_BesselY1'
         self.parameter = {'local': 'en'}
 
     @classmethod
@@ -22,6 +22,9 @@ class TestFuncDef(unittest.TestCase):
         res = json.loads(res)
         self.assertEqual(res['errorCode'], '0')
         self.assertEqual(res['classType'], '0')
+        advice_no_list = list(map(lambda x: list(map(lambda y: y[4], x['value'])), res['extendResult']))
+        advice_no_list_flat = [ele for row in advice_no_list for ele in row]
+        self.assertTrue(3 in advice_no_list_flat)
 
 
 if __name__ == '__main__':

@@ -11,6 +11,7 @@ class Rule:
     results = {}
     codes = []
     Advice = None
+    file_path = ''
 
     def __init__(self, debug='INFO', no=1, advice='避免调用运行时间过长的接口'):
         self.debug = debug
@@ -33,8 +34,9 @@ class Rule:
         return decorate
 
     @classmethod
-    def init_cls(cls, codes):
+    def init_cls(cls, file_path, codes):
         cls.codes = codes
+        cls.file_path = file_path
 
     def _info_(self, origin, new):
         # TODO: Python3.7不支持ast.unparse
@@ -74,14 +76,16 @@ class Rule:
             Rule.codes[origin.lineno-1].strip(),
             # utils.unparse(new) if isinstance(new, ast.AST) else new if new else self.advice,
             self.advice,
-            self.no
+            self.no,
+            Rule.file_path
         ]
-        res = {'title': self.advice, 'value': value}
-        if self.no in Rule.results:
-            res_dict = Rule.results[self.no]
+
+        if Rule.file_path in Rule.results:
+            res_dict = Rule.results[Rule.file_path]
             res_dict['value'].append(value)
         else:
-            Rule.results[self.no] = res
+            res = {'title': f'Advice for {Rule.file_path}', 'value': [value]}
+            Rule.results[Rule.file_path] = res
 
     def result(self, origin, new):
         if isinstance(origin, list) and isinstance(new, list):

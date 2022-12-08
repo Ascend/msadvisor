@@ -5,6 +5,6 @@ DEBUG设置算子调优结果返回形式:
     - RESULT   : 以ExtentResult返回
     - ALL      : 打印结果并以ExtendResult返回
 """
-DEBUG = 'ALL'
+DEBUG = 'RESULT'
 
 
