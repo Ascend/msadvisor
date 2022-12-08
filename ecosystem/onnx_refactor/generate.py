@@ -36,6 +36,7 @@ def remove_if_existed(path):
 def generate_ecosystem_json():
     model_list = []
     knowledge_pool = KnowledgeFactory.get_knowledge_pool()
+    need_extract_knowledge = ['KnowledgeDynamicReshape']
     for knowledge in knowledge_pool:
         adapter_name = knowledge
         knowledge_conf = {'model_name': adapter_name, 'session_list': []}
@@ -43,7 +44,8 @@ def generate_ecosystem_json():
             'python_model_path': '',
             'parameter': {
                 'mode': 'optimize',
-                'model_file': ''
+                'model_file': '',
+                'extract': 1 if knowledge in need_extract_knowledge else 0
             }
         }]
         model_list.append(knowledge_conf)

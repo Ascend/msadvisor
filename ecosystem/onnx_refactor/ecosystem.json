@@ -103,7 +103,8 @@
                     "python_model_path": "",
                     "parameter": {
                         "mode": "optimize",
-                        "model_file": ""
+                        "model_file": "",
+                        "extract": 1
                     }
                 }
             ]
