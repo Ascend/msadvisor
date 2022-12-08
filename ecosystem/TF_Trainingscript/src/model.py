@@ -12,9 +12,12 @@ from work.script import script
 from work.graph import graph
 from work.log import log
 from work.profiling import profiling
-
+import sys
 
 def evaluate(data_path, parameter = {'script': '', 'profiling': '', 'graph': '', 'plog': ''}):
+    if isinstance(parameter,dict) != True:
+        print("parameter应为dict格式的数据路径")
+        sys.exit()
     """构造result初始值为需要优化"""
     result = buildrealresult.Result()
     try:
@@ -53,6 +56,6 @@ def evaluate(data_path, parameter = {'script': '', 'profiling': '', 'graph': '',
     return result.generate()
 
 if __name__ == "__main__":
-    data_path = "../"
+    data_path = "../data/"
     ret = evaluate(data_path)
     print(ret)

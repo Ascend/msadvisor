@@ -7,7 +7,7 @@ import os
 from tool.python import remove_comments
 import pandas as pd
 
-path_type = {'script': 'data/script', 'profiling': 'data/profiling', 'graph': 'data/graph', 'plog': 'data/log'}
+path_type = {'script': 'script', 'profiling': 'profiling', 'graph': 'graph', 'plog': 'log'}
 
 class Data:
     def __init__(self, tpath, this_path, parameter):
