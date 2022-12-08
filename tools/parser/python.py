@@ -30,7 +30,7 @@ def remove_comments(text):
     """
     # Replace parse value with empty string ''
     remove_inline_p = parsecmap(inline_comment_p, const(''))
-    remove_block_p  = parsecmap(block_comment_p, const(''))
+    remove_block_p  = parsecmap(block_comment_p, lambda s: '\n' * s.count('\n'))
     parser = many(remove_block_p ^ literal_p | code_p | remove_inline_p)
     try:
         return ''.join(parser.parse(text))

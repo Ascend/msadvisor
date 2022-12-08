@@ -15,7 +15,7 @@
 from abc import ABC, abstractmethod
 from collections import deque
 from itertools import chain
-from typing import Deque, List, Dict, Literal, Sequence, Set, Tuple, Union, Optional, Type, TypeVar
+from typing import Deque, List, Dict, Sequence, Set, Tuple, Union, Optional, Type, TypeVar
 
 import numpy as np
 
@@ -161,14 +161,14 @@ class BaseGraph(ABC):
         refer_name: str,
         insert_node: Node,
         refer_index: int = 0,
-        mode: Literal['after', 'before'] = 'after'
+        mode: str = 'after'
     ) -> None:
         """Insert a node with single input and output
 
         Args:
             refer_name: reference node
             insert_node: the node to be inserted
-            refer_index: specifies the inserting position within reference node's output id when mode='after'; 
+            refer_index: specifies the inserting position within reference node's output id when mode='after';
                          specifies the inserting position within reference node's input id when mode='before';
                          Default 0.
             mode: insert the node before or after the reference node. Default 'after'.
