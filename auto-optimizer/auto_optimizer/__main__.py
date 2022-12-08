@@ -13,38 +13,117 @@
 # limitations under the License.
 
 import sys
-import argparse
+import pathlib
+from typing import List
 
-from .graph_optimizer.optimizer import GraphOptimizer
-from .graph_refactor.onnx.graph import OnnxGraph
+import click
+from click_aliases import ClickAliasedGroup
+from auto_optimizer.graph_optimizer.optimizer import GraphOptimizer
+
+from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
+from auto_optimizer.pattern import KnowledgeFactory
+from .options import (
+    arg_path, arg_input, arg_output, opt_optimizer, opt_recursive, opt_verbose
+)
 
 
-def _opt_parser(opt_parser):
-    opt_parser.add_argument('input_model', help='Input model path')
-    opt_parser.add_argument('output_model', help='Output model path')
-    opt_parser.add_argument('-k', '--knowledge', type=str,
-                            metavar='knowledge_names', nargs='+', help='name of knwoledges')
+def optimize_onnx(
+    optimizer: GraphOptimizer,
+    input_model: pathlib.Path,
+    output_model: pathlib.Path,
+) -> bool:
+    '''Optimize a onnx file and save as a new file.'''
+    try:
+        graph = OnnxGraph.parse(input_model.as_posix(), add_name_suffix=True)
+        applied_knowledges = optimizer.apply_knowledges(graph)
+        if applied_knowledges:
+            if not output_model.parent.exists():
+                output_model.parent.mkdir(parents=True)
+            graph.save(output_model.as_posix())
+            return True
+        return False
+    except RuntimeError as e:
+        print(f'{input_model} optimize failed.', file=sys.stderr)
+        print(f'{e}', file=sys.stderr)
+        return False
 
 
-def main():
-    parser = argparse.ArgumentParser(description='AutoOptimizer')
+def evaluate_onnx(
+    optimizer: GraphOptimizer,
+    verbose: bool,
+    model: pathlib.Path
+) -> List[str]:
+    '''Search knowledge pattern in a onnx model.'''
+    try:
+        if verbose:
+            print(f'Evaluating {model.as_posix()}')
+        graph = OnnxGraph.parse(model.as_posix(), add_name_suffix=True)
+        return optimizer.evaluate_knowledges(graph)
+    except RuntimeError as e:
+        print(f'{model} match failed.', file=sys.stderr)
+        print(f'{e}', file=sys.stderr)
+        return []
 
-    subparsers = parser.add_subparsers(help='commands')
-    opt_parser = subparsers.add_parser('opt', help='optimize graph')
 
-    _opt_parser(opt_parser)
+@click.group(cls=ClickAliasedGroup)
+def cli() -> None:
+    '''main entrance of auto optimizer.'''
+    pass
 
-    args = parser.parse_args()
 
-    cmd = sys.argv[1]
-    if cmd == 'opt':
-        knwoledges = args.knowledge
-        if knwoledges:
-            graph_opt = GraphOptimizer(knwoledges)
-            graph = OnnxGraph.parse(args.input_model)
-            graph_opt.apply_knowledges(graph)
-            graph.save(args.output_model)
+@cli.command('list', short_help='List available Knowledges.')
+def command_list() -> None:
+    registered_knowledges = KnowledgeFactory.get_knowledge_pool()
+    print('Available knowledges:')
+    for idx, name in enumerate(registered_knowledges):
+        print(f'  {idx:2d} {name}')
+
+
+@cli.command(
+    'evaluate',
+    aliases=['eva'],
+    short_help='Evaluate model matching specified knowledges.'
+)
+@arg_path
+@opt_optimizer
+@opt_recursive
+@opt_verbose
+def command_evaluate(
+    path: pathlib.Path,
+    optimizer: GraphOptimizer,
+    recursive: bool,
+    verbose: bool
+) -> None:
+    onnx_files = list(path.rglob('*.onnx') if recursive else path.glob('*.onnx')) \
+        if path.is_dir() else [path]
+    for onnx_file in onnx_files:
+        knowledges = evaluate_onnx(optimizer=optimizer, model=onnx_file, verbose=verbose)
+        summary = ','.join(knowledges)
+        print(f'{onnx_file}\t{summary}')
+
+
+@cli.command(
+    'optimize',
+    aliases=['opt'],
+    short_help='Optimize model with specified knowledges.'
+)
+@arg_input
+@arg_output
+@opt_optimizer
+def command_optimize(
+    input_model: pathlib.Path,
+    output_model: pathlib.Path,
+    optimizer: GraphOptimizer,
+) -> None:
+    if input_model == output_model:
+        print('WARNING: output_model is input_model, refuse to overwrite origin model!')
+        return
+    if optimize_onnx(optimizer, input_model, output_model):
+        print('optimization success')
+        print(f'{input_model} -> {output_model}')
+    else:
+        print('optimization failed.')
 
 
 if __name__ == "__main__":
-    main()
+    cli()
