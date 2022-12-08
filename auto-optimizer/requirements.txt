@@ -6,4 +6,4 @@ pillow >= 9.0.0
 onnxruntime >= 1.10.0
 setuptools >= 63.2.0
 tqdm >= 4.64.0
-pyacl @ git+https://gitee.com/peng-ao/pyacl.git
+skl2onnx >= 1.13

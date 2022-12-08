@@ -40,7 +40,7 @@ pattern = Pattern() \
     .add_node('Reshape', ['Reshape'], [ReshapeMatch()]) \
     .set_input('Reshape') \
     .set_output('Reshape') \
-    .set_node_loop(MATCH_PATTERN.MATCH_ONCE)
+    .set_node_loop('Reshape', MATCH_PATTERN.MATCH_ONCE)
 
 @KnowledgeFactory.register()
 class KnowledgeDynamicReshape(KnowledgeBase):
@@ -52,9 +52,8 @@ class KnowledgeDynamicReshape(KnowledgeBase):
 
     def get_model_dynamic_axes(self, graph: BaseGraph) -> bool:
         dynamic_axes = set()
-        dynamic_axes.add([shape for shape in input.shape for input in graph.inputs])
-        for input in graph.inputs:
-            for shape in input.shape:
+        for x in graph.inputs:
+            for shape in x.shape:
                 if not type(shape) == int:
                     dynamic_axes.add(shape)
         return dynamic_axes
@@ -64,7 +63,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
         if input_dtype in ['int32', 'int64']:
             data = np.random.randint(1, 10, static_shape, dtype = input_dtype)
         elif input_dtype in ['float16', 'float32', 'float64']:
-            data = np.random.rand(*input_shape).astype(input_dtype)
+            data = np.random.rand(*static_shape).astype(input_dtype)
         else:
             raise RuntimeError('data type: {} not supported.'.format(input_dtype))
         return data
@@ -72,28 +71,34 @@ class KnowledgeDynamicReshape(KnowledgeBase):
     def generate_dump_data(self, graph: BaseGraph, dump_num, dynamic_axes, dump_path = 'dump'):
         for j in range(dump_num):
             real_dump_path = f'{dump_path}{j}'
-            if os.path.exists(real_dump_path):
+            if not os.path.exists(real_dump_path):
                 os.makedirs(real_dump_path, 0o700)
-            dynamic_input = []
+            dynamic_input = {}
             for i, axis in enumerate(dynamic_axes):
                 dynamic_input[axis] = (j + i + 1) * (j + i + 2)
             input_data = []
-            for input in graph.inputs:
-                data = self.generate_inputs(dynamic_input, input.shape, input.dtype)
+            for x in graph.inputs:
+                data = self.generate_inputs(dynamic_input, x.shape, x.dtype)
                 input_data.append(data)
-                np.save(os.path.join(real_dump_path, f'{input.name}.npy'), data)
+                np.save(os.path.join(real_dump_path, f'{x.name}.npy'), data)
             # run model inference
             graph.dump(input_data, real_dump_path)
 
     def remove_dump_data(self, dump_num, dump_path = 'dump'):
         for j in range(dump_num):
             real_dump_path = f'{dump_path}{j}'
-            if os.path.exists(real_dump_path):
-                os.removedirs(real_dump_path)
+            for root, dirs, files in os.walk(real_dump_path, topdown = False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+            os.rmdir(real_dump_path)
 
     def get_node_inout_shapes_from_dump_data(self, graph: BaseGraph, reshape: Node, dump_num, dump_path = 'dump'):
         # check reshape type
         prev_node = graph.get_prev_node(reshape.inputs[0])
+        if prev_node is None:
+            prev_node = graph.get(reshape.inputs[0] # model input, prev node type is 'PlaceHolder'
         # get reshape input and output shapes from all dump data
         in_shapes, out_shapes = [], []
         for i in range(dump_num):
@@ -105,7 +110,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
             else:
                 raise RuntimeError('Reshape prev node is Constant type.')
             reshape_input = np.load(os.path.join(real_dump_path, dump_file))
-            reshape_output = np.load(os.path.join(real_dump_path, f'{reshape.inputs[0]}_0.npy'))
+            reshape_output = np.load(os.path.join(real_dump_path, f'{reshape.name}_0.npy'))
             in_shapes.append(reshape_input.shape)
             out_shapes.append(reshape_output.shape)
         return np.array(in_shapes), np.array(out_shapes)
@@ -174,7 +179,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
         return optimize_result
 
     def optimize_apply(self, graph: BaseGraph, match_result: MatchResult):
-        if match_result.is_empty():
+        if match_result is None or match_result.is_empty():
             return False
         # check model is dynamic and get dynamic input name
         dynamic_axes = self.get_model_dynamic_axes(graph)
@@ -187,7 +192,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
         self.generate_dump_data(graph, dump_num, dynamic_axes)
 
         # optimize Reshape operator
-        optimize_result = self.optimize_reshape(graph)
+        optimize_result = self.optimize_reshape(graph, dump_num)
 
         # release temp resource
         self.remove_dump_data(dump_num)

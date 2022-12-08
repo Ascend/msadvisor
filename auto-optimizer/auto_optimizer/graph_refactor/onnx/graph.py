@@ -211,11 +211,11 @@ class OnnxGraph(BaseGraph):
     def _run(self, model, datas):
         import onnxruntime as rt
         if isinstance(datas, np.ndarray):
-            data = [datas]
+            datas = [datas]
         sess = rt.InferenceSession(model)
         inputs = [node.name for node in sess.get_inputs()]
         outputs = [out.name for out in sess.get_outputs()]
-        return sess.run(outputs, {name: data for name, data in zip(inputs, data)})
+        return sess.run(outputs, {name: data for name, data in zip(inputs, datas)})
 
     def dump(self, data, path = 'dump', outputs = []):
         try:
