@@ -1,4 +1,16 @@
-
+# Copyright 2022 Huawei Technologies Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 class Constant:
     """
@@ -27,7 +39,6 @@ class Constant:
     # HcclAnalysisTool hyperparameter
     RDMA_TRANSIT_OP_NUM = 5
     WAIT_TIME_THRESHOLD = 0.2
-    # ANALYSIS_STEP_NUM = 1
     DEFAULT_STEP_NUM = 1
     LINK_BANDWIDTH = {"HCCS": 18, "PCIE": 20, "RDMA": 12.5}
     MESSAGE_SIZE_THRESHOLD = {"HCCS": 32, "PCIE": 32, "RDMA": 0.5}   # size:MB HCCS、PCIE阈值可能需要调小一点
@@ -83,7 +94,7 @@ class Constant:
 
     # matrix type
     BANDWIDTH_UTILIZATION = "bandwidth_utilization"
-    # return value
+    # hccl analysis model value of return
     HCCL_ANALYSIS_ERROR = -1
     HCCL_ANALYSIS_OK = 1
     DATA_PARSE_OK = 1

@@ -1,14 +1,27 @@
+# Copyright 2022 Huawei Technologies Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import glob
 import json
 import os
 import numpy as np
-import time
 
-from utils.constant import Constant
-from utils.profiling_data_check import iter_trace_file_check, step_trace_file_check
-from utils.result import Result
-from utils.generate_html import generate_body
-from utils.log import AD_INFO, AD_ERROR, AD_WARN, ad_log, ad_print_and_log
+from ..utils.constant import Constant
+from ..utils.profiling_data_check import iter_trace_file_check, step_trace_file_check
+from ..utils.result import Result
+from ..utils.generate_html import generate_body
+from ..utils.log import AD_INFO, AD_ERROR, AD_WARN, ad_log, ad_print_and_log
 from .op_bandwidth_analysis_ import op_bandwidth_analysis
 from .op_communication_time_analysis import op_communication_time_analysis, get_op_communication_time_analysis_result
 from .hccl_analysis_utils import get_communication_op_name_mapping, get_step_trace_info, parse_data, \
@@ -41,8 +54,9 @@ class HcclAnalysisTool:
             hccl_op_name = self.op_name_mapping.get(analysis_op_name)
         else:
             hccl_op_name = analysis_op_name
-            self.rank_id_list = set([int(entry.name.split("_")[-1]) for entry in os.scandir(self.hccl_profile_dir)
-                                     if entry.is_dir() and Constant.HCCL_DIR_FORMAT in entry.name])
+            self.rank_id_list = \
+                set([int(entry.name.split("_")[-1]) for entry in os.scandir(self.hccl_profile_dir) if entry.is_dir() and
+                     Constant.HCCL_DIR_FORMAT in entry.name])
         if not hccl_op_name:
             ad_print_and_log(AD_ERROR, f"There is not hccl info for communicaiton operator {analysis_op_name}")
             return Constant.HCCL_ANALYSIS_ERROR
@@ -66,7 +80,7 @@ class HcclAnalysisTool:
             ad_print_and_log(AD_ERROR, f"There is not step_num like {step_num}, please check")
             return Constant.HCCL_ANALYSIS_ERROR
         iteration_num = self.op_performance_analysis(op_info, html_info, analysis_op_name, iteration_num)
-        if iteration_num is None:
+        if iteration_num == Constant.DATA_PARSE_ERROR:
             return Constant.HCCL_ANALYSIS_ERROR
         visual_save_path = os.path.realpath(self.hccl_profile_dir)
         visual_save_path = os.path.join(visual_save_path, "recommendation", "visualization", f"{analysis_op_name}")
@@ -134,8 +148,8 @@ class HcclAnalysisTool:
         return Constant.DATA_PARSE_OK
 
     def op_performance_analysis(self, op_info, html_info, analysis_op_name, iteration_num=None):
-        self.result.class_type = Constant.CLASS_TYPE[Constant.MODEL]
-        self.result.error_code = Constant.ERROR_CODE[Constant.SUCCESS]
+        self.result.class_type = Constant.CLASS_TYPE.get(Constant.MODEL)
+        self.result.error_code = Constant.ERROR_CODE.get(Constant.SUCCESS)
         self.result.summary = "Communication operator bottleneck analysis result as follows, " \
                               "See hccl_analysis_result.html for details"
 
@@ -145,9 +159,8 @@ class HcclAnalysisTool:
             iteration_num = min(iter_list)
 
         iteration_num, op_time_analysis_result = op_communication_time_analysis(sorted_op_info, iteration_num)
-        if iteration_num is None:
-            return None
-
+        if iteration_num == Constant.DATA_PARSE_ERROR:
+            return iteration_num
         op_hccl_analysis_extent_result, op_time_analysis_html_result = \
             get_op_communication_time_analysis_result(op_time_analysis_result, analysis_op_name)
         bottleneck_rank_transit_size, op_bandwidth_detail_extent_result, op_bandwidth_analysis_extent_result = \
@@ -157,8 +170,8 @@ class HcclAnalysisTool:
 
         html_info['time_analysis_result'] = op_time_analysis_html_result
         html_info['bandwidth_analysis_result'] = op_bandwidth_analysis_extent_result.value
-        html_info['bandwidth_details'] = op_bandwidth_detail_extent_result.value
-        html_info['detail_table_name'] = op_bandwidth_detail_extent_result.extend_title
+        html_info['bandwidth_details'] = op_bandwidth_detail_extent_result.get('value')
+        html_info['detail_table_name'] = op_bandwidth_detail_extent_result.get('extend_title')
 
         self.result.extend_result.append(op_hccl_analysis_extent_result)
         # op_time_analysis_result bottleneck_rank_transit_size 可能出问题 需要检查
@@ -172,8 +185,8 @@ class HcclAnalysisTool:
         try:
             with open(file_path, "r") as src_file:
                 hccl_trace = json.load(src_file)
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
-            ad_print_and_log(AD_ERROR, f"Failed to load {os.path.basename(file_path)} from {file_path}")
+        except Exception as e:
+            ad_print_and_log(AD_ERROR, f"Failed to load {os.path.basename(file_path)} from {file_path}, error: {e}")
             return Constant.HCCL_ANALYSIS_ERROR
         if not iter_trace_file_check(hccl_trace):
             ad_print_and_log(AD_ERROR, f"The {file_path} is invalid, please check. ")
@@ -197,8 +210,8 @@ class HcclAnalysisTool:
         op_transit_size_record, op_transit_time_record = dict(), dict()
         elapse_time, transit_time, wait_time, sdma_time, rdma_time, wait_time_before_transit = 0, 0, 0, 0, 0, 0
         wait_flag = True
-        for idx in range(len(main_stream_events)):
-            event = main_stream_events[idx]
+        for idx, event in enumerate(main_stream_events):
+            # event = main_stream_events[idx]
             elapse_time += parse_data(event.get(Constant.DUR)) / Constant.US_TO_MS
             event_args = event.get(Constant.ARGS)
             transport_type, task_type = event_args.get(Constant.TRANSPORT_TYPE), event_args.get(Constant.TASK_TYPE)

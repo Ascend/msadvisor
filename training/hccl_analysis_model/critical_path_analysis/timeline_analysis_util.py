@@ -1,22 +1,39 @@
+# Copyright 2022 Huawei Technologies Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import glob
 import json
 import os
 
-from utils.constant import Constant
-from utils.log import ad_log, ad_print_and_log, AD_INFO, AD_ERROR
+from ..utils.constant import Constant
+from ..utils.log import ad_log, ad_print_and_log, AD_INFO, AD_ERROR
+
+
 TIMELINE_TASK_TYPE_PID = {
     Constant.AICORE: '0',
     Constant.AICPU: 9000,
     Constant.HOSTCPU: 11000,
     Constant.COMMUNICATION: 10000
 }
-# TASK_TYPE = ["AICORE", "AICPU", "Host CPU", "Communication"]
+
 SPECIFIC_ITEM_PID_TID = {"step": {'pid': 0, 'tid': 100000},
                          "scope name": {'pid': 0, 'tid': 100001},
                          "merged computation op": {'pid': 12000, 'tid': 7999},
                          "pure communication op": {'pid': 12000, 'tid': 8000},
                          "merged communication op": {'pid': 12000, 'tid': 8001},
                          "free time": {'pid': 12000, 'tid': 8002}}
+DEFAULT_STEP_NUM = 2
 
 
 def get_timeline_info(timeline_file):
@@ -101,7 +118,7 @@ def get_critical_timeline(profiling_dir, step_num):
     """get critical timeline which takes the longest e2e time in specified or second step"""
     timeline_format = "ascend_timeline_display_*.json"
     if step_num is None:
-        step_num = 2
+        step_num = DEFAULT_STEP_NUM
     ascend_timeline_files = glob.glob(os.path.join(profiling_dir, timeline_format))
     if len(ascend_timeline_files) == 0:
         ad_print_and_log(AD_ERROR, f"There is not {timeline_format} file in "

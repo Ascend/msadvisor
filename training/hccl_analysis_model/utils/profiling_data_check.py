@@ -1,3 +1,17 @@
+# Copyright 2022 Huawei Technologies Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 import csv
 from .constant import Constant
@@ -21,8 +35,8 @@ def trace_events_check(trace_events):
         valid_trace_event_flag = \
             check_data_type(event, Constant.TID, int) and \
             check_data_type(event, Constant.PID, str, is_digit=True) and \
-            check_data_type(event, Constant.TS, float) and \
-            check_data_type(event, Constant.DUR, float) and \
+            check_data_type(event, Constant.TS, float) and event.get(Constant.TS) > 0 and \
+            check_data_type(event, Constant.DUR, float) and event.get(Constant.TS) > 0 and\
             check_data_type(event, Constant.PH, str) and \
             check_data_type(event, Constant.NAME, str) and \
             check_data_type(event, Constant.ARGS, dict)

@@ -1,6 +1,19 @@
+# Copyright 2022 Huawei Technologies Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-from utils.result import ExtendResult
-from utils.constant import Constant
+from ..utils.result import ExtendResult
+from ..utils.constant import Constant
 
 
 def op_bandwidth_analysis(op_bandwidth_info, iteration_num, analysis_op_name):
@@ -48,45 +61,36 @@ def op_bandwidth_analysis(op_bandwidth_info, iteration_num, analysis_op_name):
         rdma_transit_size > 0 and rdma_utilization < Constant.BANDWIDTH_THRESHOLD and \
         op_message_size_analysis(transit_size_info, Constant.RDMA)
 
-    sdma_info = [sdma_transit_size, sdma_total_transit_time, sdma_bandwidth]
-    hccs_info = [hccs_transit_size, transit_time_info.get(Constant.HCCS, 0), hccs_bandwidth, hccs_utilization,
-                 hccs_large_packet_flag]
-    pcie_info = [pcie_transit_size, transit_time_info.get(Constant.PCIE, 0), pcie_bandwidth, pcie_utilization,
-                 pcie_large_packet_flag]
-    rdma_info = [rdma_transit_size, transit_time_info.get(Constant.RDMA, 0), rdma_bandwidth, rdma_utilization,
-                 rdma_large_packet_flag]
+    band_info = {
+        Constant.SDMA: [sdma_transit_size, sdma_total_transit_time, sdma_bandwidth],
+        Constant.HCCS: [hccs_transit_size, transit_time_info.get(Constant.HCCS, 0),
+                        hccs_bandwidth, hccs_utilization, hccs_large_packet_flag],
+        Constant.PCIE: [pcie_transit_size, transit_time_info.get(Constant.PCIE, 0),
+                        pcie_bandwidth, pcie_utilization, pcie_large_packet_flag],
+        Constant.RDMA: [rdma_transit_size, transit_time_info.get(Constant.RDMA, 0),
+                        rdma_bandwidth, rdma_utilization, rdma_large_packet_flag]
+    }
     op_bandwidth_detail_extend_result = \
-        get_op_bandwidth_detail_result(min_bandwidth_rank, sdma_info, hccs_info, pcie_info, rdma_info, analysis_op_name)
+        get_op_bandwidth_detail_result(min_bandwidth_rank, band_info, analysis_op_name)
     op_bandwidth_analysis_extend_result = \
-        get_op_bandwidth_bottleneck_info(sdma_info, hccs_info, pcie_info, rdma_info, analysis_op_name)
+        get_op_bandwidth_bottleneck_info(band_info, analysis_op_name)
     return transit_size_info, op_bandwidth_detail_extend_result, op_bandwidth_analysis_extend_result
 
 
-def get_op_bandwidth_detail_result(rank_id, sdma_info, hccs_info, pcie_info, rdma_info, analysis_op_name):
-    op_bandwidth_detail_extend_result = ExtendResult()
-    op_bandwidth_detail_extend_result.type = Constant.EXTEND_TYPE[Constant.TABLE]
-    op_bandwidth_detail_extend_result.extend_title = \
-        f"Communication OP {analysis_op_name} Bandwidth Detail (rank: {rank_id})"
-    op_bandwidth_detail_extend_result.data_type.append(Constant.EXTEND_DATA_TYPE[Constant.STR])
-    op_bandwidth_detail_extend_result.data_type.append(Constant.EXTEND_DATA_TYPE[Constant.DOUBLE])
-    op_bandwidth_detail_extend_result.data_type.append(Constant.EXTEND_DATA_TYPE[Constant.DOUBLE])
-    op_bandwidth_detail_extend_result.data_type.append(Constant.EXTEND_DATA_TYPE[Constant.DOUBLE])
-    op_bandwidth_detail_extend_result.data_type.append(Constant.EXTEND_DATA_TYPE[Constant.STR])
+def get_op_bandwidth_detail_result(rank_id, band_info, analysis_op_name):
+    op_bandwidth_detail_extend_result = {
+        'value': [],
+        'extend_title': f"Communication OP {analysis_op_name} Bandwidth Detail (rank: {rank_id})"
+    }
 
-    op_bandwidth_detail_extend_result.key.append("Communication Link")
-    op_bandwidth_detail_extend_result.key.append("TransitSize(MB)")
-    op_bandwidth_detail_extend_result.key.append("TransitTime(ms)")
-    op_bandwidth_detail_extend_result.key.append("Bandwidth(GB/s)")
-    op_bandwidth_detail_extend_result.key.append("BandwidthUtilization")
-
-    sdma_value = get_communication_link_value(Constant.SDMA, sdma_info)
-    op_bandwidth_detail_extend_result.value.append(sdma_value)
-    hccs_value = get_communication_link_value(Constant.HCCS, hccs_info)
-    op_bandwidth_detail_extend_result.value.append(hccs_value)
-    pcie_value = get_communication_link_value(Constant.PCIE, pcie_info)
-    op_bandwidth_detail_extend_result.value.append(pcie_value)
-    rdma_value = get_communication_link_value(Constant.RDMA, rdma_info)
-    op_bandwidth_detail_extend_result.value.append(rdma_value)
+    sdma_value = get_communication_link_value(Constant.SDMA, band_info.get(Constant.SDMA))
+    op_bandwidth_detail_extend_result.get('value').append(sdma_value)
+    hccs_value = get_communication_link_value(Constant.HCCS, band_info.get(Constant.HCCS))
+    op_bandwidth_detail_extend_result.get('value').append(hccs_value)
+    pcie_value = get_communication_link_value(Constant.PCIE, band_info.get(Constant.PCIE))
+    op_bandwidth_detail_extend_result.get('value').append(pcie_value)
+    rdma_value = get_communication_link_value(Constant.RDMA, band_info.get(Constant.PCIE))
+    op_bandwidth_detail_extend_result.get('value').append(rdma_value)
     return op_bandwidth_detail_extend_result
 
 
@@ -105,23 +109,23 @@ def get_communication_link_value(transport_type, info):
     return value
 
 
-def get_op_bandwidth_bottleneck_info(sdma_info, hccs_info, pcie_info, rdma_info, analysis_op_name):
+def get_op_bandwidth_bottleneck_info(band_info, analysis_op_name):
     op_bandwidth_analysis_extend_result = ExtendResult()
     op_bandwidth_analysis_extend_result.type = Constant.EXTEND_TYPE[Constant.LIST]
     op_bandwidth_analysis_extend_result.data_type.append(Constant.EXTEND_DATA_TYPE[Constant.STR])
     op_bandwidth_analysis_extend_result.extend_title = \
         f"Communication operator {analysis_op_name} bandwidth analysis result:"
-    if sdma_info[0] > rdma_info[0]:
+    if band_info.get(Constant.SDMA)[0] > band_info.get(Constant.RDMA)[0]:
         op_bandwidth_analysis_extend_result.value.append("SDMA Communication is the Dominated Bottleneck")
     else:
         op_bandwidth_analysis_extend_result.value.append("RDMA Communication is the Dominated Bottleneck")
-    hccs_analysis_result = get_op_bandwidth_analysis_result(Constant.HCCS, hccs_info)
+    hccs_analysis_result = get_op_bandwidth_analysis_result(Constant.HCCS, band_info.get(Constant.HCCS))
     if hccs_analysis_result:
         op_bandwidth_analysis_extend_result.value.append(hccs_analysis_result)
-    pcie_analysis_result = get_op_bandwidth_analysis_result(Constant.PCIE, pcie_info)
+    pcie_analysis_result = get_op_bandwidth_analysis_result(Constant.PCIE, band_info.get(Constant.PCIE))
     if pcie_analysis_result:
         op_bandwidth_analysis_extend_result.value.append(pcie_analysis_result)
-    rdma_analysis_result = get_op_bandwidth_analysis_result(Constant.RDMA, rdma_info)
+    rdma_analysis_result = get_op_bandwidth_analysis_result(Constant.RDMA, band_info.get(Constant.RDMA))
     if rdma_analysis_result:
         op_bandwidth_analysis_extend_result.value.append(rdma_analysis_result)
     return op_bandwidth_analysis_extend_result
@@ -161,17 +165,17 @@ def op_message_size_analysis(message_size_info, message_type):
     message_size = message_size_info.get(message_type)
     packet_num = 0
     large_packet_num = 0
-    message_size_threshold = Constant.MESSAGE_SIZE_THRESHOLD[message_type]
+    message_size_threshold = Constant.MESSAGE_SIZE_THRESHOLD.get(message_type)
     for k, v in message_size.items():
         cur_message_size = k / 1024 / 1024
         if cur_message_size >= message_size_threshold:
             large_packet_num += v
         packet_num += v
-    large_packet_ratio = large_packet_num / packet_num
-    if large_packet_ratio >= Constant.LARGE_MESSAGE_RATE:
-        return True
+    if packet_num:
+        large_packet_ratio = large_packet_num / packet_num
     else:
-        return False
+        large_packet_ratio = 0
+    return large_packet_ratio >= Constant.LARGE_MESSAGE_RATE
 
 
 def get_transit_size_and_bandwidth(transit_size_info, transit_time_info, transport_type):

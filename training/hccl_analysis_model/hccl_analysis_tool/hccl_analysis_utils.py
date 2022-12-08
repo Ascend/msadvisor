@@ -1,7 +1,21 @@
+# Copyright 2022 Huawei Technologies Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import csv
 import os
 
-from utils.constant import Constant
+from ..utils.constant import Constant
 
 
 class HcclConfig:
@@ -97,10 +111,7 @@ def parse_data(input_data):
     """str to int"""
     if input_data is None:
         return 0
-    # if isinstance(input_data, str):
-    #     return int(input_data)
-    # else:
-    #     return input_data
+
     return int(input_data) if isinstance(input_data, str) else input_data
 
 
@@ -139,36 +150,7 @@ def get_step_trace_info(step_trace_file_path):
     with open(step_trace_file_path, "r") as src_file:
         csv_reader = csv.reader(src_file)
         communication_op_name = next(csv_reader)[9:]
-        step_timestamp_info = [[info[0], float(info[1]) / 100, float(info[2]) / 100] for info in csv_reader
-                               if info[0].isdigit()]
+        step_timestamp_info = [
+            [info[0], float(info[1]) / 100, float(info[2]) / 100] for info in csv_reader if info[0].isdigit()
+        ]
     return [communication_op_name, step_timestamp_info]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

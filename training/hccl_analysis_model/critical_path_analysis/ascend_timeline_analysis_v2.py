@@ -1,20 +1,25 @@
-"""
-timeline analysis tool
-"""
+# Copyright 2022 Huawei Technologies Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
-import json
 import time
 
-from utils.constant import Constant
-from utils.log import ad_log, ad_print_and_log, AD_INFO, AD_ERROR
+from ..utils.constant import Constant
+from ..utils.log import ad_log, ad_print_and_log, AD_INFO, AD_ERROR
 from .ascend_timeline_visualization import AscendTimeAnalysisVisualization
 from .critical_path_analysis import CriticalPathAnalysis
 from .timeline_analysis_util import get_critical_timeline, get_timeline_info
-
-
-DEFAULT_STEP_NUM = 2
-# COMPUTATION_TASK = ["AICORE", "AICPU", "HostCPU"]
-# COMMUNICATION_TASK = ["Communication"]
 
 
 class AscendTimelineAnalysis:
@@ -30,7 +35,6 @@ class AscendTimelineAnalysis:
                                                                            analysis_step["end_timestamp"],
                                                                            pid_tid_dict)
         categorized_step_event_list = self.get_event_category(step_event_list, task_type_dict)
-        # print("categorized_step_event_list", categorized_step_event_list)
         aicore_num = self.get_task_num(categorized_step_event_list, task_types.get(Constant.AICORE))
         communication_num = self.get_task_num(categorized_step_event_list, task_types.get(Constant.COMMUNICATION))
         aicpu_num = self.get_task_num(categorized_step_event_list, task_types.get(Constant.AICPU))
@@ -39,7 +43,6 @@ class AscendTimelineAnalysis:
                         f"{communication_num} communication op before critical path   analysis")
 
         critical_path_event = CriticalPathAnalysis.get_critical_path(categorized_step_event_list)
-        # 耗时久 可以看看
         event_execution_type_analysis_data = \
             self.event_execution_type_analysis(critical_path_event, categorized_step_event_list)
 
@@ -52,7 +55,6 @@ class AscendTimelineAnalysis:
             top_communication_op[f"top_{idx}"] = communication_op[Constant.NAME]
 
         if visualization:
-            # 存放可视化图片，和瓶颈分析放在一起，这里传入一个profiling data目录
             visual_save_path = os.path.join(save_path, "recommendation", "critical_path_analysis_visualization")
             if not os.path.exists(visual_save_path):
                 os.makedirs(visual_save_path)
