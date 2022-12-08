@@ -222,5 +222,5 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
             ide_out_path = os.path.join(datapath, '%s_optimize.onnx' % os.path.splitext(model_file)[0])
             shutil.copy(new_onnx_path, ide_out_path)
             result.summary = "The current model has already been optimized, \
-                the optimized model path is:%s" % ide_out_path
+the optimized model path is:%s" % ide_out_path
     return result.generate()

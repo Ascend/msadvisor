@@ -115,18 +115,17 @@ class KnowledgeDynamicReshape(KnowledgeBase):
 
         insert = { 'squeeze': [], 'unsqueeze': [] }
         in_dim = 0
-        dim = 0 # output dim
         for dim in range(len(shape)):
             if not shape[dim] is None:
                 continue
             # the dim is dynamic
-            tmp_dim = dim
+            tmp_dim = in_dim
             while in_dim < in_shapes.shape[1]:
                 if np.all(out_shapes[:, dim] == in_shapes[:, in_dim]):
                     break
                 in_dim += 1
             if in_dim == in_shapes.shape[1]:
-                dim = tmp_dim
+                in_dim = tmp_dim
                 continue
             if dim == in_dim:
                 # the dim has no change
@@ -140,6 +139,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
                 while dim < in_dim:
                     shape.insert(dim, 1)
                     insert['squeeze'].append(dim)
+                    dim += 1
             else:
                 #                 Unsqueeze                     Reshape(-1, 8, 0, 32)
                 # (8*bs, len, 32) ---------> (8*bs, 1, len, 32) ---------------------> (bs, 8, len, 32)
@@ -156,7 +156,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
     def optimize_reshape(self, graph: BaseGraph):
         optimize_result = False
         for reshape in graph.get_nodes('Reshape'):
-            if graph.get_node(reshape.inputs[1], Initializer) is not None:
+            if not graph.get_node(reshape.inputs[1], Initializer) is None:
                 continue
 
             # get 'Reshape' input and output shape
