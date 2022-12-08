@@ -14,7 +14,7 @@
 
 import sys
 import pathlib
-from typing import List
+from typing import List, Union
 
 import click
 from click_aliases import ClickAliasedGroup
@@ -89,15 +89,18 @@ def command_list() -> None:
 @opt_recursive
 @opt_verbose
 def command_evaluate(
-    path: pathlib.Path,
+    path: Union[pathlib.Path, bytes],
     optimizer: GraphOptimizer,
     recursive: bool,
     verbose: bool
 ) -> None:
-    onnx_files = list(path.rglob('*.onnx') if recursive else path.glob('*.onnx')) \
-        if path.is_dir() else [path]
+    path_ = pathlib.Path(path.decode()) if isinstance(path, bytes) else path
+    onnx_files = list(path_.rglob('*.onnx') if recursive else path_.glob('*.onnx')) \
+        if path_.is_dir() else [path_]
     for onnx_file in onnx_files:
         knowledges = evaluate_onnx(optimizer=optimizer, model=onnx_file, verbose=verbose)
+        if not knowledges:
+            continue
         summary = ','.join(knowledges)
         print(f'{onnx_file}\t{summary}')
 
@@ -111,16 +114,18 @@ def command_evaluate(
 @arg_output
 @opt_optimizer
 def command_optimize(
-    input_model: pathlib.Path,
-    output_model: pathlib.Path,
+    input_model: Union[pathlib.Path, bytes],
+    output_model: Union[pathlib.Path, bytes],
     optimizer: GraphOptimizer,
 ) -> None:
-    if input_model == output_model:
+    input_model_ = pathlib.Path(input_model.decode()) if isinstance(input_model, bytes) else input_model
+    output_model_ = pathlib.Path(output_model.decode()) if isinstance(output_model, bytes) else output_model
+    if input_model_ == output_model_:
         print('WARNING: output_model is input_model, refuse to overwrite origin model!')
         return
-    if optimize_onnx(optimizer, input_model, output_model):
+    if optimize_onnx(optimizer, input_model_, output_model_):
         print('optimization success')
-        print(f'{input_model} -> {output_model}')
+        print(f'{input_model_} -> {output_model_}')
     else:
         print('optimization failed.')
 
