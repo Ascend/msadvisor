@@ -34,7 +34,13 @@ def create_graph(name: str = 'test_graph'):
     node_3 = OnnxNode('Node_3', 'Sub', inputs=['1_out_0', 'ini_0', 'ini_0'], outputs=['3_out_0'], attrs={})
     node_4 = OnnxNode('Node_4', 'Add', inputs=['1_out_0', '2_out_0'], outputs=['4_out_0'], attrs={})
     node_5 = OnnxNode('Node_5', 'Mul', inputs=['3_out_0', '4_out_0', '2_out_1'], outputs=['output_0'], attrs={})
-    return OnnxGraph(name=name, nodes=[node_0, node_1, node_2, node_3, node_4, node_5], inputs=[input_0], outputs=[output_0], initializers=[ini_0])
+    return OnnxGraph(
+        name=name,
+        nodes=[node_0, node_1, node_2, node_3, node_4, node_5],
+        inputs=[input_0],
+        outputs=[output_0],
+        initializers=[ini_0]
+    )
 
 
 class TestGraphCrud(unittest.TestCase):
@@ -262,8 +268,13 @@ class TestGraphCrud(unittest.TestCase):
         node_2 = OnnxNode('Node_2', 'Add', inputs=['0_out_0', '0_out_1'], outputs=['2_out_0', '2_out_1'], attrs={})
         node_4 = OnnxNode('Node_4', 'Add', inputs=['1_out_0', '2_out_0'], outputs=['4_out_0'], attrs={})
         node_5 = OnnxNode('Node_5', 'Mul', inputs=['1_out_0', '4_out_0', '2_out_1'], outputs=['output_0'], attrs={})
-        target = OnnxGraph(name='test_graph_remove_duplicate_input', nodes=[node_0, node_1, node_2, node_4, node_5], inputs=[
-                           input_0], outputs=[output_0], initializers=[ini_0])
+        target = OnnxGraph(
+            name='test_graph_remove_duplicate_input',
+            nodes=[node_0, node_1, node_2, node_4, node_5],
+            inputs=[input_0],
+            outputs=[output_0],
+            initializers=[ini_0]
+        )
 
         self.graph.remove('Node_3')
         self.assertEqual(self.graph, target)

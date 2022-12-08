@@ -12,23 +12,51 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict, Union
+from copy import deepcopy
+from typing import Callable, Dict, List
 
-from ..common.register import Register
+from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
+from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
+from auto_optimizer import KnowledgeFactory
+from auto_optimizer.pattern.knowledges import *
 
 
 class GraphOptimizer:
-
-    def __init__(self, knowledges: List[str] = None):
-        knowledge_module = Register.import_module('auto_optimizer.pattern.knowledges')
-        self.knowledges = [getattr(knowledge_module, k) for k in knowledges]
+    def __init__(self, knowledges: List[str]) -> None:
+        registered_knowledges: Dict[str, KnowledgeBase] = KnowledgeFactory.get_knowledge_pool()
+        for idx, name in enumerate(registered_knowledges):
+            knowledges = [name if v == str(idx) else v for v in knowledges]
+        knowledges = list(dict.fromkeys(knowledges))
+        knowledge_dict = {
+            name: registered_knowledges.get(name, KnowledgeBase())
+            for name in knowledges
+            if name in registered_knowledges
+        }
+        if len(knowledge_dict) == 0:
+            raise ValueError('No valid knowledge provided.')
+        self.knowledges: Dict[str, KnowledgeBase] = knowledge_dict
 
     def load_config(self):
         pass
 
     @staticmethod
-    def optimize(graph, knowledge):
-        res = True
+    def evaluate(graph: BaseGraph, knowledge: KnowledgeBase) -> bool:
+        graph_copy = deepcopy(graph)
+        while knowledge.has_next_pattern():
+            knowledge.next_pattern()
+            match_results = knowledge.match_pattern(graph_copy)
+            if match_results is None or len(match_results) == 0:
+                continue
+            while knowledge.has_next_apply():
+                knowledge.next_apply()
+                for match_result in match_results:
+                    if knowledge.apply(graph_copy, match_result):
+                        return True
+        return False
+
+    @staticmethod
+    def optimize(graph: BaseGraph, knowledge: KnowledgeBase) -> bool:
+        res = False
         while knowledge.has_next_pattern():
             knowledge.next_pattern()
             match_results = knowledge.match_pattern(graph)
@@ -37,19 +65,31 @@ class GraphOptimizer:
             while knowledge.has_next_apply():
                 knowledge.next_apply()
                 for match_result in match_results:
-                    res &= knowledge.apply(graph, match_result)
+                    res |= knowledge.apply(graph, match_result)
         return res
 
-    def apply_knowledges(self, graph):
-        for knowledge in self.knowledges:
-            _knowledge = knowledge()
-            if not _knowledge.pre_process(graph):
+    def _apply_action(
+        self,
+        graph: BaseGraph,
+        action: Callable[[BaseGraph, KnowledgeBase], bool]
+    ) -> List[str]:
+        applied_knowledges = []
+        for name, knowledge in self.knowledges.items():
+            knowledge.reset()
+            if not knowledge.pre_process(graph):
                 continue
-            GraphOptimizer.optimize(graph, _knowledge)
-            _knowledge.post_process(graph)
+            if action(graph, knowledge):
+                applied_knowledges.append(name)
+            knowledge.post_process(graph)
+        return applied_knowledges
 
-        return graph
+    def evaluate_knowledges(self, graph: BaseGraph) -> List[str]:
+        return self._apply_action(graph, GraphOptimizer.evaluate)
+
+    def apply_knowledges(self, graph: BaseGraph) -> List[str]:
+        return self._apply_action(graph, GraphOptimizer.optimize)
 
 
 if __name__ == "__main__":
-    graph_opt = GraphOptimizer(['KnowledgeConv1d2Conv2d'])
+    knowledges = KnowledgeFactory.get_knowledge_pool()
+    graph_opt = GraphOptimizer(list(knowledges.keys()))
