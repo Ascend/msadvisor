@@ -21,6 +21,7 @@ from auto_optimizer.pattern.knowledges.utils import insert_squeeze
 
 from utils import inference, optimize
 
+
 def make_dynamic_model(onnx_name, x, y, shape):
     graph = OnnxGraph(name=onnx_name)
     graph.add_input('X', x['dtype'], x['shape'])
@@ -33,6 +34,7 @@ def make_dynamic_model(onnx_name, x, y, shape):
     graph.add_node('Reshape1', 'Reshape', ['X', 'Shape_out'], ['OUT_0'])
     graph.update_map()
     return graph
+
 
 def make_dynamic_model_and_squeeze(onnx_name, x, y, shape):
     graph = OnnxGraph(name=onnx_name)
@@ -49,6 +51,7 @@ def make_dynamic_model_and_squeeze(onnx_name, x, y, shape):
     graph.update_map()
     return graph
 
+
 class TestKnowledgeDynamicReshape(unittest.TestCase):
     def test_basic_dynamic_reshape(self):
         usecases = [
@@ -57,13 +60,13 @@ class TestKnowledgeDynamicReshape(unittest.TestCase):
         ]
 
         for in_shape, in_dtype, shape in usecases:
-            X = {'shape': in_shape, 'dtype': in_dtype}
-            Y = {'shape': in_shape, 'dtype': in_dtype}
+            x = {'shape': in_shape, 'dtype': in_dtype}
+            y = {'shape': in_shape, 'dtype': in_dtype}
 
             onnx_name = 'knowledge_dynamic_reshape_test'
             origin_file = f'onnx/{onnx_name}.onnx'
             optimized_file = f'onnx/{onnx_name}_optimize.onnx'
-            graph = make_dynamic_model(onnx_name, X, Y, shape)
+            graph = make_dynamic_model(onnx_name, x, y, shape)
             graph.save(origin_file)
 
             knowledge = KnowledgeDynamicReshape()
@@ -83,13 +86,13 @@ class TestKnowledgeDynamicReshape(unittest.TestCase):
         ]
 
         for in_shape, in_dtype, shape in usecases:
-            X = {'shape': in_shape, 'dtype': in_dtype}
-            Y = {'shape': in_shape, 'dtype': in_dtype}
+            x = {'shape': in_shape, 'dtype': in_dtype}
+            y = {'shape': in_shape, 'dtype': in_dtype}
 
             onnx_name = 'knowledge_dynamic_reshape_test'
             origin_file = f'onnx/{onnx_name}.onnx'
             optimized_file = f'onnx/{onnx_name}_optimize.onnx'
-            graph = make_dynamic_model_and_squeeze(onnx_name, X, Y, shape)
+            graph = make_dynamic_model_and_squeeze(onnx_name, x, y, shape)
             graph.save(origin_file)
 
             knowledge = KnowledgeDynamicReshape()

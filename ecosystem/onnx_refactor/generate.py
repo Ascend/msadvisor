@@ -89,6 +89,7 @@ def generate_knowledge_adapter():
             '' + os.linesep,
             'from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory' + os.linesep,
             '' + os.linesep,
+            '' + os.linesep,
             'def evaluate(data_path, param):' + os.linesep,
             '    knowledge = KnowledgeFactory.get_knowledge(\'%s\')' % knowledge + os.linesep,
             '    sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))' + os.linesep,

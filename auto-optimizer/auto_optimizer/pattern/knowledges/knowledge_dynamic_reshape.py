@@ -25,26 +25,28 @@ from auto_optimizer.pattern.knowledges.utils import (insert_squeeze, insert_unsq
 from auto_optimizer.common.utils import dump_op_outputs
 
 
-pattern = Pattern() \
-    .add_node('Reshape', ['Reshape']) \
-    .set_input('Reshape') \
-    .set_output('Reshape') \
-    .set_node_loop('Reshape', MATCH_PATTERN.MATCH_ONCE)
-
-
 @KnowledgeFactory.register()
 class KnowledgeDynamicReshape(KnowledgeBase):
     """ calculate Reshape 'shape' value and replace """
 
     def __init__(self) -> None:
         super().__init__()
-        self._register_apply_funcs(pattern, [self.optimize_apply])
+
+        pattern = Pattern() \
+            .add_node('Reshape', ['Reshape']) \
+            .set_input('Reshape') \
+            .set_output('Reshape') \
+            .set_node_loop('Reshape', MATCH_PATTERN.MATCH_ONCE)
+        self._register_apply_funcs(pattern, [self._optimize_apply])
 
         # inference config
         self._dump_num = 3 # generate inferenca dump data for 3 time
         self._dump_path = 'dump'
 
-    def generate_inputs(self, dynamic_input, input_shape, input_dtype):
+    def _generate_inputs(self, dynamic_input, input_shape, input_dtype):
+        '''
+        generate random number for model input
+        '''
         static_shape = [ dynamic_input.get(i) or i for i in input_shape ]
         if input_dtype in ['int32', 'int64']:
             data = np.random.randint(1, 10, static_shape, dtype = input_dtype)
@@ -54,7 +56,10 @@ class KnowledgeDynamicReshape(KnowledgeBase):
             raise RuntimeError('data type: {} not supported.'.format(input_dtype))
         return data
 
-    def generate_dump_data(self, graph: BaseGraph, dynamic_axes):
+    def _generate_dump_data(self, graph: BaseGraph, dynamic_axes):
+        '''
+        generate operator dump by inference base on skl2onnx module
+        '''
         for j in range(self._dump_num):
             real_dump_path = f'{self._dump_path}{j}'
             if not os.path.exists(real_dump_path):
@@ -66,13 +71,16 @@ class KnowledgeDynamicReshape(KnowledgeBase):
             # generate operator dump
             input_data = []
             for x in graph.inputs:
-                data = self.generate_inputs(dynamic_input, x.shape, x.dtype)
+                data = self._generate_inputs(dynamic_input, x.shape, x.dtype)
                 input_data.append(data)
                 np.save(os.path.join(real_dump_path, f'{x.name}.npy'), data)
             # inference
             dump_op_outputs(graph, input_data, real_dump_path)
 
-    def remove_dump_data(self):
+    def _remove_dump_data(self):
+        '''
+        remove all dump data, clean disk space
+        '''
         for j in range(self._dump_num):
             real_dump_path = f'{self._dump_path}{j}'
             if not os.path.exists(real_dump_path):
@@ -84,7 +92,10 @@ class KnowledgeDynamicReshape(KnowledgeBase):
                     os.rmdir(os.path.join(root, name))
             os.rmdir(real_dump_path)
 
-    def get_node_inout_shapes_from_dump_data(self, graph: BaseGraph, reshape: BaseNode):
+    def _get_inout_shapes_from_dump_data(self, graph: BaseGraph, reshape: BaseNode):
+        '''
+        get reshape input and output shape by dump data
+        '''
         # check reshape type
         prev_node = graph.get_prev_node(reshape.inputs[0])
         if prev_node is None:
@@ -105,13 +116,16 @@ class KnowledgeDynamicReshape(KnowledgeBase):
             out_shapes.append(reshape_output.shape)
         return np.array(in_shapes), np.array(out_shapes)
 
-    def calculate_shape(self, in_shapes, out_shapes):
+    def _calculate_shape(self, in_shapes, out_shapes):
+        '''
+        calculate Reshape input 'shape' and optimization apply
+        '''
         if len(in_shapes) == 0 or len(out_shapes) == 0:
             return None, None
 
         # init shape, dynamic dim need to calculate
         shape = [out_shapes[0][i] if is_constant else None
-            for i, is_constant in enumerate(np.all(out_shapes == out_shapes[0,:], axis = 0))]
+            for i, is_constant in enumerate(np.all(out_shapes == out_shapes[0, :], axis = 0))]
 
         insert = { 'squeeze': [], 'unsqueeze': [] }
         in_dim = 0
@@ -129,49 +143,52 @@ class KnowledgeDynamicReshape(KnowledgeBase):
                 continue
             if dim == in_dim:
                 # the dim has no change
-                #                Reshape(-1, 0, 32)
-                # (bs, len, 256) ------------------> (8*bs, len, 32)
+                #                (-1, 0, 32)
+                # (bs, len, 256) -----------> (8*bs, len, 32)
                 shape[dim] = 0
             elif dim < in_dim:
-                #                  Reshape(-1, 1, 0, 32)                     Squeeze
-                # (bs, 8, len, 32) ---------------------> (8*bs, 1, len, 32) -------> (8*bs, len, 32)
+                #                  (-1, 1, 0, 32)                     Squeeze
+                # (bs, 8, len, 32) --------------> (8*bs, 1, len, 32) -------> (8*bs, len, 32)
                 shape[dim] = 0
                 while dim < in_dim:
                     shape.insert(dim, 1)
-                    insert['squeeze'].append(dim)
+                    insert.get('squeeze').append(dim)
                     dim += 1
             else:
-                #                 Unsqueeze                     Reshape(-1, 8, 0, 32)
-                # (8*bs, len, 32) ---------> (8*bs, 1, len, 32) ---------------------> (bs, 8, len, 32)
+                #                 Unsqueeze                     (-1, 8, 0, 32)
+                # (8*bs, len, 32) ---------> (8*bs, 1, len, 32) --------------> (bs, 8, len, 32)
                 shape[dim] = 0
-                insert['unsqueeze'].append(in_dim)
+                insert('unsqueeze').append(in_dim)
             # compute next dimension
             in_dim += 1
         # if exist two or more dynamic dimension, then will not be optimized.
         if shape.count(None) <= 1:
-            return insert, [dim if dim != None else -1 for dim in shape]
+            return insert, [dim if not dim is None else -1 for dim in shape]
         else:
             return None, None
 
-    def optimize_reshape(self, graph: BaseGraph):
+    def _optimize_reshape(self, graph: BaseGraph):
+        '''
+        visit all Reshape operators and optimize
+        '''
         optimize_result = False
         for reshape in graph.get_nodes('Reshape'):
             if not graph.get_node(reshape.inputs[1], Initializer) is None:
                 continue
 
             # get 'Reshape' input and output shape
-            in_shapes, out_shapes = self.get_node_inout_shapes_from_dump_data(graph, reshape)
+            in_shapes, out_shapes = self._get_inout_shapes_from_dump_data(graph, reshape)
 
             # optimize Reshape operator
-            insert, shape = self.calculate_shape(in_shapes, out_shapes)
+            insert, shape = self._calculate_shape(in_shapes, out_shapes)
             if insert is None or shape is None:
                 continue
             # insert squeeze/unsqueeze
-            if len(insert['unsqueeze']) != 0:
-                attrs = {'axes': np.array(insert['unsqueeze'], dtype = np.int64)}
+            if len(insert.get('unsqueeze')) != 0:
+                attrs = {'axes': np.array(insert.get('unsqueeze'), dtype = np.int64)}
                 insert_unsqueeze(graph, reshape, attrs, mode = 'before', refer_index = 0)
-            if len(insert['squeeze']) != 0:
-                attrs = {'axes': np.array(insert['squeeze'], dtype = np.int64)}
+            if len(insert.get('squeeze')) != 0:
+                attrs = {'axes': np.array(insert.get('squeeze'), dtype = np.int64)}
                 insert_squeeze(graph, reshape, attrs, mode = 'after', refer_index = 0)
 
             # add constant shape for Reshape operator
@@ -181,39 +198,42 @@ class KnowledgeDynamicReshape(KnowledgeBase):
             optimize_result = True
         return optimize_result
 
-    def optimize_apply(self, graph: BaseGraph, match_result: MatchResult):
+    def _optimize_apply(self, graph: BaseGraph, match_result: MatchResult):
+        '''
+        optimize Reshape operator for dynamic model
+        '''
         if match_result is None or match_result.is_empty():
             return False
 
+        is_optimized = True
+        for node_dict in match_result.node_dicts:
+            if not 'Reshape' in node_dict:
+                continue
+            for node in node_dict.get('Reshape'):
+                reshape = graph.get_node(node.name, Node)
+                if reshape is None:
+                    continue
+                if graph.get_node(reshape.inputs[1], Initializer) is None:
+                    is_optimized = False
+        if is_optimized:
+            return False
+
         # check model is dynamic and get dynamic input name
-        dynamic_axes = set([shape for x in graph.inputs for shape in x.shape if not type(shape) == int])
+        for x in graph.inputs:
+            dynamic_axes = set([shape for shape in x.shape if not type(shape) == int])
         if len(dynamic_axes) == 0:
-            print('The model is static, no need to optimize Reshape.')
             return False
 
         optimize_result = False
         try:
             # infer and generate operator dump, the purpose is to obtain the input and output shapes
-            self.generate_dump_data(graph, dynamic_axes)
+            self._generate_dump_data(graph, dynamic_axes)
 
             # optimize Reshape operator
-            optimize_result = self.optimize_reshape(graph)
-        except BaseException:
-            raise
+            optimize_result = self._optimize_reshape(graph)
         finally:
             # release temp resource
-            self.remove_dump_data()
+            self._remove_dump_data()
 
         return optimize_result
-
-if __name__ == '__main__':
-    import sys
-    onnx_file = sys.argv[1]
-    from auto_optimizer import OnnxGraph
-    graph = OnnxGraph.parse(onnx_file)
-    knowledge = KnowledgeDynamicReshape()
-    if knowledge.optimize_apply(graph, None):
-        input_names = [i.name for i in graph.inputs]
-        output_names = [o.name for o in graph.outputs]
-        graph.extract(f'{onnx_file}_opt.onnx', input_names, output_names)
 

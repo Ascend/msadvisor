@@ -17,6 +17,7 @@ import sys
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 
+
 def evaluate(data_path, param):
     knowledge = KnowledgeFactory.get_knowledge('KnowledgeDynamicReshape')
     sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))

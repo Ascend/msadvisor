@@ -15,6 +15,7 @@
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph, Node
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 
+
 def is_lower_onnx_version(graph: BaseGraph, limit_version = 13) -> bool:
     """
     check current onnx version is lower than limit version
@@ -23,12 +24,13 @@ def is_lower_onnx_version(graph: BaseGraph, limit_version = 13) -> bool:
     opset_versions = [opset.version for opset in graph.opset_imports if domain_check(opset.domain)]
     return len(opset_versions) == 0 or opset_versions[0] < limit_version
 
+
 def insert_unsqueeze(graph: BaseGraph, node: BaseNode, attrs, mode: str, refer_index) -> BaseNode:
     if attrs.get('axes') is None:
         raise RuntimeError('insert unsqueeze failed, invalid axes.')
     op_name = f'Unsqueeze_before_{node.name}'
     if not graph.get_node(op_name, Node) is None:
-        return None
+        raise RuntimeError(f'unsqueeze has bean existed, op_name:{op_name}.')
     if is_lower_onnx_version(graph, 13):
         us = graph.add_node(op_name, 'Unsqueeze', attrs = attrs)
         graph.insert_node(node.name, us, mode=mode, refer_index=refer_index)
@@ -41,12 +43,13 @@ def insert_unsqueeze(graph: BaseGraph, node: BaseNode, attrs, mode: str, refer_i
     graph.update_map()
     return us
 
+
 def insert_squeeze(graph: BaseGraph, node: BaseNode, attrs, mode: str, refer_index) -> BaseNode:
     if attrs.get('axes') is None:
         raise RuntimeError('Insert squeeze failed, invalid axes.')
     op_name = f'Squeeze_{mode}_{node.name}_{refer_index}'
     if not graph.get_node(op_name, Node) is None:
-        return None
+        raise RuntimeError(f'squeeze has bean existed, op_name:{op_name}.')
     if is_lower_onnx_version(graph, 13):
         sq = graph.add_node(op_name, 'Squeeze', attrs = attrs)
         graph.insert_node(node.name, sq, mode=mode, refer_index=refer_index)
