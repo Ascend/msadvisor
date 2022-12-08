@@ -18,7 +18,7 @@ import numpy as np
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.pattern import Pattern, MATCH_PATTERN
 from auto_optimizer.pattern.matcher import MatchResult
-from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
+from auto_optimizer.graph_refactor.interface.base_graph import BaseGraphi, Initializer
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 from auto_optimizer.pattern.knowledges.utils import (insert_squeeze, insert_unsqueeze)
@@ -74,6 +74,8 @@ class KnowledgeDynamicReshape(KnowledgeBase):
     def remove_dump_data(self):
         for j in range(self._dump_num):
             real_dump_path = f'{self._dump_path}{j}'
+            if not os.path.exists(real_dump_path):
+                continue
             for root, dirs, files in os.walk(real_dump_path, topdown = False):
                 for name in files:
                     os.remove(os.path.join(root, name))
@@ -85,7 +87,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
         # check reshape type
         prev_node = graph.get_prev_node(reshape.inputs[0])
         if prev_node is None:
-            prev_node = graph[reshape.inputs[0]]] # model input, prev node type is 'PlaceHolder'
+            prev_node = graph[reshape.inputs[0]] # model input, prev node type is 'PlaceHolder'
         # get reshape input and output shapes from multi dump data
         in_shapes, out_shapes = [], []
         for i in range(self._dump_num):
@@ -112,16 +114,19 @@ class KnowledgeDynamicReshape(KnowledgeBase):
 
         insert = { 'squeeze': [], 'unsqueeze': [] }
         in_dim = 0
+        dim = 0 # output dim
         for dim in range(len(shape)):
             if not shape[dim] is None:
                 continue
             # the dim is dynamic
+            tmp_dim = dim
             while in_dim < in_shapes.shape[1]:
                 if np.all(out_shapes[:, dim] == in_shapes[:, in_dim]):
                     break
                 in_dim += 1
             if in_dim == in_shapes.shape[1]:
-                break
+                dim = tmp_dim
+                continue
             if dim == in_dim:
                 # the dim has no change
                 #                Reshape(-1, 0, 32)
@@ -130,9 +135,10 @@ class KnowledgeDynamicReshape(KnowledgeBase):
             elif dim < in_dim:
                 #                  Reshape(-1, 1, 0, 32)                     Squeeze
                 # (bs, 8, len, 32) ---------------------> (8*bs, 1, len, 32) -------> (8*bs, len, 32)
-                shape.insert(dim, 1)
                 shape[dim] = 0
-                insert['squeeze'].append(dim)
+                while dim < in_dim:
+                    shape.insert(dim, 1)
+                    insert['squeeze'].append(dim)
             else:
                 #                 Unsqueeze                     Reshape(-1, 8, 0, 32)
                 # (8*bs, len, 32) ---------> (8*bs, 1, len, 32) ---------------------> (bs, 8, len, 32)
@@ -149,6 +155,9 @@ class KnowledgeDynamicReshape(KnowledgeBase):
     def optimize_reshape(self, graph: BaseGraph):
         optimize_result = False
         for reshape in graph.get_nodes('Reshape'):
+            if graph.get_node(reshape.inputs[1], Initializer) is not None:
+                continue
+
             # get 'Reshape' input and output shape
             in_shapes, out_shapes = self.get_node_inout_shapes_from_dump_data(graph, reshape)
 

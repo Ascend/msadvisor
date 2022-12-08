@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
+from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph, Node
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 
 def is_lower_onnx_version(graph: BaseGraph, limit_version = 13) -> bool:
@@ -27,10 +27,10 @@ def insert_unsqueeze(graph: BaseGraph, node: BaseNode, attrs, mode: str, refer_i
     if attrs.get('axes') is None:
         raise RuntimeError('insert unsqueeze failed, invalid axes.')
     op_name = f'Unsqueeze_before_{node.name}'
-    if not graph[op_name] is None:
+    if not graph.get_node(op_name, Node) is None:
         return None
     if is_lower_onnx_version(graph, 13):
-        us = graph.add_node(op_name, 'Unsqueeze', attrs)
+        us = graph.add_node(op_name, 'Unsqueeze', attrs = attrs)
         graph.insert_node(node.name, us, mode=mode, refer_index=refer_index)
     else:
         us = graph.add_node(op_name, 'Unsqueeze')
@@ -45,10 +45,10 @@ def insert_squeeze(graph: BaseGraph, node: BaseNode, attrs, mode: str, refer_ind
     if attrs.get('axes') is None:
         raise RuntimeError('Insert squeeze failed, invalid axes.')
     op_name = f'Squeeze_{mode}_{node.name}_{refer_index}'
-    if not graph[op_name] is None:
+    if not graph.get_node(op_name, Node) is None:
         return None
     if is_lower_onnx_version(graph, 13):
-        sq = graph.add_node(op_name, 'Squeeze', attrs)
+        sq = graph.add_node(op_name, 'Squeeze', attrs = attrs)
         graph.insert_node(node.name, sq, mode=mode, refer_index=refer_index)
     else:
         sq = graph.add_node(op_name, 'Squeeze')
