@@ -18,7 +18,7 @@ import numpy as np
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.pattern import Pattern, MATCH_PATTERN
 from auto_optimizer.pattern.matcher import MatchResult
-from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph, Initializer
+from auto_optimizer.graph_refactor.interface.base_graph import (BaseGraph, Initializer, Node)
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 from auto_optimizer.pattern.knowledges.utils import (insert_squeeze, insert_unsqueeze)
@@ -158,12 +158,12 @@ class KnowledgeDynamicReshape(KnowledgeBase):
                 #                 Unsqueeze                     (-1, 8, 0, 32)
                 # (8*bs, len, 32) ---------> (8*bs, 1, len, 32) --------------> (bs, 8, len, 32)
                 shape[dim] = 0
-                insert('unsqueeze').append(in_dim)
+                insert.get('unsqueeze').append(in_dim)
             # compute next dimension
             in_dim += 1
         # if exist two or more dynamic dimension, then will not be optimized.
         if shape.count(None) <= 1:
-            return insert, [dim if not dim is None else -1 for dim in shape]
+            return insert, [dim if dim is not None else -1 for dim in shape]
         else:
             return None, None
 
@@ -207,7 +207,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
 
         is_optimized = True
         for node_dict in match_result.node_dicts:
-            if not 'Reshape' in node_dict:
+            if 'Reshape' not in node_dict:
                 continue
             for node in node_dict.get('Reshape'):
                 reshape = graph.get_node(node.name, Node)
@@ -219,8 +219,11 @@ class KnowledgeDynamicReshape(KnowledgeBase):
             return False
 
         # check model is dynamic and get dynamic input name
+        dynamic_axes = set()
         for x in graph.inputs:
-            dynamic_axes = set([shape for shape in x.shape if not type(shape) == int])
+            for shape in x.shape:
+                if not type(shape) == int:
+                    dynamic_axes.add(shape)
         if len(dynamic_axes) == 0:
             return False
 
