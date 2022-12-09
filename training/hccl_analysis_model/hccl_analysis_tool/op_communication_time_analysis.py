@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..utils.result import ExtendResult
-from ..utils.constant import Constant
-from ..utils.log import AD_ERROR, ad_print_and_log
+from utils.result import ExtendResult
+from utils.constant import Constant
+from utils.log import AD_ERROR, ad_print_and_log
 
 
 def op_communication_time_analysis(op_time_info, iteration_num):

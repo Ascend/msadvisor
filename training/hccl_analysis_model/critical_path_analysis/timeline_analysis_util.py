@@ -16,8 +16,8 @@ import glob
 import json
 import os
 
-from ..utils.constant import Constant
-from ..utils.log import ad_log, ad_print_and_log, AD_INFO, AD_ERROR
+from utils.constant import Constant
+from utils.log import ad_log, ad_print_and_log, AD_INFO, AD_ERROR
 
 
 TIMELINE_TASK_TYPE_PID = {

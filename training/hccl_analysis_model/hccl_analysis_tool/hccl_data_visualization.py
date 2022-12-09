@@ -16,7 +16,9 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..utils.constant import Constant
+from utils.constant import Constant
+
+
 BAR_WIDTH = 0.2
 TRANSPORT_TYPE_DISPLAY_DICT = {0: "", 1: "HCCS", 2: "PCIE", 3: "RDMA"}
 

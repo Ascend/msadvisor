@@ -15,7 +15,7 @@
 import csv
 import os
 
-from ..utils.constant import Constant
+from utils.constant import Constant
 
 
 class HcclConfig:

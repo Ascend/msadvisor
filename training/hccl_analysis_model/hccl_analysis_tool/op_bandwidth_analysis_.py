@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..utils.result import ExtendResult
-from ..utils.constant import Constant
+from utils.result import ExtendResult
+from utils.constant import Constant
 
 
 def op_bandwidth_analysis(op_bandwidth_info, iteration_num, analysis_op_name):

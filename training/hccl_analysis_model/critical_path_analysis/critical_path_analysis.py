@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..utils.constant import Constant
+from utils.constant import Constant
 from .timeline_analysis_util import get_event_by_pid_tid
 
 TIME_INTERVAL = 1

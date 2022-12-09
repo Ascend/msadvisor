@@ -17,11 +17,11 @@ import json
 import os
 import numpy as np
 
-from ..utils.constant import Constant
-from ..utils.profiling_data_check import iter_trace_file_check, step_trace_file_check
-from ..utils.result import Result
-from ..utils.generate_html import generate_body
-from ..utils.log import AD_INFO, AD_ERROR, AD_WARN, ad_log, ad_print_and_log
+from utils.constant import Constant
+from utils.profiling_data_check import iter_trace_file_check, step_trace_file_check
+from utils.result import Result
+from utils.generate_html import generate_body
+from utils.log import AD_INFO, AD_ERROR, AD_WARN, ad_log, ad_print_and_log
 from .op_bandwidth_analysis_ import op_bandwidth_analysis
 from .op_communication_time_analysis import op_communication_time_analysis, get_op_communication_time_analysis_result
 from .hccl_analysis_utils import get_communication_op_name_mapping, get_step_trace_info, parse_data, \
