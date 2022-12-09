@@ -6,6 +6,7 @@ Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
 import os
 from tool.python import remove_comments
 import pandas as pd
+import sys
 
 path_type = {'script': 'script', 'profiling': 'profiling', 'graph': 'graph', 'plog': 'log'}
 
