@@ -1,4 +1,4 @@
-# Copyright 2022 Huawei Technologies Co., Ltd
+# Copyright (c) Huawei Technologies Co., Ltd. 2022. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
         self._register_apply_funcs(pattern, [self._optimize_apply])
 
         # inference config
-        self._dump_num = 3 # generate inferenca dump data for 3 time
+        self._dump_num = 3 # generate inference dump data for 3 time
         self._dump_path = 'dump'
 
     def _generate_inputs(self, dynamic_input, input_shape, input_dtype):
@@ -100,7 +100,8 @@ class KnowledgeDynamicReshape(KnowledgeBase):
         prev_node = graph.get_prev_node(reshape.inputs[0])
         if prev_node is None:
             prev_node = graph[reshape.inputs[0]] # model input, prev node type is 'PlaceHolder'
-        # get reshape input and output shapes from multi dump data
+
+        # get input and output shapes from multi-group dump data
         in_shapes, out_shapes = [], []
         for i in range(self._dump_num):
             real_dump_path = f'{self._dump_path}{i}'
@@ -110,10 +111,11 @@ class KnowledgeDynamicReshape(KnowledgeBase):
                 dump_file = f'{prev_node.name}_{prev_node.get_output_id(reshape.inputs[0])}.npy'
             else:
                 raise RuntimeError('Reshape prev node is Constant type.')
-            reshape_input = np.load(os.path.join(real_dump_path, dump_file))
-            reshape_output = np.load(os.path.join(real_dump_path, f'{reshape.name}_0.npy'))
-            in_shapes.append(reshape_input.shape)
-            out_shapes.append(reshape_output.shape)
+            data_in = np.load(os.path.join(real_dump_path, dump_file))
+            data_out = np.load(os.path.join(real_dump_path, f'{reshape.name}_0.npy'))
+
+            in_shapes.append(data_in.shape)
+            out_shapes.append(data_out.shape)
         return np.array(in_shapes), np.array(out_shapes)
 
     def _calculate_shape(self, in_shapes, out_shapes):
@@ -121,7 +123,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
         calculate Reshape input 'shape' and optimization apply
         '''
         if len(in_shapes) == 0 or len(out_shapes) == 0:
-            return None, None
+            raise RuntimeError('invalid input or output shapes.')
 
         # init shape, dynamic dim need to calculate
         shape = [out_shapes[0][i] if is_constant else None
@@ -161,11 +163,19 @@ class KnowledgeDynamicReshape(KnowledgeBase):
                 insert.get('unsqueeze').append(in_dim)
             # compute next dimension
             in_dim += 1
-        # if exist two or more dynamic dimension, then will not be optimized.
-        if shape.count(None) <= 1:
-            return insert, [dim if dim is not None else -1 for dim in shape]
-        else:
-            return None, None
+        return insert, [dim if dim is not None else -1 for dim in shape]
+
+    def _modify_dimension(self, unsqueeze_dims, squeeze_dims):
+        '''
+        modify dimension by insert unsqueeze or squeeze
+        '''
+        if unsqueeze_dims is not None and len(unsqueeze_dims) != 0:
+            attrs = {'axes': np.array(unsqueeze_dims, dtype = np.int64)}
+            insert_unsqueeze(graph, reshape, attrs, mode = 'before', refer_index = 0)
+
+        if squeeze_dims is not None and len(squeeze_dims) != 0:
+            attrs = {'axes': np.array(squeeze_dims, dtype = np.int64)}
+            insert_squeeze(graph, reshape, attrs, mode = 'after', refer_index = 0)
 
     def _optimize_reshape(self, graph: BaseGraph):
         '''
@@ -181,19 +191,15 @@ class KnowledgeDynamicReshape(KnowledgeBase):
 
             # optimize Reshape operator
             insert, shape = self._calculate_shape(in_shapes, out_shapes)
-            if insert is None or shape is None:
+            if shape.count(-1) > 1:
+                # if exist two or more dynamic dimension, cannot be optimized.
                 continue
-            # insert squeeze/unsqueeze
-            if len(insert.get('unsqueeze')) != 0:
-                attrs = {'axes': np.array(insert.get('unsqueeze'), dtype = np.int64)}
-                insert_unsqueeze(graph, reshape, attrs, mode = 'before', refer_index = 0)
-            if len(insert.get('squeeze')) != 0:
-                attrs = {'axes': np.array(insert.get('squeeze'), dtype = np.int64)}
-                insert_squeeze(graph, reshape, attrs, mode = 'after', refer_index = 0)
 
-            # add constant shape for Reshape operator
+            # set shape value for Reshape operator
             graph.add_initializer(f'Shape_for_{reshape.name}', np.array(shape))
             reshape.inputs[1] = f'Shape_for_{reshape.name}'
+
+            self._modify_dimension(insert.get('unsqueeze'), insert.get('squeeze'))
 
             optimize_result = True
         return optimize_result
@@ -205,6 +211,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
         if match_result is None or match_result.is_empty():
             return False
 
+        # check reshape is or not optimized
         is_optimized = True
         for node_dict in match_result.node_dicts:
             if 'Reshape' not in node_dict:

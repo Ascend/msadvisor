@@ -1,4 +1,4 @@
-# Copyright 2022 Huawei Technologies Co., Ltd
+# Copyright (c) Huawei Technologies Co., Ltd. 2022. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,6 +26,14 @@ def is_lower_onnx_version(graph: BaseGraph, limit_version = 13) -> bool:
 
 
 def insert_unsqueeze(graph: BaseGraph, node: BaseNode, attrs, mode: str, refer_index) -> BaseNode:
+    '''
+    insert unsqueeze operator
+    :param graph       : infer model graph
+    :param node        : dest node which will be inserted
+    :param attrs       : unsqueeze operator attrs
+    :param mode        : insert position, support 'before' or 'after'
+    :param refer_index : node input or output id
+    '''
     if attrs.get('axes') is None:
         raise RuntimeError('insert unsqueeze failed, invalid axes.')
     op_name = f'Unsqueeze_before_{node.name}'
@@ -45,6 +53,14 @@ def insert_unsqueeze(graph: BaseGraph, node: BaseNode, attrs, mode: str, refer_i
 
 
 def insert_squeeze(graph: BaseGraph, node: BaseNode, attrs, mode: str, refer_index) -> BaseNode:
+    '''
+    insert squeeze operator
+    :param graph       : infer model graph
+    :param node        : dest node which will be inserted
+    :param attrs       : squeeze operator attrs
+    :param mode        : insert position, support 'before' or 'after'
+    :param refer_index : node input or output id
+    '''
     if attrs.get('axes') is None:
         raise RuntimeError('Insert squeeze failed, invalid axes.')
     op_name = f'Squeeze_{mode}_{node.name}_{refer_index}'

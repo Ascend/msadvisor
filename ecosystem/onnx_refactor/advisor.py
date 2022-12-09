@@ -221,7 +221,7 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
     if optimize_result:
         if params.get('extract'):
             input_names = [i.name for i in onnx_graph.inputs]
-            output_names = [o.name for o in onnx_graph.outputs]
+            output_names = [i.name for i in onnx_graph.outputs]
             onnx_graph.extract(new_onnx_path, input_names, output_names)
         else:
             onnx_graph.save(new_onnx_path)

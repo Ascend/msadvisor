@@ -72,7 +72,7 @@ def generate_knowledge_adapter():
             continue
         f = os.fdopen(os.open(adapter_path, FILE_FLAG, FILE_STAT), 'w')
         f.writelines(
-            ('# Copyright 2022 Huawei Technologies Co., Ltd' + os.linesep,
+            ('# Copyright (c) Huawei Technologies Co., Ltd. 2022. All rights reserved.' + os.linesep,
             '#' + os.linesep,
             '# Licensed under the Apache License, Version 2.0 (the "License");' + os.linesep,
             '# you may not use this file except in compliance with the License.' + os.linesep,
