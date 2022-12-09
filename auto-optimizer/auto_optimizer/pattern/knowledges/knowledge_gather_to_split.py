@@ -129,7 +129,6 @@ class KnowledgeGatherToSplit(KnowledgeBase):
         output_value = []
         axis=0
         for node in gather_to_remove:
-            print(node.name)
             output_value.append(node.outputs)
             axis=node.attrs.get('axis', None)
             graph.remove(node.name)
