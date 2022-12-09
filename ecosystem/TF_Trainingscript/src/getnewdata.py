@@ -22,7 +22,8 @@ class Data:
         try:
             value = self.parameter[self.tpath]
         except KeyError:
-            print("key not in dict!")
+            print("用户输入的字典key值有误，请重新输入参数值")
+            sys.exit()
         if value != '':
             file_path = value
         else:
