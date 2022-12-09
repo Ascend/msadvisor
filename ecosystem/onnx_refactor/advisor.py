@@ -77,6 +77,8 @@ def check_file_permission(filepath):
     return True
 
 def find_one_model_file(path, suffix = '.onnx'):
+    if not os.path.exists(path):
+        return None
     files = os.listdir(path)
     for filename in files:
         if filename.endswith(suffix):
@@ -132,9 +134,9 @@ def optimize_model(graph: OnnxGraph, knowledge: KnowledgeBase, result: Result, o
                 optimize_result |= knowledge.apply(graph, match_result)
     if optimize_result:
         # graph is optimized.
-        graph.save(out_path)
         result.error_code = error_code['optimized']
         result.summary = "The current model has already been optimized, the optimized model path is:%s" % out_path
+    return optimize_result
 
 def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
     """
@@ -215,12 +217,18 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
         onnx_graph = OnnxGraph.parse(onnx_path)
     if len(onnx_graph.inputs) == 0 and len(onnx_graph.outputs) == 0:
         raise RuntimeError('The current model is invalid.')
-    optimize_model(onnx_graph, knowledge, result, new_onnx_path)
-    if result.error_code == error_code['optimized']:
+    optimize_result = optimize_model(onnx_graph, knowledge, result, new_onnx_path)
+    if optimize_result:
+        if params.get('extract'):
+            input_names = [i.name for i in onnx_graph.inputs]
+            output_names = [i.name for i in onnx_graph.outputs]
+            onnx_graph.extract(new_onnx_path, input_names, output_names)
+        else:
+            onnx_graph.save(new_onnx_path)
         # replace result for IDE
         if sub_path == 'project': # adapter for IDE
             ide_out_path = os.path.join(datapath, '%s_optimize.onnx' % os.path.splitext(model_file)[0])
             shutil.copy(new_onnx_path, ide_out_path)
             result.summary = "The current model has already been optimized, \
-                the optimized model path is:%s" % ide_out_path
+the optimized model path is:%s" % ide_out_path
     return result.generate()
