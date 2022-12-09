@@ -207,3 +207,4 @@ class OnnxGraph(BaseGraph):
             converted_model = version_converter.convert_version(model, opset)
             self.graph = OnnxGraph.parse(converted_model)
             self._meta['opset_imports'] = [opset_imports]
+
