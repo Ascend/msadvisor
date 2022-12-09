@@ -121,8 +121,10 @@ class KnowledgeGatherToSplit(KnowledgeBase):
         ]
 
         indices = self._get_gather_nodes_indices(gather_to_remove, graph)
+        if not indices:
+            return False
         indices = sorted(indices)
-
+        
         for i in range(len(indices)-1):
             if (indices[i] + 1 < indices[i + 1]):
                 return False
