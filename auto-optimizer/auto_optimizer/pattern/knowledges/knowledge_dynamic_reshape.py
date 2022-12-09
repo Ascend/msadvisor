@@ -165,7 +165,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
             in_dim += 1
         return insert, [dim if dim is not None else -1 for dim in shape]
 
-    def _modify_dimension(self, unsqueeze_dims, squeeze_dims):
+    def _modify_dimension(self, graph, reshape, unsqueeze_dims, squeeze_dims):
         '''
         modify dimension by insert unsqueeze or squeeze
         '''
@@ -199,7 +199,7 @@ class KnowledgeDynamicReshape(KnowledgeBase):
             graph.add_initializer(f'Shape_for_{reshape.name}', np.array(shape))
             reshape.inputs[1] = f'Shape_for_{reshape.name}'
 
-            self._modify_dimension(insert.get('unsqueeze'), insert.get('squeeze'))
+            self._modify_dimension(graph, reshape, insert.get('unsqueeze'), insert.get('squeeze'))
 
             optimize_result = True
         return optimize_result
