@@ -49,7 +49,7 @@ class Rule:
         # else:  # 没有给出修改建议的话，取第一行输出
         #     unparse = utils.unparse(origin)
         #     print(f"[{self.debug}] 第 {origin.lineno} 行:{unparse}")
-        unparse = Rule.codes[origin.lineno-1].strip()
+        unparse = Rule.codes[origin.lineno - 1].strip()
         print(f"[{self.debug}] 第 {origin.lineno} 行:{unparse}")
 
     def info(self, origin, new):
@@ -73,9 +73,9 @@ class Rule:
         value = [
             origin.lineno,
             origin.col_offset,
-            Rule.codes[origin.lineno-1].strip(),
+            Rule.codes[origin.lineno - 1].strip(),
             # utils.unparse(new) if isinstance(new, ast.AST) else new if new else self.advice,
-            self.advice,
+            new if isinstance(new, str) else self.advice,
             self.no,
             Rule.file_path
         ]
@@ -216,6 +216,8 @@ def multi_core_load_balance(node, soc):
         block_num = block_num_kw[0].value
         if isinstance(block_num, ast.Constant) and block_num.value % soc['cores'] != 0:
             return node, None
+        elif isinstance(block_num, ast.Num) and block_num.n % soc['cores'] != 0:
+            return node, None
         elif isinstance(block_num, (ast.Name, ast.Call)):
             return node, Advice.MultiCore.check_name
     return None, None
@@ -230,6 +232,8 @@ def multi_core_maximum(node, soc):
             return None, None
         block_num = block_num_kw[0].value
         if isinstance(block_num, ast.Constant) and block_num.value > 65535:
+            return node, None
+        elif isinstance(block_num, ast.Num) and block_num.n > 65535:
             return node, None
     return None, None
 
@@ -249,7 +253,8 @@ def sync_instruction(node, soc):
     func_name = node.func.attr if isinstance(node.func, ast.Attribute) else node.func.id
     if func_name == 'new_stmt_scope':
         sync_kw = list(filter(lambda x: x.arg == 'disable_sync', node.keywords))
-        if len(sync_kw) != 0 and isinstance(sync_kw[0].value, ast.Constant) and sync_kw[0].value.value:
+        if len(sync_kw) != 0 and isinstance(sync_kw[0].value, (ast.Constant, ast.NameConstant)) \
+                and sync_kw[0].value.value:
             return node, None
     return None, None
 
