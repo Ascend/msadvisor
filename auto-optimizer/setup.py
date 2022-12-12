@@ -29,5 +29,17 @@ setup(
         'Topic :: Scientific/Engineering',
         'Topic :: Software Development'
     ],
+    extras_require={
+        'infer_test': [
+            (
+                'aclruntime @ git+https://gitee.com/Ascend/tools.git'
+                '#egg=aclruntime&subdirectory=ais-bench_workload/tool/ais_infer/backend'
+            ),
+            (
+                'ais_bench @ git+https://gitee.com/Ascend/tools.git'
+                '#egg=ais_bench&subdirectory=ais-bench_workload/tool/ais_infer'
+            )
+        ],
+    },
     python_requires='>=3.7'
 )

@@ -22,7 +22,12 @@
 git clone https://gitee.com/ascend/auto-optimizer.git
 cd auto-optimizer
 pip install -r requirements.txt
+
+# without infer_test feature
 python setup.py install
+
+# with infer_test feature
+pip install .[infer_test]
 
 ```
 
@@ -91,6 +96,11 @@ python -m auto_optimizer optimize [OPTIONS] INPUT_MODEL OUTPUT_MODEL
 
 额外参数(OPTIONS):
  - -k/--knowledges: 以英文逗号(,)分隔的知识库列表，可以是名称或者序号。默认启用除修复性质以外的所有知识库。
+ - -t/--infer-test: 当启用这个选项时，通过对比优化前后的推理速度来决定是否使用某知识库。启用该选项需要安装额外依赖[infer_test]，并且需要安装CANN。
+ - -s/--soc: 使用的SOC，仅当启用infer-test选项时有意义。默认为Ascend310P3。
+ - -d/--device: NPU设备ID，仅当启用infer-test选项时有意义。默认为0。
+ - -l/--loop: 测试推理速度时推理次数，仅当启用infer-test选项时有意义。默认为100。
+ - --threshold: 推理速度提升阈值，仅当知识库的优化带来的提升超过这个值时才使用这个知识库，可以为负，表示接受负优化。仅当启用infer-test选项时有意义。默认为-0.02，即默认接受推理性能劣化2%以内的负优化。
  - --help: 打印帮助信息。
 
 注：目前infer-test模式尚不支持动态shape模型，后续可能会添加相关选项进行支持。
@@ -101,6 +111,6 @@ python -m auto_optimizer optimize [OPTIONS] INPUT_MODEL OUTPUT_MODEL
 
 ## 免责声明
 
-auto-optimizer仅提高基于ONNX的改图及调优参考，不对其质量或维护负责。
+auto-optimizer仅提供基于ONNX的改图及调优参考，不对其质量或维护负责。
 如果您遇到了问题，Gitee/Ascend/auto-optimizer提交issue，我们将根据您的issue跟踪解决。
 衷心感谢您对我们社区的理解和贡献。
