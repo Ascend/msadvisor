@@ -23,7 +23,7 @@ git clone https://gitee.com/ascend/msadvisor.git
 ### 知识库调优方向
 ![知识库调优方向](running_env_tuning/doc/running_env_tuning.PNG)
 ### 数据准备
-
+将迁移代码路径通过ecosystem/running_env_tuning/RunningEnvTuning.json内的"target_file_address": ""进行配置。
 ### 命令行执行
 ```shell
 msadvisor -c xxx/msadvisor/ecosystem/running_env_tuning/RunningEnvTuning.json 
