@@ -44,7 +44,7 @@ msadvisor -c xxx/msadvisor/ecosystem/Api_optimization_suggestion/model/ApiOptimi
 ```
 ### 执行结果
 - [x] python环境下，枚举数据类型aclvencChannelDescParamType中定义全部参数，应当输出所有参数的约束建议。解决迁移过程中数据类型中参数的约束问题。
-
+![输入图片说明](docs/img/Api_optimization_suggestion_img1.png)
 
 ##调优方向二：运行管理资源申请API差异识别
 ###Device管理&&Context管理&&内存管理
