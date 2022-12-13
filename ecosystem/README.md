@@ -34,7 +34,8 @@ msadvisor -c xxx/msadvisor/ecosystem/running_env_tuning/RunningEnvTuning.json
 ### 知识库调优方向
 ![知识库调优方向](Api_optimization_suggestion/doc/Api_optimization_suggestion.PNG)
 ### 数据准备
-
+将profiling数据放到ecosystem/Api_optimization_suggestion/data/profiling路径下
+将aipp配置文件数据放到ecosystem/Api_optimization_suggestion/data/project路径下
 ### 命令行执行
 ```shell
 msadvisor -c xxx/msadvisor/ecosystem/Api_optimization_suggestion/model/ApiOptimizationSuggestion.json 
