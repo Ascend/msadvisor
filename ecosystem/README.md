@@ -70,7 +70,8 @@ Device管理&&Context管理&&内存管理：判断stream数量是否超过1024�
 	![输入图片说明](docs/img/Api_optimization_suggestion_img6.png)		 
 场景二：使用aclmdlExecuteAsync接口实现异步推理，使用aclrtSynchronizeStream接口阻塞Host运行，接口使用规范无相关输出。
 - [x] 推理输入内存零拷贝  
-场景一：使用acldvppMalloc接口，使用aclrtMemcpy，应输出不需使用DVPP内存的相关建议。解决迁移过程中推理输入内存零拷贝中DVPP内存使用问题  
+场景一：使用acldvppMalloc接口，使用aclrtMemcpy，应输出不需使用DVPP内存的相关建议。解决迁移过程中推理输入内存零拷贝中DVPP内存使用问题
+  
 ![输入图片说明](docs/img/Api_optimization_suggestion_img7.png)
 ## 3 代码逻辑错误识别及自动调优知识库
 ### 知识库调优方向
