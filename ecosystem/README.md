@@ -54,7 +54,8 @@ msadvisor -c xxx/msadvisor/ecosystem/code_logic_error_identification_tuning/mode
 -d xxx/msadvisor/ecosystem/code_logic_error_identification_tuning/data/
 
 ```
-
+### 执行结果
+![输入图片说明](docs/img/code_logic_error_identification_tuning_ans.png)
 ## 许可证
 
 [Apache License 2.0](LICENSE)
