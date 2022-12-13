@@ -9,9 +9,9 @@
 
 ## 组件使用说明
 
-- [x]  [运行环境调优知识库](auto_optimizer/graph_refactor/README.md)
-- [x]  [API使用问题识别及自动调优知识库](docs/knowledge_optimizer_frame.md)
-- [x]  [代码逻辑错误识别及自动调优知识库](auto_optimizer/inference_engine/README.md)
+- [x]  [运行环境调优知识库](#1-运行环境调优知识库)
+- [x]  [API使用问题识别及自动调优知识库](#2-API使用问题识别及自动调优知识库)
+- [x]  [代码逻辑错误识别及自动调优知识库](#3-代码逻辑错误识别及自动调优知识库)
 
 ## 安装教程
 
@@ -22,6 +22,8 @@ pip install -r requirements.txt
 python setup.py install
 
 ```
+## 1 运行环境调优知识库
+
 
 ## 许可证
 
@@ -29,6 +31,6 @@ python setup.py install
 
 ## 免责声明
 
-auto-optimizer仅提高基于ONNX的改图及调优参考，不对其质量或维护负责。
-如果您遇到了问题，Gitee/Ascend/auto-optimizer提交issue，我们将根据您的issue跟踪解决。
+msadvisor仅提供调优参考，不对其质量或维护负责。
+如果您遇到了问题，Gitee/Ascend/msadvisor提交issue，我们将根据您的issue跟踪解决。
 衷心感谢您对我们社区的理解和贡献。
