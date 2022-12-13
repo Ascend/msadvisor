@@ -21,7 +21,7 @@ git clone https://gitee.com/ascend/msadvisor.git
 ```
 ## 1 运行环境调优知识库
 ### 知识库调优方向
-
+![知识库调优方向](docs/img/architecture.png)
 ### 数据准备
 
 ### 命令行执行
