@@ -46,13 +46,13 @@ msadvisor -c xxx/msadvisor/ecosystem/Api_optimization_suggestion/model/ApiOptimi
 - [x] 开发API差异识别：python环境下，枚举数据类型aclvencChannelDescParamType中定义全部参数，应当输出所有参数的约束建议。解决迁移过程中数据类型中参数的约束问题。
 ![输入图片说明](docs/img/Api_optimization_suggestion_img1.png)
 
-- [x] 运行管理资源申请API差异识别
+- [x] 运行管理资源申请API差异识别  
 Device管理&&Context管理&&内存管理：判断stream数量是否超过1024，若超过给出预警  
 场景一：使用aclrtMemcpy接口，在使用aclrtMemcpy接口前使用了aclrtDeviceCanAccessPeer和aclrtDeviceEnablePeerAccess，使用规范无相关输出，解决迁移过程中Device的内存复制相关接口的使用约束问题
 场景二：使用aclrtMemcpy接口，在使用aclrtMemcpy接口前使用了aclrtDeviceCanAccessPeer接口，未使用aclrtDeviceEnablePeerAccess接口，应输出建议使用aclrtDeviceEnablePeerAccess接口，解决迁移过程中Device的内存复制相关接口的使用约束问题
 ![输入图片说明](docs/img/Api_optimization_suggestion_img2.png)
-6. 场景四：使用aclrtMemcpy接口，在使用aclrtMemcpy接口前未使用aclrtDeviceCanAccessPeer接口，使用了aclrtDeviceEnablePeerAccess接口，应输出建议使用aclrtDeviceCanAccessPeer接口，解决迁移过程中Device的内存复制相关接口的使用约束问题
-
+场景四：使用aclrtMemcpy接口，在使用aclrtMemcpy接口前未使用aclrtDeviceCanAccessPeer接口，使用了aclrtDeviceEnablePeerAccess接口，应输出建议使用aclrtDeviceCanAccessPeer接口，解决迁移过程中Device的内存复制相关接口的使用约束问题
+![输入图片说明](docs/img/Api_optimization_suggestion_img3.png)
 7. 场景五：使用aclrtMemcpy接口，未使用aclrtDeviceCanAccessPeer和aclrtDeviceEnablePeerAccess，应输出建议使用aclrtDeviceCanAccessPeer和aclrtDeviceEnablePeerAccess，解决迁移过程中Device的内存复制相关接口的使用约束问题
 
 
