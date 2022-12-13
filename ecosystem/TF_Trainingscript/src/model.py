@@ -13,6 +13,7 @@ from work.graph import graph
 from work.log import log
 from work.profiling import profiling
 import sys
+import json
 
 def evaluate(data_path, parameter):
     try:

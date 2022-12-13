@@ -54,26 +54,26 @@ def change(path, pathtest):
 
 def test(word, path, flag):
     logdelete(word, path, flag)
-    r = evaluate('./data/')
+    r = evaluate('./data/', '{"script": "", "profiling": "", "graph": "", "plog": ""}')
     print('删除关键词后结果为:\n' + r)
     logadd(word, path, flag)
-    r = evaluate('./data/')
+    r = evaluate('./data/', '{"script": "", "profiling": "", "graph": "", "plog": ""}')
     print('还原关键词后结果为:\n' + r + '\n')
 
 def test2(word, path, flag):
     logadd(word, path, flag)
-    r = evaluate('./data/')
+    r = evaluate('./data/', '{"script": "", "profiling": "", "graph": "", "plog": ""}')
     print('还原关键词后结果为:\n' + r)
     logdelete(word, path, flag)
-    r = evaluate('./data/')
+    r = evaluate('./data/', '{"script": "", "profiling": "", "graph": "", "plog": ""}')
     print('删除关键词后结果为:\n' + r + '\n')
 
 def test3():
-    r = evaluate('./data/')
+    r = evaluate('./data/', '{"script": "", "profiling": "", "graph": "", "plog": ""}')
     print('无优化内容时结果为:\n' + r)
     change('./data/profiling/op_summary_0_1_1.csv_test.csv', './data/profiling/summtest.csv')
     change('./data/profiling/op_statistic_0_1_1_test2.csv', './data/profiling/teststat.csv')
-    r = evaluate('./data/')
+    r = evaluate('./data/', '{"script": "", "profiling": "", "graph": "", "plog": ""}')
     print('需优化时结果为:\n' + r + '\n')
     change('./data/profiling/op_summary_0_1_1.csv_test.csv', './data/profiling/summtest.csv')
     change('./data/profiling/op_statistic_0_1_1_test2.csv', './data/profiling/teststat.csv')
