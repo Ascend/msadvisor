@@ -57,8 +57,8 @@ Device管理&&Context管理&&内存管理：判断stream数量是否超过1024�
 场景五：使用aclrtMemcpy接口，未使用aclrtDeviceCanAccessPeer和aclrtDeviceEnablePeerAccess，应输出建议使用aclrtDeviceCanAccessPeer和aclrtDeviceEnablePeerAccess，解决迁移过程中Device的内存复制相关接口的使用约束问题
 ![输入图片说明](docs/img/Api_optimization_suggestion_img4.png)
 
-- [x] 媒体数据处理V1版本接口
-场景一：使用所有媒体数据处理V1版本接口，应输出所有接口的迁移建议。解决310-310p迁移过程中媒体数据处理V1版本接口的差异问题
+- [x] 媒体数据处理V1版本接口 
+场景一：使用所有媒体数据处理V1版本接口，应输出所有接口的迁移建议。解决310-310p迁移过程中媒体数据处理V1版本接口的差异问题  
 ![输入图片说明](docs/img/Api_optimization_suggestion_img5.png)
 功能开发
 - [x] 异步推理  
@@ -67,8 +67,8 @@ Device管理&&Context管理&&内存管理：判断stream数量是否超过1024�
 场景一：使用aclmdlExecuteAsync接口实现异步推理，未使用aclrtSynchronizeStream接口阻塞Host运行，应输出使用aclrtSynchronizeStream接口的相关建议。解决迁移过程中异步推理相关接口的差异问题
 	![输入图片说明](docs/img/Api_optimization_suggestion_img6.png)		 
 场景二：使用aclmdlExecuteAsync接口实现异步推理，使用aclrtSynchronizeStream接口阻塞Host运行，接口使用规范无相关输出。
-- [x] 推理输入内存零拷贝
-场景一：使用acldvppMalloc接口，使用aclrtMemcpy，应输出不需使用DVPP内存的相关建议。解决迁移过程中推理输入内存零拷贝中DVPP内存使用问题
+- [x] 推理输入内存零拷贝  
+场景一：使用acldvppMalloc接口，使用aclrtMemcpy，应输出不需使用DVPP内存的相关建议。解决迁移过程中推理输入内存零拷贝中DVPP内存使用问题  
 ![输入图片说明](docs/img/Api_optimization_suggestion_img7.png)
 ## 3 代码逻辑错误识别及自动调优知识库
 ### 知识库调优方向
