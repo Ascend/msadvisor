@@ -23,7 +23,7 @@ git clone https://gitee.com/ascend/msadvisor.git
 ### 知识库调优方向
 ![知识库调优方向](running_env_tuning/doc/running_env_tuning.PNG)
 ### 数据准备
-将迁移代码路径通过ecosystem/running_env_tuning/RunningEnvTuning.json内的"target_file_address": ""进行配置。
+[x] 将迁移代码路径通过ecosystem/running_env_tuning/RunningEnvTuning.json内的"target_file_address": ""进行配置。
 ### 命令行执行
 ```shell
 msadvisor -c xxx/msadvisor/ecosystem/running_env_tuning/RunningEnvTuning.json 
@@ -34,8 +34,8 @@ msadvisor -c xxx/msadvisor/ecosystem/running_env_tuning/RunningEnvTuning.json
 ### 知识库调优方向
 ![知识库调优方向](Api_optimization_suggestion/doc/Api_optimization_suggestion.PNG)
 ### 数据准备
-将profiling数据放到ecosystem/Api_optimization_suggestion/data/profiling路径下
-将aipp配置文件数据放到ecosystem/Api_optimization_suggestion/data/project路径下
+[x] 将profiling数据放到ecosystem/Api_optimization_suggestion/data/profiling路径下
+[x] 将aipp配置文件数据放到ecosystem/Api_optimization_suggestion/data/project路径下
 ### 命令行执行
 ```shell
 msadvisor -c xxx/msadvisor/ecosystem/Api_optimization_suggestion/model/ApiOptimizationSuggestion.json 
