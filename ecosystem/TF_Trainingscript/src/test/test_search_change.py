@@ -11,6 +11,18 @@ def get_list(second_path):
     datanames = os.listdir(second_path)
     list = []
     for i in datanames:
+        if second_path.find('script') != -1:
+            if i.find('.py') == -1 and i.find('.sh') == -1:
+                continue
+        if second_path.find('profiling') != -1:
+            if i.find('.csv') == -1:
+                continue
+        if second_path.find('graph') != -1:
+            if i.find('.pbtxt') == -1 and i.find('.txt') == -1:
+                continue
+        if second_path.find('log') != -1:
+            if i.find('.log') == -1:
+                continue
         path = os.path.join(second_path, i)
         real_file_path = os.path.realpath(path)
         list.append(real_file_path)
