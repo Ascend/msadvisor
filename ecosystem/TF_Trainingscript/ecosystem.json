@@ -5,7 +5,7 @@
       "session_list": [
         {
           "python_model_path": "src",
-          "parameter": '{"script": "", "profiling": "", "graph": "", "plog": ""}'
+          "parameter": "{"script": "", "profiling": "", "graph": "", "plog": ""}"
         }
       ]
     }
