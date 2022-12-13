@@ -16,10 +16,7 @@
 ## 安装教程
 
 ```shell
-git clone https://gitee.com/ascend/auto-optimizer.git
-cd auto-optimizer
-pip install -r requirements.txt
-python setup.py install
+git clone https://gitee.com/ascend/msadvisor.git
 
 ```
 ## 1 运行环境调优知识库
