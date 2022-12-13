@@ -30,6 +30,8 @@ msadvisor -c xxx/msadvisor/ecosystem/running_env_tuning/RunningEnvTuning.json -d
 
 ```
 ## 2 API使用问题识别及自动调优知识库
+### 知识库调优方向
+![知识库调优方向](Api_optimization_suggestion/doc/Api_optimization_suggestion.PNG)
 
 ## 3 代码逻辑错误识别及自动调优知识库
 
