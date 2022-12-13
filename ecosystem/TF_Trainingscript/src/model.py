@@ -61,5 +61,5 @@ def evaluate(data_path, parameter):
 
 if __name__ == "__main__":
     data_path = "../data/"
-    ret = evaluate(data_path)
+    ret = evaluate(data_path, '{"script": "", "profiling": "", "graph": "", "plog": ""}')
     print(ret)
