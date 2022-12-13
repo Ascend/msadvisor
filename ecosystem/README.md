@@ -6,17 +6,12 @@
 不同应用场景，对性能的要求往往是不同的，常见的推理性能指标包括时延、吞吐两项；建议在没有特殊要求的场景下，以吞吐作为迁移目标。
 因此需要进行必要的前置分析，主要包括业务分析、硬件选型、软硬件兼容性评估、推理业务迁移流程等部分。
 
-## 软件架构
-
-软件架构说明
-
-![软件架构](docs/img/architecture.png)
 
 ## 组件使用说明
 
-- [x]  [graph_refactor](auto_optimizer/graph_refactor/README.md)
-- [x]  [knowledge](docs/knowledge_optimizer_frame.md)
-- [x]  [inference_engine](auto_optimizer/inference_engine/README.md)
+- [x]  [运行环境调优知识库](auto_optimizer/graph_refactor/README.md)
+- [x]  [API使用问题识别及自动调优知识库](docs/knowledge_optimizer_frame.md)
+- [x]  [代码逻辑错误识别及自动调优知识库](auto_optimizer/inference_engine/README.md)
 
 ## 安装教程
 
