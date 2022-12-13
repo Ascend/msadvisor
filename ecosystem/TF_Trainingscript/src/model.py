@@ -14,8 +14,12 @@ from work.log import log
 from work.profiling import profiling
 import sys
 
-def evaluate(data_path, parameter = {'script': '', 'profiling': '', 'graph': '', 'plog': ''}):
-    if isinstance(parameter,dict) != True:
+def evaluate(data_path, parameter):
+    try:
+        parameter = json.loads(parameter)
+    except Exception as e:
+        print(e)
+    if isinstance(parameter, dict) != True:
         print("parameter应为dict格式的数据路径")
         sys.exit()
     """构造result初始值为需要优化"""
