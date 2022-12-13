@@ -20,7 +20,15 @@ git clone https://gitee.com/ascend/msadvisor.git
 
 ```
 ## 1 运行环境调优知识库
+### 知识库调优方向
 
+### 数据准备
+
+### 命令行执行
+```shell
+msadvisor -c xxx/msadvisor/ecosystem/running_env_tuning/RunningEnvTuning.json -d xxx/msadvisor/ecosystem/running_env_tuning/data/knowledge
+
+```
 ## 2 API使用问题识别及自动调优知识库
 
 ## 3 代码逻辑错误识别及自动调优知识库
