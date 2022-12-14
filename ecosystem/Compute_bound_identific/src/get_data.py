@@ -8,12 +8,13 @@ import os
 import csv
 import codecs
 
+from exception import ProfilingPathNotFound, KernelMetaNotFound
+
 
 def get_csv_path(data_path, divice_id):
     profiling_path = os.path.join(data_path, 'profiling')
     if not os.path.exists(profiling_path):
-        print(f"The path of profiling does not exist, and the error path is {profiling_path}")
-        os._exit(0)
+        raise ProfilingPathNotFound(profiling_path)
     path_op_summary = []
     for file_name in os.listdir(profiling_path):
         if 'PROF' in file_name:
@@ -51,8 +52,7 @@ def get_cce_path(data_path):
     lis = []
     profiling_path = os.path.join(data_path, 'kernel_meta')
     if not os.path.exists(profiling_path):
-        print(f"The path of kernel_meta does not exist, and the error path is {profiling_path}")
-        os._exit(0)
+        raise KernelMetaNotFound(profiling_path)
     path_op_summary = []
     for file_name in os.listdir(profiling_path):
         if '.cce' in file_name:

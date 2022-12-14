@@ -16,6 +16,7 @@ from repeat_jud import repeat_jud
 from mask_jud import mask_jud
 from compute_amount_jud import comput_jud
 from high_performance_jud import high_jud
+from exception import ProfilingDataLack, CCEFileNotFound
 
 
 class ExtendResult:
@@ -75,21 +76,16 @@ def evaluate(data_path, parameter='{}'):
     data_path_last = data_path.split(os.path.sep)[-1]
 
     # 判断csv文件是否缺失，并给出提示
-    csv_queshi = 0
+    lack_keys = []
     for i, profil in enumerate(profiling_parameter):
         if profil not in list_total[0].keys():
-            csv_queshi = csv_queshi + 1
-            a = f"Parameter '{profil}' is missing. Please put the profiling file whose parameter (AI Core Metrics) is set to '{set_parameter[i]}' in the '{data_path_last}/profiling/' folder"
-            print('\n')
-            print(a)
-    if csv_queshi > 0:
-        os._exit(0)
+            lack_keys.append(profil)
+    if len(lack_keys) > 0:
+        raise ProfilingDataLack(lack_keys)
 
     # 判断CCE文件是否缺失，并给出提示
     if len(cce_path) == 0:
-        print('\n')
-        print(f"CCE file is mising. Please make sure the '.cce' file is in the '{data_path_last}/kernel_meta/' folder")
-        os._exit(0)
+        raise CCEFileNotFound(f'{data_path_last}/kernel_meta/')
 
     list_comp_bound = comp_bound(list_total)
     if len(list_comp_bound) == 0:
