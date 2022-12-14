@@ -31,7 +31,7 @@ def optimize_onnx(
     optimizer: GraphOptimizer,
     input_model: pathlib.Path,
     output_model: pathlib.Path,
-) -> bool:
+) -> List[str]:
     '''Optimize a onnx file and save as a new file.'''
     try:
         graph = OnnxGraph.parse(input_model.as_posix(), add_name_suffix=True)
@@ -40,12 +40,11 @@ def optimize_onnx(
             if not output_model.parent.exists():
                 output_model.parent.mkdir(parents=True)
             graph.save(output_model.as_posix())
-            return True
-        return False
+        return applied_knowledges
     except RuntimeError as e:
         print(f'{input_model} optimize failed.', file=sys.stderr)
         print(f'{e}', file=sys.stderr)
-        return False
+        return []
 
 
 def evaluate_onnx(
