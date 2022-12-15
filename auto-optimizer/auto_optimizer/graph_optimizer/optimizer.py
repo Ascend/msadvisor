@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from copy import deepcopy
+import logging
 from typing import Callable, Dict, List
 
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
@@ -41,22 +42,25 @@ class GraphOptimizer:
 
     @staticmethod
     def evaluate(graph: BaseGraph, knowledge: KnowledgeBase) -> bool:
-        graph_copy = deepcopy(graph)
+        if not knowledge.pre_process(graph):
+            return False
         while knowledge.has_next_pattern():
             knowledge.next_pattern()
-            match_results = knowledge.match_pattern(graph_copy)
+            match_results = knowledge.match_pattern(graph)
             if match_results is None or len(match_results) == 0:
                 continue
             while knowledge.has_next_apply():
                 knowledge.next_apply()
                 for match_result in match_results:
-                    if knowledge.apply(graph_copy, match_result):
+                    if knowledge.apply(graph, match_result):
                         return True
         return False
 
     @staticmethod
     def optimize(graph: BaseGraph, knowledge: KnowledgeBase) -> bool:
         res = False
+        if not knowledge.pre_process(graph):
+            return False
         while knowledge.has_next_pattern():
             knowledge.next_pattern()
             match_results = knowledge.match_pattern(graph)
@@ -66,7 +70,7 @@ class GraphOptimizer:
                 knowledge.next_apply()
                 for match_result in match_results:
                     res |= knowledge.apply(graph, match_result)
-        return res
+        return knowledge.post_process(graph) and res
 
     def _apply_action(
         self,
@@ -76,11 +80,14 @@ class GraphOptimizer:
         applied_knowledges = []
         for name, knowledge in self.knowledges.items():
             knowledge.reset()
-            if not knowledge.pre_process(graph):
-                continue
-            if action(graph, knowledge):
-                applied_knowledges.append(name)
-            knowledge.post_process(graph)
+            graph_copy = deepcopy(graph)
+            try:
+                if action(graph_copy, knowledge):
+                    graph = graph_copy
+                    applied_knowledges.append(name)
+            except Exception as exc:
+                logging.warning('Error applying knowledge: %s!', name)
+                logging.warning(exc)
         return applied_knowledges
 
     def evaluate_knowledges(self, graph: BaseGraph) -> List[str]:

@@ -86,36 +86,36 @@ class TestKnowledgeSplitLargeKernel(unittest.TestCase):
             (1, False, (1, 3, 1344, 1344), (3, 3), (1, 3, 3, 3), (0, 1, 2, 3), True, True, ),
             (1, False, (1, 3, 133, 133, 133), (3, 3, 3), (1, 3, 3, 3, 3), (0, 1, 2, 3, 4, 5), True, True, ),
             # 1d
-            (10, True, (1, 3, 32), (15, ), (12, 3, 15), (0, 1), True, True, ),
-            (10, True, (16, 3, 32), (15, ), (12, 3, 15), (0, 1), True, True, ),
-            (10, True, (1, 1, 32), (15, ), (1, 1, 15), (0, 1), True, True, ),
-            (10, True, (1, 1, 32), (15, ), (1, 1, 15), (0, 1), False, True, ),
-            (10, True, (1, 1, 32), (15, ), (1, 1, 15), (0, 1), True, False, ),
-            (10, True, (1, 1, 32), (15, ), (1, 1, 15), (0, 1), False, False, ),
+            (10, True, (1, 3, 71), (65, ), (12, 3, 65), (0, 1), True, True, ),
+            (10, True, (16, 3, 71), (65, ), (12, 3, 65), (0, 1), True, True, ),
+            (10, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), True, True, ),
+            (10, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), False, True, ),
+            (10, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), True, False, ),
+            (10, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), False, False, ),
             # 2d
-            (10, True, (1, 1, 32, 32), (15, 15), (1, 1, 15, 15), (0, 1, 2, 3), True, True, ),
-            (10, True, (1, 3, 32, 32), (15, 15), (12, 3, 15, 15), (0, 1, 2, 3), True, True, ),
-            (10, True, (2, 3, 32, 32), (15, 15), (12, 3, 15, 15), (0, 1, 2, 3), True, True, ),
-            (10, True, (1, 1, 32, 32), (15, 15), (1, 1, 15, 15), (0, 1, 2, 3), False, True, ),
-            (10, True, (1, 1, 32, 32), (15, 15), (1, 1, 15, 15), (0, 1, 2, 3), True, False, ),
-            (10, True, (1, 1, 32, 32), (15, 15), (1, 1, 15, 15), (0, 1, 2, 3), False, False, ),
-            (10, True, (1, 1, 64, 64), (15, 15), (1, 1, 15, 15), (0, 0, 0, 0), True, True, ),
-            (10, True, (1, 1, 64, 64), (15, 15), (1, 1, 15, 15), (0, 1, 2, 3), True, True, ),
-            (10, True, (1, 3, 64, 64), (15, 15), (2, 3, 15, 15), (0, 1, 2, 3), True, True, ),
-            (10, True, (1, 1, 64, 64), (15, 3), (1, 1, 15, 3), (0, 1, 2, 3), True, True, ),
-            (10, True, (1, 1, 64, 64), (3, 15), (1, 1, 3, 15), (0, 1, 2, 3), True, True, ),
+            (10, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), True, True, ),
+            (10, True, (1, 3, 71, 71), (65, 65), (12, 3, 65, 65), (0, 1, 2, 3), True, True, ),
+            (10, True, (2, 3, 71, 71), (65, 65), (12, 3, 65, 65), (0, 1, 2, 3), True, True, ),
+            (10, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), False, True, ),
+            (10, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), True, False, ),
+            (10, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), False, False, ),
+            (10, True, (1, 1, 131, 131), (65, 65), (1, 1, 65, 65), (0, 0, 0, 0), True, True, ),
+            (10, True, (1, 1, 131, 131), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), True, True, ),
+            (10, True, (1, 3, 131, 131), (65, 65), (2, 3, 65, 65), (0, 1, 2, 3), True, True, ),
+            (10, True, (1, 1, 131, 131), (65, 3), (1, 1, 65, 3), (0, 1, 2, 3), True, True, ),
+            (10, True, (1, 1, 131, 131), (3, 65), (1, 1, 3, 65), (0, 1, 2, 3), True, True, ),
             # 3d
-            (10, True, (1, 1, 33, 33, 33), (15, 15, 15), (1, 1, 15, 15, 15), (0, 0, 0, 0, 0, 0), True, True, ),
-            (10, True, (1, 1, 33, 33, 33), (15, 15, 15), (1, 1, 15, 15, 15), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 33, 33, 33), (3, 15, 15), (1, 1, 3, 15, 15), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 33, 33, 33), (15, 3, 15), (1, 1, 15, 3, 15), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 33, 33, 33), (15, 15, 3), (1, 1, 15, 15, 3), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 33, 33, 33), (15, 3, 3), (1, 1, 15, 3, 3), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 33, 33, 33), (3, 15, 3), (1, 1, 3, 15, 3), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 33, 33, 33), (3, 3, 15), (1, 1, 3, 3, 15), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 33, 33, 33), (3, 3, 15), (1, 1, 3, 3, 15), (0, 1, 2, 3, 4, 5), False, True, ),
-            (10, True, (1, 1, 33, 33, 33), (3, 3, 15), (1, 1, 3, 3, 15), (0, 1, 2, 3, 4, 5), True, False, ),
-            (10, True, (1, 1, 33, 33, 33), (3, 3, 15), (1, 1, 3, 3, 15), (0, 1, 2, 3, 4, 5), False, False, ),
+            (10, True, (1, 1, 71, 71, 71), (65, 65, 65), (1, 1, 65, 65, 65), (0, 0, 0, 0, 0, 0), True, True, ),
+            (10, True, (1, 1, 71, 71, 71), (65, 65, 65), (1, 1, 65, 65, 65), (0, 1, 2, 3, 4, 5), True, True, ),
+            (10, True, (1, 1, 71, 71, 71), (3, 65, 65), (1, 1, 3, 65, 65), (0, 1, 2, 3, 4, 5), True, True, ),
+            (10, True, (1, 1, 71, 71, 71), (65, 3, 65), (1, 1, 65, 3, 65), (0, 1, 2, 3, 4, 5), True, True, ),
+            (10, True, (1, 1, 71, 71, 71), (65, 65, 3), (1, 1, 65, 65, 3), (0, 1, 2, 3, 4, 5), True, True, ),
+            (10, True, (1, 1, 71, 71, 71), (65, 3, 3), (1, 1, 65, 3, 3), (0, 1, 2, 3, 4, 5), True, True, ),
+            (10, True, (1, 1, 71, 71, 71), (3, 65, 3), (1, 1, 3, 65, 3), (0, 1, 2, 3, 4, 5), True, True, ),
+            (10, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), True, True, ),
+            (10, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), False, True, ),
+            (10, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), True, False, ),
+            (10, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), False, False, ),
         ]
         for count, expect, ishape, kshape, kweight, pads, before, after in tests:
             ishape_s = 'x'.join(str(i) for i in ishape)
@@ -123,16 +123,14 @@ class TestKnowledgeSplitLargeKernel(unittest.TestCase):
             kweight_s = 'x'.join(str(i) for i in kweight)
             pads_s = 'x'.join(str(i) for i in pads)
             name_ = f'split_kernel_in{ishape_s}_ks{kshape_s}_kw{kweight_s}_p{pads_s}_b{int(before)}_a{int(after)}'
-            for threshold in [4, 6, 8]:
+            for threshold in [16, 32, 48]:
                 origin_file = f'onnx/{name_}.onnx'
                 graph_ = make_graph(name_, ishape, kshape, kweight, pads, before, after)
                 graph_.save(origin_file)
                 with self.subTest(name=name_):
                     optimized_file = f'onnx/{name_}_th{threshold}.onnx'
-                    knowledge = KnowledgeSplitLargeKernelConv()
                     # change threshold to small number to speed up unittest
-                    knowledge.threshold = threshold
-                    knowledge.large_kernel_match.threshold = threshold
+                    knowledge = KnowledgeSplitLargeKernelConv(threshold=threshold)
                     graph = OnnxGraph.parse(origin_file)
                     result = optimize(graph, knowledge)
                     self.assertEqual(result, expect)
