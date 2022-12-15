@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import sys
 import pathlib
 from typing import List, Union
@@ -41,9 +42,9 @@ def optimize_onnx(
                 output_model.parent.mkdir(parents=True)
             graph.save(output_model.as_posix())
         return applied_knowledges
-    except RuntimeError as e:
-        print(f'{input_model} optimize failed.', file=sys.stderr)
-        print(f'{e}', file=sys.stderr)
+    except RuntimeError as exc:
+        logging.warning('%s optimize failed.', input_model.as_posix())
+        logging.warning('exception: %s', exc)
         return []
 
 
@@ -58,9 +59,9 @@ def evaluate_onnx(
             print(f'Evaluating {model.as_posix()}')
         graph = OnnxGraph.parse(model.as_posix(), add_name_suffix=True)
         return optimizer.evaluate_knowledges(graph)
-    except RuntimeError as e:
-        print(f'{model} match failed.', file=sys.stderr)
-        print(f'{e}', file=sys.stderr)
+    except RuntimeError as exc:
+        logging.warning('%s match failed.', model.as_posix())
+        logging.warning('exception: %s', exc)
         return []
 
 
@@ -113,10 +114,11 @@ def command_evaluate(
 @arg_output
 @opt_optimizer
 def command_optimize(
-    input_model: Union[pathlib.Path, bytes],
-    output_model: Union[pathlib.Path, bytes],
+    input_model: pathlib.Path,
+    output_model: pathlib.Path,
     optimizer: GraphOptimizer,
 ) -> None:
+    # compability for click < 8.0
     input_model_ = pathlib.Path(input_model.decode()) if isinstance(input_model, bytes) else input_model
     output_model_ = pathlib.Path(output_model.decode()) if isinstance(output_model, bytes) else output_model
     if input_model_ == output_model_:
