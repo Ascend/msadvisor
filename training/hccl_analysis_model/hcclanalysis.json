@@ -6,8 +6,20 @@
         {
           "python_model_path": "./",
           "parameter":{
-              "rank_size": null,
-              "step_num": null
+              "rank_size": 24,
+              "step_num": null,
+              "bucket_name": "obs://0923/00lcm/result/profiler",
+              "download": 1,
+              "access_config": {
+                  "access_key": "",
+                  "secret_access_key": "",
+                  "server": "",
+                  "region_name": "",
+                  "project_id": "",
+                  "iam_endpoint": "",
+                  "obs_endpoint": "",
+                  "modelarts_endpoint": ""
+              }
           }
         }
       ]

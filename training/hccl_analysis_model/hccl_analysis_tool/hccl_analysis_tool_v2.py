@@ -19,15 +19,15 @@ import numpy as np
 
 from utils.constant import Constant
 from utils.profiling_data_check import iter_trace_file_check, step_trace_file_check
-from utils.result import Result
+from training.utils.result import Result
 from utils.generate_html import generate_body
-from utils.log import AD_INFO, AD_ERROR, AD_WARN, ad_log, ad_print_and_log
-from .op_bandwidth_analysis_ import op_bandwidth_analysis
-from .op_communication_time_analysis import op_communication_time_analysis, get_op_communication_time_analysis_result
-from .hccl_analysis_utils import get_communication_op_name_mapping, get_step_trace_info, parse_data, \
+from training.utils.log import AD_INFO, AD_ERROR, AD_WARN, ad_log, ad_print_and_log
+from op_bandwidth_analysis_ import op_bandwidth_analysis
+from op_communication_time_analysis import op_communication_time_analysis, get_op_communication_time_analysis_result
+from hccl_analysis_utils import get_communication_op_name_mapping, get_step_trace_info, parse_data, \
     get_rdma_communication_info, update_transit_size_record, update_record_dict, determine_rdma, HcclConfig
-from .hccl_visualization_utils import get_communication_matrix_info
-from .hccl_data_visualization import HcclVisualization
+from hccl_visualization_utils import get_communication_matrix_info
+from hccl_data_visualization import HcclVisualization
 
 
 class HcclAnalysisTool:
@@ -64,13 +64,14 @@ class HcclAnalysisTool:
             self.cluster_rank_size = len(self.rank_id_list)
         elif self.cluster_rank_size != len(self.rank_id_list):
             ad_print_and_log(AD_ERROR, f"The input rank size is {self.cluster_rank_size},"
-                                       f"but got {len(self.rank_id_list)} step_trace files")
+                                       f"but got {len(self.rank_id_list)} step_trace files. Missing profiling data!")
             return Constant.HCCL_ANALYSIS_ERROR
 
         HcclConfig.init_config(self.cluster_rank_size, Constant.RANK_NUM_PER_SERVER, Constant.RANK_NUM_PER_OS)
 
         ad_log(AD_INFO, f"Analysis hccl data for {len(self.rank_id_list)} devices")
         get_op_info = self.record_op_info(op_info_record, analysis_op_name, valid_step_num, hccl_op_name)
+        ad_log(AD_INFO, f"Operator {analysis_op_name} information recorded successfully")
         if get_op_info == Constant.DATA_PARSE_ERROR:
             return Constant.HCCL_ANALYSIS_ERROR
         if step_num is None:
@@ -80,6 +81,7 @@ class HcclAnalysisTool:
             ad_print_and_log(AD_ERROR, f"There is not step_num like {step_num}, please check")
             return Constant.HCCL_ANALYSIS_ERROR
         iteration_num = self.op_performance_analysis(op_info, html_info, analysis_op_name, iteration_num)
+        ad_log(AD_INFO, f"Operator {analysis_op_name} performance analysis successfully")
         if iteration_num == Constant.DATA_PARSE_ERROR:
             return Constant.HCCL_ANALYSIS_ERROR
         visual_save_path = os.path.realpath(self.hccl_profile_dir)
@@ -307,7 +309,7 @@ class HcclAnalysisTool:
 
         matrix_memory_data, size_exception = \
             self.get_communication_matrix_from_record(link_info_record, self.cluster_rank_size,
-                                                      "transit_size", factor=1024*2)
+                                                      "transit_size", factor=1024**2)
         HcclVisualization.draw_heatmap(
             matrix_memory_data, "Data Transmission Size(MB)", self.cluster_rank_size, visual_save_path)
 
@@ -332,6 +334,6 @@ class HcclAnalysisTool:
 
         exception = type_exception or size_exception or bandwidth_exception or util_exception or time_exception
         if exception:
-            ad_print_and_log(AD_WARN, "An exception ocurs during visualization generation,"
+            ad_print_and_log(AD_WARN, "An exception occurs during visualization generation,"
                                       "The possible cause is that the entered rank_size is incorrect or"
                                       "the step_trace file is missing")

@@ -19,7 +19,6 @@ TIME_INTERVAL = 1
 
 
 class CriticalPathAnalysis:
-
     @staticmethod
     def get_critical_path(event_list):
         sorted_event_by_start_time = sorted(event_list, key=lambda s: float(s[Constant.TS]), reverse=False)

@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import os
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
 from utils.constant import Constant
 

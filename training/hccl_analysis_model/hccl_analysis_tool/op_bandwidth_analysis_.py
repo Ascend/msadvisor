@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utils.result import ExtendResult
+from training.utils.result import ExtendResult
 from utils.constant import Constant
 
 
@@ -89,7 +89,7 @@ def get_op_bandwidth_detail_result(rank_id, band_info, analysis_op_name):
     op_bandwidth_detail_extend_result.get('value').append(hccs_value)
     pcie_value = get_communication_link_value(Constant.PCIE, band_info.get(Constant.PCIE))
     op_bandwidth_detail_extend_result.get('value').append(pcie_value)
-    rdma_value = get_communication_link_value(Constant.RDMA, band_info.get(Constant.PCIE))
+    rdma_value = get_communication_link_value(Constant.RDMA, band_info.get(Constant.RDMA))
     op_bandwidth_detail_extend_result.get('value').append(rdma_value)
     return op_bandwidth_detail_extend_result
 

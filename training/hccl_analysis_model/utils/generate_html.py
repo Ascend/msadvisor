@@ -13,10 +13,7 @@
 # limitations under the License.
 
 import os
-import sys
 from jinja2 import Environment, FileSystemLoader
-
-sys.path.append(os.path.dirname(__file__))
 
 
 def generate_html(body, save_path):

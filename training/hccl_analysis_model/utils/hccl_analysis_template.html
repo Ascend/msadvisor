@@ -1,4 +1,23 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<script language="JavaScript" type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script type="text/javascript">$('img').each(function(idx, ele) {
+        var modal = document.getElementById('img-modal');
+        var imgWrapper = document.getElementById('img-wrapper');
+
+        ele.onclick = function () {
+            modal.style.display = "block";
+            imgWrapper.src = ele.src;
+        };
+
+        // Get the <span> element that closes the modal
+        var closeBtn = document.getElementsByClassName("close")[0];
+
+        // When the user clicks on <span> (x), close the modal
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        };
+    });
+</script>
 <html align='left'>
 <h1> 训练通信算子优化推荐结果 </h1>
     <body>
@@ -62,5 +81,9 @@
     p {
         color: blue;
         text-indent: 70px;
+    }
+    body {
+        position: absolute;
+        white-space: nowrap;
     }
 </style>

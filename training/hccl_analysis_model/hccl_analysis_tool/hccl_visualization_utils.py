@@ -15,8 +15,8 @@
 import json
 
 from utils.constant import Constant
-from .hccl_analysis_utils import parse_data, update_record_dict, determine_rdma, get_rdma_communication_info
-from .hccl_analysis_utils import HcclConfig
+from hccl_analysis_utils import parse_data, update_record_dict, determine_rdma, get_rdma_communication_info
+from hccl_analysis_utils import HcclConfig
 
 
 def get_communication_matrix_info(trace_file_list, communication_maxtrix_info_record, iteration_num):
