@@ -1,211 +1,157 @@
 import re
 import os
-import json
+
+from util import load_json
 import config
-from util import *
+from advisor import Advisor
 
-dir_json = load_json(os.path.join(config.CONFIG_PATH,config.OPTIMIZER_DIR))
-
-
-class ScanFile:  # 传入参数主路径，递归搜索所有py和sh文件，以路径形式加入list返回
-    def __init__(self):
-        pass
-
-    def listdir(self, path, list_name):  # 传入存储的list
-        lst = os.listdir(path)
-        for file in lst:
-            file_path = os.path.join(path, file)
-            if os.path.isdir(file_path):
-                self.listdir(file_path, list_name)
-            if file.endswith('.py') or file.endswith('.sh'):
-                list_name.append(file_path)
+dir_json = load_json(os.path.join(config.CONFIG_PATH, config.OPTIMIZER_DIR))
 
 
-        return list_name
+class TaskOptimizer:
+    task_json = dir_json["dir_1"]
+    rule = task_json["rule"]
+    advice = task_json["advice"]
 
-    def run(self, path):
-        filepath = []
-        result = self.listdir(path, filepath)
-        return result
-
-
-class task_base:
-    def __init__(self, advisor) -> None:
-        advisor.register_final_processor(self.run_final)
-
-    ## 这个方法会对每个文件内容进行处理，path为处理的文件地址，content为字符串列表
-    def run_file(self, advisor, path, content):
-        pass
-
-
-    ## 这个方法会在最后被调用
-    def run_final(self, advisor):
-        pass
-
-
-class task1(task_base):
-    def __init__(self, advisor):
-        super().__init__(advisor)
-        advisor.register_file_processor('.py', self.run_file)
-        self.task_json=dir_json["dir_1"]
-        self.rule=self.task_json["rule"]
-        self.advice=self.task_json["advice"]
-
-    def run_file(self, advisor, path, content):
+    @Advisor.register_file_processor('.py')
+    @staticmethod
+    def run_file(advisor, path, content):
         result = []
         for index in range(len(content)):
             line = content[index]
             if line.lstrip().startswith('#'):
-                continue;
-            for r in self.rule:
-                ret = re.findall(self.rule[r], line)
+                continue
+            for r in TaskOptimizer.rule:
+                ret = re.findall(TaskOptimizer.rule[r], line)
                 if ret == []:
                     continue
-                #下标123分别加入行号，代码段，建议
-                ret[0]="path:"+path # 将匹配内容替换为path
-                ret.append("line:"+str(index+1))
-                ret.append("anchor:"+line.strip())
-                ret.append("advice:"+self.advice[r])#巧妙利用r的对应关系
-                if ret !=[]:
-                    result.append(ret)
-        if result != []:
-            advisor.result_lst.append(result)
-
-        return result
+                result.append([
+                    path,
+                    str(index + 1),
+                    line.strip(),
+                    TaskOptimizer.advice[r]
+                ])
+        advisor.result_general.extend(result)
 
 
-class task2(task_base):
-    def __init__(self, advisor):
-        super().__init__(advisor)
-        advisor.register_file_processor('.py', self.run_file)
-        self.task_json=dir_json["dir_2"]
-        self.rule=self.task_json["rule"]
-        self.advice=self.task_json["advice"]
+class TaskAmp:
+    task_json = dir_json["dir_2"]
+    rule = task_json["rule"]
+    advice = task_json["advice"]
 
-    def run_file(self, advisor, path, content):
+    @Advisor.register_file_processor('.py')
+    @staticmethod
+    def run_file(advisor, path, content):
         result = []
         for index in range(len(content)):
             line = content[index]
             if line.lstrip().startswith('#'):
-                continue;
-            ret = re.findall(self.rule["_1"], line)#这一条匹配很精确，缺点是返回结果只有')'或''
+                continue
+            ret = re.findall(TaskAmp.rule["_1"], line)  # 这一条匹配很精确，缺点是返回结果只有')'或''
             if ret == []:
                 continue
-            if ret[0]==')' :
-                #下标123分别加入行号，代码段，建议
-                ret[0]="path:"+path# 将匹配内容替换为path
-                ret.append("line:"+str(index+1))
-                ret.append("anchor:"+line.strip())
-                ret.append("advice:"+self.advice["_1"])
-                if ret !=[]:
-                    result.append(ret)
+            if ret[0] == ')':
+                # 下标123分别加入行号，代码段，建议
+                result.append([
+                    path,
+                    str(index + 1),
+                    line.strip(),
+                    TaskAmp.advice["_1"]
+                ])
+        advisor.result_general.extend(result)
 
-        if result != []:
-            advisor.result_lst.append(result)
 
-        return result
+class TaskOperators:
+    task_json = dir_json["dir_3"]
+    rule = task_json["rule"]
+    advice = task_json["advice"]
 
-class task3(task_base):
-    def __init__(self, advisor):
-        super().__init__(advisor)
-        advisor.register_file_processor('.py', self.run_file)
-        self.task_json=dir_json["dir_3"]
-        self.rule=self.task_json["rule"]
-        self.advice=self.task_json["advice"]
-
-    def run_file(self, advisor, path, content):
+    @Advisor.register_file_processor('.py')
+    @staticmethod
+    def run_file(advisor, path, content):
         result = []
         for index in range(len(content)):
             line = content[index]
             if line.lstrip().startswith('#'):
-                continue;
-            for r in self.rule:
-                ret = re.findall(self.rule[r], line)
+                continue
+            for r in TaskOperators.rule:
+                ret = re.findall(TaskOperators.rule[r], line)
                 if ret == []:
                     continue
-                #下标123分别加入行号，代码段，建议
-                ret[0]="path:"+path # 将匹配内容替换为path
-                ret.append("line:"+str(index+1))
-                ret.append("anchor:"+line.strip())
-                ret.append("advice:"+self.advice[r])#巧妙利用r的对应关系
-                if ret !=[]:
-                    result.append(ret)
+                result.append([
+                    path,
+                    str(index + 1),
+                    line.strip(),
+                    TaskOperators.advice[r]
+                ])
+        advisor.result_general.extend(result)
 
-        if result != []:
-            advisor.result_lst.append(result)
-        return result
 
-class task4(task_base):
-    def __init__(self, advisor):
-        super().__init__(advisor)
-        advisor.register_file_processor('.sh', self.run_file)
-        self.task_json=dir_json["dir_4"]
-        self.rule1=self.task_json["rule1"]
-        self.rule2=self.task_json["rule2"]
-        self.advice=self.task_json["advice"]
+class TaskParemeter:
+    task_json = dir_json["dir_4"]
+    rule1 = task_json["rule1"]
+    rule2 = task_json["rule2"]
+    advice = task_json["advice"]
 
-    def run_file(self, advisor, path, content):
+    @Advisor.register_file_processor('.sh')
+    @staticmethod
+    def run_file(advisor, path, content):
         for index in range(len(content)):
             line = content[index]
             if line.lstrip().startswith('#'):
-                continue;
-            for r in self.rule1:
-                ret1 = re.findall(self.rule1[r], line)
+                continue
+            for r in TaskParemeter.rule1:
+                ret1 = re.findall(TaskParemeter.rule1[r], line)
                 if ret1 != []:
                     advisor.vars['lr'] = ret1
                     advisor.vars['lr_path'] = path
-                    advisor.vars['lr_line'] = index + 1
+                    advisor.vars['lr_line'] = str(index + 1)
                     advisor.vars['lr_anchor'] = line.strip()
 
-                ret2 = re.findall(self.rule2[r], line)
+                ret2 = re.findall(TaskParemeter.rule2[r], line)
                 if ret2 != []:
                     advisor.vars['bs'] = ret2
                     advisor.vars['bs_path'] = path
-                    advisor.vars['bs_line'] = index + 1
+                    advisor.vars['bs_line'] = str(index + 1)
                     advisor.vars['bs_anchor'] = line.strip()
 
-    def run_final(self, advisor):
-        result = []
+    @Advisor.register_final_processor
+    @staticmethod
+    def run_final(advisor):
         ret = []
-        if 'lr_path' in advisor.vars:
-          ret.append(f"lr path: {advisor.vars['lr_path']}")
-          ret.append(f"lr line: {advisor.vars['lr_line']}")
-          ret.append(f"lr anchor: {advisor.vars['lr_anchor']}")
-          ret.append(f"bs path: {advisor.vars['bs_path']}")
-          ret.append(f"bs line: {advisor.vars['bs_line']}")
-          ret.append(f"bs anchor: {advisor.vars['bs_anchor']}")
-          ret.append(f"advice: {self.advice['_1']}")
-        if ret !=[]:
-            result.append(ret)
-        if result != []:
-            advisor.result_lst.append(result)
+        if 'lr_path' in advisor.vars or 'bs_path' in advisor.vars:
+            ret.append(advisor.vars.get('lr_path', ''))
+            ret.append(advisor.vars.get('lr_line', ''))
+            ret.append(advisor.vars.get('lr_anchor', ''))
+            ret.append(advisor.vars.get('bs_path', ''))
+            ret.append(advisor.vars.get('bs_line', ''))
+            ret.append(advisor.vars.get('bs_anchor', ''))
+            ret.append(TaskParemeter.advice['_1'])
+            advisor.result_lrbs.append(ret)
 
-class task5(task_base):
-    def __init__(self, advisor):
-        super().__init__(advisor)
-        advisor.register_file_processor('.sh', self.run_file)
-        self.task_json=dir_json["dir_5"]
-        self.rule=self.task_json["rule"]
-        self.advice=self.task_json["advice"]
 
-    def run_file(self, advisor, path, content):
+class TaskTasket:
+    task_json = dir_json["dir_5"]
+    rule = task_json["rule"]
+    advice = task_json["advice"]
+
+    @Advisor.register_file_processor('.sh')
+    @staticmethod
+    def run_file(advisor, path, content):
         for index in range(len(content)):
             line = content[index]
-            for r in self.rule:
-                ret = re.findall(self.rule[r], line)
+            if line.lstrip().startswith('#'):
+                continue
+            for r in TaskTasket.rule:
+                ret = re.findall(TaskTasket.rule[r], line)
                 if ret != []:
-                    advisor.vars['temp'] = 1
-                advisor.vars['file_path'] = path
+                    advisor.vars['file_path'] = path
 
-
-    def run_final(self, advisor):
-        result = []
+    @Advisor.register_final_processor
+    @staticmethod
+    def run_final(advisor):
         ret = []
-        if not 'temp' in advisor.vars:
-            if 'file_path' in advisor.vars:
-                ret.append(f"lr path: {advisor.vars['file_path']}")
-                ret.append(f"advice: {self.advice['_1']}")
-        if ret !=[]:
-            result.append(ret)
-        if result != []:
-            advisor.result_lst.append(result)
+        if 'file_path' in advisor.vars:
+            ret.append(advisor.vars.get('file_path', ''))
+            ret.append(TaskTasket.advice['_1'])
+            advisor.result_taskset.append(ret)
