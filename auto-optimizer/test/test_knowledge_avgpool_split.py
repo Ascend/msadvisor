@@ -71,13 +71,6 @@ class TestKnowledgeDynamicReshape(unittest.TestCase):
                 self.assertTrue(np.all(node.attrs['kernel_shape'] == split_result[i]))
                 self.assertTrue(np.all(node.attrs['strides'] == split_result[i]))
 
-            input0 = np.random.randn(1, 8, 32, 64).astype(np.float32)
-            out0 = inference(origin_file, [input0])
-            out1 = inference(optimized_file, [input0])
-            self.assertTrue(len(out0) == len(out1))
-            for lmatrix, rmatrix in zip(out0, out1):
-                self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
-
             result = optimize(graph, knowledge)
             self.assertFalse(result)
 

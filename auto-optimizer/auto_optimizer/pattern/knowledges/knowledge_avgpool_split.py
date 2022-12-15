@@ -132,7 +132,6 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
             # old AveragePool --> AveragePool, AveragePool, ...
             prev_node = new_node
         # remove old AveragePool
-        new_node.outputs[0] = node.outputs[0]
         graph.remove(node.name)
         return True
 
