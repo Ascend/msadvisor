@@ -71,7 +71,7 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
             if n = 3, the mini factor is 1, because 3 cannot be divided
         '''
         factor = 2
-        while factor * factor <= mid:
+        while factor * factor <= n:
             if n % factor == 0:
                 return (factor, n // factor)
             factor += 1
