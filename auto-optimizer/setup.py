@@ -14,7 +14,7 @@ setup(
     long_description_content_type='text/markdown',
     url='https://gitee.com/ascend/auto-optimizer',
     packages=find_packages(),
-    package_data={'': ['LICENSE']},
+    package_data={'': ['LICENSE', 'model.cfg']},
     license='Apache-2.0',
     keywords='auto optimizer',
     install_requires=required,

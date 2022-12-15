@@ -56,18 +56,79 @@ class KnowledgeDynamicReshape(KnowledgeBase):
             raise RuntimeError('data type: {} not supported.'.format(input_dtype))
         return data
 
+    def _get_input_shape_range(self, dynamic_axes):
+        '''
+        parse input_shape_range from model.cfg, if none, then use default range [1, 64]
+        '''
+        res = {}
+        for axes in dynamic_axes:
+            res[axes] = [1, 64]
+        input_shape_range = '' # 'n,h,w=1~100,-1,64*'
+        cfg_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../model.cfg')
+        if not os.path.exists(cfg_path):
+            return res
+        with open(cfg_path) as f:
+            contents = f.readlines()
+        for line in contents:
+            if line.startswith('input_shape_range'):
+                pos = line.find('#')
+                line = line[:pos]
+                pos = line.find('=')
+                if pos == -1:
+                    break
+                input_shape_range = line[pos + 1:].replace(' ', '')
+                if input_shape_range.startswith('\''):
+                    input_shape_range = input_shape_range[1:]
+                if input_shape_range.endswith('\''):
+                    input_shape_range = input_shape_range[:-1]
+        shape_array = input_shape_range.split('=')
+        if len(shape_array) != 2:
+            return res
+        inputs_name = shape_array[0].split(',')
+        inputs_shape = shape_array[1].split(',')
+        if len(inputs_name) != len(inputs_shape) or len(inputs_name) == 0:
+            return res
+        for i, name in enumerate(inputs_name):
+            if res.get(name) is None:
+                continue
+            shape_range = inputs_shape[i]
+            rng = shape_range.split('~')
+            if len(rng) == 1:
+                if rng[0].isdigit():
+                    res[name] = [int(rng[0]), int(rng[0])]
+                elif rng[0].endswith('*') and rng[0][:-1].isdigit():
+                    val = []
+                    for j in range(self._dump_num):
+                        val.append((j + 1) * int(rng[0][:-1]))
+                    res[name] = val
+            elif len(rng) == 2:
+                if rng[0].isdigit() and rng[1].isdigit():
+                    res[name] = [int(rng[0]), int(rng[1])]
+            else:
+                continue
+        return res
+
     def _generate_dump_data(self, graph: BaseGraph, dynamic_axes):
         '''
         generate operator dump by inference base on skl2onnx module
         '''
+        inputs_shape_range = self._get_input_shape_range(dynamic_axes)
         for j in range(self._dump_num):
             real_dump_path = f'{self._dump_path}{j}'
             if not os.path.exists(real_dump_path):
                 os.makedirs(real_dump_path, 0o700)
             dynamic_input = {}
             # generate dynamic input shape
-            for i, axis in enumerate(dynamic_axes):
-                dynamic_input[axis] = (j + i + 1) * (j + i + 2)
+            for axis in dynamic_axes:
+                rng = inputs_shape_range.get(axis)
+                if rng is None:
+                    rng = [1, 64] # default range
+                if len(rng) == self._dump_num:
+                    dynamic_input[axis] = rng[j]
+                elif rng[0] == rng[1]:
+                    dynamic_input[axis] = rng[0]
+                else:
+                    dynamic_input[axis] = np.random.randint(rng[0], rng[1], 1, dtype = np.int32)[0]
             # generate operator dump
             input_data = []
             for x in graph.inputs:
