@@ -1,17 +1,17 @@
 {
     "dir_1": {
         "rule": {
-            "_1": "\\.SGD\\(*",
-            "_2": "\\.Adam\\(*"
+            "_1": "\\.SGD\\(",
+            "_2": "\\.Adam\\("
         },
         "advice": {
             "_1": "建议使用NpuFusedSGD接口优化性能",
-            "_2": "建议使用NpuFusedadam接口优化性能"
+            "_2": "建议使用NpuFusedAdam接口优化性能"
         }
     },
     "dir_2": {
         "rule": {
-            "_1": "amp\\.initialize\\(*((?!combine_grad=True).)*$"
+            "_1": "\\bamp\\.initialize\\(*((?!combine_grad\\s*=\\s*True).)*$"
         },
         "advice": {
             "_1": "建议打开amp融合开关combine_grad=True以提升性能"
@@ -19,19 +19,19 @@
     },
     "dir_3": {
         "rule": {
-            "_1": "(?<!pt)iou",
-            "_2": "ptiou",
-            "_3": "nms",
-            "_4": "single_level_responsible_flags",
-            "_5": "yolo_bbox_coder",
-            "_6": "delta_xywh_bbox_coder",
-            "_7": "channel_shuffle",
-            "_8": "Prefetcher",
-            "_9": "Dropout",
-            "_10": "LabelSmoothingCrossEntropy",
-            "_11": "ROIAlign",
-            "_12": "DCNv2",
-            "_13": "LSTM"
+            "_1": "\\biou\\b",
+            "_2": "\\bptiou\\b",
+            "_3": "\\bnms\\b",
+            "_4": "\\bsingle_level_responsible_flags\\b",
+            "_5": "\\byolo_bbox_coder\\b",
+            "_6": "\\bdelta_xywh_bbox_coder\\b",
+            "_7": "\\bchannel_shuffle\\b",
+            "_8": "\\bPrefetcher\\b",
+            "_9": "\\bDropout\\b",
+            "_10": "\\bLabelSmoothingCrossEntropy\\b",
+            "_11": "\\bROIAlign\\b",
+            "_12": "\\bDCNv2\\b",
+            "_13": "\\bLSTM\\b"
         },
         "advice": {
             "_1": "建议使用npu_iou来提高计算力",
@@ -51,24 +51,16 @@
     },
     "dir_4": {
         "rule1": {
-            "_1": "lr = (.+)",
-            "_2": "learning_rate = (.+)",
-            "_3": "lr (.+)",
-            "_4": "learning-rate = (.+)",
-            "_5": "lr=(.+)",
-            "_6": "learning_rate=(.+)",
-            "_7": "lr(.+)",
-            "_8": "learning-rate=(.+)"
+            "_1": "lr=(.+)",
+            "_2": "learning_rate=(.+)",
+            "_3": "lr=(.+)",
+            "_4": "learning_rate=(.+)"
         },
         "rule2": {
-            "_1": "batch_size = (.*)",
-            "_2": "batch_size = (.*)",
-            "_3": "batch_size = (.*)",
-            "_4": "batch_size = (.*)",
-            "_5": "batch_size = (.*)",
-            "_6": "batch_size = (.*)",
-            "_7": "batch_size = (.*)",
-            "_8": "batch_size = (.*)"
+            "_1": "batch_size=(.*)",
+            "_2": "batch_size=(.*)",
+            "_3": "bs=(.*)",
+            "_4": "bs=(.*)"
         },
         "advice": {
             "_1": "建议同比例增大Batch_Size与Learning_rate，以提升NPU资源的利用率"
@@ -76,7 +68,7 @@
     },
     "dir_5": {
         "rule": {
-            "_1": "taskset"
+            "_1": "\\btaskset\\b"
         },
         "advice": {
             "_1": "建议在运行模型时使用taskset绑核起任务"
