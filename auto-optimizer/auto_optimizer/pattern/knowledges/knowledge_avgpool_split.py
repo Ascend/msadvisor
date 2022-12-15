@@ -18,7 +18,7 @@ import numpy as np
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.pattern.pattern import Pattern, MATCH_PATTERN, MatchBase
 from auto_optimizer.pattern.matcher import MatchResult
-from auto_optimizer.graph_refactor.interface.base_graph import (BaseGraph, PlaceHolder)
+from auto_optimizer.graph_refactor.interface.base_graph import (BaseGraph, Node)
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 
@@ -64,8 +64,11 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
 
     def _calculate_mini_factor(self, n):
         '''
-        calculate mini factor which number divided, the factor must large and equal to 2
-        for example, n = 10, the mini factor is 2, n = 3, the mini factor is 3
+        calculate mini factor which number divided, if number can not be divided, then the factor is 1
+        for example: 
+            if n = 10, the mini factor is 2
+            if n = 55, the mini factor is 5
+            if n = 3, the mini factor is 1, because 3 cannot be divided
         '''
         factor = 2
         mid = n / 2
@@ -75,7 +78,7 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
             factor += 1
         if factor >= mid:
             # cannot split n
-            return (n, n)
+            return (1, n)
         return (factor, n / factor)
 
     def _calculate_split_func(self, node: BaseNode):
@@ -91,12 +94,12 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
             if h >= w and h_can_split:
                 # split h
                 factor, h = self._calculate_mini_factor(h)
-                h_can_split = False if factor == h else True
+                h_can_split = False if factor == 1 else True
                 tmp_h *= factor
             elif w_can_split:
                 # split w
                 factor, w = self._calculate_mini_factor(w)
-                w_can_split = False if factor == w else True
+                w_can_split = False if factor == 1 else True
                 tmp_w *= factor
             else:
                 # split failed
@@ -122,13 +125,14 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
             attrs['strides'] = np.array(splits[i], dtype = np.int64)
             # add new AveragePool
             new_node = graph.add_node(f'{node.name}_{i}', 'AveragePool', attrs = attrs)
-            if isinstance(prev_node, PlaceHolder):
-                graph.insert_node(node, new_node, mode = 'before', refer_index = 0)
+            if not isinstance(prev_node, Node):
+                graph.insert_node(node.name, new_node, mode = 'before', refer_index = 0)
             else:
                 graph.insert_node(prev_node.name, new_node, mode = 'after', refer_index = 0)
             # old AveragePool --> AveragePool, AveragePool, ...
             prev_node = new_node
         # remove old AveragePool
+        new_node.outputs[0] = node.outputs[0]
         graph.remove(node.name)
         return True
 
