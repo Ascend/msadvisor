@@ -11,3 +11,4 @@ from .knowledge_merge_casts import KnowledgeMergeCasts
 from .knowledge_empty_slice_fix import KnowledgeEmptySliceFix
 from .knowledge_dynamic_reshape import KnowledgeDynamicReshape
 from .knowledge_gather_to_split import KnowledgeGatherToSplit
+from .knowledge_avgpool_split import KnowledgeAvgPoolSplit
