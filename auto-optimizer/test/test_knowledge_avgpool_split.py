@@ -31,8 +31,8 @@ def make_dynamic_model(onnx_name, x, attrs):
     graph.update_map()
     return graph
 
-class TestKnowledgeDynamicReshape(unittest.TestCase):
-    def test_basic_dynamic_reshape(self):
+class TestKnowledgeAvgPoolSplit(unittest.TestCase):
+    def test_basic_avgpool_split(self):
         usecases = [
             # ceil_mode, kernel_shape, pads, strides, kernel_shape split result
             (0, [32, 64], [0, 0, 0, 0], [32, 64], [[8, 16], [4, 4]]),

@@ -71,15 +71,12 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
             if n = 3, the mini factor is 1, because 3 cannot be divided
         '''
         factor = 2
-        mid = n / 2
-        while factor < mid:
+        while factor * factor <= mid:
             if n % factor == 0:
-                break
+                return (factor, n // factor)
             factor += 1
-        if factor >= mid:
-            # cannot split n
-            return (1, n)
-        return (factor, n / factor)
+        # cannot split n
+        return (1, n)
 
     def _calculate_split_func(self, node: BaseNode):
         '''
@@ -106,9 +103,9 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
                 return []
             if h * w > KERNEL_MAX_SIZE:
                 continue
-            splits.append([int(h), int(w)])
+            splits.append([h, w])
             if tmp_h * tmp_w < KERNEL_MAX_SIZE:
-                splits.append([int(tmp_h), int(tmp_w)])
+                splits.append([tmp_h, tmp_w])
                 break
             h, w = tmp_h, tmp_w
             tmp_h, tmp_w = 1, 1
@@ -119,10 +116,10 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
         optimize AveragePool to multi little AveragePool by split kernel_shape and strides
         '''
         prev_node = graph.get_prev_node(node.inputs[0])
-        for i, _ in enumerate(splits):
+        for i, split in enumerate(splits):
             attrs = copy.deepcopy(node.attrs)
-            attrs['kernel_shape'] = np.array(splits[i], dtype = np.int64)
-            attrs['strides'] = np.array(splits[i], dtype = np.int64)
+            attrs['kernel_shape'] = np.array(split, dtype = np.int64)
+            attrs['strides'] = np.array(split, dtype = np.int64)
             # add new AveragePool
             new_node = graph.add_node(f'{node.name}_{i}', 'AveragePool', attrs = attrs)
             if not isinstance(prev_node, Node):
