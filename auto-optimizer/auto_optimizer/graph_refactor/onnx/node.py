@@ -23,7 +23,7 @@ try:
     tensor_dtype_to_np_dtype = helper.tensor_dtype_to_np_dtype
     np_dtype_to_tensor_dtype = helper.np_dtype_to_tensor_dtype
 
-except AttributeError:
+except AttributeError as e:
     # onnx.__version__ before '1.13.0'
     from onnx import mapping
 
