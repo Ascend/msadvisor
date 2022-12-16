@@ -41,14 +41,11 @@ class_type = {'op': '0', 'model': '1'}
 error_code = {'success': '0', 'optimized': '1'}
 
 def find_model_file(path, suffix = '.onnx'):
-    file_list = []
-    files = os.listdir(path)
-    for filename in files:
-        if filename.endswith(suffix):
-            file_list.append(filename)
-    return file_list
+    if not os.path.isdir(path):
+        return []
+    return list(filter(lambda f: f.endswith(suffix), os.listdir(path)))
 
-def evaluate(data_path, parameter = {'model_file': ''}):
+def evaluate(data_path, parameter = '{}'):
     """
     interface function called by msadvisor
     Args:
@@ -60,41 +57,37 @@ def evaluate(data_path, parameter = {'model_file': ''}):
     """
     result = Result()
     result.class_type = class_type['model']
-    result.error_code = error_code['success']
-    result.summary = "The current model is well optimized."
+    result.error_code = error_code['optimized']
+    result.summary = "All models are well optimized."
 
-    datapath = os.path.realpath(data_path)
-    onnx_path = None
-    sub_path = 'onnx'
-    model_file = parameter['model_file']#params.get("model_file")
-    
-    if model_file is None or model_file == '':
-        # find onnx model in datapath
-        model_file_list = find_model_file(os.path.join(datapath, sub_path)) 
-        if not model_file_list:
-            raise RuntimeError('model file not exist in datapath')   
-        else:
-            for model_file in model_file_list:
-                onnx_path = os.path.join(os.path.join(datapath, sub_path), model_file)
-                onnx_model = add_pad(onnx_path)
-                onnx.save(onnx_model,os.path.join(os.path.join(datapath,"results"),model_file))
+    data_path = os.path.realpath(data_path)
+    parameter = json.loads(parameter)
+    if isinstance(parameter, dict) and 'model_file' in parameter:
+        model_files = [parameter['model_file']]
     else:
-        # check onnx model do or not exist
-        onnx_path = os.path.join(os.path.join(datapath, sub_path), model_file)
-        if not os.path.isfile(onnx_path):
-            onnx_path = os.path.realpath(os.path.join(datapath, model_file))
-            if not os.path.isfile(onnx_path):
-                raise RuntimeError('model file not exist, filename={}'.format(model_file))
-            sub_path = ''
-        onnx_model = add_pad(onnx_path)
-        onnx.save(onnx_model,os.path.join(os.path.join(datapath,"results"),model_file))
-    if result.error_code == error_code['optimized']:
-        ide_out_path = os.path.join(os.path.join(onnx_path,"results"),model_file)
-        result.summary = "The current model has already been optimized, \
-            the optimized model path is:%s" % ide_out_path
+        model_files = find_model_file(data_path)
+
+    extend_result = ExtendResult()
+
+    for model_file in model_files:
+        model_path = os.path.join(data_path, model_file)
+        onnx_model = add_pad(onnx.load(model_path))
+        if onnx_model:
+            model_name, ext = os.path.splitext(model_file)
+            output_path = os.path.join(data_path, f'{model_name}_optimized{ext}')
+            onnx.save(onnx_model, output_path)
+            extend_result.data_type.append('0')
+            extend_result.value.append(f'{model_path} need to be optimized')
+    
+    if extend_result.value:
+        extend_result.extend_title = '{} model(s) can be optimized by LayerNorm fusion' \
+                                     .format(len(extend_result.value))
+        result.error_code = error_code['success']
+        result.summary = extend_result.extend_title
+        result.extend_result.append(extend_result)
     return result.generate()
 
 if __name__ == "__main__":
-    data_path = "../data" 
+    data_path = "../data/onnx" 
     ret = evaluate(data_path)
     print("sample in:{} out:{}".format(data_path, ret))
