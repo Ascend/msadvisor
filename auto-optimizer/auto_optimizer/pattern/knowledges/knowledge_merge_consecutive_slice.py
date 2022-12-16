@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict
+from typing import List, Dict, Optional
 import logging
 import numpy as np
 
@@ -142,12 +142,12 @@ class KnowledgeMergeConsecutiveSlice(KnowledgeBase):
             logging.info("Some matching node have been removed or renamed, failed to optimizd.")
             return False
 
-        input_initializers = [
+        input_initializers: List[List[Optional[Initializer]]] = [
             [
                 graph.get_node(inp, node_type=Initializer) for inp in node.inputs[1:]
             ] for node in slices_total
         ]
-        if any(inp is None for inp in input_initializers):
+        if any(inp is None for lst in input_initializers for inp in lst):
             logging.info("Failed to get slices parameters.")
             return False
         input_values = [[inp.value for inp in lst] for lst in input_initializers]
