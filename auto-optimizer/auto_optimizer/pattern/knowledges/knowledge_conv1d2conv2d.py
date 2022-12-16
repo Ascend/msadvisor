@@ -23,7 +23,7 @@ from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Initializer, Node
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 from auto_optimizer.pattern.knowledges.utils import (insert_squeeze, insert_unsqueeze)
 
@@ -38,7 +38,9 @@ class Conv1dMatch(MatchBase):
         if not op.eq(node.op_type, 'Conv'):
             return False
         if len(node.inputs) > 1:
-            weight = graph[node.inputs[1]]
+            weight = graph.get_node(node.inputs[1], node_type=Initializer)
+            if weight is None or weight.value is None:
+                return False
             return len(weight.value.shape) == 3
         return False
 
