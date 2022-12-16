@@ -62,7 +62,8 @@ def find_layernorm(onnx_model,input_node):
         and node.output[0] == input_node[i+2].input[0] and input_node[i+1].output[0] == input_node[i+2].input[1]     
         and input_node[i+2].output[0] == input_node[i+3].input[0] and input_node[i+4].output[0] == input_node[i+5].input[0]
         and input_node[i+2].output[0] == input_node[i+7].input[0] and input_node[i+6].output[0] == input_node[i+7].input[1]):
-            count = modify(onnx_model, input_node, 7, i, count)     
+            count = modify(onnx_model, input_node, 7, i, count)
+    return count     
 
 def modify(onnx_model, input_node, index, i, count):   
     node = input_node[i]
@@ -133,10 +134,14 @@ def create_slice(onnx_model, node, out_idx, start, end, len):
     onnx_model.graph.initializer.append(end_t)
     return slice_node
 
-def add_pad(model_path):
-    onnx_model = onnx.load(model_path)
+def add_pad(onnx_model):
+    onnx_model.graph.ClearField('value_info')
     onnx_model = onnx.shape_inference.infer_shapes(onnx_model)
     input_node = get_info(onnx_model)
-    find_layernorm(onnx_model,input_node)
-    onnx.checker.check_model(onnx_model)
-    return onnx_model
+    if find_layernorm(onnx_model,input_node):
+        onnx.checker.check_model(onnx_model)
+        onnx_model.graph.ClearField('value_info')
+        onnx_model = onnx.shape_inference.infer_shapes(onnx_model)
+        return onnx_model
+    else:
+        return None
