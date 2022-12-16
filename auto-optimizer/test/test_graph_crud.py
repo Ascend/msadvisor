@@ -310,7 +310,6 @@ class TestGraphCrud(unittest.TestCase):
         self.graph_1['ini_0'] = test_input_0  # ini -> input
         self.graph_1['Node_1'] = test_input_1  # op -> input
         self.graph_1['Node_2'] = test_node  # op -> op
-        self.graph_1.save('g.onnx')
         self.assertEqual(self.graph_1, target)
 
 

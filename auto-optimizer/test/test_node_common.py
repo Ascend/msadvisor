@@ -13,12 +13,21 @@
 # limitations under the License.
 
 import unittest
+from typing import cast
 
 import numpy as np
-from onnx import helper
-from onnx.mapping import NP_TYPE_TO_TENSOR_TYPE
+from onnx import helper, numpy_helper
 
 from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
+
+try:
+    np_dtype_to_tensor_dtype = helper.np_dtype_to_tensor_dtype
+    
+except AttributeError:
+    from onnx import mapping
+
+    def np_dtype_to_tensor_dtype(np_dtype: np.dtype) -> int:
+        return cast(int, mapping.NP_TYPE_TO_TENSOR_TYPE[np_dtype])
 
 
 def is_node_equal(node1, node2, msg=None):
@@ -95,19 +104,20 @@ class TestNodeCommon(unittest.TestCase):
 
     def test_initializer_parse(self):
         test_proto = helper.make_tensor(
-            'test_ini', NP_TYPE_TO_TENSOR_TYPE[np.dtype('int32')], (1, 5), np.array([1, 2, 3, 4, 5]))
+            'test_ini', np_dtype_to_tensor_dtype(np.dtype('int32')), (1, 5), np.array([1, 2, 3, 4, 5]))
         test_init = OnnxInitializer.parse(test_proto)
         self.assertEqual(test_init, create_node('OnnxInitializer'))
 
     def test_initializer_to_proto(self):
         ini = create_node('OnnxInitializer')
         test_proto = OnnxInitializer.proto(ini)
-        self.assertEqual(test_proto, helper.make_tensor(
-            'test_ini', NP_TYPE_TO_TENSOR_TYPE[np.dtype('int32')], (1, 5), np.array([1, 2, 3, 4, 5])))
+        tensor_proto = numpy_helper.from_array(ini.value)
+        tensor_proto.name = ini.name
+        self.assertEqual(test_proto, tensor_proto)
 
     def test_placeholder_parse(self):
         test_proto = helper.make_tensor_value_info(
-            'test_ph', NP_TYPE_TO_TENSOR_TYPE[np.dtype('float32')], (1, 3, 224, 224))
+            'test_ph', np_dtype_to_tensor_dtype(np.dtype('float32')), (1, 3, 224, 224))
         test_ph = OnnxPlaceHolder.parse(test_proto)
         self.assertEqual(test_ph, create_node('OnnxPlaceHolder'))
 
@@ -115,7 +125,7 @@ class TestNodeCommon(unittest.TestCase):
         ph = create_node('OnnxPlaceHolder')
         test_proto = OnnxPlaceHolder.proto(ph)
         self.assertEqual(test_proto, helper.make_tensor_value_info(
-            'test_ph', NP_TYPE_TO_TENSOR_TYPE[np.dtype('float32')], (1, 3, 224, 224)))
+            'test_ph', np_dtype_to_tensor_dtype(np.dtype('float32')), (1, 3, 224, 224)))
 
 
 if __name__ == "__main__":
