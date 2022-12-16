@@ -480,7 +480,7 @@ class BaseGraph(ABC):
                                 self._next_map[in_name] = [next_node]
                             else:
                                 self._next_map[in_name].append(next_node)
-                    else:
+                    elif self._node_map.get(out_name, None):
                         ph = self[out_name]
                         ph.name = in_name
             # update prev and next map, outputs of node no long exist
