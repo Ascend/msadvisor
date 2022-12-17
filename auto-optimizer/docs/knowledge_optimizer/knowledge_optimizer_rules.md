@@ -273,3 +273,27 @@ graph TD
         A --> B(Node1)
     end
 ```
+---
+
+## Split算子替换Gather算子(KnowledgeGatherToSplit)
+
+### 原理
+
+部分推理模型中使用了多个Gather算子对同一个数据进行切分，经分析Gather算子indices连续的情况下，例如该场景：y1=x[:3]，y2=x[3:6]，y3=x[6:9]，可使用一个Split算子进行替换。
+
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        X(Node0) --> D(Split)
+        D --> E(Node1)
+        D --> E(Node2)
+        D --> E(Node3)
+    end
+
+    subgraph Before
+        Z(Node0) -->A(Resize mode:linear)
+        A --> B(Node1)
+    end
+```
