@@ -288,8 +288,8 @@ graph TD
     subgraph After
         X(Node0) --> D(Split)
         D --> E(Node1)
-        D --> E(Node2)
-        D --> E(Node3)
+        D --> F(Node2)
+        D --> G(Node3)
     end
 
     subgraph Before
