@@ -293,7 +293,11 @@ graph TD
     end
 
     subgraph Before
-        Z(Node0) -->A(Resize mode:linear)
-        A --> B(Node1)
+        Z(Node0) --> A(Gather0)
+        Z --> B(Gather1)
+        Z --> C(Gather2)
+        A --> H(Node1)
+        B --> I(Node1)
+        C --> J(Node2)
     end
 ```
