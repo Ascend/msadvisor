@@ -16,6 +16,8 @@ import os
 from inspect import signature
 from functools import wraps
 
+import numpy as np
+import onnxruntime as rt
 
 def typeassert(*ty_args, **ty_kwargs):
     def decorate(func):
@@ -57,3 +59,31 @@ def format_to_module(path):
 def check_file_exist(file, msg='file "{}" does not exist'):
     if not os.path.isfile(file):
         raise FileNotFoundError(msg.format(file))
+
+
+def dump_op_outputs(graph, input_data, dump_path, outputs=[]):
+    def _run(model, input_data):
+        sess = rt.InferenceSession(model)
+        inputs = [ipt.name for ipt in sess.get_inputs()]
+        outputs = [out.name for out in sess.get_outputs()]
+        ret = sess.run(outputs, {name: data for name, data in zip(inputs, input_data)})
+        return ret
+
+    from skl2onnx.helpers.onnx_helper import (select_model_inputs_outputs,
+                                                enumerate_model_node_outputs)
+
+    ori_model = graph.model()
+    if len(outputs) == 0:
+        outputs = [
+            name for name in enumerate_model_node_outputs(ori_model)]
+    new_model = select_model_inputs_outputs(ori_model, outputs)
+    new_model_byte = new_model.SerializeToString()
+    arrs = _run(new_model_byte, input_data)
+    idx = 0
+    if not os.path.exists(dump_path):
+        os.makedirs(dump_path, mode=0o700)
+    for node in ori_model.graph.node:
+        for i, output in enumerate(node.output):
+            fname = f'{node.name}_{i}.npy'
+            np.save(os.path.join(dump_path, fname), arrs[idx])
+            idx += 1

@@ -14,8 +14,6 @@
 
 import unittest
 
-import os
-
 import numpy as np
 import onnx
 from onnx import (
@@ -167,8 +165,13 @@ def make_c3_slice_model(onnx_name, x):
     node_slice1 = helper.make_node("Slice", ["X_S", "start1", "end1", "axes1", "step1"], ["X_S_S"], "Slice1")
     node_slice2 = helper.make_node("Slice", ["X_S_S", "start2", "end2", "axes2", "step2"], ["Z"], "Slice2")
 
-    graph = helper.make_graph([node_slice0, node_slice1, node_slice2], "continue3_slice_test",
-                              [X], [Z], [start0, end0, axes0, step0, start1, end1, axes1, step1, start2, end2, axes2, step2],)
+    graph = helper.make_graph(
+        nodes=[node_slice0, node_slice1, node_slice2],
+        name="continue3_slice_test",
+        inputs=[X],
+        outputs=[Z],
+        initializer=[start0, end0, axes0, step0, start1, end1, axes1, step1, start2, end2, axes2, step2],
+    )
     model = helper.make_model(graph)
 
     del model.opset_import[:]

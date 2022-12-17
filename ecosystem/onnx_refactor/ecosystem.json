@@ -95,6 +95,31 @@
                     }
                 }
             ]
+        },
+        {
+            "model_name": "KnowledgeDynamicReshape",
+            "session_list": [
+                {
+                    "python_model_path": "",
+                    "parameter": {
+                        "mode": "optimize",
+                        "model_file": "",
+                        "extract": 1
+                    }
+                }
+            ]
+        },
+        {
+            "model_name": "KnowledgeAvgPoolSplit",
+            "session_list": [
+                {
+                    "python_model_path": "",
+                    "parameter": {
+                        "mode": "optimize",
+                        "model_file": ""
+                    }
+                }
+            ]
         }
     ]
 }

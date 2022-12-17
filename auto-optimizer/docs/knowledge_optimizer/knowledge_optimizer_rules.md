@@ -223,6 +223,34 @@ graph TD
         A --> |indices| C(Node2)
     end
 ```
+
+---
+
+## 空slice修复(KnowledgeEmptySliceFix)
+
+### 原理
+
+ONNX标准中，Concat算子支持输入空张量，但是om的Concat算子实现某些情况下不支持，此时ATC转换会失败。一种已知的情况是输出空张量的slice算子和concat算子组合，本知识库通过删除该Slice算子，并根据前后的连接情况不同而做不同的处理，来规避这个问题。
+
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After 
+
+        F(PreNode) --> G(NormalSlice)
+        G --> H(NextNode)
+    end
+
+    subgraph Before
+        A(PreNode) --> B(EmptySlice)
+        A --> C(NormalSlice)
+        B --> D(Concat)
+        C --> D
+        D --> E(NextNode)
+
+    end
+```
 ---
 
 ## Resize算子mode使用最近邻(KnowledgeResizeModeToNearest)
