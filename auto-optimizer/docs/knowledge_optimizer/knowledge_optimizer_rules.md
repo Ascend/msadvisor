@@ -282,7 +282,7 @@ graph TD
 
 部分推理模型中使用了多个Gather算子对同一个数据进行切分，经分析Gather算子indices连续的情况下，例如该场景：y1=x[:3]，y2=x[3:6]，y3=x[6:9]，可使用一个Split算子进行替换。
 ### 可支持场景
-各Gather算子axis相同，indices为连续切分且数据不相交的场景。  
+各Gather算子axis相同，indices为连续一维向量或个位数且切分数据不相交的场景。例如：三个Gather算子indices分别为0、1、2；三个Gather算子indices分别为[0, 1]、[2, 3]、[4, 5]。
 ### 示意图
 
 ```mermaid
