@@ -236,7 +236,8 @@ ONNX标准中，Concat算子支持输入空张量，但是om的Concat算子实�
 
 ```mermaid
 graph TD
-    subgraph After
+    subgraph After 
+
         F(PreNode) --> G(NormalSlice)
         G --> H(NextNode)
     end
@@ -247,5 +248,58 @@ graph TD
         B --> D(Concat)
         C --> D
         D --> E(NextNode)
+
+    end
+```
+---
+
+## Resize算子mode使用最近邻(KnowledgeResizeModeToNearest)
+
+### 原理
+
+部分推理模型中使用了双线性插值法做resize，经分析导致精度回归异常，使得各别图片存在误差。此类优化可扩展至linear->nearest、cubic->nearest、area->nearest等自定义转换场景。
+### 可支持场景
+Resize算子mode类型为linear、cubic、area的场景。 
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        X(Node0) --> D(Resize mode:nearest)
+        D --> E(Node1)
+    end
+
+    subgraph Before
+        Z(Node0) -->A(Resize mode:linear)
+        A --> B(Node1)
+    end
+```
+---
+
+## Split算子替换Gather算子(KnowledgeGatherToSplit)
+
+### 原理
+
+部分推理模型中使用了多个Gather算子对同一个数据进行切分，经分析Gather算子indices连续的情况下，例如该场景：y1=x[:3]，y2=x[3:6]，y3=x[6:9]，可使用一个Split算子进行替换。
+### 可支持场景
+各Gather算子axis相同，indices为0开始的连续一维向量且切分数据不相交的场景。例如：三个Gather算子indices分别为[0]、[1]、[2]；三个Gather算子indices分别为[0, 1]、[2, 3]、[4, 5]。
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        X(Node0) --> D(Split)
+        D --> E(Node1)
+        D --> F(Node2)
+        D --> G(Node3)
+    end
+
+    subgraph Before
+        Z(Node0) --> A(Gather0)
+        Z --> B(Gather1)
+        Z --> C(Gather2)
+        A --> H(Node1)
+        B --> I(Node1)
+        C --> J(Node2)
     end
 ```
