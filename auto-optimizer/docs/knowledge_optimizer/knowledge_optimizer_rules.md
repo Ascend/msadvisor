@@ -223,3 +223,25 @@ graph TD
         A --> |indices| C(Node2)
     end
 ```
+---
+
+## Resize算子mode使用最近邻(KnowledgeResizeModeToNearest)
+
+### 原理
+
+部分推理模型中使用了双线性插值法做resize，经分析导致精度回归异常，使得各别图片存在误差。此类优化可扩展至linear->nearest、cubic->nearest、area->nearest等自定义转换场景。
+
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        X(Node0) --> D(Resize mode:nearest)
+        D --> E(Node1)
+    end
+
+    subgraph Before
+        Z(Node0) -->A(Resize mode:linear)
+        A --> B(Node1)
+    end
+```
