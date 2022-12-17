@@ -258,7 +258,8 @@ graph TD
 ### 原理
 
 部分推理模型中使用了双线性插值法做resize，经分析导致精度回归异常，使得各别图片存在误差。此类优化可扩展至linear->nearest、cubic->nearest、area->nearest等自定义转换场景。
-
+### 可支持场景
+Resize算子mode类型为linear、cubic、area的场景。 
 ### 示意图
 
 ```mermaid
@@ -280,7 +281,8 @@ graph TD
 ### 原理
 
 部分推理模型中使用了多个Gather算子对同一个数据进行切分，经分析Gather算子indices连续的情况下，例如该场景：y1=x[:3]，y2=x[3:6]，y3=x[6:9]，可使用一个Split算子进行替换。
-
+### 可支持场景
+各Gather算子axis相同，且indices为连续切分数据不相交。  
 ### 示意图
 
 ```mermaid
