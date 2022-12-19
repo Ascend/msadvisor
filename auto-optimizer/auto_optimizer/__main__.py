@@ -48,11 +48,11 @@ def optimize_onnx(
         graph = OnnxGraph.parse(input_model.as_posix(), add_name_suffix=True)
         optimize_action = partial(optimizer.apply_knowledges_with_infer_test, cfg=config) \
             if infer_test else optimizer.apply_knowledges
-        applied_knowledges = optimize_action(graph=graph)
+        graph_opt, applied_knowledges = optimize_action(graph=graph)
         if applied_knowledges:
             if not output_model.parent.exists():
                 output_model.parent.mkdir(parents=True)
-            graph.save(output_model.as_posix())
+            graph_opt.save(output_model.as_posix())
         return applied_knowledges
     except RuntimeError as exc:
         logging.warning('%s optimize failed.', input_model.as_posix())
@@ -70,7 +70,8 @@ def evaluate_onnx(
         if verbose:
             print(f'Evaluating {model.as_posix()}')
         graph = OnnxGraph.parse(model.as_posix(), add_name_suffix=True)
-        return optimizer.evaluate_knowledges(graph)
+        graph, applied_knowledges = optimizer.evaluate_knowledges(graph)
+        return applied_knowledges
     except RuntimeError as exc:
         logging.warning('%s match failed.', model.as_posix())
         logging.warning('exception: %s', exc)
