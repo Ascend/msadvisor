@@ -15,8 +15,8 @@
 import pathlib
 
 import click
-from auto_optimizer.graph_optimizer.optimizer import GraphOptimizer
 
+from auto_optimizer.graph_optimizer.optimizer import GraphOptimizer
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 
 
@@ -92,4 +92,74 @@ arg_path = click.argument(
         readable=True,
         path_type=pathlib.Path
     )
+)
+
+
+opt_device = click.option(
+    '-d',
+    '--device',
+    'device',
+    default=0,
+    type=click.IntRange(min=0),
+    help='device_id, default to 0.'
+)
+
+
+opt_loop = click.option(
+    '-l',
+    '--loop',
+    'loop',
+    default=100,
+    type=click.IntRange(min=1),
+    help='how many times to run the test inference, default to 100.'
+)
+
+
+opt_soc = click.option(
+    '-s',
+    '--soc',
+    'soc',
+    default='Ascend310P3',
+    type=str,
+    help='soc_version, default to Ascend310P3.'
+)
+
+
+def validate_opt_converter(ctx: click.Context, param: click.Option, value: str) -> str:
+    '''Process and validate knowledges option.'''
+    if value.lower() not in ['atc']:
+        raise click.BadParameter('Invalid converter.')
+    return value.lower()
+
+
+opt_converter = click.option(
+    '-c',
+    '--converter',
+    'converter',
+    default='atc',
+    type=str,
+    callback=validate_opt_converter,
+    help='OM Converter, default to atc.'
+)
+
+
+opt_threshold = click.option(
+    '--threshold',
+    'threshold',
+    default=-0.02,
+    type=click.FloatRange(min=-1),
+    help='Threshold of inference speed improvement,'
+         'knowledges with less improvement won\'t be used.'
+         'Can be a negative number, which means accept'
+         'negative optimization, default: -0.02'
+)
+
+
+opt_infer_test = click.option(
+    '-t',
+    '--infer-test',
+    'infer_test',
+    is_flag=True,
+    default=False,
+    help='Run inference to determine whether to apply knowledges optimization. Default to False.'
 )

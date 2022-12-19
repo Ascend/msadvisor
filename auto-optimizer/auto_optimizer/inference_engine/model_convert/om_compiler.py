@@ -17,7 +17,7 @@ import logging
 
 from .compiler import Compiler
 
-logging = logging.getLogger("auto-optimizer")
+logger = logging.getLogger("auto-optimizer")
 
 
 class OmCompiler(Compiler):
@@ -45,5 +45,21 @@ class OmCompiler(Compiler):
             raise RuntimeError("Invalid cmd type! Only support 'atc', 'aoe', but got '{}'.".format(cmd_type))
 
     def build_model(self):
-        logging.debug(self.atc_cmd)
+        logger.debug(self.atc_cmd)
         subprocess.run(self.atc_cmd, shell=False)
+
+
+def onnx2om(path_onnx: str, converter: str, **kwargs):
+    '''convert a onnx file to om using ATC.'''
+    if not path_onnx.endswith('.onnx'):
+        raise RuntimeError('Not a onnx file.')
+    convert_cfg = {
+        'type': converter,
+        'framework': '5',
+        'model': path_onnx,
+        'output': path_onnx[:-5],
+        **kwargs
+    }
+    compiler = OmCompiler(convert_cfg)
+    compiler.build_model()
+    return path_onnx[:-4] + 'om'

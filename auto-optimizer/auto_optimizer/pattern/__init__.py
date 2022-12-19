@@ -14,6 +14,8 @@
 
 from .knowledges.knowledge_base import KnowledgeBase
 from .knowledge_factory import KnowledgeFactory
+
+from .knowledges import *
 from .pattern import Pattern
 
 __all__ = ["KnowledgeBase", "KnowledgeFactory", "Pattern"]
