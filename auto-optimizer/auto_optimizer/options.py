@@ -163,3 +163,35 @@ opt_infer_test = click.option(
     default=False,
     help='Run inference to determine whether to apply knowledges optimization. Default to False.'
 )
+
+
+opt_input_shape = click.option(
+    '--input-shape',
+    'input_shape',
+    type=str,
+    help='Input shape of onnx graph.',
+)
+
+
+opt_input_shape_range = click.option(
+    '--input-shape-range',
+    'input_shape_range',
+    type=str,
+    help='Specify input shape range for OM converter.'
+)
+
+
+opt_dynamic_shape = click.option(
+    '--dynamic-shape',
+    'dynamic_shape',
+    type=str,
+    help='Specify input shape for dynamic onnx in inference.'
+)
+
+
+opt_output_size = click.option(
+    '--output-size',
+    'output_size',
+    type=str,
+    help='Specify real size of graph output.'
+)

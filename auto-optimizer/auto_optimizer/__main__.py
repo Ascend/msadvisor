@@ -21,6 +21,7 @@ import click
 from click_aliases import ClickAliasedGroup
 
 from auto_optimizer.graph_optimizer.optimizer import GraphOptimizer, InferTestConfig
+from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern import KnowledgeFactory
 from .options import (
@@ -33,7 +34,15 @@ from .options import (
     opt_infer_test,
     opt_loop,
     opt_threshold,
+    opt_input_shape,
+    opt_input_shape_range,
+    opt_dynamic_shape,
+    opt_output_size
 )
+
+
+def is_graph_input_static(graph: BaseGraph) -> bool:
+    return all(isinstance(sh, int) and sh > 0 for inp in graph.inputs for sh in inp.shape)
 
 
 def optimize_onnx(
@@ -46,6 +55,12 @@ def optimize_onnx(
     '''Optimize a onnx file and save as a new file.'''
     try:
         graph = OnnxGraph.parse(input_model.as_posix(), add_name_suffix=True)
+        config.is_static = is_graph_input_static(graph)
+        if infer_test:
+            if not (config.is_static or (config.input_shape_range and config.dynamic_shape and config.output_size)):
+                logging.warning('Failed to optimize %s with inference test.', input_model.as_posix())
+                logging.warning('Didn\'t specify input_shape_range or dynamic_shape or output_size.')
+                return []
         optimize_action = partial(optimizer.apply_knowledges_with_infer_test, cfg=config) \
             if infer_test else optimizer.apply_knowledges
         graph_opt, applied_knowledges = optimize_action(graph=graph)
@@ -54,7 +69,7 @@ def optimize_onnx(
                 output_model.parent.mkdir(parents=True)
             graph_opt.save(output_model.as_posix())
         return applied_knowledges
-    except RuntimeError as exc:
+    except Exception as exc:
         logging.warning('%s optimize failed.', input_model.as_posix())
         logging.warning('exception: %s', exc)
         return []
@@ -72,7 +87,7 @@ def evaluate_onnx(
         graph = OnnxGraph.parse(model.as_posix(), add_name_suffix=True)
         graph, applied_knowledges = optimizer.evaluate_knowledges(graph)
         return applied_knowledges
-    except RuntimeError as exc:
+    except Exception as exc:
         logging.warning('%s match failed.', model.as_posix())
         logging.warning('exception: %s', exc)
         return []
@@ -131,6 +146,10 @@ def command_evaluate(
 @opt_device
 @opt_loop
 @opt_threshold
+@opt_input_shape
+@opt_input_shape_range
+@opt_dynamic_shape
+@opt_output_size
 def command_optimize(
     input_model: pathlib.Path,
     output_model: pathlib.Path,
@@ -140,6 +159,10 @@ def command_optimize(
     device: int,
     loop: int,
     threshold: float,
+    input_shape: str,
+    input_shape_range: str,
+    dynamic_shape: str,
+    output_size: str
 ) -> None:
     # compatibility for click < 8.0
     input_model_ = pathlib.Path(input_model.decode()) if isinstance(input_model, bytes) else input_model
@@ -152,7 +175,11 @@ def command_optimize(
         soc=soc,
         device=device,
         loop=loop,
-        threshold=threshold
+        threshold=threshold,
+        input_shape=input_shape,
+        input_shape_range=input_shape_range,
+        dynamic_shape=dynamic_shape,
+        output_size=output_size,
     )
     applied_knowledges = optimize_onnx(
         optimizer=optimizer,
