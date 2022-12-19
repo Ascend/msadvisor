@@ -49,7 +49,7 @@ def evaluate(datapath, parameter):
     bucket_name = parameters.get("bucket_name")
     download = parameters.get("download")
 
-    if cluster_rank is None:
+    if cluster_rank is None or cluster_rank <= 0:
         log.ad_print_and_log(log.AD_ERROR, "Input rank size is invalid, please check")
         return INVALID_RESULT
 
