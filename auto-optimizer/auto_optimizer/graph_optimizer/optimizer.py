@@ -18,7 +18,7 @@ import pathlib
 import logging
 import tempfile
 from copy import deepcopy
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 
@@ -127,7 +127,7 @@ class GraphOptimizer:
         self,
         graph: BaseGraph,
         action: Callable[[BaseGraph, KnowledgeBase], bool]
-    ) -> List[str]:
+    ) -> Tuple[BaseGraph, List[str]]:
         applied_knowledges = []
         for name, knowledge in self.knowledges.items():
             knowledge.reset()
@@ -139,13 +139,13 @@ class GraphOptimizer:
             except RuntimeError as exc:
                 logger.warning('Error applying knowledge: %s!', name)
                 logger.warning(exc)
-        return applied_knowledges
+        return graph, applied_knowledges
 
-    def evaluate_knowledges(self, graph: BaseGraph) -> List[str]:
+    def evaluate_knowledges(self, graph: BaseGraph) -> Tuple[BaseGraph, List[str]]:
         '''Test graph for applicable knowledges.'''
         return self._exec_action(graph, GraphOptimizer._evaluate)
 
-    def apply_knowledges(self, graph: BaseGraph) -> List[str]:
+    def apply_knowledges(self, graph: BaseGraph) -> Tuple[BaseGraph, List[str]]:
         '''Optimize graph using optimizer.'''
         return self._exec_action(graph, GraphOptimizer._optimize)
 
@@ -153,7 +153,7 @@ class GraphOptimizer:
         self,
         graph: BaseGraph,
         cfg: InferTestConfig
-    ) -> List[str]:
+    ) -> Tuple[BaseGraph, List[str]]:
         '''Optimize graph using optimizer, eliminate negative knowledges with
         inference testing.'''
         from auto_optimizer.inference_engine.model_convert import onnx2om
@@ -188,7 +188,7 @@ class GraphOptimizer:
                     os.rename(om_opt, om_ori)
             except RuntimeError as exc:
                 logger.warning("%s", exc)
-        return applied_knowledges
+        return graph, applied_knowledges
 
 
 if __name__ == "__main__":
