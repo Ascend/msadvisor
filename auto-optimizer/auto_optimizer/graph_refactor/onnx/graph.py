@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import tempfile
 import warnings
 import os
 from typing import List, Dict, Union, Sequence, Optional
@@ -141,15 +142,40 @@ class OnnxGraph(BaseGraph):
         return helper.make_model(self.proto(), **self._meta)
 
     def save(self, path: str) -> None:
-        onnx.save(self.model(), path)
+        try:
+            onnx.save(self.model(), path)
+        except ValueError:
+            # large models
+            onnx.save(
+                self.model(),
+                path,
+                save_as_external_data=True,
+                all_tensors_to_one_file=True,
+                location=os.path.basename(path) + '.data'
+            )
 
     def infershape(self) -> None:
         # clear value_infos
         self._value_infos = []
         self._value_map = {}
         model = self.model()
-        # TODO: exception
-        inferred_model = onnx.shape_inference.infer_shapes(model, strict_mode=True)
+
+        try:
+            inferred_model = onnx.shape_inference.infer_shapes(model, strict_mode=True)
+        except ValueError:
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                onnx.save(
+                    model,
+                    os.path.join(tmpdirname, 'model.onnx'),
+                    save_as_external_data=True
+                    )
+                onnx.shape_inference.infer_shapes_path(
+                    os.path.join(tmpdirname, 'model.onnx'), 
+                    os.path.join(tmpdirname, 'inferred_model.onnx')
+                    )
+                inferred_model = onnx.load(os.path.join(tmpdirname, 'inferred_model.onnx'))
+       
+       # update value_infos
         graph = inferred_model.graph
         self._value_infos = [OnnxPlaceHolder.parse(v) for v in graph.value_info]
         self._value_map = {v.name: v for v in self._value_infos}
@@ -161,22 +187,26 @@ class OnnxGraph(BaseGraph):
         output_name_list: List[str],
         enable_model_check: bool = True
     ) -> 'OnnxGraph':
-        # TODO: reimplement
+
         def check_model(model):
             pass
         if not enable_model_check:
             onnx.checker.check_model = check_model
 
-        print('Begin to extract the model.')
-        old_model_save_path = '{}_tmp.onnx'.format(new_model_save_path.split('.')[0])
-        self.save(old_model_save_path)
-        onnx.utils.extract_model(
-            old_model_save_path, new_model_save_path, input_name_list, output_name_list)
-        os.remove(old_model_save_path)
-
-        print('Extract the model completed, model saved in {}.'.format(
-            new_model_save_path))
-
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            self.save(os.path.join(tmpdirname, 'model.onnx'))
+            print('Begin to extract the model.')
+            try:
+                onnx.utils.extract_model(
+                    os.path.join(tmpdirname, 'model.onnx'),
+                    new_model_save_path,
+                    input_name_list,
+                    output_name_list
+                )
+            except ValueError as e:
+                raise RuntimeError('Function extract() does not support a Large ONNX Model >2GB currently.') from e
+            print('Extract the model completed, model saved in {}.'.format(
+                    new_model_save_path))
         return OnnxGraph.parse(new_model_save_path)
 
     def simplify(self, **kwargs) -> 'OnnxGraph':

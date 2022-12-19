@@ -615,9 +615,10 @@ class BaseGraph(ABC):
                     if out_degree[prev_node] == 0:
                         queue.append(prev_node)
 
-        # remove unused graph inputs
+        # remove unused graph inputs and initializers
         inputs = [inp for n in self._nodes for inp in n.inputs]
         self._inputs = list(filter(lambda x: x.name in inputs, self._inputs))
+        self._initializers = list(filter(lambda x: x.name in inputs, self._initializers))
 
         self.update_map()
 

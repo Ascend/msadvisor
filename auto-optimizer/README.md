@@ -13,13 +13,13 @@
 ## 组件使用说明
 
 - [x]  [graph_refactor](auto_optimizer/graph_refactor/README.md)
-- [x]  [knowledge](docs/knowledge_optimizer_frame.md)
+- [x]  [knowledge](docs/knowledge_optimizer/knowledge_optimizer_framework.md)
 - [x]  [inference_engine](auto_optimizer/inference_engine/README.md)
 
 ## 安装教程
 
 ```shell
-git clone https://gitee.com/ascend/auto-optimizer.git
+git clone https://gitee.com/ascend/msadvisor.git
 cd auto-optimizer
 pip install -r requirements.txt
 

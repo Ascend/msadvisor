@@ -12,12 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict, Optional, Sequence, Union
+from typing import List, Dict, Optional, Sequence, Union, cast
 
 import numpy as np
-from onnx import NodeProto, TensorProto, ValueInfoProto, helper, numpy_helper, mapping
+from onnx import NodeProto, TensorProto, ValueInfoProto, helper, numpy_helper
 
 from .. import Node, PlaceHolder, Initializer
+
+try:
+    tensor_dtype_to_np_dtype = helper.tensor_dtype_to_np_dtype
+    np_dtype_to_tensor_dtype = helper.np_dtype_to_tensor_dtype
+
+except AttributeError as e:
+    # onnx.__version__ before '1.13.0'
+    from onnx import mapping
+
+    def tensor_dtype_to_np_dtype(tensor_dtype: int) -> np.dtype:
+        return mapping.TENSOR_TYPE_TO_NP_TYPE[tensor_dtype]
+
+    def np_dtype_to_tensor_dtype(np_dtype: np.dtype) -> int:
+        return cast(int, mapping.NP_TYPE_TO_TENSOR_TYPE[np_dtype])
 
 
 class OnnxNode(Node):
@@ -89,16 +103,9 @@ class OnnxInitializer(Initializer):
         )
 
     def proto(self) -> TensorProto:
-        tensor_dtype = mapping.NP_TYPE_TO_TENSOR_TYPE[self._value.dtype]
-        storage_np_dtype = mapping.TENSOR_TYPE_TO_NP_TYPE[
-            mapping.TENSOR_TYPE_TO_STORAGE_TENSOR_TYPE[tensor_dtype]
-        ]
-        return helper.make_tensor(
-            self._name,
-            tensor_dtype,
-            self._value.shape,
-            self._value.astype(storage_np_dtype).flatten()
-        )
+        tensor_proto = numpy_helper.from_array(self.value)
+        tensor_proto.name = self._name
+        return tensor_proto
 
 
 class OnnxPlaceHolder(PlaceHolder):
@@ -119,7 +126,7 @@ class OnnxPlaceHolder(PlaceHolder):
     ) -> 'OnnxPlaceHolder':
         if node.HasField('type'):
             tensor_type = node.type.tensor_type
-            dtype = mapping.TENSOR_TYPE_TO_NP_TYPE[tensor_type.elem_type]
+            dtype = tensor_dtype_to_np_dtype(tensor_type.elem_type)
             if tensor_type.HasField('shape'):
                 shape = [
                     dim.dim_value if dim.HasField('dim_value') else dim.dim_param
@@ -135,7 +142,7 @@ class OnnxPlaceHolder(PlaceHolder):
         if self.shape:
             shape = ['-1' if dim == -1 else dim for dim in self.shape]
         if self.dtype:
-            dtype = mapping.NP_TYPE_TO_TENSOR_TYPE[self._dtype]
+            dtype = np_dtype_to_tensor_dtype(self._dtype)
         return helper.make_tensor_value_info(
             self._name,
             dtype,
