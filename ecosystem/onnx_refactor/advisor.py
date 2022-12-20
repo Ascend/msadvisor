@@ -22,7 +22,8 @@ import shutil
 import msadvisor as ms
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
+from auto_optimizer.graph_optimizer import GraphOptimizer, InferTestConfig
+from auto_optimizer.pattern import KnowledgeBase, KnowledgeFactory
 
 LOG_INFO = 1
 LOG_WARN = 2
@@ -217,8 +218,32 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
         onnx_graph = OnnxGraph.parse(onnx_path)
     if len(onnx_graph.inputs) == 0 and len(onnx_graph.outputs) == 0:
         raise RuntimeError('The current model is invalid.')
-    optimize_result = optimize_model(onnx_graph, knowledge, result, new_onnx_path)
-    if optimize_result:
+    knowledge_name = knowledge.__class__.__name__
+    pool = KnowledgeFactory.get_knowledge_pool()
+    for name, know in pool.items():
+        if know == knowledge:
+            knowledge_name = name
+    infer_test = params.get('infer_test', False)
+    optimizer = GraphOptimizer([knowledge_name])
+    if infer_test:
+        attrs = {
+            'converter': 'atc',
+            'soc': 'Ascend310P3',
+            'device': 0,
+            'loop': 100,
+            'threshold': -0.02,
+        }
+        for para in attrs:
+            if para in params:
+                attrs[para] = params[para]
+        cfg = InferTestConfig(**attrs)
+        onnx_graph, applied_knowledges = optimizer.apply_knowledges_with_infer_test(onnx_graph, cfg)
+    else:
+        onnx_graph, applied_knowledges = optimizer.apply_knowledges(onnx_graph)
+    if applied_knowledges:
+        result.error_code = error_code['optimized']
+        result.summary = "The current model has already been optimized, the optimized model path is:%s" % out_path
+    if applied_knowledges:
         if params.get('extract'):
             input_names = [i.name for i in onnx_graph.inputs]
             output_names = [i.name for i in onnx_graph.outputs]
