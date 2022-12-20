@@ -598,3 +598,59 @@ graph TD
 ```
 
 结合以上三种方法，对 Cast 节点树进行递归处理就可以合并多余的 Cast 节点
+
+
+## BatchNormalization折叠 (KnowledgeBNFolding)
+
+### 原理及示意图
+
+BatchNormalization的数学表示如下：
+
+$$
+\mathbf{Y} = \frac{\mathbf{X} - \textrm{E}[\mathbf{X}]}{\sqrt{\textrm{Var}[\mathbf{X}] + \epsilon}} \times \gamma + \beta
+$$
+
+其中 $\mathbf{X}$ 为需要normalize的数据，shape为 $[N, C, D_1, D_2, ..., D_n]$ ， $\mathbf{Y}$ 为算子输出， $\textrm{E}[\mathbf{X}]$ 为输入均值mean， $\textrm{Var}[\mathbf{X}]$ 为输入方差var，$\gamma$ 为输入scale，$\beta$ 为输入bias，$\textrm{E}[\mathbf{X}], \textrm{Var}[\mathbf{X}], \gamma, \beta$ 的shape均为 $[C]$
+
+其中的 $\epsilon$ 为BN的一个属性，是一个float常量
+
+当前后有Transpose且两个Transpose可以互相抵消时，整个TR/BN/TR结构的数学表示可以写成：
+
+$$
+\mathbf{Y} = \left[\frac{\mathbf{X}^\mathsf{T} - \textrm{E}[\mathbf{X}]}{\sqrt{\textrm{Var}[\mathbf{X}] + \epsilon}} \times \mathbf{\gamma} + \beta \right]^\mathsf{T}
+$$
+
+化简为
+
+$$
+\mathbf{Y} = \mathbf{W} \times \mathbf{X} + \mathbf{B}
+$$
+
+其中
+
+$$ \mathbf{W} = \left[\frac{\gamma}{\sqrt{\textrm{Var}[\mathbf{X}] + \epsilon}} \right]^\mathsf{T} $$
+$$ \mathbf{B} = \left[\beta - \frac{\gamma \times \textrm{E}[\mathbf{X}]}{\sqrt{\textrm{Var}[\mathbf{X}] + \epsilon}} \right]^\mathsf{T} $$
+
+因此当这里的输入 $\textrm{E}[\mathbf{X}], \textrm{Var}[\mathbf{X}], \gamma, \beta$ 都为常量时，可以进行常量折叠，将这里的TR/BN/TR组合替换为Mul/Add组合, $\mathbf{W}$ 和 $\mathbf{B}$ 分别为Mul和Add算子的输入。如图所示
+
+```mermaid
+graph TD
+    subgraph After
+        F[input] --> G(Mul)
+        subgraph "Subgraph "
+                G --> H(Add)
+        end
+        H --> I(output)
+    end
+
+    subgraph Before
+        A[input] --> B(Transpose0)
+        subgraph "Subgraph"
+                B --> C(BatchNormalization)
+                C --> D(Transpose1)
+        end
+        D --> E(output)
+    end
+```
+
+当没有Transpose时，FusionPass会进行一些类似Conv+BatchNormalization的融合，原理上是一样的，尝试了一些模型，部分性能有劣化，故不考虑。
