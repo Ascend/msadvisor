@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from dataclasses import dataclass
+from functools import partial
 import os
 import pathlib
 import logging
@@ -21,6 +22,7 @@ from copy import deepcopy
 from typing import Callable, Dict, List, Tuple
 
 import numpy as np
+from numpy.linalg import norm
 
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
@@ -30,14 +32,26 @@ from auto_optimizer import KnowledgeFactory
 logger = logging.getLogger('GraphOptimizer')
 
 
+def close(mat0, mat1, threshold=1e-3) -> bool:
+    mat0 = np.ndarray.flatten(mat0)
+    mat1 = np.ndarray.flatten(mat1)
+    cos_sim: float = np.dot(mat0, mat1) / (norm(mat0) * norm(mat1))
+    return 1 - cos_sim < threshold
+
+
 @dataclass
 class InferTestConfig:
     '''Config class'''
-    converter: str
-    soc: str
-    device: int
-    loop: int
-    threshold: float
+    converter: str = 'atc'
+    soc: str = 'Ascend310P3'
+    device: int = 0
+    loop: int = 100
+    threshold: float = -0.02
+    is_static: bool = True
+    input_shape: str = ''
+    input_shape_range: str = ''
+    dynamic_shape: str = ''
+    output_size: str = ''
 
 
 class GraphOptimizer:
@@ -66,13 +80,29 @@ class GraphOptimizer:
 
         sess_ori = InferSession(device_id=cfg.device, model_path=om_ori, loop=cfg.loop)
         sess_opt = InferSession(device_id=cfg.device, model_path=om_opt, loop=cfg.loop)
-        input_ = [
-            np.random.randn(*inp.shape)
-                     .astype(tensor_type_to_numpy_type[inp.datatype])
-            for inp in sess_ori.get_inputs()
-        ]
-        out_ori = sess_ori.infer(input_)
-        out_opt = sess_opt.infer(input_)
+        if cfg.is_static:
+            input_ = [
+                np.random.randn(*inp.shape)
+                         .astype(tensor_type_to_numpy_type[inp.datatype])
+                for inp in sess_ori.get_inputs()
+            ]
+            out_ori = sess_ori.infer(input_)
+            out_opt = sess_opt.infer(input_)
+        else:
+            custom_sizes = int(cfg.output_size)
+            dyn_shape = {
+                k: [int(n) for n in v.split(',')]
+                for k, v in [
+                    inp.split(':') for inp in cfg.dynamic_shape.split(';')
+                ]
+            }
+            input_ = [
+                np.random.randn(*dyn_shape[inp.name])
+                         .astype(tensor_type_to_numpy_type[inp.datatype])
+                for inp in sess_ori.get_inputs()
+            ]
+            out_ori = sess_ori.infer(input_, mode='dymshape', custom_sizes=custom_sizes)
+            out_opt = sess_opt.infer(input_, mode='dymshape', custom_sizes=custom_sizes)
 
         time_ori = np.mean(sess_ori.sumary().exec_time_list)
         time_opt = np.mean(sess_opt.sumary().exec_time_list)
@@ -81,8 +111,7 @@ class GraphOptimizer:
             logger.warning('Optimization failed: result is wrong.')
             return False
 
-        if not all(np.allclose(mat0, mat1, atol=1e-3, rtol=1e-1)
-                   for mat0, mat1 in zip(out_ori, out_opt)):
+        if not all(close(mat0, mat1) for mat0, mat1 in zip(out_ori, out_opt)):
             logger.warning('Optimization failed: result not close enough.')
             return False
 
@@ -139,7 +168,7 @@ class GraphOptimizer:
                 if action(graph_copy, knowledge):
                     graph = graph_copy
                     applied_knowledges.append(name)
-            except RuntimeError as exc:
+            except Exception as exc:
                 logger.warning('Error applying knowledge: %s!', name)
                 logger.warning(exc)
         return graph, applied_knowledges
@@ -168,10 +197,13 @@ class GraphOptimizer:
         onnx_ori = pathlib.Path(tmp_dir, f'auto_optimizer_{pid}_ori.onnx')
         onnx_opt = pathlib.Path(tmp_dir, f'auto_optimizer_{pid}_opt.onnx')
         graph.save(onnx_ori.as_posix())
-        om_ori = onnx2om(
-            onnx_ori.as_posix(),
+        cvtr_stc = partial(onnx2om, input_shape=cfg.input_shape) if cfg.input_shape else onnx2om
+        cvtr_dyn = partial(onnx2om, input_shape_range=cfg.input_shape_range)
+        cvtr = cvtr_stc if cfg.is_static else cvtr_dyn
+        om_ori = cvtr(
+            path_onnx=onnx_ori.as_posix(),
             converter=cfg.converter,
-            soc_version=cfg.soc
+            soc_version=cfg.soc,
         )
         for name, knowledge in self.knowledges.items():
             logger.info('Evaluating knowledge %s', name)
@@ -181,16 +213,16 @@ class GraphOptimizer:
                 if not self._optimize(graph_opt, knowledge):
                     continue
                 graph_opt.save(onnx_opt.as_posix())
-                om_opt = onnx2om(
-                    onnx_opt.as_posix(),
+                om_opt = cvtr(
+                    path_onnx=onnx_opt.as_posix(),
                     converter=cfg.converter,
-                    soc_version=cfg.soc
+                    soc_version=cfg.soc,
                 )
                 if self._effective(om_ori, om_opt, cfg=cfg):
                     applied_knowledges.append(name)
                     graph = graph_opt
                     os.rename(om_opt, om_ori)
-            except RuntimeError as exc:
+            except Exception as exc:
                 logger.warning("%s", exc)
         return graph, applied_knowledges
 
