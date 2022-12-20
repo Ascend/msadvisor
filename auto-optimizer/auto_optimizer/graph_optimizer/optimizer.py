@@ -86,6 +86,9 @@ class GraphOptimizer:
             logger.warning('Optimization failed: result not close enough.')
             return False
 
+        logger.info('Origin inference time: %.2f ms', time_ori)
+        logger.info('Optimized inference time: %.2f ms', time_ori)
+        logger.info('Inference speed improved %.2s%%.', (time_ori / time_opt - 1) * 100)
         if time_opt > time_ori * (1 - cfg.threshold):
             logger.warning('Optimization cancaled: not enough improvement.')
             return False
@@ -171,6 +174,7 @@ class GraphOptimizer:
             soc_version=cfg.soc
         )
         for name, knowledge in self.knowledges.items():
+            logger.info('Evaluating knowledge %s', name)
             graph_opt = deepcopy(graph)
             knowledge.reset()
             try:
