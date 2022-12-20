@@ -303,3 +303,75 @@ graph TD
         C --> J(Node2)
     end
 ```
+
+---
+
+## 动态shape模型Reshape算子优化(KnowledgeDynamicReshape)
+
+### 原理
+
+由于动态shape模型的输入shape不固定，onnx模型中大部分Reshape算子的shape值需要在执行过程中计算得出。这就会导致两个问题：1、计算Reshape的shape值引入了很多小算子，增加了调度耗时；2、shape值未知，导致Reshape算子的infershape依赖前置算子的输出（Reshape的infershape需要等前置算子执行完才能开始），会打断调度流水。如果能够计算出Reshape的shape值，就可以减少很多非必须的算子，从而有效提高模型性能。Reshape算子有两个特性可以帮助我们实现：如果shape某一个轴大小没有变化，可以设置为0；如果输入只有一个动态轴，该轴可以赋值为-1。然后通过静态推导方法，对模型指定不同的固定输入，再根据Reshape算子推导出的输入和输出计算出该算子的shape值。
+
+### 参数配置
+
+因为动态shape模型输入存在差异，不同模型输入可接受的范围不同，需要用户手动配置动态轴的输入范围。可以打开配置文件auto_optimizer/model.cfg，修改input_shape_range值，动态轴的取值范围通过“~”符号的方式连接，如果动态轴是固定值的倍数，则需要在固定值后面加上“*”符号，详细的描述请移步model.cfg的配置说明。
+
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        Y(Input)
+        N(Node0)
+        Re(Reshape)
+
+        Y --> N
+        N --> Re
+    end
+
+    subgraph Before
+        X(Input)
+        N0(Node0)
+        N1(Node1)
+        N2(Node2)
+        R(Reshape)
+
+        X --> N0
+        X --> N1
+        N0 --> R
+        N1 --> N2
+        N2 --> R
+    end
+```
+
+---
+
+## AveragePool算子大kernel size和stride拆分
+
+### 原理
+
+因为Ascend指令集的限制，AvgPool算子的kernel size最大不能超过255，如果超过会额外插入Transdata、Transpose等算子进行shape转换，导致性能下降。可以优化onnx模型，将AveragePool算子拆分成多个串联的AveragePool算子，比如AveragePool("kernel_shape": [32, 64], "stride": [32, 64])，可以拆分成AveragePool_0("kernel_shape": [8, 16], "stride": [8, 16])和AveragePool_1("kernel_shape": [4, 4], "stride": [4, 4])，拆分后转成om模型，可以消除多余的Transdata、Transpose等算子。
+
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        X(Input)
+        A0(AveragePool_0)
+        A1(AveragePool_1)
+        A2(AveragePool_2)
+
+        X --> A0
+        A0 --> A1
+        A1 --> A2
+    end
+
+    subgraph Before
+        Y(Input)
+        A(AveragePool)
+
+        Y --> A
+    end
+```
+
