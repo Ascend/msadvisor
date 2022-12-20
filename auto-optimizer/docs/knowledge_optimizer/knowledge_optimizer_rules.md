@@ -346,11 +346,11 @@ graph TD
 
 ---
 
-## AveragePool算子大kernel size和stride拆分
+## AveragePool算子大kernel size和stride拆分(KnowledgeAvgPoolSplit)
 
 ### 原理
 
-因为Ascend指令集的限制，AvgPool算子的kernel size最大不能超过255，如果超过会额外插入Transdata、Transpose等算子进行shape转换，导致性能下降。可以优化onnx模型，将AveragePool算子拆分成多个串联的AveragePool算子，比如AveragePool("kernel_shape": [32, 64], "stride": [32, 64])，可以拆分成AveragePool_0("kernel_shape": [8, 16], "stride": [8, 16])和AveragePool_1("kernel_shape": [4, 4], "stride": [4, 4])，拆分后转成om模型，可以消除多余的Transdata、Transpose等算子。
+因为Ascend指令集的限制，AvgPool算子的kernel size最大不能超过255，如果超过会额外插入Transdata、Transpose等算子进行shape转换，导致性能下降。可以优化onnx模型，将AveragePool算子拆分成等价的多个串联的AveragePool算子，比如AveragePool("kernel_shape": [32, 64], "stride": [32, 64])，可以拆分成AveragePool_0("kernel_shape": [8, 16], "stride": [8, 16])和AveragePool_1("kernel_shape": [4, 4], "stride": [4, 4])，拆分后转成om模型，可以消除多余的Transdata、Transpose等算子。
 
 ### 示意图
 
