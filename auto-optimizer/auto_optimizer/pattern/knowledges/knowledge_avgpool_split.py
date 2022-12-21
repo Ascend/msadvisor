@@ -122,8 +122,8 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
         prev_node = graph.get_prev_node(node.inputs[0])
         for i, split in enumerate(splits):
             attrs = copy.deepcopy(node.attrs)
-            attrs['kernel_shape'] = np.array(split, dtype = np.int64)
-            attrs['strides'] = np.array(split, dtype = np.int64)
+            attrs['kernel_shape'] = list(split)
+            attrs['strides'] = list(split)
             # add new AveragePool
             new_node = graph.add_node(f'{node.name}_{i}', 'AveragePool', attrs = attrs)
             if not isinstance(prev_node, Node):
