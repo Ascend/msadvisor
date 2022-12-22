@@ -88,7 +88,7 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
         h, w = kernel_shape[0], kernel_shape[1]
         h_can_split, w_can_split = True, True
         while True:
-            if h >= w and h_can_split:
+            if h_can_split and (h >= w or not w_can_split):
                 # split h
                 factor, h = self._calculate_mini_factor(h)
                 h_can_split = False if factor == 1 else True
@@ -100,6 +100,10 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
                 tmp_w *= factor
             else:
                 # split failed
+                if h * tmp_w <= KERNEL_MAX_SIZE and tmp_h * w <= KERNEL_MAX_SIZE:
+                    splits.append([tmp_h, w])
+                    splits.append([h, tmp_w])
+                    break
                 return []
             if h * w > KERNEL_MAX_SIZE:
                 continue
@@ -118,8 +122,8 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
         prev_node = graph.get_prev_node(node.inputs[0])
         for i, split in enumerate(splits):
             attrs = copy.deepcopy(node.attrs)
-            attrs['kernel_shape'] = np.array(split, dtype = np.int64)
-            attrs['strides'] = np.array(split, dtype = np.int64)
+            attrs['kernel_shape'] = list(split)
+            attrs['strides'] = list(split)
             # add new AveragePool
             new_node = graph.add_node(f'{node.name}_{i}', 'AveragePool', attrs = attrs)
             if not isinstance(prev_node, Node):
