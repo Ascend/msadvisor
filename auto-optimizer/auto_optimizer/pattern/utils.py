@@ -16,6 +16,8 @@ from functools import wraps
 import time
 from typing import Callable
 
+import numpy as np
+
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node
 from auto_optimizer.pattern.pattern import MatchBase
@@ -81,7 +83,7 @@ def insert_unsqueeze(graph: BaseGraph, node: BaseNode, attrs, mode: str, refer_i
     else:
         us = graph.add_node(op_name, 'Unsqueeze')
         axes_name = f'{op_name}_axes'
-        graph.add_initializer(axes_name, attrs.get('axes'))
+        graph.add_initializer(axes_name, np.array(attrs.get('axes')))
         graph.insert_node(node.name, us, mode=mode, refer_index=refer_index)
         us.inputs.append(axes_name)
     graph.update_map()
@@ -108,7 +110,7 @@ def insert_squeeze(graph: BaseGraph, node: BaseNode, attrs, mode: str, refer_ind
     else:
         sq = graph.add_node(op_name, 'Squeeze')
         axes_name = f'{op_name}_axes'
-        graph.add_initializer(axes_name, attrs.get('axes'))
+        graph.add_initializer(axes_name, np.array(attrs.get('axes')))
         graph.insert_node(node.name, sq, mode=mode, refer_index=refer_index)
         sq.inputs.append(axes_name)
     graph.update_map()

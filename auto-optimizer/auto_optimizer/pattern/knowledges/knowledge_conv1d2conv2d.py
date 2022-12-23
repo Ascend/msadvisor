@@ -103,7 +103,7 @@ class KnowledgeConv1d2Conv2d(KnowledgeBase):
         for node in graph.initializers:
             const_inputs.add(node.name)
 
-        attrs = {'axes': np.array([2], dtype=np.int64)}
+        attrs = {'axes': [2]}
         for node in node_map.values():
             for refer_index, node_input in enumerate(node.inputs):
                 # 如果输入不在输出集合中，并且不在常量输入集合中则认为此输入为子图的外部输入
