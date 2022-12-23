@@ -25,7 +25,7 @@ from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Initializer, Node
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
-from auto_optimizer.pattern.knowledges.utils import (insert_squeeze, insert_unsqueeze)
+from auto_optimizer.pattern.utils import insert_squeeze, insert_unsqueeze
 
 
 class Conv1dMatch(MatchBase):
