@@ -161,7 +161,49 @@ node_dicts的结果如下：
     }]
 ```
 
-## 2. 如何使用知识库
+## 2. 如何测试改图知识库
+
+写好了知识库后应该如何进行测试以保证知识库的正确性呢，框架提供了一个用于测试的helper类
+
+```mermaid
+classDiagram
+    class KnowledgeTestHelper {
+        +graph_equal()
+        +optimize()
+        +inference()
+        +check_optimization()
+        +check_precision()
+    }
+    class OptimizationConfig {
+        +graph
+        +knowledge
+        +onnx_ori
+        +onnx_opt
+    }
+```
+
+| KnowledgeTestHelper方法  | 功能说明                                         |
+| ------------------------ | ------------------------------------------------ |
+| graph_equal()            | 判定两个计算图是否相等                           |
+| optimize()               | 使用指定的知识库优化图，返回优化结果和优化后的图 |
+| inference()              | 基于onnxruntime进行推理                          |
+| check_optimization()     | 进行优化，并判断优化结果是否符合预期             |
+| check_precision()        | 进行推理并判定两图推理结果是否等价               |
+
+这里的接口定义了一些知识库测试常用的pattern，方便知识库测试使用。主要有测试优化成功和测试精度，宣称数学等价的知识库都应该通过这两个测试，如果不是数学等价的，则只需要通过优化成功这个测试。
+
+知识库被认为优化成功需要进行两遍优化，第一次优化成功且图的结构被修改，第二次优化失败且图结构不变。这是因为已经优化了图不应该能够被再次优化。
+
+精度判定方面，如果推理输出未产生溢出时，使用使用余弦距离小于一个阈值(默认1e-6)以及输出张量的模接近(atol=1e-8, rtol=1e-5)作为判定等价的依据，否则退而使用numpy.allclose。
+
+OptimizationConfig是一个封装参数的类，其中graph是待优化的图，knowledge是使用的知识库，onnx_ori是原始onnx保存路径，onnx_opt是优化后onnx保存路径
+
+使用时，让知识库的单元测试类同时继承unittest.TestCase和KnowledgeTestHelper即可使用。
+
+关于这些接口的使用细节，请参见源代码以及现有知识库的单元测试。
+
+
+## 3. 如何使用知识库
 
 定义好了知识库之后，怎么应用？
 
