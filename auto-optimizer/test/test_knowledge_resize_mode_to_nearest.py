@@ -17,7 +17,7 @@ import numpy as np
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_resize_mode_to_nearest import KnowledgeResizeModeToNearest
-from utils import inference, optimize
+from helper import KnowledgeTestHelper, OptimizationConfig
 
 
 def make_resize_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np.dtype):
@@ -30,11 +30,11 @@ def make_resize_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np.dt
     graph.add_initializer('roi', roi)
     graph.add_initializer('scales', scales)
     graph.add_node('Resize0', 'Resize', ['input', 'scales'], ['11'], attrs={
-        'coordinate_transformation_mode': str("half_pixel"),
+        'coordinate_transformation_mode': b"half_pixel",
         'cubic_coeff_a': -0.75,
         'exclude_outside': 0,
-        'mode': "linear",
-        'nearest_mode': "round_prefer_floor",
+        'mode': b"linear",
+        'nearest_mode': b"round_prefer_floor",
     })
     graph.update_map()
 
@@ -42,22 +42,23 @@ def make_resize_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np.dt
     return graph
 
 
-class TestKnowledgeResizeModeToNearest(unittest.TestCase):
+class TestKnowledgeResizeModeToNearest(unittest.TestCase, KnowledgeTestHelper):
     def test_basic_resize_mode(self):
         for value_type in [np.int64]:
             X = np.random.randn(10, 10).astype(value_type)
             Y = np.random.randn(10, 10).astype(value_type)
 
             onnx_name = 'resize_mode_test'
-            origin_file = f'onnx/{onnx_name}1.onnx'
-            optimized_file = f'onnx/{onnx_name}_optimize1.onnx'
+            onnx_ori = f'onnx/{onnx_name}1.onnx'
+            onnx_opt = f'onnx/{onnx_name}_optimize1.onnx'
             graph = make_resize_model(onnx_name, X, Y, value_type)
-            graph.save(origin_file)
-            newgraph = OnnxGraph.parse(origin_file)
-            knowledge = KnowledgeResizeModeToNearest()
-            result = optimize(newgraph, knowledge)
-            newgraph.save(optimized_file)
-            self.assertTrue(result)
+            cfg = OptimizationConfig(
+                graph=graph,
+                knowledge=KnowledgeResizeModeToNearest(),
+                onnx_ori=onnx_ori,
+                onnx_opt=onnx_opt,
+            )
+            self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
 
 
 if __name__ == '__main__':

@@ -17,9 +17,8 @@ import numpy as np
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_dynamic_reshape import KnowledgeDynamicReshape
-from auto_optimizer.pattern.knowledges.utils import insert_squeeze
-
-from utils import inference, optimize
+from auto_optimizer.pattern.utils import insert_squeeze
+from helper import KnowledgeTestHelper, OptimizationConfig
 
 
 def make_dynamic_model(onnx_name, x, y, shape):
@@ -46,13 +45,13 @@ def make_dynamic_model_and_squeeze(onnx_name, x, y, shape):
     graph.add_node('Reshape0', 'Reshape', ['Y', 'Shape_0'], ['Reshape0_out'])
     graph.add_node('Shape', 'Shape', ['Reshape0_out'], ['Shape_out'])
     graph.add_node('Reshape1', 'Reshape', ['X', 'Shape_out'], ['OUT_0'])
-    attrs = {'axes': np.array([1], dtype = np.int64)}
+    attrs = {'axes': [1]}
     insert_squeeze(graph, graph['Reshape0'], attrs, mode = 'after', refer_index = 0)
     graph.update_map()
     return graph
 
 
-class TestKnowledgeDynamicReshape(unittest.TestCase):
+class TestKnowledgeDynamicReshape(unittest.TestCase, KnowledgeTestHelper):
     def test_basic_dynamic_reshape(self):
         usecases = [
             (('bs', 512), np.float32, np.array([-1, 64], dtype = np.int64)),
@@ -64,21 +63,30 @@ class TestKnowledgeDynamicReshape(unittest.TestCase):
             y = {'shape': in_shape, 'dtype': in_dtype}
 
             onnx_name = 'knowledge_dynamic_reshape_test'
-            origin_file = f'onnx/{onnx_name}.onnx'
-            optimized_file = f'onnx/{onnx_name}_optimize.onnx'
+            onnx_ori = f'onnx/{onnx_name}.onnx'
+            onnx_opt = f'onnx/{onnx_name}_optimize.onnx'
             graph = make_dynamic_model(onnx_name, x, y, shape)
-            graph.save(origin_file)
+            cfg = OptimizationConfig(
+                graph=graph,
+                knowledge=KnowledgeDynamicReshape(),
+                onnx_ori=onnx_ori,
+                onnx_opt=onnx_opt,
+            )
+            self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
 
-            knowledge = KnowledgeDynamicReshape()
-            result = optimize(graph, knowledge)
-            graph.save(optimized_file)
-            self.assertTrue(result)
+            var = {'bs': 8, 'len': 128}
+            shape_ = [var[x] if x in var else x for x in in_shape]
+            feeds = [
+                {
+                    'X': np.random.randn(*shape_).astype(x['dtype']),
+                    'Y': np.random.randn(*shape_).astype(y['dtype']),
+                } for _ in range(10)
+            ]
+            self.assertTrue(self.check_precision(onnx_ori, onnx_opt, feeds))
 
-            shape_name = graph['Reshape1'].inputs[1]
-            self.assertTrue(np.all(graph[shape_name].value == list(shape)))
-
-            result = optimize(graph, knowledge)
-            self.assertFalse(result)
+            graph_opt = OnnxGraph.parse(onnx_opt)
+            shape_name = graph_opt['Reshape1'].inputs[1]
+            self.assertTrue(np.all(graph_opt[shape_name].value == list(shape)))
 
     def test_basic_dynamic_reshape_and_squeeze(self):
         usecases = [
@@ -89,25 +97,32 @@ class TestKnowledgeDynamicReshape(unittest.TestCase):
             x = {'shape': in_shape, 'dtype': in_dtype}
             y = {'shape': in_shape, 'dtype': in_dtype}
 
-            onnx_name = 'knowledge_dynamic_reshape_test'
-            origin_file = f'onnx/{onnx_name}.onnx'
-            optimized_file = f'onnx/{onnx_name}_optimize.onnx'
+            onnx_name = 'knowledge_dynamic_reshape_and_squeeze_test'
+            onnx_ori = f'onnx/{onnx_name}.onnx'
+            onnx_opt = f'onnx/{onnx_name}_optimize.onnx'
             graph = make_dynamic_model_and_squeeze(onnx_name, x, y, shape)
-            graph.save(origin_file)
+            cfg = OptimizationConfig(
+                graph=graph,
+                knowledge=KnowledgeDynamicReshape(),
+                onnx_ori=onnx_ori,
+                onnx_opt=onnx_opt,
+            )
+            self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
 
-            knowledge = KnowledgeDynamicReshape()
-            result = optimize(graph, knowledge)
-            graph.save(optimized_file)
-            self.assertTrue(result)
+            var = {'bs': 8, 'len': 128}
+            shape_ = [var[x] if x in var else x for x in in_shape]
+            feeds = [
+                {
+                    'X': np.random.randn(*shape_).astype(x['dtype']),
+                    'Y': np.random.randn(*shape_).astype(y['dtype']),
+                } for _ in range(10)
+            ]
+            self.assertTrue(self.check_precision(onnx_ori, onnx_opt, feeds))
 
-            shape_name = graph['Reshape1'].inputs[1]
-            self.assertTrue(np.all(graph[shape_name].value == list(shape)))
-
-            result = optimize(graph, knowledge)
-            self.assertFalse(result)
+            graph_opt = OnnxGraph.parse(onnx_opt)
+            shape_name = graph_opt['Reshape1'].inputs[1]
+            self.assertTrue(np.all(graph_opt[shape_name].value == list(shape)))
 
 
 if __name__ == '__main__':
     unittest.main()
-
-
