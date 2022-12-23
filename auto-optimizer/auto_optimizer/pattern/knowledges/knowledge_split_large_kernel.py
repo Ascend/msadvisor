@@ -36,8 +36,8 @@ class LargeKernelConv(MatchBase):
     def match(self, node: BaseNode, graph: BaseGraph) -> bool:
         if not isinstance(node, (Node, )) or op.ne(node.op_type, 'Conv'):
             return False
-        auto_pad: str = node.attrs.get('auto_pad', 'NOTSET')
-        if auto_pad != 'NOTSET':
+        auto_pad: str = node.attrs.get('auto_pad', b'NOTSET')
+        if auto_pad != b'NOTSET':
             return False
         strides: List[int] = node.attrs.get('strides', [1])
         dilations: List[int] = node.attrs.get('dilations', [1])
@@ -181,6 +181,7 @@ class KnowledgeSplitLargeKernelConv(KnowledgeBase):
             inputs=new_inputs,
             outputs=[f'{conv_name}_output'],
             attrs={
+                **conv.attrs,
                 'pads': new_pads,
                 'group': conv.attrs.get('group', 1),
                 'kernel_shape': [end_ - start_ for start_, end_ in kslice]
