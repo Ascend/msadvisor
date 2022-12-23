@@ -106,11 +106,3 @@ def check_data_type(data, key, value_type, is_digit=False):
                                    f"but get {data.get(key)} type: {type(data.get(key))}. "
                                    f"please check profiling data")
     return False
-
-
-def check_rank_and_step(rank_size, step_num):
-    if rank_size is None or (isinstance(rank_size, str) and not rank_size.isdigit()):
-        return False
-    a = rank_size is not None and (not isinstance(rank_size, str) or rank_size.isdigit())
-    return True
-

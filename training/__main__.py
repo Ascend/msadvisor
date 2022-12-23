@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import json
+import argparse
+
+
 from training.hccl_analysis_model.hcclanalysis import evaluate
 
 
-def run_hcclanalysis():
-    data_path = '/home/dcs-50/y00804230/'
+def run_hcclanalysis(rank_size, bucket_name, data_path):
     pra = {
-        "rank_size": 24,
         "step_num": 1,
-        "bucket_name": "obs://0923/00lcm/result/profiler",
         "download": 1,
         "access_config": {
             # 登录需要的ak sk信息
@@ -44,9 +45,18 @@ def run_hcclanalysis():
             'modelarts_endpoint': 'https://modelarts.cn-south-222.ai.pcl.cn',
         },
     }
+    pra.update({"rank_size": rank_size})
+    pra.update({"bucket_name": bucket_name})
     pra = json.dumps(pra)
     result = evaluate(data_path, parameter=pra)
     print(result)
 
 
-run_hcclanalysis()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="parameters for collecting profiling data from obs")
+    parser.add_argument("--rank_size", type=int, default=None)
+    parser.add_argument("--bucket_name", type=str, default=None)
+    parser.add_argument("--data_path", type=str, default=None)
+    args = parser.parse_args()
+
+    run_hcclanalysis(args.rank_size, args.bucket_name, args.data_path)

@@ -45,7 +45,7 @@ def op_bandwidth_analysis(op_bandwidth_info, iteration_num, analysis_op_name):
         sdma_total_transit_time = transit_time_info.get(Constant.HCCS, 0) + \
                                   transit_time_info.get(Constant.PCIE, 0) + \
                                   transit_time_info.get(Constant.SDMA, 0)
-        sdma_bandwidth = sdma_transit_size / Constant.B_TO_G / (sdma_total_transit_time / Constant.US_TO_MS)
+        sdma_bandwidth = sdma_transit_size / Constant.B_TO_G / (sdma_total_transit_time / Constant.MS_TO_S)
 
     hccs_utilization = float(format(hccs_bandwidth / Constant.LINK_BANDWIDTH[Constant.HCCS], ".2f"))
     pcie_utilization = float(format(pcie_bandwidth / Constant.LINK_BANDWIDTH[Constant.PCIE], ".2f"))
@@ -185,6 +185,6 @@ def get_transit_size_and_bandwidth(transit_size_info, transit_time_info, transpo
         for data_size, num in transit_size_info.get(transport_type).items():
             transit_size += data_size * num
         bandwidth = float(format(
-            transit_size / Constant.B_TO_G / (transit_time_info.get(transport_type) / Constant.US_TO_MS), ".2f")
+            transit_size / Constant.B_TO_G / (transit_time_info.get(transport_type) / Constant.MS_TO_S), ".2f")
         )
     return transit_size, bandwidth

@@ -37,39 +37,64 @@ DEFAULT_STEP_NUM = 2
 
 
 def get_timeline_info(timeline_file):
-    rank_id = timeline_file.split("/")[-1].split("_")[-1].split(".")[0]
+    rank_id = os.path.basename(timeline_file).split("_")[-1].split(".")[0]
     device_id = str(int(rank_id) % 8)
-    with open(timeline_file) as f:
-        timeline_data = json.load(f)
+    try:
+        with open(timeline_file) as f:
+            timeline_data = json.load(f)
+    except Exception as e:
+        ad_print_and_log(AD_ERROR, f"Failed to load json file {timeline_file}, error: {e}")
+        return Constant.DATA_PARSE_ERROR
     timeline_task_type_pid = TIMELINE_TASK_TYPE_PID
     timeline_task_type_pid[Constant.AICORE] = device_id
     specific_item_pid_tid = SPECIFIC_ITEM_PID_TID
     specific_item_pid_tid['step'] = {'pid': device_id, 'tid': 100000}
-    task_type_dict, task_types = get_task_type_dict(timeline_data, timeline_task_type_pid)
-    pid_tid_dict, step_name = get_pid_tid(timeline_data, specific_item_pid_tid)
-    step_info = get_step_time_info(timeline_data, pid_tid_dict, step_name)
-    return task_type_dict, task_types, pid_tid_dict, step_info, timeline_data
+    task_type_dict = get_task_type_dict(timeline_data, timeline_task_type_pid)
+    identifier = parse_identifier(timeline_data, specific_item_pid_tid)
+    if task_type_dict == Constant.DATA_PARSE_ERROR or identifier == Constant.DATA_PARSE_ERROR:
+        return Constant.DATA_PARSE_ERROR
+    step_info = get_step_time_info(timeline_data, identifier["pid_tid"], identifier["step_name"])
+    if step_info == Constant.DATA_PARSE_ERROR:
+        return Constant.DATA_PARSE_ERROR
+    timeline_info = {
+        "task_type_pid": task_type_dict["task_type_pid"],
+        "task_types": task_type_dict["task_types"],
+        "pid_tid_dict": identifier["pid_tid"],
+        "step_info": step_info,
+        "timeline_data": timeline_data
+    }
+    return timeline_info
 
 
-def get_task_type_dict(timeline_data, task_types_pid):
-    task_type_dict = {}
+def get_task_type_dict(timeline_data, tasks_pid):
+    task_type_pid = {}
     task_types = {}
     for event in timeline_data:
         if event.get(Constant.NAME) == "process_labels" and event.get(Constant.ARGS) is not None:
-            for key, task_type_pid in task_types_pid.items():
-                if task_type_pid == event.get(Constant.PID):
+            if not event.get(Constant.ARGS).get('labels') or not event.get(Constant.PID):
+                ad_print_and_log(AD_ERROR, "process_labels in timeline data is invalid!")
+                return Constant.DATA_PARSE_ERROR
+            for key, task_pid in tasks_pid.items():
+                if task_pid == event.get(Constant.PID):
                     task_types[key] = event.get(Constant.ARGS).get('labels')
-                    task_type_dict[event.get(Constant.ARGS).get('labels')] = int(event.get(Constant.PID))
-    return task_type_dict, task_types
+                    task_type_pid[event.get(Constant.ARGS).get('labels')] = int(event.get(Constant.PID))
+    task_type_dict = {
+        "task_type_pid": task_type_pid,
+        "task_types": task_types
+    }
+    return task_type_dict
 
 
-def get_pid_tid(timeline_data, specific_item_pid_tid):
+def parse_identifier(timeline_data, specific_item_pid_tid):
+    """Get pid and tid of events. In addition, get step_name"""
     pid_tid_dict = dict()
     step_name = None
     for event in timeline_data:
         if event.get(Constant.ARGS) is None or event.get(Constant.NAME) != 'thread_name':
             continue
 
+        if not event.get(Constant.ARGS).get(Constant.NAME):
+            return Constant.DATA_PARSE_ERROR
         for key, item_pid_tid in specific_item_pid_tid.items():
             if event.get(Constant.PID) == item_pid_tid.get(Constant.PID) and event.get(
                     Constant.TID) == item_pid_tid.get(Constant.TID):
@@ -79,7 +104,11 @@ def get_pid_tid(timeline_data, specific_item_pid_tid):
 
                 if cur_type == 'Steps' or cur_type == 'Step':
                     step_name = cur_type
-    return pid_tid_dict, step_name
+    identifier = {
+        "pid_tid": pid_tid_dict,
+        "step_name": step_name
+    }
+    return identifier
 
 
 def get_event_start_end_time(event):
@@ -95,9 +124,13 @@ def get_step_time_info(timeline_data, pid_tid_dict, step_name):
     sorted_step_event_list = sorted(step_event_list, key=lambda s: int(s[Constant.NAME]), reverse=False)
     step_info_record = dict()
     for step_event in sorted_step_event_list:
+        data_invalid = \
+            not step_event.get(Constant.NAME) or not step_event.get(Constant.TS) or not step_event.get(Constant.DUR)
+        if data_invalid:
+            ad_print_and_log(AD_ERROR, "Incomplete step data in timeline data!")
+            return Constant.DATA_PARSE_ERROR
         step_id = int(step_event.get(Constant.NAME))
-        start_timestamp = float(step_event.get(Constant.TS))
-        end_timestamp = start_timestamp + float(step_event.get(Constant.DUR))
+        start_timestamp, end_timestamp = get_event_start_end_time(step_event)
         step_info_record[step_id] = {"start_timestamp": start_timestamp,
                                      "dur_time": float(step_event.get(Constant.DUR)),
                                      "end_timestamp": end_timestamp}
@@ -127,12 +160,11 @@ def get_critical_timeline(profiling_dir, step_num):
     max_time = 0
     analysis_timeline = None
     for ascend_timeline in ascend_timeline_files:
-        try:
-            _, _, _, step_infos, _ = get_timeline_info(ascend_timeline)
-        except Exception as e:
-            ad_print_and_log(AD_ERROR, f"The {ascend_timeline} is invalid. analysis error: {e}")
+        timeline_info = get_timeline_info(ascend_timeline)
+        if timeline_info == Constant.DATA_PARSE_ERROR:
+            ad_print_and_log(AD_ERROR, f"The {ascend_timeline} is invalid, please check!")
             return Constant.DATA_PARSE_ERROR
-        step_info = step_infos.get(step_num)
+        step_info = timeline_info["step_info"].get(step_num)
         if not step_info:
             ad_print_and_log(AD_ERROR, f"Got step info from ascend timeline failed, cur step_num: {step_num}")
             return Constant.DATA_PARSE_ERROR

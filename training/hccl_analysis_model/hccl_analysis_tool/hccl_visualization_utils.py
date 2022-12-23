@@ -57,7 +57,7 @@ def get_communication_info(trace_events, communication_info_record):
             update_record_dict(communication_info_record[link_key], Constant.TRANSIT_SIZE, transit_size)
             _, src_rand_os_id = HcclConfig.get_server_and_os_id(src_rank)
             _, dst_rank_os_id = HcclConfig.get_server_and_os_id(dst_rank)
-            if src_rand_os_id == dst_rank_os_id and src_rand_os_id is not None and dst_rank_os_id is not None:
+            if src_rand_os_id == dst_rank_os_id and src_rand_os_id is not None:
                 cur_transport_type = Constant.HCCS
             elif src_rand_os_id != dst_rank_os_id and src_rand_os_id is not None and dst_rank_os_id is not None:
                 cur_transport_type = Constant.PCIE

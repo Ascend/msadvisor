@@ -51,6 +51,7 @@ class Constant:
     # Unit conversion
     B_TO_G = 1024 ** 3
     US_TO_MS = 1000
+    MS_TO_S = 1000
 
     # communication link info keys
     TRANSPORT_TYPE_ = "transport_type"

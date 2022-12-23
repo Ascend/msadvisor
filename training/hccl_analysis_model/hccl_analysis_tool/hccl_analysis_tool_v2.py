@@ -31,10 +31,10 @@ from hccl_data_visualization import HcclVisualization
 
 
 class HcclAnalysisTool:
-    def __init__(self, cluster_rank_size, hccl_profile_dir, visualization=False):
+    def __init__(self, cluster_rank_size, profile_dir, visualization=False):
         self.cluster_rank_size = cluster_rank_size
-        self.hccl_profile_dir = hccl_profile_dir
-        self.step_trace_dir = hccl_profile_dir
+        self.hccl_profile_dir = profile_dir
+        self.step_trace_dir = profile_dir
         self.op_name_mapping = dict()
         self.rank_id_list = set()
         self.step_timestamp = dict()
@@ -49,7 +49,7 @@ class HcclAnalysisTool:
         html_info = {}
 
         if op_mapping_flag:
-            if self.get_hccl_op_name() == Constant.DATA_PARSE_ERROR:
+            if self.parse_hccl_op_name() == Constant.DATA_PARSE_ERROR:
                 return Constant.HCCL_ANALYSIS_ERROR
             hccl_op_name = self.op_name_mapping.get(analysis_op_name)
         else:
@@ -71,9 +71,9 @@ class HcclAnalysisTool:
 
         ad_log(AD_INFO, f"Analysis hccl data for {len(self.rank_id_list)} devices")
         get_op_info = self.record_op_info(op_info_record, analysis_op_name, valid_step_num, hccl_op_name)
-        ad_log(AD_INFO, f"Operator {analysis_op_name} information recorded successfully")
         if get_op_info == Constant.DATA_PARSE_ERROR:
             return Constant.HCCL_ANALYSIS_ERROR
+        ad_log(AD_INFO, f"Operator {analysis_op_name} information recorded successfully")
         if step_num is None:
             step_num = min(valid_step_num)
         op_info = op_info_record.get(analysis_op_name).get(step_num)
@@ -81,9 +81,9 @@ class HcclAnalysisTool:
             ad_print_and_log(AD_ERROR, f"There is not step_num like {step_num}, please check")
             return Constant.HCCL_ANALYSIS_ERROR
         iteration_num = self.op_performance_analysis(op_info, html_info, analysis_op_name, iteration_num)
-        ad_log(AD_INFO, f"Operator {analysis_op_name} performance analysis successfully")
         if iteration_num == Constant.DATA_PARSE_ERROR:
             return Constant.HCCL_ANALYSIS_ERROR
+        ad_log(AD_INFO, f"Operator {analysis_op_name} performance analysis successfully")
         visual_save_path = os.path.realpath(self.hccl_profile_dir)
         visual_save_path = os.path.join(visual_save_path, "recommendation", "visualization", f"{analysis_op_name}")
 
@@ -93,7 +93,7 @@ class HcclAnalysisTool:
             self.visualize_communication_pattern(hccl_op_name, iteration_num, visual_save_path)
         return Constant.HCCL_ANALYSIS_OK
 
-    def get_hccl_op_name(self):
+    def parse_hccl_op_name(self):
         step_trace_files = glob.glob(os.path.join(self.step_trace_dir, Constant.STEP_TRACE_FILE))
         if len(step_trace_files) == 0:
             ad_print_and_log(AD_ERROR,
@@ -102,8 +102,7 @@ class HcclAnalysisTool:
         for step_trace_file in step_trace_files:
             if not step_trace_file_check(step_trace_file):
                 return Constant.DATA_PARSE_ERROR
-            # windows -3 linux 3
-            cur_rank_id = step_trace_file.split("/")[-1].split("_")[-3]
+            cur_rank_id = os.path.basename(step_trace_file).split("_")[3]
             step_trace_info = get_step_trace_info(step_trace_file)
             self.step_timestamp[cur_rank_id] = step_trace_info[1]
         self.get_all_op_name_mapping(step_trace_files)
@@ -188,7 +187,7 @@ class HcclAnalysisTool:
             with open(file_path, "r") as src_file:
                 hccl_trace = json.load(src_file)
         except Exception as e:
-            ad_print_and_log(AD_ERROR, f"Failed to load {os.path.basename(file_path)} from {file_path}, error: {e}")
+            ad_print_and_log(AD_ERROR, f"Failed to load json file {file_path}, error: {e}")
             return Constant.HCCL_ANALYSIS_ERROR
         if not iter_trace_file_check(hccl_trace):
             ad_print_and_log(AD_ERROR, f"The {file_path} is invalid, please check. ")
@@ -273,7 +272,7 @@ class HcclAnalysisTool:
             transit_size = link_rank_info.get(Constant.TRANSIT_SIZE, 0)
             cur_bandwidth = 0
             if transit_time > 0:
-                cur_bandwidth = transit_size / Constant.B_TO_G / (transit_time / Constant.US_TO_MS)
+                cur_bandwidth = transit_size / Constant.B_TO_G / (transit_time / Constant.MS_TO_S)
             if matrix_type == Constant.BANDWIDTH:
                 data_value = float(format(cur_bandwidth, ".2f"))
             elif matrix_type == Constant.TRANSPORT_TYPE_:

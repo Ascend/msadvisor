@@ -23,8 +23,8 @@ class HcclConfig:
 
     @classmethod
     def init_config(cls, rank_size, rank_num_per_server, rank_num_per_os):
-        server_num = int(rank_size / rank_num_per_server) + 1
-        os_num = int(rank_num_per_server / rank_num_per_os) + 1
+        server_num = rank_size // rank_num_per_server
+        os_num = rank_num_per_server // rank_num_per_os
         rank_list = list(range(rank_size))
         server_list = list(range(1, server_num + 1, 1))
         os_list = list(range(1, os_num + 1, 1))
@@ -57,7 +57,8 @@ class HcclConfig:
                 if rank_id in server_value.get(os_key):
                     os_id = os_num
                     break
-            if server_id is not None and os_id  is not None:
+            if server_id is not None and os_id is not None:
+                server_id = None
                 break
         cls.network_topology_mapping[rank_id]["server_id"] = server_id
         cls.network_topology_mapping[rank_id]["os_id"] = os_id

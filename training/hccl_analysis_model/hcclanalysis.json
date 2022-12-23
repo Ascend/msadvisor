@@ -9,7 +9,7 @@
               "rank_size": 24,
               "step_num": null,
               "bucket_name": "obs://0923/00lcm/result/profiler",
-              "download": 1,
+              "download": 0,
               "access_config": {
                   "access_key": "",
                   "secret_access_key": "",

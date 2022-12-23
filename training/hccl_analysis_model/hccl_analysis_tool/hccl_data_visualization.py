@@ -124,4 +124,3 @@ class HcclVisualization:
             os.makedirs(save_path)
         plt.savefig("{}/{}.jpg".format(save_path, heatmap_title.split("(")[0]))
         plt.close()
-

@@ -15,6 +15,7 @@
 from utils.constant import Constant
 from .timeline_analysis_util import get_event_by_pid_tid
 
+# time interval(ms)
 TIME_INTERVAL = 1
 
 

@@ -38,7 +38,7 @@ def evaluate(datapath, parameter):
         json string of result info
         result must be ad_result
     """
-    log.ad_log(log.AD_INFO, f"hccl analysis Model start runing, log and recommendation will be saved in {datapath}")
+    log.ad_log(log.AD_INFO, f"hccl analysis Model start running, log and recommendation will be saved in {datapath}")
     parameters = json.loads(parameter)
     cluster_rank = parameters.get("rank_size")
     cluster_rank = int(cluster_rank) \
