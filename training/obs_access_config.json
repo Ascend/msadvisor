@@ -1,0 +1,12 @@
+{
+    "access_config": {
+        "access_key": "",
+        "secret_access_key": "",
+        "server": "",
+        "region_name": "",
+        "project_id": "",
+        "iam_endpoint": "",
+        "obs_endpoint": "",
+        "modelarts_endpoint": ""
+    }
+}

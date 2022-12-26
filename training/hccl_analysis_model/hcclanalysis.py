@@ -19,7 +19,6 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 
 from training.utils import log
-from training.utils.modelarts_handler import ModelartsHandler
 from hccl_analysis_tool.hccl_analysis_tool_v2 import HcclAnalysisTool
 from critical_path_analysis.ascend_timeline_analysis_v2 import run_critical_path_analysis
 from utils.constant import Constant
@@ -45,36 +44,11 @@ def evaluate(datapath, parameter):
         if cluster_rank and (not isinstance(cluster_rank, str) or cluster_rank.isdigit()) else None
     step_num = parameters.get("step_num")
     step_num = int(step_num) if step_num and (not isinstance(step_num, str) or step_num.isdigit()) else None
-    access_config = parameters.get("access_config")
-    bucket_name = parameters.get("bucket_name")
-    download = parameters.get("download")
 
     if cluster_rank is None or cluster_rank <= 0:
         log.ad_print_and_log(log.AD_ERROR, "Input rank size is invalid, please check")
         return INVALID_RESULT
-
-    if download:
-        datapath = os.path.join(datapath, "profiler")
-        # Create Modelarts session
-        log.ad_print_and_log(log.AD_INFO, "Profiling data Downloading...")
-        download_start = time.time()
-        modelarts_handler = ModelartsHandler()
-        modelarts_handler.create_session(access_config)
-        # download profiling data
-        for rank_id in range(cluster_rank):
-            hccl_info_dir = os.path.join(bucket_name, f"hccl_info_{rank_id}")
-            step_trace = os.path.join(bucket_name, f"step_trace_raw_{rank_id}_detail_time.csv")
-            ascend_timeline = os.path.join(bucket_name, f"ascend_timeline_display_{rank_id}.json")
-            try:
-                local_dir = f"{datapath}/"
-                modelarts_handler.session.obs.download_dir(src_obs_dir=hccl_info_dir, dst_local_dir=local_dir)
-                modelarts_handler.session.obs.download_file(src_obs_file=ascend_timeline, dst_local_dir=local_dir)
-                modelarts_handler.session.obs.download_file(src_obs_file=step_trace, dst_local_dir=local_dir)
-            except Exception as e:
-                log.ad_print_and_log(log.AD_ERROR, f"rank:{rank_id} data collected failed, error:{e}")
-                return INVALID_RESULT
-        cost_time = time.time() - download_start
-        log.ad_log(log.AD_INFO, f"File download succeeded !, cost time: {cost_time}")
+    
 
     # Critical path analysis and Hccl oprator analysis
     log.ad_print_and_log(log.AD_INFO, "Critical path analyzing...")
