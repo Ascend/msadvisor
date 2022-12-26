@@ -28,13 +28,20 @@ def convert_to_graph_optimizer(ctx: click.Context, param: click.Option, value: s
         raise click.BadParameter('No valid knowledge provided!')
 
 
+default_off_knowledges = [
+    'KnowledgeEmptySliceFix',
+    'KnowledgeTopkFix',
+    'KnowledgeDynamicReshape',
+]
+
+
 opt_optimizer = click.option(
     '-k',
     '--knowledges',
     'optimizer',
     default=','.join(
         knowledge for knowledge in KnowledgeFactory.get_knowledge_pool().keys()
-        if 'fix' not in knowledge.lower()
+        if knowledge not in default_off_knowledges
     ),
     type=str,
     callback=convert_to_graph_optimizer,
