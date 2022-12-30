@@ -245,6 +245,7 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
             'input_shape_range': '',
             'dynamic_shape': '',
             'output_size': '',
+            'process_run_infer': True,
         }
         for para in attrs:
             if para in params:

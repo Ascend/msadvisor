@@ -20,6 +20,7 @@ import logging
 import tempfile
 from copy import deepcopy
 from typing import Callable, Dict, List, Tuple
+import multiprocessing
 
 import numpy as np
 from numpy.linalg import norm
@@ -52,6 +53,7 @@ class InferTestConfig:
     input_shape_range: str = ''
     dynamic_shape: str = ''
     output_size: str = ''
+    process_run_infer: bool = False
 
 
 class GraphOptimizer:
@@ -74,7 +76,7 @@ class GraphOptimizer:
         pass
 
     @staticmethod
-    def _effective(om_ori: str, om_opt: str, cfg: InferTestConfig) -> bool:
+    def _effective(om_ori: str, om_opt: str, cfg: InferTestConfig, queue: multiprocessing.Queue) -> None:
         from auto_optimizer.inference_engine.inference.acl_inference \
                 import InferSession, tensor_type_to_numpy_type
 
@@ -109,19 +111,22 @@ class GraphOptimizer:
 
         if out_ori is None or out_opt is None or len(out_ori) != len(out_opt):
             logger.warning('Optimization failed: result is wrong.')
-            return False
+            queue.put(False)
+            return
 
         if not all(close(mat0, mat1) for mat0, mat1 in zip(out_ori, out_opt)):
             logger.warning('Optimization failed: result not close enough.')
-            return False
+            queue.put(False)
+            return
 
         logger.info('Origin inference time: %.2f ms', time_ori)
-        logger.info('Optimized inference time: %.2f ms', time_ori)
+        logger.info('Optimized inference time: %.2f ms', time_opt)
         logger.info('Inference speed improved %.2s%%.', (time_ori / time_opt - 1) * 100)
         if time_opt > time_ori * (1 - cfg.threshold):
             logger.warning('Optimization cancaled: not enough improvement.')
-            return False
-        return True
+            queue.put(False)
+            return
+        queue.put(True)
 
     @staticmethod
     def _evaluate(graph: BaseGraph, knowledge: KnowledgeBase) -> bool:
@@ -189,8 +194,6 @@ class GraphOptimizer:
         '''Optimize graph using optimizer, eliminate negative knowledges with
         inference testing.'''
         from auto_optimizer.inference_engine.model_convert import onnx2om
-        from auto_optimizer.inference_engine.inference.acl_inference \
-                import InferSession, tensor_type_to_numpy_type
         applied_knowledges = []
         tmp_dir = tempfile.gettempdir()
         pid = os.getpid()
@@ -218,7 +221,18 @@ class GraphOptimizer:
                     converter=cfg.converter,
                     soc_version=cfg.soc,
                 )
-                if self._effective(om_ori, om_opt, cfg=cfg):
+                ctx = multiprocessing.get_context('spawn')
+                queue = ctx.Queue()
+                if cfg.process_run_infer:
+                    proc = ctx.Process(
+                        target=self._effective,
+                        args=(om_ori, om_opt, cfg, queue)
+                    )
+                    proc.start()
+                    proc.join()
+                else:
+                    self._effective(om_ori, om_opt, cfg=cfg, queue=queue)
+                if queue.qsize() > 0 and queue.get():
                     applied_knowledges.append(name)
                     graph = graph_opt
                     os.rename(om_opt, om_ori)
