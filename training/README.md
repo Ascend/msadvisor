@@ -78,3 +78,9 @@ vim obs_access_config.json
 	- data: 本地环境存放profiling数据目录路径
 	
 	> **知识库分析结果保存在`${data}/recommendation/visualization`**
+
+- 查看分析结果
+    
+	1、通信算子的分析结果概览通过打屏展示
+
+	2、详细信息，请下载`visualization`目录到本地，通过该目录下的`hccl_analysis_result.html`查看通信算子的详细分析结果
