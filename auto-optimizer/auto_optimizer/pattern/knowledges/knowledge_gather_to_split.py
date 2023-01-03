@@ -53,10 +53,6 @@ pattern = Pattern() \
     .add_edge("PreNode", "Gather_0") \
     .add_edge("PreNode", "Gather_1") \
     .add_edge("PreNode", "Gather_2") \
-    .set_input("PreNode") \
-    .set_output("Gather_0") \
-    .set_output("Gather_1") \
-    .set_output("Gather_2") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
     
 r"""
@@ -80,9 +76,6 @@ pattern1 = Pattern() \
     .add_node("Gather_1", ["Gather"], [NextNodeCount(1)]) \
     .add_edge("PreNode", "Gather_0") \
     .add_edge("PreNode", "Gather_1") \
-    .set_input("PreNode") \
-    .set_output("Gather_0") \
-    .set_output("Gather_1") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 

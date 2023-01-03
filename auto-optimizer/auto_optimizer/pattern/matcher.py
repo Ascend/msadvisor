@@ -18,7 +18,6 @@ from typing import Callable, List, Dict, Optional, Set
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.graph_refactor.interface.base_node import Node
 from .pattern import Pattern, PatternNode
-from .pattern import DIRECTION
 
 
 class MatchResult(object):
@@ -31,11 +30,7 @@ class MatchResult(object):
         添加子图匹配到的节点数据
         :param node_dict:子图匹配后的所有节点，字典key是算子名，value是实际算子节点
         """
-        direction = self.pattern.get_visit_direction()
-        if direction == DIRECTION.DOWN_UP:
-            self.node_dicts.insert(0, node_dict)
-        else:
-            self.node_dicts.append(node_dict)
+        self.node_dicts.append(node_dict)
 
     def is_empty(self) -> bool:
         """
@@ -54,6 +49,7 @@ class Matcher(object):
     def __init__(self, graph: BaseGraph, pattern: Pattern) -> None:
         self._graph: BaseGraph = graph
         self._pattern: Pattern = pattern
+        self._visit_direction: int = 0 # 0: visit from up to down; 1: visit from down to up
 
     def get_candidate_nodes(self) -> List[Node]:
         """
@@ -86,6 +82,16 @@ class Matcher(object):
                 continue
             prev_nodes.add(node)
         return list(prev_nodes)
+
+    def __get_next_nodes(self, cur_node: Node) -> List[Node]:
+        """
+        获取所有子节点
+        """
+        next_nodes: Set[Node] = set()
+        for output_ in cur_node.outputs:
+            nodes = self._graph.get_next_nodes(output_)
+            next_nodes = next_nodes.union(nodes)
+        return list(next_nodes)
 
     def __get_prev_pattern_nodes(
         self,
@@ -145,7 +151,7 @@ class Matcher(object):
             if pattern_node in nodes_map:
                 nodes_map.pop(pattern_node)
                 continue
-            if self._pattern.node_can_match_zero(pattern_node.op_name):
+            if pattern_node.can_match_zero_time():
                 # 节点没有成功匹配过，但节点可以匹配0次
                 nodes_map[pattern_node] = None
                 if not isinstance(get_next_func, types.MethodType):
@@ -209,43 +215,12 @@ class Matcher(object):
                 return True
         return False
 
-    def __match_continuous_same_nodes(
-        self,
-        nodes: List[Node],
-        pattern_node: PatternNode,
-        result: Dict[str, List[Node]],
-        callback: Callable[[Node, PatternNode, Dict[str, List[Node]]], bool]
-    ) -> bool:
-        """
-        匹配连续的相同节点
-        :param nodes: 实际算子节点列表
-        :param pattern_node: 算子节点模板
-        :param result: 匹配结果
-        :param callback: 回调函数
-        :return: 如果nodes中节点存在与pattern_node不匹配的节点，则返回False，
-                 需要进一步和pattern_node子节点或者父节点进行匹配
-        """
-        match_continuous_nodes: List[Node] = []
-        for node in nodes:
-            if not pattern_node.match(node, self._graph):
-                continue
-            if pattern_node.op_name not in result:
-                result[pattern_node.op_name] = []
-            result[pattern_node.op_name].append(node)
-            if not isinstance(callback, types.MethodType):
-                return False
-            # 进一步匹配前置节点/后置节点
-            if callback(node, pattern_node, result):
-                match_continuous_nodes.append(node)
-            else:
-                result[pattern_node.op_name].remove(node)
-        return len(match_continuous_nodes) == len(nodes)
-
     def __match_prev_nodes(
         self,
         node: Node,
         pattern_node: PatternNode,
-        result: Dict[str, List[Node]]
+        result: Dict[str, List[Node]],
+        visited: Set[Node]
     ) -> bool:
         """
         匹配node前置节点
@@ -254,16 +229,35 @@ class Matcher(object):
         :param result: 匹配结果
         :return: 匹配成功则返回True，否则返回False
         """
-        prev_nodes = self.__get_prev_nodes(node)
-        if self._pattern.node_can_match_more(pattern_node.op_name):
-            if self.__match_continuous_same_nodes(
-                    prev_nodes, pattern_node, result, self.__match_prev_nodes):
-                return True
+        if pattern_node.can_match_more_time():
+            root_pattern_node = self._pattern.get_start_node()
+            if pattern_node is not root_pattern_node:
+                prev_nodes = self.__get_prev_nodes(node)
+                for prev_node in prev_nodes:
+                    if not pattern_node.match(prev_node, self._graph):
+                        continue
+                    if prev_node in visited:
+                        continue
+                    result[pattern_node.op_name].append(prev_node)
+                    if self.__match_prev_nodes(
+                        prev_node,
+                        pattern_node,
+                        result,
+                        visited = visited
+                    ):
+                        return True
+                    visited.add(prev_node)
+                    result[pattern_node.op_name].pop()
         if len(pattern_node.inputs) == 0:
-            return True
+            root_pattern_node = self._pattern.get_start_node()
+            prev_pattern_nodes = root_pattern_node.inputs
+            prev_nodes = self.__get_prev_nodes(result[root_pattern_node.op_name][0])
+        else:
+            prev_pattern_nodes = pattern_node.inputs
+            prev_nodes = self.__get_prev_nodes(node)
         return self.__match_nodes(
             prev_nodes,
-            pattern_node.inputs,
+            prev_pattern_nodes,
             result,
             self.__get_prev_pattern_nodes
         )
@@ -272,7 +266,8 @@ class Matcher(object):
         self,
         node: Node,
         pattern_node: PatternNode,
-        result: Dict[str, List[Node]]
+        result: Dict[str, List[Node]],
+        visited: Set[Node]
     ) -> bool:
         """
         匹配node后置节点
@@ -281,16 +276,33 @@ class Matcher(object):
         :param result: 匹配结果
         :return: 匹配成功则返回True，否则返回False
         """
-        next_nodes = self._graph.get_next_nodes(node.outputs[0])
-        if self._pattern.node_can_match_more(pattern_node.op_name):
-            if self.__match_continuous_same_nodes(
-                    next_nodes, pattern_node, result, self.__match_next_nodes):
-                return True
+        if pattern_node.can_match_more_time():
+            next_nodes = self.__get_next_nodes(node)
+            for next_node in next_nodes:
+                if not pattern_node.match(next_node, self._graph):
+                    continue
+                if next_node in visited:
+                    continue
+                result[pattern_node.op_name].append(next_node)
+                if self.__match_next_nodes(
+                    next_node,
+                    pattern_node,
+                    result,
+                    visited = visited
+                ):
+                    return True
+                visited.add(next_node)
+                result[pattern_node.op_name].pop()
         if len(pattern_node.outputs) == 0:
-            return True
+            root_pattern_node = self._pattern.get_start_node()
+            next_pattern_nodes = root_pattern_node.outputs
+            next_nodes = self.__get_next_nodes(result[root_pattern_node.op_name][-1])
+        else:
+            next_pattern_nodes = pattern_node.outputs
+            next_nodes = self.__get_next_nodes(node)
         return self.__match_nodes(
             next_nodes,
-            pattern_node.outputs,
+            next_pattern_nodes,
             result,
             self.__get_next_pattern_nodes
         )
@@ -310,18 +322,36 @@ class Matcher(object):
         """
         if not pattern_node.match(node, self._graph):
             return False
-        if pattern_node.op_name in result:
-            return True
-        result[pattern_node.op_name] = [node]
+        if pattern_node is self._pattern.get_start_node():
+            if pattern_node.op_name not in result:
+                result[pattern_node.op_name] = [node]
+        else:
+            if pattern_node.op_name in result:
+                for idx, item in enumerate(result[pattern_node.op_name]):
+                    if node.name == item.name:
+                        return idx == 0
+                return False
+            result[pattern_node.op_name] = [node]
 
-        # 遍历前置节点
-        ret = self.__match_prev_nodes(node, pattern_node, result)
-        # 遍历后置节点
-        ret &= self.__match_next_nodes(node, pattern_node, result)
-        # 结果处理
-        if not ret:
-            result.pop(pattern_node.op_name)
-        return ret
+        if self._visit_direction == 0:
+            if not self.__match_next_nodes(
+                node,
+                pattern_node,
+                result,
+                visited = set()
+            ):
+                result.pop(pattern_node.op_name)
+                return False
+        else:
+            if not self.__match_prev_nodes(
+                node,
+                pattern_node,
+                result,
+                visited = set()
+            ):
+                result.pop(pattern_node.op_name)
+                return False
+        return True
 
     def get_match_map(self, node: Node) -> MatchResult:
         """
@@ -330,14 +360,21 @@ class Matcher(object):
         :return: 匹配结果
         """
         result = MatchResult(self._pattern)
+
         start_pattern_node = self._pattern.get_start_node()
-        if start_pattern_node is None:
-            return result
         if not start_pattern_node.match(node, self._graph):
             return result
 
         match_nodes: Dict[str, List[Node]] = {}
-        # 子图遍历
+        if len(start_pattern_node.inputs) != 0:
+            # visit from down to up
+            self._visit_direction = 1
+            if not self.__graph_bfs(node, start_pattern_node, match_nodes):
+                return result
+            for nodes in match_nodes.values():
+                nodes.reverse()
+        # visit from up to down
+        self._visit_direction = 0
         if not self.__graph_bfs(node, start_pattern_node, match_nodes):
             return result
         result.add_node_dict(match_nodes)

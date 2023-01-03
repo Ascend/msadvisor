@@ -92,8 +92,6 @@ pattern_aasist = Pattern() \
     .add_edge("Conv_0", "Add_0") \
     .add_edge("Conv_2", "Add_0") \
     .add_edge("Add_0", "MaxPool_0") \
-    .set_input("Selu_0") \
-    .set_output("MaxPool_0") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 

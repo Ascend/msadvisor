@@ -40,15 +40,11 @@ classDiagram
     class Pattern {
         +add_node()
         +add_edge()
-        +set_input()
-        +set_output()
         +set_node_loop()
         +set_loop()
     }
     class PatternNode {
-        +match()
-        +set_input()
-        +set_output()
+        match()
     }
     class MatchBase {
         <<interface>>
@@ -58,19 +54,13 @@ classDiagram
     PatternNode --> MatchBase
 ```
 
-PatternNode：算子节点
-
-| PatternNode方法                         |                                                    |
-| --------------------------------------- | -------------------------------------------------- |
-| match(node: BaseNode, graph: BaseGraph) | 算子的匹配规则，包括对算子类型、属性、输入和输出等 |
-| set_input(prev_node: PatternNode)       | 设置输入的节点                                     |
-| set_output(next_node: PatternNode)      | 设置输出的节点                                     |
-
 算子的匹配规则依赖于MatchBase接口，不同算子节点，根据自己的需求，实现MatchBase，每个算子可以有多个MatchBase实现。
 
 | MatchBase方法      | 功能说明                                                     |
 | ------------------ | ------------------------------------------------------------ |
 | match(node, graph) | 算子匹配规则，node算子节点，BaseNode实例；graph计算图，BaseGraph实例 |
+
+PatternNode是子图Pattern中定义的算子节点，其成员方法match()会调用所有实现MatchBase的子类去匹配实际算子, match()只内部调用，外部不用感知。
 
 样例代码
 
@@ -93,8 +83,6 @@ Pattern：子图
 | ------------------------------------------------------- | ------------------------------------------------------------ |
 | add_node(op_name, op_types, op_matchs: List[MatchBase]) | 添加节点，op_name算子名，op_types支持的算子类型，op_matchs算子匹配规则 |
 | add_edge(prev_op_name, next_op_name)                    | 添加边，prev_op_name前置算子，next_op_name后置算子           |
-| set_input(op_name)                                      | 设置子图的输入算子                                           |
-| set_output(op_name)                                     | 设置子图的输出算子                                           |
 | set_node_loop(op_name, match_pattern)                   | 设置节点是否匹配多次，或者允许匹配零次                       |
 | set_loop(match_pattern)                                 | 设置子图是否匹配多次，或者允许匹配零次                       |
 
@@ -110,8 +98,6 @@ pattern = Pattern() \
     .add_node('Conv', ['Conv'], [Conv1dMatch]) \
     .add_node('element_wise', ['Mul', 'Add', 'Sub', 'Div', 'BatchNormalization', 'LeakyRelu', 'Relu']) \
     .add_edge('Conv', 'element_wise') \
-    .set_input('Conv') \
-    .set_output('element_wise') \
     .set_node_loop('element_wise', MATCH_PATTERN.MATCH_ZERO_OR_MORE) \
     .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
 ```

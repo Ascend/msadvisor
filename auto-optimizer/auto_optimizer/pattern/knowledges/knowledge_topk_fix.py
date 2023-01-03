@@ -45,8 +45,6 @@ r"""
 """
 pattern_topk = Pattern() \
     .add_node("TopK_0", ["TopK"]) \
-    .set_input("TopK_0") \
-    .set_output("TopK_0") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 

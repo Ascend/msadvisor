@@ -92,8 +92,6 @@ pattern0 = Pattern() \
     .add_edge("ElementWise_0", "Reshape_0") \
     .add_node("Transpose_0", ["Transpose"], [AllOutputsAreGatherMatch()]) \
     .add_edge("Reshape_0", "Transpose_0") \
-    .set_input("MatMul_0") \
-    .set_output("Transpose_0") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 

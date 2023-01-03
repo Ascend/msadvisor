@@ -221,8 +221,6 @@ class TypeCastPattern(Pattern):
     def __init__(self, strategy: TypeCastStrategy):
         super().__init__()
         self.add_node('generic_operator', None, [GenericOpMatch(strategy)]) \
-            .set_input('generic_operator') \
-            .set_output('generic_operator') \
             .set_node_loop('generic_operator', MATCH_PATTERN.MATCH_ONCE_OR_MORE) \
             .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
 

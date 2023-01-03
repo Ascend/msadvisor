@@ -13,14 +13,11 @@
 # limitations under the License.
 
 import copy
-import types
-import operator as op
 from abc import abstractmethod
-from typing import Dict, Optional, Tuple, List, Callable
+from typing import Dict, Optional, List, Callable
 from collections import defaultdict
 
 from auto_optimizer.pattern.pattern import Pattern
-from auto_optimizer.pattern.pattern import DIRECTION
 from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.pattern.matcher import Matcher
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
@@ -211,9 +208,6 @@ class KnowledgeBase(object):
             return []
         matcher = Matcher(graph, pattern)
         candidate_nodes = matcher.get_candidate_nodes()
-        direction = pattern.get_visit_direction()
-        if direction == DIRECTION.DOWN_UP:
-            candidate_nodes.reverse()  # 从下往上遍历，遍历结果排序取反
 
         uf = UnionFind()
         all_match_result = []

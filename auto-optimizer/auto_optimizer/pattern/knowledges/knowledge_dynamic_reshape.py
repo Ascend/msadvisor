@@ -34,8 +34,6 @@ class KnowledgeDynamicReshape(KnowledgeBase):
 
         pattern = Pattern() \
             .add_node('Reshape', ['Reshape']) \
-            .set_input('Reshape') \
-            .set_output('Reshape') \
             .set_node_loop('Reshape', MATCH_PATTERN.MATCH_ONCE)
         self._register_apply_funcs(pattern, [self._optimize_apply])
 
