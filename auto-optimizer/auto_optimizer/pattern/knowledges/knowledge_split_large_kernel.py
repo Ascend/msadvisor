@@ -49,24 +49,18 @@ class LargeKernelConv(MatchBase):
 
 # 拆分示意图
 r"""
-                                            _________PreNode_________
-                                       ____/         /  |  \         \____
-                                      /         ____/   |   \____         \
-                                     /         /        |        \         \
-                                slice0     slice1     slice2     slice3     slice4
-          |                       |          |          |          |          |
-       PreNode                  conv0      conv1      conv2      conv3      conv4
-          |                       |          |          |          |          |
-          |                   Unsqueeze0 Unsqueeze1 Unsqueeze2 Unsqueeze3 Unsqueeze4
-          |          slice           \         \        |        /         /
-    LargeKernelConv  ======>          \         \___    |   ____/         /
-          |                            \___         \   |  /          ___/
-          |                                \_________concat__________/
-          |                                             |
-       NextNode                                     ReduceSum
-          |                                             |
-                                                     NextNode
-                                                        |
+                                  ______________PreNode______________
+       |                         /         ____/   |   \____         \
+    PreNode                     /         /        |        \         \
+       |                     slice0    slice1    slice2    slice3    slice4
+       |                       |         |         |         |         |
+       |            slice    conv0     conv1     conv2     conv3     conv4
+ LargeKernelConv   ======>      \         \        |        /         /
+       |                         \         \_____  |  _____/         /
+       |                          \              \ | /              /
+       |                           \______________Sum______________/
+    NextNode                                       |
+       |                                        NextNode
 """
 
 
@@ -74,14 +68,14 @@ r"""
 class KnowledgeSplitLargeKernelConv(KnowledgeBase):
     """Split Large Conv Kernel to speed up inference."""
 
-    def __init__(self):
+    def __init__(self, threshold: int = 192):
         super().__init__()
         # 卷积核阈值，任意一维超过该阈值均认为是大卷积核算子
         # 该阈值通过实际模型测试得到，实际阈值可能在200左右
         # 测试模型有限，无法得到确切的值
         # 由于128-176之间推理性能区别不大，取了一个保守的大值
         # 确保性能的前提下，尽量减少拆分
-        self.threshold = 176
+        self.threshold = (max(threshold - 1, 15) // 16 + 1) * 16
         self.large_kernel_match = LargeKernelConv(self.threshold)
         self.large_kernel_pattern = Pattern() \
             .add_node("LargeKernelConv", ["Conv"], [self.large_kernel_match]) \
@@ -181,7 +175,7 @@ class KnowledgeSplitLargeKernelConv(KnowledgeBase):
         if keep_bias:
             new_inputs += conv.inputs[2:]
         conv_name = f'conv_{conv.name}_{identifier}'
-        conv_node = graph.add_node(
+        return graph.add_node(
             name=conv_name,
             op_type='Conv',
             inputs=new_inputs,
@@ -191,15 +185,6 @@ class KnowledgeSplitLargeKernelConv(KnowledgeBase):
                 'group': conv.attrs.get('group', 1),
                 'kernel_shape': [end_ - start_ for start_, end_ in kslice]
             }
-        )
-        # 每个分支均需要添加Unsqueeze算子
-        unsqueeze_name = f'unsqueeze_after_{conv_node.name}'
-        return graph.add_node(
-            name=unsqueeze_name,
-            op_type='Unsqueeze',
-            inputs=[conv_node.outputs[0]],
-            outputs=[f'{unsqueeze_name}_output'],
-            attrs={'axes': [0]}
         )
 
     def _calculate_kernel_slices(self, kshape: List[int]) -> List[List[Tuple[int, int]]]:
@@ -217,12 +202,13 @@ class KnowledgeSplitLargeKernelConv(KnowledgeBase):
         # [[]] --> [[(0, 3)]]
         # ...  --> [[(0, 3), (0, 100)], [(0, 3), (100, 201)]]
         # ...  --> [[(0, 3), (0, 100), (0, 5)], [(0, 3), (100, 201), (0, 5)]]
-        kslices = [[]]
+        # 最终kslices内每个元素都是kernel shape的一个切片
+        kslices: List[List[Tuple[int, int]]] = [[]]
         for ksize in kshape:
-            n = (ksize - 1) // self.threshold + 1
-            k, e = ksize // n, ksize % n
-            o = (n - e) // 2
-            ksizes = [k + 1 if o <= i < o + e else k for i in range(n)]
+            _16s = [16] * (ksize // 16) + ([ksize % 16] if ksize % 16 else [])
+            num = (len(_16s) - 1) // (self.threshold // 16) + 1
+            each = ((len(_16s) - 1) // num) + 1
+            ksizes = [sum(_16s[i:i+each]) for i in range(0, len(_16s), each)]
             indices = list(accumulate([0, *ksizes[:-1]]))
             kslices = [[*slc, (i, i + s)] for i, s in zip(indices, ksizes) for slc in kslices]
         return kslices
@@ -246,20 +232,11 @@ class KnowledgeSplitLargeKernelConv(KnowledgeBase):
             for idx, slc in enumerate(slices)
         ]
 
-        # add Concat/ReduceSum operator combination to calculate sumation of splitted conv operators
-        concat_node = graph.add_node(
-            name=f'concat_{conv0.name}',
-            op_type='Concat',
-            inputs=outputs,
-            outputs=[f'concat_{conv0.name}_output'],
-            attrs={'axis': 0}
-        )
         graph.add_node(
-            name=f'reducesum_after_{concat_node.name}',
-            op_type='ReduceSum',
-            inputs=[concat_node.outputs[0]],
+            name=f'sum_{conv0.name}',
+            op_type='Sum',
+            inputs=outputs,
             outputs=[conv0.outputs[0]],
-            attrs={'axes': [0], 'keepdims': 0}
         )
         graph.remove(conv0.name, {})
         graph.update_map()

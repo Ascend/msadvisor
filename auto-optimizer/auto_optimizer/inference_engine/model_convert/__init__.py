@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .om_compiler import OmCompiler
+from .om_compiler import OmCompiler, onnx2om

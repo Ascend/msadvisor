@@ -15,15 +15,23 @@
 import os
 import random
 import unittest
-from typing import List
+from typing import List, cast
 
 import numpy as np
 from onnx import helper, numpy_helper, GraphProto, ModelProto, OperatorSetIdProto
-from onnx.mapping import NP_TYPE_TO_TENSOR_TYPE
 
 from auto_optimizer.graph_refactor.onnx.node import OnnxPlaceHolder, OnnxInitializer, OnnxNode
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from test_node_common import is_ph_equal, is_ini_equal, is_node_equal
+
+try:
+    np_dtype_to_tensor_dtype = helper.np_dtype_to_tensor_dtype
+    
+except AttributeError as e:
+    from onnx import mapping
+
+    def np_dtype_to_tensor_dtype(np_dtype: np.dtype) -> int:
+        return cast(int, mapping.NP_TYPE_TO_TENSOR_TYPE[np_dtype])
 
 
 def is_elem_equal(elem1, elem2):
@@ -69,7 +77,7 @@ def is_graph_equal(g1, g2, msg=None):
     if not is_list_equal(g1.outputs, g2.outputs):
         msg = 'graph outputs are not equal!'
         raise unittest.TestCase.failureException(msg)
-    if not is_list_equal(g1._value_infos, g2._value_infos):
+    if not is_list_equal(g1.value_infos, g2.value_infos):
         msg = 'graph value_infos are not equal!'
         raise unittest.TestCase.failureException(msg)
     if not is_map_equal(g1._node_map, g2._node_map):
@@ -155,15 +163,15 @@ class TestGraphBasic(unittest.TestCase):
         }))
 
     def test_parse_proto(self):
-        input_0 = helper.make_tensor_value_info('input_0', NP_TYPE_TO_TENSOR_TYPE[np.dtype('float32')], [3, 2])
-        ini_0 = helper.make_tensor('ini_0', NP_TYPE_TO_TENSOR_TYPE[np.dtype('int32')], [2], np.array([1, 4]))
-        ini_1 = helper.make_tensor('ini_1', NP_TYPE_TO_TENSOR_TYPE[np.dtype('int32')], [1], np.array([1]))
+        input_0 = helper.make_tensor_value_info('input_0', np_dtype_to_tensor_dtype(np.dtype('float32')), [3, 2])
+        ini_0 = helper.make_tensor('ini_0', np_dtype_to_tensor_dtype(np.dtype('int32')), [2], np.array([1, 4]))
+        ini_1 = helper.make_tensor('ini_1', np_dtype_to_tensor_dtype(np.dtype('int32')), [1], np.array([1]))
         node_0 = helper.make_node('Pad', ['input_0', 'ini_0', 'ini_1', 'const_0'],
                                   ['output_0'], 'Node_0', mode='constant')
         node_1 = helper.make_node('Constant', [], ['const_0'], 'Constant_0',
                                   value=numpy_helper.from_array(np.array([1], dtype='int32')))
-        output_0 = helper.make_tensor_value_info('output_0', NP_TYPE_TO_TENSOR_TYPE[np.dtype('float32')], [3, 4])
-        value_info_0 = helper.make_tensor_value_info('const_0', NP_TYPE_TO_TENSOR_TYPE[np.dtype('int32')], [1])
+        output_0 = helper.make_tensor_value_info('output_0', np_dtype_to_tensor_dtype(np.dtype('float32')), [3, 4])
+        value_info_0 = helper.make_tensor_value_info('const_0', np_dtype_to_tensor_dtype(np.dtype('int32')), [1])
         graph_proto = helper.make_graph(
             [node_0, node_1],
             'test_parse',

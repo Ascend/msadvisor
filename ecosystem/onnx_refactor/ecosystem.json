@@ -95,6 +95,42 @@
                     }
                 }
             ]
+        },
+        {
+            "model_name": "KnowledgeMergeCasts",
+            "session_list": [
+                {
+                    "python_model_path": "",
+                    "parameter": {
+                        "mode": "optimize",
+                        "model_file": ""
+                    }
+                }
+            ]
+        },
+        {
+            "model_name": "KnowledgeGatherToSplit",
+            "session_list": [
+                {
+                    "python_model_path": "",
+                    "parameter": {
+                        "mode": "optimize",
+                        "model_file": ""
+                    }
+                }
+            ]
+        },
+        {
+            "model_name": "KnowledgeAvgPoolSplit",
+            "session_list": [
+                {
+                    "python_model_path": "",
+                    "parameter": {
+                        "mode": "optimize",
+                        "model_file": ""
+                    }
+                }
+            ]
         }
     ]
 }

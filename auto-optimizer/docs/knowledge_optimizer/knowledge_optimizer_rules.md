@@ -236,7 +236,8 @@ ONNX标准中，Concat算子支持输入空张量，但是om的Concat算子实�
 
 ```mermaid
 graph TD
-    subgraph After
+    subgraph After 
+
         F(PreNode) --> G(NormalSlice)
         G --> H(NextNode)
     end
@@ -247,5 +248,353 @@ graph TD
         B --> D(Concat)
         C --> D
         D --> E(NextNode)
+
     end
 ```
+---
+
+## Resize算子mode使用最近邻(KnowledgeResizeModeToNearest)
+
+### 原理
+
+部分推理模型中使用了双线性插值法做resize，经分析导致精度回归异常，使得各别图片存在误差。此类优化可扩展至linear->nearest、cubic->nearest、area->nearest等自定义转换场景。
+### 可支持场景
+Resize算子mode类型为linear、cubic、area的场景。 
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        X(Node0) --> D(Resize mode:nearest)
+        D --> E(Node1)
+    end
+
+    subgraph Before
+        Z(Node0) -->A(Resize mode:linear)
+        A --> B(Node1)
+    end
+```
+---
+
+## Split算子替换Gather算子(KnowledgeGatherToSplit)
+
+### 原理
+
+部分推理模型中使用了多个Gather算子对同一个数据进行切分，经分析Gather算子indices连续的情况下，例如该场景：y1=x[:3]，y2=x[3:6]，y3=x[6:9]，可使用一个Split算子进行替换。
+### 可支持场景
+各Gather算子axis相同，indices为0开始的连续一维向量且切分数据不相交的场景。例如：三个Gather算子indices分别为[0]、[1]、[2]；三个Gather算子indices分别为[0, 1]、[2, 3]、[4, 5]。
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        X(Node0) --> D(Split)
+        D --> E(Node1)
+        D --> F(Node2)
+        D --> G(Node3)
+    end
+
+    subgraph Before
+        Z(Node0) --> A(Gather0)
+        Z --> B(Gather1)
+        Z --> C(Gather2)
+        A --> H(Node1)
+        B --> I(Node1)
+        C --> J(Node2)
+    end
+```
+
+---
+
+## 动态shape模型Reshape算子优化(KnowledgeDynamicReshape)
+
+### 原理
+
+由于动态shape模型的输入shape不固定，onnx模型中大部分Reshape算子的shape值需要在执行过程中计算得出。这就会导致两个问题：1、计算Reshape的shape值引入了很多小算子，增加了调度耗时；2、shape值未知，导致Reshape算子的infershape依赖前置算子的输出（Reshape的infershape需要等前置算子执行完才能开始），会打断调度流水。如果能够计算出Reshape的shape值，就可以减少很多非必须的算子，从而有效提高模型性能。Reshape算子有两个特性可以帮助我们实现：如果shape某一个轴大小没有变化，可以设置为0；如果输入只有一个动态轴，该轴可以赋值为-1。然后通过静态推导方法，对模型指定不同的固定输入，再根据Reshape算子推导出的输入和输出计算出该算子的shape值。
+
+### 参数配置
+
+因为动态shape模型输入存在差异，不同模型输入可接受的范围不同，需要用户手动配置动态轴的输入范围。可以打开配置文件auto_optimizer/model.cfg，修改input_shape_range值，动态轴的取值范围通过“~”符号的方式连接，如果动态轴是固定值的倍数，则需要在固定值后面加上“*”符号，详细的描述请移步model.cfg的配置说明。
+
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        Y(Input)
+        N(Node0)
+        Re(Reshape)
+
+        Y --> N
+        N --> Re
+    end
+
+    subgraph Before
+        X(Input)
+        N0(Node0)
+        N1(Node1)
+        N2(Node2)
+        R(Reshape)
+
+        X --> N0
+        X --> N1
+        N0 --> R
+        N1 --> N2
+        N2 --> R
+    end
+```
+
+---
+
+## AveragePool算子大kernel size和stride拆分(KnowledgeAvgPoolSplit)
+
+### 原理
+
+因为Ascend指令集的限制，AvgPool算子的kernel size最大不能超过255，如果超过会额外插入Transdata、Transpose等算子进行shape转换，导致性能下降。可以优化onnx模型，将AveragePool算子拆分成等价的多个串联的AveragePool算子，比如AveragePool("kernel_shape": [32, 64], "stride": [32, 64])，可以拆分成AveragePool_0("kernel_shape": [8, 16], "stride": [8, 16])和AveragePool_1("kernel_shape": [4, 4], "stride": [4, 4])，拆分后转成om模型，可以消除多余的Transdata、Transpose等算子。
+
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        X(Input)
+        A0(AveragePool_0)
+        A1(AveragePool_1)
+        A2(AveragePool_2)
+
+        X --> A0
+        A0 --> A1
+        A1 --> A2
+    end
+
+    subgraph Before
+        Y(Input)
+        A(AveragePool)
+
+        Y --> A
+    end
+```
+
+## Conv1d 转 Conv2d (KnowledgeConv1d2Conv2d)
+
+### 原理
+
+在 onnx 图转换为 om 图过程中，Conv1d 算子会转换为 Conv2d 算子，并在算子前后插入 Transdata 进行数据类型转换，图中的多个 Conv 算子就会导致多次数据类型转换引起性能损失。本知识库识别多个连通的 (Conv1d | Element-wise) 类型的算子为一个子图，并在子图的所有输入前插入 Unsqueeze 算子，所有输出后插入 Squeeze 算子将子图进行整体升维从而减少数据类型转换。
+
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        subgraph " 1+"
+            C2("Conv(2d)") --> E2(Element-wise)
+            E2 .->|0+| E2
+        end
+        P2[PreNode] --> U(Unsqueeze)
+        U --> C2
+        E2 --> S(Squeeze)
+        S --> O2[PostNode]
+    end
+
+    subgraph Before
+        subgraph 1+
+            C1("Conv(1d)") --> E1(Element-wise)
+            E1 .->|0+| E1
+        end
+        P1[PreNode] --> C1
+        E1 --> O1[PostNode]
+    end
+```
+
+如图所示，Before 对应的是优化之前的 onnx 图，图中的 `Conv(1d) --> Element-wise` 结构代表由若干个 Conv 算子和 Element-wise 类型算子连通形成的子图。整个优化过程就是在子图的所有输入前插入 Unsqueeze 算子，所有输出后插入 Squeeze 算子将子图进行整体升维。
+
+```mermaid
+graph TD
+    subgraph After
+        subgraph " Subgraph"
+            C4("Conv(2d)") --> L2(LeakyRelu)
+            L2 --> C5("Conv(2d)")
+            C6("Conv(2d)") --> A2(Add)
+        end
+        P2[PreNode] --> U1(Unsqueeze)
+        U1 --> C4
+        P2 --> U2(Unsqueeze)
+        U2 --> C6
+        C5 --> A2
+        A2 --> S(Squeeze)
+    end
+
+    subgraph Before
+        subgraph Subgraph
+            C1("Conv(1d)") --> L1(LeakyRelu)
+            L1 --> C2("Conv(1d)")
+            C3("Conv(1d)") --> A1(Add)
+        end
+        P1[PreNode] --> C1
+        P1 --> C3
+        C2 --> A1
+    end
+```
+
+上图是一个更具体的示例，可以看到 Subgraph 中就是符合要求的子图，优化后子图的输入输出插入了 Unsqueeze 和 Squeeze 算子。
+
+## 数据类型转换 (KnowledgeTypeCast)
+
+### 原理
+
+一些模型中使用了 int64 等较高精度的数据类型，实际模型并不需要这么高的精度进行推理，因此可以通过特定的类型转换策略对 onnx 图中的数据类型进行转换，从而提升图推理的性能。基本原理为找到 onnx 图中所有满足类型要求并可泛型的子图，通过在子图前后插入 Cast 算子将子图的数据类型转换为目标类型。
+
+### 已支持场景
+
+#### 已支持类型转换策略
+
+后续可扩展为更复杂的转换策略
+
+- int64 -> int32
+- float64 -> float32
+
+#### 已支持类型转换的算子
+
+完全泛型算子：
+
+- Mul
+- Add
+- Sub
+- Div
+- Abs
+- Tanh
+- LeakyRelu
+- Relu
+- Sigmoid
+- BatchNormalization
+- ReduceSum
+- Concat
+- Gemm
+- Split
+- Slice
+- Transpose
+
+半泛型算子：
+
+- Expand: GenericIO([0], [0])
+- Less: GenericIO([0, 1], [])
+- Gather: GenericIO([0], [0])
+- Shape: GenericIO([0], [])
+- Where: GenericIO([1, 2], [0])
+- Equal: GenericIO([0, 1], [])
+- Reshape: GenericIO([0], [0])
+- Tile: GenericIO([0], [0])
+- ScatterND: GenericIO([0, 2], [0])
+- Unsqueeze: GenericIO([0], [0])
+- Squeeze: GenericIO([0], [0])
+
+### 示意图
+
+```mermaid
+graph TD
+    subgraph After
+        subgraph "Subgraph"
+            V2(VaradicNode) .->|1+| V2
+        end
+        P2[PreNode] --> C3("Cast {to: dst_type}")
+        C3 --> V2
+        V2 --> C4("Cast {to: ori_type}")
+        C4 --> O2[PostNode]
+    end
+
+    subgraph Before
+        subgraph "Subgraph "
+            V1(VaradicNode) .->|1+| V1
+        end
+        P1[PreNode] --> V1
+        V1 --> O1[PostNode]
+    end
+```
+
+如上图所示，原图中存在满足匹配条件的子图，知识库通过在子图的所有输入前插入 `Cast {to: dst_type}` 算子，在输出后插入 `Cast {to: ori_type}` 算子，将子图内部的可泛型算子转换为目标类型。
+
+```mermaid
+graph TD
+    subgraph After
+        subgraph "Subgraph "
+            S3(Shape) -->|int64| E2(Expand)
+            E2 -->|S| A2(Add)
+            A2 -->|S| S4(Shape)
+            C2(("Const(S)")) -->|S| A2
+        end
+        P2[PreNode] -->|T| Cast1("Cast {to: s}") -->|S| S3
+        P2 -->|T| Cast2("Cast {to: s}")  -->|S| E2
+        S4 -->|int64| O2(PostNode)
+    end
+
+    subgraph Before
+        subgraph "Subgraph"
+            S1(Shape) -->|int64| E1(Expand)
+            E1 -->|T| A1(Add)
+            A1 -->|T| S2(Shape)
+            C1(("Const(T)")) -->|T| A1
+        end
+        P1[PreNode] -->|T| S1
+        P1 -->|T| E1
+        S2 -->|int64| O1(PostNode)
+    end
+```
+
+上图是一个更具体的示例，有几个细节需要注意：
+
+1. 子图作为一个整体，只需要在子图的外部输入前插入 `Cast {to: s}` 算子，子图内部的可泛型算子也会转换为目标类型
+2. Add 算子的常量输入节点内部的数据也会转换为目标类型
+3. Shape 算子的输出不能泛型，因此 Shape 算子的输出作为图输出也不会插入 `Cast {to: T}` 算子
+
+## Cast 算子合并 (KnowledgeMergeCasts)
+
+### 原理
+
+本知识库是对 KnowledgeTypeCast 知识库的一个补充优化，目的是合并图结构中多余的 Cast 算子，从而减少类型转换操作，也可以方便后续其他知识库进行结构合并。
+
+### 示意图
+
+Cast 算子合并可以归纳为以下三种方法：
+
+1. 同属性的兄弟 Cast 算子合并
+
+```mermaid
+graph TD
+    subgraph After
+        A2(Add) --> C3("Cast{to: T}") --> M2(Mul)
+        C3 --> S2(Sub)
+    end
+
+    subgraph Before
+        A1(Add) --> C1("Cast{to: T}") --> M1(Mul)
+        A1 --> C2("Cast{to: T}") --> S1(Sub)
+    end
+```
+
+2. 单分支路径上的父子 Cast 算子合并
+
+```mermaid
+graph TD
+    subgraph After
+        A2(Add) --> C3("Cast{to: S}")
+    end
+
+    subgraph Before
+        A1(Add) --> C1("Cast{to: T}") --> C2("Cast{to: S}")
+    end
+```
+
+3. 根节点后的 Cast 算子如果与输出类型相同可以消除
+
+```mermaid
+graph TD
+    subgraph After
+        A2(Add) -->|T| M2(Mul)
+    end
+
+    subgraph Before
+        A1(Add) -->|T| C1("Cast{to: T}") --> M1(Mul)
+    end
+```
+
+结合以上三种方法，对 Cast 节点树进行递归处理就可以合并多余的 Cast 节点

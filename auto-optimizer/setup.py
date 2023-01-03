@@ -14,7 +14,7 @@ setup(
     long_description_content_type='text/markdown',
     url='https://gitee.com/ascend/auto-optimizer',
     packages=find_packages(),
-    package_data={'': ['LICENSE']},
+    package_data={'': ['LICENSE', 'model.cfg']},
     license='Apache-2.0',
     keywords='auto optimizer',
     install_requires=required,
@@ -29,5 +29,17 @@ setup(
         'Topic :: Scientific/Engineering',
         'Topic :: Software Development'
     ],
+    extras_require={
+        'infer_test': [
+            (
+                'aclruntime @ git+https://gitee.com/Ascend/tools.git'
+                '#egg=aclruntime&subdirectory=ais-bench_workload/tool/ais_infer/backend'
+            ),
+            (
+                'ais_bench @ git+https://gitee.com/Ascend/tools.git'
+                '#egg=ais_bench&subdirectory=ais-bench_workload/tool/ais_infer'
+            )
+        ],
+    },
     python_requires='>=3.7'
 )

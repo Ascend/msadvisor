@@ -1,0 +1,55 @@
+{
+      "The Dataset interface": "The network does not use the queue mode of the Dataset. Please change it to the interface mode of the Dataset",
+
+      "Gennext sinking": "If Getnext does not sink, enable preprocessing sink enable_data_pre_proc=True",
+
+      "dropout interface":"Use the Huawei affinity npu_ops.dropout interface to replace the dropout interface to improve performance",
+
+      "dynamic_rnn interface":"Use the Huawei affinity kernel interface npu_dynamic_rnn",
+
+      "gelu interface":"Use the Huawei affinity kernel gelu interface:1)npu_bridge.estimator.npu_unary_ops.gelu(x);2)npu_aicore_ops.fast_gelu(x)",
+
+      "Mixing precision":"It is recommended that you set mixing precision mode to improve performance:precision_mode='allow_mix_precision'",
+
+      "mixed calculation":"The network uses mixed calculation mode, please confirm whether it can be fully sunk to NPU calculation",
+
+      "interface1":"Customize the tf.boolean_mask interface",
+
+      "interface2":"Customizing metrics functions",
+
+      "Overflow detection interface":"Huawei loss scale is used with overflow detection function",
+
+      "data parallel":"The allreduce data parallel interface is recommended",
+
+      "LSTM interface":"Use the Huawei affinity kernel 'npu_ops.basic_lstm_cell' interface",
+
+      "Mixing precision2":"It is recommended that you set mixed precision mode to improve performance by setting precision_mode=\"allow_mix_precision\".",
+
+      "Overflow detection interface2":"The whole network is using debug mode, it is recommended to turn off op debug level.",
+
+      "Circular sinking":"The network can try to configure iterations_per_loop to enable the training iteration to sink.",
+
+      "Gradient segmentation":"The distributed training network uses the knowledge base capability of automatic segmentation.",
+
+      "loss scale":"Huawei loss scale is used with overflow detection function,this API can be removed.",
+
+      "LSTM":"Use the Huawei affinity kernel 'npu_ops.basic_lstm_cell' interface,this API can be removed.",
+
+      "CSR":"The network can try to configure iterations_per_loop to enable the training iteration to sink.",
+
+      "Aicore operator":"It is recommended to confirm that the shape is 16X aligned,The operators in the Top10 range of blockdim=1 are:",
+
+      "whitelist":"It is recommended to set up a whitelist of Transpose operators,The operators are:",
+
+      "INT64":"Operator input dtype is INT64, maybe because Aicore does not support INT64, maybe can be converted to INT32 Aicore",
+
+      "dynamic_rnn":"Use Huawei affinity interface large kernel interface npu_dynamic_rnn,the following APIs can be removed",
+
+      "Allreduce":"If the current network supports distributed, it is recommended to manually enable Allreduce and set the gradient cut point",
+
+      "estimator data parallel":"The allreduce data parallel interface is recommended:npu_distributed_optimizer_wrapper & npu_allreduce",
+
+      "sess.run data parallel":"The allreduce data parallel interface is recommended:broadcast & npu_distributed_optimizer_wrapper & npu_allreduce",
+
+      "Keras data parallel":"The allreduce data parallel interface is recommended:npu_distributed_optimizer_wrapper & NPUBroadcastGlobalVariablesCallback "
+}

@@ -22,7 +22,8 @@ import shutil
 import msadvisor as ms
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
-from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
+from auto_optimizer.graph_optimizer import GraphOptimizer, InferTestConfig
+from auto_optimizer.pattern import KnowledgeBase, KnowledgeFactory
 
 LOG_INFO = 1
 LOG_WARN = 2
@@ -61,6 +62,13 @@ error_code = {'success': '0', 'optimized': '1'}
 extend_type = {'list': '0', 'table': '1', 'sourcedata': '2'}
 extend_data_type = {'str': '0', 'int': '1', 'double': '2'}
 
+def get_default_soc():
+    try:
+        import acl
+        return acl.get_soc_name()
+    except Exception:
+        return 'Ascend310P3'
+
 def check_file_permission(filepath):
     if not os.path.isfile(filepath):
         ms.utils.log(LOG_WARN, 'file not exist, check permission failed, file={}.'.format(filepath))
@@ -77,6 +85,8 @@ def check_file_permission(filepath):
     return True
 
 def find_one_model_file(path, suffix = '.onnx'):
+    if not os.path.exists(path):
+        return None
     files = os.listdir(path)
     for filename in files:
         if filename.endswith(suffix):
@@ -132,9 +142,9 @@ def optimize_model(graph: OnnxGraph, knowledge: KnowledgeBase, result: Result, o
                 optimize_result |= knowledge.apply(graph, match_result)
     if optimize_result:
         # graph is optimized.
-        graph.save(out_path)
         result.error_code = error_code['optimized']
         result.summary = "The current model has already been optimized, the optimized model path is:%s" % out_path
+    return optimize_result
 
 def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
     """
@@ -213,14 +223,56 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
     else:
         # load source model
         onnx_graph = OnnxGraph.parse(onnx_path)
+    is_onnx_static = all(isinstance(x, int) and x > 0 for inp in onnx_graph.inputs for x in inp.shape)
     if len(onnx_graph.inputs) == 0 and len(onnx_graph.outputs) == 0:
         raise RuntimeError('The current model is invalid.')
-    optimize_model(onnx_graph, knowledge, result, new_onnx_path)
-    if result.error_code == error_code['optimized']:
+    knowledge_name = knowledge.__class__.__name__
+    pool = KnowledgeFactory.get_knowledge_pool()
+    for name, know in pool.items():
+        if know == knowledge:
+            knowledge_name = name
+    infer_test = params.get('infer_test', False)
+    optimizer = GraphOptimizer([knowledge_name])
+    if infer_test:
+        attrs = {
+            'converter': 'atc',
+            'soc': get_default_soc(),
+            'device': 0,
+            'loop': 100,
+            'threshold': -0.02,
+            'is_static': is_onnx_static,
+            'input_shape': '',
+            'input_shape_range': '',
+            'dynamic_shape': '',
+            'output_size': '',
+            'process_run_infer': True,
+        }
+        for para in attrs:
+            if para in params:
+                attrs[para] = params[para]
+        cfg = InferTestConfig(**attrs)
+        if not (cfg.is_static or (cfg.input_shape_range and cfg.dynamic_shape and cfg.output_size)):
+            raise RuntimeError(
+                'Didn\'t specify input_shape_range or dynamic_shape or output_size'
+                ' for dynamic input shape onnx in inference test'
+            )
+        onnx_graph, applied_knowledges = optimizer.apply_knowledges_with_infer_test(onnx_graph, cfg)
+    else:
+        onnx_graph, applied_knowledges = optimizer.apply_knowledges(onnx_graph)
+    if applied_knowledges:
+        result.error_code = error_code['optimized']
+        result.summary = "The current model has already been optimized, the optimized model path is:%s" % out_path
+    if applied_knowledges:
+        if params.get('extract'):
+            input_names = [i.name for i in onnx_graph.inputs]
+            output_names = [i.name for i in onnx_graph.outputs]
+            onnx_graph.extract(new_onnx_path, input_names, output_names)
+        else:
+            onnx_graph.save(new_onnx_path)
         # replace result for IDE
         if sub_path == 'project': # adapter for IDE
             ide_out_path = os.path.join(datapath, '%s_optimize.onnx' % os.path.splitext(model_file)[0])
             shutil.copy(new_onnx_path, ide_out_path)
             result.summary = "The current model has already been optimized, \
-                the optimized model path is:%s" % ide_out_path
+the optimized model path is:%s" % ide_out_path
     return result.generate()

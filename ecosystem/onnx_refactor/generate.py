@@ -36,6 +36,7 @@ def remove_if_existed(path):
 def generate_ecosystem_json():
     model_list = []
     knowledge_pool = KnowledgeFactory.get_knowledge_pool()
+    need_extract_knowledge = ['KnowledgeDynamicReshape']
     for knowledge in knowledge_pool:
         adapter_name = knowledge
         knowledge_conf = {'model_name': adapter_name, 'session_list': []}
@@ -43,7 +44,8 @@ def generate_ecosystem_json():
             'python_model_path': '',
             'parameter': {
                 'mode': 'optimize',
-                'model_file': ''
+                'model_file': '',
+                'extract': 1 if knowledge in need_extract_knowledge else 0
             }
         }]
         model_list.append(knowledge_conf)
@@ -70,7 +72,7 @@ def generate_knowledge_adapter():
             continue
         f = os.fdopen(os.open(adapter_path, FILE_FLAG, FILE_STAT), 'w')
         f.writelines(
-            ('# Copyright 2022 Huawei Technologies Co., Ltd' + os.linesep,
+            ('# Copyright (c) Huawei Technologies Co., Ltd. 2022. All rights reserved.' + os.linesep,
             '#' + os.linesep,
             '# Licensed under the Apache License, Version 2.0 (the "License");' + os.linesep,
             '# you may not use this file except in compliance with the License.' + os.linesep,
@@ -88,6 +90,7 @@ def generate_knowledge_adapter():
             'import sys' + os.linesep,
             '' + os.linesep,
             'from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory' + os.linesep,
+            '' + os.linesep,
             '' + os.linesep,
             'def evaluate(data_path, param):' + os.linesep,
             '    knowledge = KnowledgeFactory.get_knowledge(\'%s\')' % knowledge + os.linesep,
