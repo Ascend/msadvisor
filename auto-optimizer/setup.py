@@ -33,11 +33,11 @@ setup(
         'infer_test': [
             (
                 'aclruntime @ git+https://gitee.com/Ascend/tools.git'
-                '#egg=aclruntime&subdirectory=ais-bench_workload/tool/ais_infer/backend'
+                '#egg=aclruntime&subdirectory=ais-bench_workload/tool/ais_bench/backend'
             ),
             (
                 'ais_bench @ git+https://gitee.com/Ascend/tools.git'
-                '#egg=ais_bench&subdirectory=ais-bench_workload/tool/ais_infer'
+                '#egg=ais_bench&subdirectory=ais-bench_workload/tool/ais_bench'
             )
         ],
     },
