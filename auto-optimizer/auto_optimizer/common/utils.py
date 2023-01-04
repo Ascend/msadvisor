@@ -17,6 +17,8 @@ from inspect import signature
 from functools import wraps
 
 import numpy as np
+from numpy.typing import NDArray
+from numpy.linalg import norm
 import onnxruntime as rt
 
 def typeassert(*ty_args, **ty_kwargs):
@@ -87,3 +89,9 @@ def dump_op_outputs(graph, input_data, dump_path, outputs=[]):
             fname = f'{node.name}_{i}.npy'
             np.save(os.path.join(dump_path, fname), arrs[idx])
             idx += 1
+
+
+def cosine_similarity(mat0: NDArray, mat1: NDArray) -> float:
+    m0 = np.ndarray.flatten(mat0) / norm(mat0)
+    m1 = np.ndarray.flatten(mat1) / norm(mat1)
+    return np.dot(m0, m1)

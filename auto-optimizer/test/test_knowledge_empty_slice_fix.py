@@ -20,7 +20,7 @@ import onnx
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges import KnowledgeEmptySliceFix
-from utils import inference, optimize
+from helper import KnowledgeTestHelper, OptimizationConfig
 
 
 def make_multi_concat_empty_slice_model(onnx_name, x: np.ndarray):
@@ -157,82 +157,58 @@ def make_two_outputs_empty_slice_model(onnx_name, x: np.ndarray, add_slice=True)
     return graph
 
 
-class TestKnowledgeEmptySliceFix(unittest.TestCase):
+class TestKnowledgeEmptySliceFix(unittest.TestCase, KnowledgeTestHelper):
     def test_two_outputs_empty_slice_fix(self):
-        input_ = np.random.randn(10).astype(np.int32)
-
         for add_slice in [False, True]:
             with self.subTest(add_slice=add_slice):
                 postfix = '_slice' if add_slice else ''
                 onnx_name = f'empty_slice_fix_combined{postfix}'
-                origin_file = f'onnx/{onnx_name}.onnx'
-                optimized_file = f'onnx/{onnx_name}_optimize.onnx'
+                onnx_ori = f'onnx/{onnx_name}.onnx'
+                onnx_opt = f'onnx/{onnx_name}_fixed.onnx'
+
+                input_ = np.random.randn(10).astype(np.int32)
                 graph = make_two_outputs_empty_slice_model(onnx_name, input_, add_slice)
-                graph.save(origin_file)
-
-                knowledge = KnowledgeEmptySliceFix()
-                result = optimize(graph, knowledge)
-                graph.save(optimized_file)
-                self.assertTrue(result)
-
-                output_origin = inference(origin_file, [input_])
-                output_optimized = inference(optimized_file, [input_])
-                self.assertTrue(len(output_origin) == len(output_optimized))
-                for lmat, rmat in zip(output_origin, output_optimized):
-                    self.assertTrue(np.allclose(lmat, rmat, atol=1e-4, rtol=1e-2))
-
-                result = optimize(graph, knowledge)
-                self.assertFalse(result)
+                cfg = OptimizationConfig(
+                    graph=graph,
+                    knowledge=KnowledgeEmptySliceFix(),
+                    onnx_ori=onnx_ori,
+                    onnx_opt=onnx_opt,
+                )
+                self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
 
     def test_multi_concat_empty_slice_fix(self):
-        input_ = np.random.randn(10).astype(np.int32)
-
         onnx_name = 'empty_slice_fix_multi_concat'
-        origin_file = f'onnx/{onnx_name}.onnx'
-        optimized_file = f'onnx/{onnx_name}_optimize.onnx'
+        onnx_ori = f'onnx/{onnx_name}.onnx'
+        onnx_opt = f'onnx/{onnx_name}_optimize.onnx'
+
+        input_ = np.random.randn(10).astype(np.int32)
         graph = make_multi_concat_empty_slice_model(onnx_name, input_)
-        graph.save(origin_file)
-
-        knowledge = KnowledgeEmptySliceFix()
-        result = optimize(graph, knowledge)
-        graph.save(optimized_file)
-        self.assertTrue(result)
-
-        output_origin = inference(origin_file, [input_])
-        output_optimized = inference(optimized_file, [input_])
-        self.assertTrue(len(output_origin) == len(output_optimized))
-        for lmat, rmat in zip(output_origin, output_optimized):
-            self.assertTrue(np.allclose(lmat, rmat, atol=1e-4, rtol=1e-2))
-
-        result = optimize(graph, knowledge)
-        self.assertFalse(result)
+        cfg = OptimizationConfig(
+            graph=graph,
+            knowledge=KnowledgeEmptySliceFix(),
+            onnx_ori=onnx_ori,
+            onnx_opt=onnx_opt,
+        )
+        self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
 
     def test_basic_empty_slice_fix(self):
-        input_ = np.random.randn(10).astype(np.int32)
-
         for add_slice, add_cast in product([False, True], repeat=2):
             with self.subTest(add_slice=add_slice, add_cast=add_cast):
                 postfix0 = '_slice' if add_slice else ''
                 postfix1 = '_cast' if add_cast else ''
                 onnx_name = f'empty_slice_fix_single{postfix0}{postfix1}'
-                origin_file = f'onnx/{onnx_name}.onnx'
-                optimized_file = f'onnx/{onnx_name}_optimize.onnx'
+                onnx_ori = f'onnx/{onnx_name}.onnx'
+                onnx_opt = f'onnx/{onnx_name}_optimize.onnx'
+
+                input_ = np.random.randn(10).astype(np.int32)
                 graph = make_empty_slice_model(onnx_name, input_, add_slice, add_cast)
-                graph.save(origin_file)
-
-                knowledge = KnowledgeEmptySliceFix()
-                result = optimize(graph, knowledge)
-                graph.save(optimized_file)
-                self.assertTrue(result)
-
-                output_origin = inference(origin_file, [input_])
-                output_optimized = inference(optimized_file, [input_])
-                self.assertTrue(len(output_origin) == len(output_optimized))
-                for lmat, rmat in zip(output_origin, output_optimized):
-                    self.assertTrue(np.allclose(lmat, rmat, atol=1e-4, rtol=1e-2))
-
-                result = optimize(graph, knowledge)
-                self.assertFalse(result)
+                cfg = OptimizationConfig(
+                    graph=graph,
+                    knowledge=KnowledgeEmptySliceFix(),
+                    onnx_ori=onnx_ori,
+                    onnx_opt=onnx_opt,
+                )
+                self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
 
 
 if __name__ == '__main__':

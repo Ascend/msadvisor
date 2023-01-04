@@ -639,3 +639,7 @@ class BaseGraph(ABC):
     @abstractmethod
     def simplify(self, **kwargs) -> 'BaseGraph':
         raise NotImplementedError()
+
+    @abstractmethod
+    def infershape(self) -> None:
+        raise NotImplementedError()

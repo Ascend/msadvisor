@@ -42,6 +42,14 @@ class BaseNode(ABC):
     def op_type(self) -> str:
         return self._op_type
 
+    def __eq__(self, rhs: 'BaseNode') -> bool:
+        if not isinstance(rhs, BaseNode):
+            return False
+        return self.name == rhs.name and self.op_type == rhs.op_type
+
+    def __hash__(self) -> int:
+        return hash((self.name, self.op_type))
+
 
 class Node(BaseNode):
     def __init__(
@@ -68,6 +76,18 @@ class Node(BaseNode):
         self._outputs: List[str] = [] if outputs is None else outputs
         self._attrs: Dict[str, object] = {} if attrs is None else attrs
         self._domain: str = domain if domain is not None else ''
+
+    def __eq__(self, rhs: 'Node') -> bool:
+        if not isinstance(rhs, Node):
+            return False
+        return self.inputs == rhs.inputs \
+                and self.outputs == rhs.outputs \
+                and self.attrs == rhs.attrs \
+                and self.domain == rhs.domain \
+                and super().__eq__(rhs)
+
+    def __hash__(self) -> int:
+        return super().__hash__()
 
     @classmethod
     def parse(cls, _) -> 'Node':
@@ -144,6 +164,16 @@ class Initializer(BaseNode):
         super().__init__(name, 'Initializer')
         self._value: np.ndarray = value if value is not None else np.array([])
 
+    def __eq__(self, rhs: 'Initializer') -> bool:
+        if not isinstance(rhs, Initializer):
+            return False
+        return self.value.dtype == rhs.value.dtype \
+                and np.array_equal(self.value, rhs.value, equal_nan=True) \
+                and super().__eq__(rhs)
+
+    def __hash__(self) -> int:
+        return super().__hash__()
+
     @classmethod
     def parse(cls, _) -> 'Initializer':
         raise NotImplementedError()
@@ -181,6 +211,16 @@ class PlaceHolder(BaseNode):
         super().__init__(name, 'PlaceHolder')
         self._dtype: np.dtype = dtype
         self._shape: Sequence[Union[str, int]] = shape if shape is not None else []
+
+    def __eq__(self, rhs: 'PlaceHolder') -> bool:
+        if not isinstance(rhs, PlaceHolder):
+            return False
+        return self.dtype == rhs.dtype \
+                and self.shape == rhs.shape \
+                and super().__eq__(rhs)
+
+    def __hash__(self) -> int:
+        return super().__hash__()
 
     @classmethod
     def parse(cls, _) -> 'PlaceHolder':

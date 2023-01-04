@@ -18,7 +18,7 @@ import numpy as np
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_split_large_kernel import KnowledgeSplitLargeKernelConv
-from utils import inference, optimize
+from helper import KnowledgeTestHelper, OptimizationConfig
 
 
 def make_graph(
@@ -47,11 +47,11 @@ def make_graph(
 
     graph.add_initializer(
         name='weight',
-        value=np.random.rand(*kweight_shape).astype(np.float32) + 0.5,
+        value=np.random.randn(*kweight_shape).astype(np.float32)
     )
     graph.add_initializer(
         name='bias',
-        value=np.random.rand(kweight_shape[0]).astype(np.float32) + 0.5,
+        value=np.random.randn(kweight_shape[0]).astype(np.float32)
     )
     graph.add_node(
         name='conv_large',
@@ -78,7 +78,7 @@ def make_graph(
     return graph
 
 
-class TestKnowledgeSplitLargeKernel(unittest.TestCase):
+class TestKnowledgeSplitLargeKernel(unittest.TestCase, KnowledgeTestHelper):
     def test_basic_split(self):
         tests = [
             # small kernel
@@ -86,36 +86,36 @@ class TestKnowledgeSplitLargeKernel(unittest.TestCase):
             (1, False, (1, 3, 1344, 1344), (3, 3), (1, 3, 3, 3), (0, 1, 2, 3), True, True, ),
             (1, False, (1, 3, 133, 133, 133), (3, 3, 3), (1, 3, 3, 3, 3), (0, 1, 2, 3, 4, 5), True, True, ),
             # 1d
-            (10, True, (1, 3, 71), (65, ), (12, 3, 65), (0, 1), True, True, ),
-            (10, True, (16, 3, 71), (65, ), (12, 3, 65), (0, 1), True, True, ),
-            (10, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), True, True, ),
-            (10, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), False, True, ),
-            (10, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), True, False, ),
-            (10, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), False, False, ),
+            (8, True, (1, 3, 71), (65, ), (12, 3, 65), (0, 1), True, True, ),
+            (1, True, (16, 3, 71), (65, ), (12, 3, 65), (0, 1), True, True, ),
+            (1, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), True, True, ),
+            (1, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), False, True, ),
+            (1, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), True, False, ),
+            (1, True, (1, 1, 71), (65, ), (1, 1, 65), (0, 1), False, False, ),
             # 2d
-            (10, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), True, True, ),
-            (10, True, (1, 3, 71, 71), (65, 65), (12, 3, 65, 65), (0, 1, 2, 3), True, True, ),
-            (10, True, (2, 3, 71, 71), (65, 65), (12, 3, 65, 65), (0, 1, 2, 3), True, True, ),
-            (10, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), False, True, ),
-            (10, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), True, False, ),
-            (10, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), False, False, ),
-            (10, True, (1, 1, 131, 131), (65, 65), (1, 1, 65, 65), (0, 0, 0, 0), True, True, ),
-            (10, True, (1, 1, 131, 131), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), True, True, ),
-            (10, True, (1, 3, 131, 131), (65, 65), (2, 3, 65, 65), (0, 1, 2, 3), True, True, ),
-            (10, True, (1, 1, 131, 131), (65, 3), (1, 1, 65, 3), (0, 1, 2, 3), True, True, ),
-            (10, True, (1, 1, 131, 131), (3, 65), (1, 1, 3, 65), (0, 1, 2, 3), True, True, ),
+            (8, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), True, True, ),
+            (1, True, (1, 3, 71, 71), (65, 65), (12, 3, 65, 65), (0, 1, 2, 3), True, True, ),
+            (1, True, (2, 3, 71, 71), (65, 65), (12, 3, 65, 65), (0, 1, 2, 3), True, True, ),
+            (1, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), False, True, ),
+            (1, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), True, False, ),
+            (1, True, (1, 1, 71, 71), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), False, False, ),
+            (1, True, (1, 1, 131, 131), (65, 65), (1, 1, 65, 65), (0, 0, 0, 0), True, True, ),
+            (1, True, (1, 1, 131, 131), (65, 65), (1, 1, 65, 65), (0, 1, 2, 3), True, True, ),
+            (1, True, (1, 3, 131, 131), (65, 65), (2, 3, 65, 65), (0, 1, 2, 3), True, True, ),
+            (1, True, (1, 1, 131, 131), (65, 3), (1, 1, 65, 3), (0, 1, 2, 3), True, True, ),
+            (1, True, (1, 1, 131, 131), (3, 65), (1, 1, 3, 65), (0, 1, 2, 3), True, True, ),
             # 3d
-            (10, True, (1, 1, 71, 71, 71), (65, 65, 65), (1, 1, 65, 65, 65), (0, 0, 0, 0, 0, 0), True, True, ),
-            (10, True, (1, 1, 71, 71, 71), (65, 65, 65), (1, 1, 65, 65, 65), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 71, 71, 71), (3, 65, 65), (1, 1, 3, 65, 65), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 71, 71, 71), (65, 3, 65), (1, 1, 65, 3, 65), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 71, 71, 71), (65, 65, 3), (1, 1, 65, 65, 3), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 71, 71, 71), (65, 3, 3), (1, 1, 65, 3, 3), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 71, 71, 71), (3, 65, 3), (1, 1, 3, 65, 3), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), True, True, ),
-            (10, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), False, True, ),
-            (10, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), True, False, ),
-            (10, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), False, False, ),
+            (1, True, (1, 1, 71, 71, 71), (65, 65, 65), (1, 1, 65, 65, 65), (0, 0, 0, 0, 0, 0), True, True, ),
+            (8, True, (1, 1, 71, 71, 71), (65, 65, 65), (1, 1, 65, 65, 65), (0, 1, 2, 3, 4, 5), True, True, ),
+            (1, True, (1, 1, 71, 71, 71), (3, 65, 65), (1, 1, 3, 65, 65), (0, 1, 2, 3, 4, 5), True, True, ),
+            (1, True, (1, 1, 71, 71, 71), (65, 3, 65), (1, 1, 65, 3, 65), (0, 1, 2, 3, 4, 5), True, True, ),
+            (1, True, (1, 1, 71, 71, 71), (65, 65, 3), (1, 1, 65, 65, 3), (0, 1, 2, 3, 4, 5), True, True, ),
+            (1, True, (1, 1, 71, 71, 71), (65, 3, 3), (1, 1, 65, 3, 3), (0, 1, 2, 3, 4, 5), True, True, ),
+            (1, True, (1, 1, 71, 71, 71), (3, 65, 3), (1, 1, 3, 65, 3), (0, 1, 2, 3, 4, 5), True, True, ),
+            (1, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), True, True, ),
+            (1, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), False, True, ),
+            (1, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), True, False, ),
+            (1, True, (1, 1, 71, 71, 71), (3, 3, 65), (1, 1, 3, 3, 65), (0, 1, 2, 3, 4, 5), False, False, ),
         ]
         for count, expect, ishape, kshape, kweight, pads, before, after in tests:
             ishape_s = 'x'.join(str(i) for i in ishape)
@@ -123,31 +123,38 @@ class TestKnowledgeSplitLargeKernel(unittest.TestCase):
             kweight_s = 'x'.join(str(i) for i in kweight)
             pads_s = 'x'.join(str(i) for i in pads)
             name_ = f'split_kernel_in{ishape_s}_ks{kshape_s}_kw{kweight_s}_p{pads_s}_b{int(before)}_a{int(after)}'
+            onnx_ori = f'onnx/{name_}.onnx'
+            graph = make_graph(name_, ishape, kshape, kweight, pads, before, after)
             for threshold in [16, 32, 48]:
-                origin_file = f'onnx/{name_}.onnx'
-                graph_ = make_graph(name_, ishape, kshape, kweight, pads, before, after)
-                graph_.save(origin_file)
                 with self.subTest(name=name_):
-                    optimized_file = f'onnx/{name_}_th{threshold}.onnx'
+                    onnx_opt = f'onnx/{name_}_th{threshold}.onnx'
                     # change threshold to small number to speed up unittest
-                    knowledge = KnowledgeSplitLargeKernelConv(threshold=threshold)
-                    graph = OnnxGraph.parse(origin_file)
-                    result = optimize(graph, knowledge)
-                    self.assertEqual(result, expect)
-                    if not result:
+                    cfg = OptimizationConfig(
+                        graph=graph,
+                        knowledge=KnowledgeSplitLargeKernelConv(threshold=threshold),
+                        onnx_ori=onnx_ori,
+                        onnx_opt=onnx_opt,
+                    )
+                    self.assertTrue(self.check_optimization(cfg=cfg, expect=expect))
+                    if not expect:
                         continue
-                    graph.save(optimized_file)
 
-                    for _ in range(count):
-                        input_ = np.random.rand(*ishape).astype(np.float32) + 0.5
-                        matrix_before_apply = inference(origin_file, [input_])
-                        matrix_after_apply = inference(optimized_file, [input_])
-                        self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
-                        for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
-                            self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
-
-                    result = optimize(graph, knowledge)
-                    self.assertFalse(result)
+                    feeds = [
+                        {
+                            'input': np.random.randn(*ishape).astype(np.float32)
+                        }
+                        for _ in range(count)
+                    ]
+                    self.assertTrue(
+                        self.check_precision(
+                            onnx_ori,
+                            onnx_opt,
+                            feeds,
+                            cos_th=1e-3,
+                            rtol=1e-2,
+                            atol=1e-4
+                        )
+                    )
 
 
 if __name__ == '__main__':

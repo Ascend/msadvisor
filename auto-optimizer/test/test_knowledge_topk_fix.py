@@ -18,7 +18,7 @@ import onnx
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges import KnowledgeTopkFix
-from utils import optimize
+from helper import KnowledgeTestHelper, OptimizationConfig
 
 
 def make_topk_model(onnx_name, x: np.ndarray):
@@ -73,26 +73,21 @@ def make_topk_model(onnx_name, x: np.ndarray):
     return graph
 
 
-class TestKnowledgeTopkFix(unittest.TestCase):
+class TestKnowledgeTopkFix(unittest.TestCase, KnowledgeTestHelper):
     def test_basic_topk_fix(self):
         input_ = np.random.rand(100).astype(np.float32)
 
         onnx_name = 'topk_model'
-        origin_file = f'onnx/{onnx_name}.onnx'
-        optimized_file = f'onnx/{onnx_name}_fixed.onnx'
+        onnx_ori = f'onnx/{onnx_name}.onnx'
+        onnx_opt = f'onnx/{onnx_name}_fixed.onnx'
         graph = make_topk_model(onnx_name, input_)
-        graph.save(origin_file)
-
-        knowledge = KnowledgeTopkFix()
-        result = optimize(graph, knowledge)
-        graph.save(optimized_file)
-        self.assertTrue(result)
-
-        # skip inference
-        # modified onnx is not a 'valid' onnx graph, so it can't be inferenced
-
-        result = optimize(graph, knowledge)
-        self.assertFalse(result)
+        cfg = OptimizationConfig(
+            graph=graph,
+            knowledge=KnowledgeTopkFix(),
+            onnx_ori=onnx_ori,
+            onnx_opt=onnx_opt,
+        )
+        self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
 
 
 if __name__ == '__main__':

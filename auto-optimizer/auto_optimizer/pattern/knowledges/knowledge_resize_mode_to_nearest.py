@@ -24,8 +24,8 @@ from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 
 class ResizeModeOptimize:
     def __init__(self):
-        self._mode_from = ['linear', 'cubic', 'area', 'random']
-        self._mode_to = 'nearest'
+        self._mode_from = [b'linear', b'cubic', b'area', b'random']
+        self._mode_to = b'nearest'
 
     @property
     def mode_from(self):
@@ -45,7 +45,7 @@ class ResizeOpMatch(MatchBase):
             return False
         if not node.op_type == 'Resize':
             return False
-        if str(node['mode'], encoding='utf-8') in ResizeModeOptimize().mode_from:
+        if node['mode'] in ResizeModeOptimize().mode_from:
             return True
         return False
 
@@ -74,10 +74,10 @@ class KnowledgeResizeModeToNearest(KnowledgeBase):
                 for node in nodes:
                     if node.op_type != 'Resize':
                         continue
-                    if str(node['mode'], encoding='utf-8') not in mode.mode_from:
+                    if node['mode'] not in mode.mode_from:
                         continue
                     _node = graph[node.name]
                     _node['mode'] = mode.mode_to
-                    if mode.mode_to == 'nearest':
-                        _node['nearest_mode'] = 'round_prefer_floor'
+                    if mode.mode_to == b'nearest':
+                        _node['nearest_mode'] = b'round_prefer_floor'
         return True

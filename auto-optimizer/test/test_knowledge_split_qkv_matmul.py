@@ -26,7 +26,7 @@ from onnx import (
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_split_qkv_matmul import KnowledgeSplitQKVMatmul
-from utils import inference, optimize
+from helper import KnowledgeTestHelper, OptimizationConfig
 
 
 def make_basic_qkv_matmul_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2=1,
@@ -51,7 +51,7 @@ def make_basic_qkv_matmul_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2
         _input = [last_output, _weight]
         random.shuffle(_input)
         inits.append(
-            helper.make_tensor(_weight, TensorProto.FLOAT, [112], np.random.rand(112).astype(np.float32) + 0.5)
+            helper.make_tensor(_weight, TensorProto.FLOAT, [112], np.random.randn(112).astype(np.float32))
         )
         nodes.append(helper.make_node(_op, _input, [_output], _name))
         last_output = _output
@@ -63,7 +63,7 @@ def make_basic_qkv_matmul_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2
     _output = f"{_op}{_op_idx}_o"
     _name = f"{_op}_{_op_idx}"
     inits.append(
-        helper.make_tensor(_weight, TensorProto.FLOAT, [112, 8400], np.random.rand(112, 8400).astype(np.float32) + 0.5)
+        helper.make_tensor(_weight, TensorProto.FLOAT, [112, 8400], np.random.randn(112, 8400).astype(np.float32))
     )
     nodes.append(helper.make_node(_op, [last_output, _weight], [_output], _name))
     last_output = _output
@@ -78,7 +78,7 @@ def make_basic_qkv_matmul_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2
         _input = [last_output, _weight]
         random.shuffle(_input)
         inits.append(
-            helper.make_tensor(_weight, TensorProto.FLOAT, [8400], np.random.rand(8400).astype(np.float32) + 0.5)
+            helper.make_tensor(_weight, TensorProto.FLOAT, [8400], np.random.randn(8400).astype(np.float32))
         )
         nodes.append(helper.make_node(_op, _input, [_output], _name))
         last_output = _output
@@ -178,7 +178,7 @@ def make_basic_qkv_matmul_model(onnx_name, perm, gathers=3, axis=0, ops1=1, ops2
     return True
 
 
-class TestKnowledgeSplitQKVMatmul(unittest.TestCase):
+class TestKnowledgeSplitQKVMatmul(unittest.TestCase, KnowledgeTestHelper):
 
     def test_basic_qkv_slice(self):
         params = [
@@ -209,11 +209,11 @@ class TestKnowledgeSplitQKVMatmul(unittest.TestCase):
             pstr = ''.join(str(k) for k in perm)
             name = f"qkv_slice_p{pstr}_g{gathers}_a{axis}_s_{s1}_{s2}_g{int(vg)}_r{int(vr)}"
             with self.subTest(name):
-                onnx_path = f"./onnx/{name}.onnx"
-                optimize_onnx_path = f"./onnx/{name}_optimize.onnx"
+                onnx_ori = f"./onnx/{name}.onnx"
+                onnx_opt = f"./onnx/{name}_optimize.onnx"
 
                 ok = make_basic_qkv_matmul_model(
-                    onnx_path,
+                    onnx_ori,
                     perm=perm,
                     gathers=gathers,
                     axis=axis,
@@ -226,24 +226,25 @@ class TestKnowledgeSplitQKVMatmul(unittest.TestCase):
                 if not ok:
                     continue
 
-                graph = OnnxGraph.parse(onnx_path)
+                graph = OnnxGraph.parse(onnx_ori)
+                cfg = OptimizationConfig(
+                    graph=graph,
+                    knowledge=KnowledgeSplitQKVMatmul(),
+                    onnx_ori=onnx_ori,
+                    onnx_opt=onnx_opt,
+                )
+                self.assertTrue(self.check_optimization(cfg=cfg, expect=expect))
 
-                knowledge = KnowledgeSplitQKVMatmul()
-                result = optimize(graph, knowledge)
-                self.assertEqual(result, expect)
-                if not result:
+                if not expect:
                     continue
-                graph.save(optimize_onnx_path)
 
-                input_ = np.random.rand(1, 10, 112).astype(np.float32) + 0.5
-                matrix_before_apply = inference(onnx_path, [input_])
-                matrix_after_apply = inference(optimize_onnx_path, [input_])
-                self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
-                for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
-                    self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
-
-                result = optimize(graph, knowledge)
-                self.assertFalse(result)
+                feeds = [
+                    {
+                        'input': np.random.randn(1, 10, 112).astype(np.float32),
+                    }
+                    for _ in range(10)
+                ]
+                self.assertTrue(self.check_precision(onnx_ori, onnx_opt, feeds))
 
 
 if __name__ == "__main__":

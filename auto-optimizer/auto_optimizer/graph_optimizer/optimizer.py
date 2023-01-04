@@ -24,6 +24,7 @@ import multiprocessing
 
 import numpy as np
 from numpy.linalg import norm
+from auto_optimizer.common.utils import cosine_similarity
 
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
@@ -31,13 +32,6 @@ from auto_optimizer import KnowledgeFactory
 
 
 logger = logging.getLogger('GraphOptimizer')
-
-
-def close(mat0, mat1, threshold=1e-3) -> bool:
-    mat0 = np.ndarray.flatten(mat0)
-    mat1 = np.ndarray.flatten(mat1)
-    cos_sim: float = np.dot(mat0, mat1) / (norm(mat0) * norm(mat1))
-    return 1 - cos_sim < threshold
 
 
 @dataclass
@@ -114,7 +108,7 @@ class GraphOptimizer:
             queue.put(False)
             return
 
-        if not all(close(mat0, mat1) for mat0, mat1 in zip(out_ori, out_opt)):
+        if not all(1 - cosine_similarity(mat0, mat1) < 1e-3 for mat0, mat1 in zip(out_ori, out_opt)):
             logger.warning('Optimization failed: result not close enough.')
             queue.put(False)
             return

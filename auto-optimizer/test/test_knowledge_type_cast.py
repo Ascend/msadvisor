@@ -16,8 +16,9 @@ import unittest
 import numpy as np
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
+from auto_optimizer.pattern.knowledge_factory import KnowledgeType
 from auto_optimizer.pattern.knowledges.knowledge_type_cast import KnowledgeTypeCast
-from utils import inference, optimize
+from helper import KnowledgeTestHelper, OptimizationConfig
 
 
 def make_type_cast_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np.dtype):
@@ -44,31 +45,31 @@ def make_type_cast_model(onnx_name, x: np.ndarray, y: np.ndarray, value_type: np
     return graph
 
 
-class TestKnowledgeTypeCast(unittest.TestCase):
+class TestKnowledgeTypeCast(unittest.TestCase, KnowledgeTestHelper):
     def test_basic_type_cast(self):
         for value_type in [np.int64, np.float64]:
-            X = np.random.randn(10, 10).astype(value_type)
-            Y = np.random.randn(10, 10).astype(value_type)
+            x = np.random.randn(10, 10).astype(value_type)
+            y = np.random.randn(10, 10).astype(value_type)
 
             onnx_name = 'type_cast_test'
-            origin_file = f'onnx/{onnx_name}.onnx'
-            optimized_file = f'onnx/{onnx_name}_optimize.onnx'
-            graph = make_type_cast_model(onnx_name, X, Y, value_type)
-            graph.save(origin_file)
-
-            knowledge = KnowledgeTypeCast()
-            result = optimize(graph, knowledge)
-            graph.save(optimized_file)
-            self.assertTrue(result)
-
-            matrix_before_apply = inference(origin_file, [X, Y])
-            matrix_after_apply = inference(optimized_file, [X, Y])
-            self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
-            for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
-                self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
-
-            result = optimize(graph, knowledge)
-            self.assertFalse(result)
+            onnx_ori = f'onnx/{onnx_name}.onnx'
+            onnx_opt = f'onnx/{onnx_name}_optimize.onnx'
+            graph = make_type_cast_model(onnx_name, x, y, value_type)
+            cfg = OptimizationConfig(
+                graph=graph,
+                knowledge=KnowledgeTypeCast(),
+                onnx_ori=onnx_ori,
+                onnx_opt=onnx_opt,
+            )
+            self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
+            feeds = [
+                {
+                    'X': np.random.randn(*x.shape).astype(x.dtype),
+                    'Y': np.random.randn(*y.shape).astype(y.dtype),
+                }
+                for _ in range(10)
+            ]
+            self.assertTrue(self.check_precision(onnx_ori, onnx_opt, feeds))
 
 
 if __name__ == '__main__':

@@ -18,7 +18,7 @@ import numpy as np
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_avgpool_split import KnowledgeAvgPoolSplit
 
-from utils import inference, optimize
+from helper import KnowledgeTestHelper, OptimizationConfig
 
 
 def make_dynamic_model(onnx_name, x, attrs):
@@ -31,7 +31,7 @@ def make_dynamic_model(onnx_name, x, attrs):
     graph.update_map()
     return graph
 
-class TestKnowledgeAvgPoolSplit(unittest.TestCase):
+class TestKnowledgeAvgPoolSplit(unittest.TestCase, KnowledgeTestHelper):
     def test_basic_avgpool_split(self):
         usecases = [
             # ceil_mode, kernel_shape, pads, strides, kernel_shape split result
@@ -48,32 +48,31 @@ class TestKnowledgeAvgPoolSplit(unittest.TestCase):
             x = {'shape': (1, 8, 32, 64), 'dtype': np.float32}
             attrs = {
                 'ceil_mode': ceil_mode,
-                'kernel_shape': np.array(kernel_shape, dtype = np.int64),
-                'pads': np.array(pads, dtype = np.int64),
-                'strides': np.array(strides, dtype = np.int64)
+                'kernel_shape': kernel_shape,
+                'pads': pads,
+                'strides': strides,
             }
 
             onnx_name = 'knowledge_avgpool_split_test'
-            origin_file = f'onnx/{onnx_name}.onnx'
-            optimized_file = f'onnx/{onnx_name}_optimize.onnx'
+            onnx_ori = f'onnx/{onnx_name}.onnx'
+            onnx_opt = f'onnx/{onnx_name}_optimize.onnx'
             graph = make_dynamic_model(onnx_name, x, attrs)
-            graph.save(origin_file)
-
-            knowledge = KnowledgeAvgPoolSplit()
-            result = optimize(graph, knowledge)
-            if len(split_result) == 0:
-                self.assertFalse(result)
+            expect = len(split_result) != 0
+            cfg = OptimizationConfig(
+                graph=graph,
+                knowledge=KnowledgeAvgPoolSplit(),
+                onnx_ori=onnx_ori,
+                onnx_opt=onnx_opt,
+            )
+            self.assertTrue(self.check_optimization(cfg=cfg, expect=expect))
+            if not expect:
                 continue
-            self.assertTrue(result)
-            graph.save(optimized_file)
 
-            nodes = graph.get_nodes('AveragePool')
+            graph_opt = OnnxGraph.parse(onnx_opt)
+            nodes = graph_opt.get_nodes('AveragePool')
             for i, node in enumerate(nodes):
                 self.assertTrue(np.all(node.attrs['kernel_shape'] == split_result[i]))
                 self.assertTrue(np.all(node.attrs['strides'] == split_result[i]))
-
-            result = optimize(graph, knowledge)
-            self.assertFalse(result)
 
 
 if __name__ == "__main__":

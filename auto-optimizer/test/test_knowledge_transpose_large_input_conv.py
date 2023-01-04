@@ -20,33 +20,35 @@ import numpy as np
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_transpose_large_input_conv import KnowledgeTransposeLargeInputConv
-from utils import inference, optimize
+from helper import KnowledgeTestHelper, OptimizationConfig
 
 
-class TestKnowledgeTransposeLargeInputConv(unittest.TestCase):
+class TestKnowledgeTransposeLargeInputConv(unittest.TestCase, KnowledgeTestHelper):
 
     def test_aasist(self):
         models = [
-            (True, './onnx/aasist_bs1_ori.onnx', (1, 64600), 1),
+            (True, './onnx/aasist_bs1_ori.onnx', (1, 64600), 10),
         ]
-        for expect, path, shape, count in models:
-            with self.subTest(path):
-                optimized_path = f'{os.path.splitext(path)[0]}_transpose_conv.onnx'
-                graph = OnnxGraph.parse(path)
-                knowledge = KnowledgeTransposeLargeInputConv()
-                result = optimize(graph, knowledge)
-                self.assertEqual(result, expect)
-                graph.save(optimized_path)
-                for _ in range(count):
-                    input_ = np.random.rand(*shape).astype(np.float32) + 0.5
-                    matrix_before_apply = inference(path, [input_])
-                    matrix_after_apply = inference(optimized_path, [input_])
-                    self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
-                    for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
-                        self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
-
-                result = optimize(graph, knowledge)
-                self.assertFalse(result)
+        for expect, onnx_ori, shape, count in models:
+            with self.subTest(onnx_ori):
+                onnx_opt = f'{os.path.splitext(onnx_ori)[0]}_transpose_conv.onnx'
+                graph = OnnxGraph.parse(onnx_ori)
+                cfg = OptimizationConfig(
+                    graph=graph,
+                    knowledge=KnowledgeTransposeLargeInputConv(),
+                    onnx_ori=onnx_ori,
+                    onnx_opt=onnx_opt,
+                )
+                self.assertTrue(self.check_optimization(cfg=cfg, expect=expect))
+                if not expect:
+                    continue
+                feeds = [
+                    {
+                        'input': np.random.randn(*shape).astype(np.float32),
+                    }
+                    for _ in range(count)
+                ]
+                self.assertTrue(self.check_precision(onnx_ori, onnx_opt, feeds))
 
 
 if __name__ == "__main__":

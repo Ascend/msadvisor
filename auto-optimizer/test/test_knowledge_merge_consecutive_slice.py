@@ -23,7 +23,7 @@ from onnx import (
 
 from auto_optimizer.graph_refactor.onnx.graph import OnnxGraph
 from auto_optimizer.pattern.knowledges.knowledge_merge_consecutive_slice import KnowledgeMergeConsecutiveSlice
-from utils import inference, optimize
+from helper import KnowledgeTestHelper, OptimizationConfig
 
 
 def make_c2_slice_model(onnx_name, x):
@@ -212,180 +212,177 @@ def make_c4_slice_model(onnx_name, x, same_axis=False):
     onnx.save(model, onnx_name)
 
 
-class TestKnowledgeMergeConsecutiveSlice(unittest.TestCase):
+class TestKnowledgeMergeConsecutiveSlice(unittest.TestCase, KnowledgeTestHelper):
 
     def test_merge_c2_slice(self):
-        x = np.random.rand(50, 50, 50).astype(np.float32) + 0.5
+        x = np.random.randn(50, 50, 50).astype(np.float32)
 
         onnx_name = "c2_slice"
-        c2_slice_onnx = f"./onnx/{onnx_name}.onnx"
-        c2_slice_optimize_onnx = f"./onnx/{onnx_name}_optimize.onnx"
+        onnx_ori = f"./onnx/{onnx_name}.onnx"
+        onnx_opt = f"./onnx/{onnx_name}_optimize.onnx"
 
-        make_c2_slice_model(c2_slice_onnx, x)
+        make_c2_slice_model(onnx_ori, x)
 
-        graph = OnnxGraph.parse(c2_slice_onnx)
-        knowledge = KnowledgeMergeConsecutiveSlice()
-        res = optimize(graph, knowledge)
-        self.assertTrue(res)
-        graph.save(c2_slice_optimize_onnx)
-
-        matrix_before_apply = inference(c2_slice_onnx, x)
-        matrix_after_apply = inference(c2_slice_optimize_onnx, x)
-        self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
-        for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
-            self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
-
-        result = optimize(graph, knowledge)
-        self.assertFalse(result)
+        graph = OnnxGraph.parse(onnx_ori)
+        cfg = OptimizationConfig(
+            graph=graph,
+            knowledge=KnowledgeMergeConsecutiveSlice(),
+            onnx_ori=onnx_ori,
+            onnx_opt=onnx_opt,
+        )
+        self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
+        feeds = [{
+            'X': np.random.randn(*x.shape).astype(x.dtype)
+        } for _ in range(10)]
+        self.assertTrue(self.check_precision(onnx_ori, onnx_opt, feeds))
 
     def test_merge_c3_slice(self):
-        x = np.random.rand(50, 50, 50).astype(np.float32) + 0.5
+        x = np.random.randn(50, 50, 50).astype(np.float32)
 
         onnx_name = "c3_slice"
-        c3_slice_onnx = f"./onnx/{onnx_name}.onnx"
-        c3_slice_optimize_onnx = f"./onnx/{onnx_name}_optimize.onnx"
+        onnx_ori = f"./onnx/{onnx_name}.onnx"
+        onnx_opt = f"./onnx/{onnx_name}_optimize.onnx"
 
-        make_c3_slice_model(c3_slice_onnx, x)
+        make_c3_slice_model(onnx_ori, x)
 
-        graph = OnnxGraph.parse(c3_slice_onnx)
-        knowledge = KnowledgeMergeConsecutiveSlice()
-        res = optimize(graph, knowledge)
-        self.assertTrue(res)
-        graph.save(c3_slice_optimize_onnx)
-
-        matrix_before_apply = inference(c3_slice_onnx, x)
-        matrix_after_apply = inference(c3_slice_optimize_onnx, x)
-        self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
-        for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
-            self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
-
-        result = optimize(graph, knowledge)
-        self.assertFalse(result)
+        graph = OnnxGraph.parse(onnx_ori)
+        cfg = OptimizationConfig(
+            graph=graph,
+            knowledge=KnowledgeMergeConsecutiveSlice(),
+            onnx_ori=onnx_ori,
+            onnx_opt=onnx_opt,
+        )
+        self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
+        feeds = [{
+            'X': np.random.randn(*x.shape).astype(x.dtype)
+        } for _ in range(10)]
+        self.assertTrue(self.check_precision(onnx_ori, onnx_opt, feeds))
 
     def test_merge_c4_slice(self):
-        x = np.random.rand(50, 50, 50, 50).astype(np.float32) + 0.5
+        x = np.random.randn(50, 50, 50, 50).astype(np.float32)
 
         onnx_name = "c4_slice"
-        c4_slice_onnx = f"./onnx/{onnx_name}.onnx"
-        c4_slice_optimize_onnx = f"./onnx/{onnx_name}_optimize.onnx"
+        onnx_ori = f"./onnx/{onnx_name}.onnx"
+        onnx_opt = f"./onnx/{onnx_name}_optimize.onnx"
 
-        make_c4_slice_model(c4_slice_onnx, x, False)
+        make_c4_slice_model(onnx_ori, x, False)
 
-        graph = OnnxGraph.parse(c4_slice_onnx)
-        knowledge = KnowledgeMergeConsecutiveSlice()
-        res = optimize(graph, knowledge)
-        self.assertTrue(res)
-        graph.save(c4_slice_optimize_onnx)
-
-        matrix_before_apply = inference(c4_slice_onnx, x)
-        matrix_after_apply = inference(c4_slice_optimize_onnx, x)
-        self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
-        for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
-            self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
-
-        result = optimize(graph, knowledge)
-        self.assertFalse(result)
+        graph = OnnxGraph.parse(onnx_ori)
+        cfg = OptimizationConfig(
+            graph=graph,
+            knowledge=KnowledgeMergeConsecutiveSlice(),
+            onnx_ori=onnx_ori,
+            onnx_opt=onnx_opt,
+        )
+        self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
+        feeds = [{
+            'X': np.random.randn(*x.shape).astype(x.dtype)
+        } for _ in range(10)]
+        self.assertTrue(self.check_precision(onnx_ori, onnx_opt, feeds))
 
     def test_merge_c4_slice_same_axis(self):
-        x = np.random.rand(50, 50, 50, 50).astype(np.float32) + 0.5
+        x = np.random.randn(50, 50, 50, 50).astype(np.float32)
 
         onnx_name = "c4_slice_same_axis"
-        c4_slice_onnx = f"./onnx/{onnx_name}.onnx"
+        onnx_ori = f"./onnx/{onnx_name}.onnx"
 
-        make_c4_slice_model(c4_slice_onnx, x, True)
+        make_c4_slice_model(onnx_ori, x, True)
 
-        graph = OnnxGraph.parse(c4_slice_onnx)
-        knowledge = KnowledgeMergeConsecutiveSlice()
-        res = optimize(graph, knowledge)
-        self.assertFalse(res)
+        graph = OnnxGraph.parse(onnx_ori)
+        cfg = OptimizationConfig(
+            graph=graph,
+            knowledge=KnowledgeMergeConsecutiveSlice(),
+        )
+        self.assertTrue(self.check_optimization(cfg=cfg, expect=False))
 
     def test_merge_c2_slice_2dims(self):
-        x = np.random.rand(50, 50, 50, 30).astype(np.float32) + 0.5
+        x = np.random.randn(50, 50, 50, 30).astype(np.float32)
 
         onnx_name = "c2_slice_2dims"
-        c2_slice_2dims_onnx = f"./onnx/{onnx_name}.onnx"
-        c2_slice_2dims_optimize_onnx = f"./onnx/{onnx_name}_optimize.onnx"
+        onnx_ori = f"./onnx/{onnx_name}.onnx"
+        onnx_opt = f"./onnx/{onnx_name}_optimize.onnx"
 
-        make_c2_slice_2dim_model(c2_slice_2dims_onnx, x, False)
+        make_c2_slice_2dim_model(onnx_ori, x, False)
 
-        graph = OnnxGraph.parse(c2_slice_2dims_onnx)
-        knowledge = KnowledgeMergeConsecutiveSlice()
-        res = optimize(graph, knowledge)
-        self.assertTrue(res)
-        graph.save(c2_slice_2dims_optimize_onnx)
-
-        matrix_before_apply = inference(c2_slice_2dims_onnx, x)
-        matrix_after_apply = inference(c2_slice_2dims_optimize_onnx, x)
-        self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
-        for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
-            self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
-
-        result = optimize(graph, knowledge)
-        self.assertFalse(result)
+        graph = OnnxGraph.parse(onnx_ori)
+        cfg = OptimizationConfig(
+            graph=graph,
+            knowledge=KnowledgeMergeConsecutiveSlice(),
+            onnx_ori=onnx_ori,
+            onnx_opt=onnx_opt,
+        )
+        self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
+        feeds = [{
+            'X': np.random.randn(*x.shape).astype(x.dtype)
+        } for _ in range(10)]
+        self.assertTrue(self.check_precision(onnx_ori, onnx_opt, feeds))
 
     def test_merge_c2_slice_2dims_same_axis(self):
-        x = np.random.rand(50, 50, 50, 30).astype(np.float32) + 0.5
+        x = np.random.randn(50, 50, 50, 30).astype(np.float32)
 
         onnx_name = "c2_slice_2dims_same_axis"
-        c2_slice_2dims_onnx = f"./onnx/{onnx_name}.onnx"
+        onnx_ori = f"./onnx/{onnx_name}.onnx"
 
-        make_c2_slice_2dim_model(c2_slice_2dims_onnx, x, True)
+        make_c2_slice_2dim_model(onnx_ori, x, True)
 
-        graph = OnnxGraph.parse(c2_slice_2dims_onnx)
-        knowledge = KnowledgeMergeConsecutiveSlice()
-        res = optimize(graph, knowledge)
-        self.assertFalse(res)
+        graph = OnnxGraph.parse(onnx_ori)
+        cfg = OptimizationConfig(
+            graph=graph,
+            knowledge=KnowledgeMergeConsecutiveSlice(),
+        )
+        self.assertTrue(self.check_optimization(cfg=cfg, expect=False))
 
     def test_merge_c2_slice_2dims_1dims(self):
-        x = np.random.rand(50, 50, 50, 30).astype(np.float32) + 0.5
+        x = np.random.randn(50, 50, 50, 30).astype(np.float32)
 
         onnx_name = "c2_slice_2dims_1dims"
-        c2_slice_2dims_1dims_onnx = f"./onnx/{onnx_name}.onnx"
-        c2_slice_2dims_1dims_optimize_onnx = f"./onnx/{onnx_name}_optimize.onnx"
+        onnx_ori = f"./onnx/{onnx_name}.onnx"
+        onnx_opt = f"./onnx/{onnx_name}_optimize.onnx"
 
-        make_c2_slice_2dim_model(c2_slice_2dims_1dims_onnx, x, False)
+        make_c2_slice_2dim_model(onnx_ori, x, False)
 
-        graph = OnnxGraph.parse(c2_slice_2dims_1dims_onnx)
-        knowledge = KnowledgeMergeConsecutiveSlice()
-        res = optimize(graph, knowledge)
-        self.assertTrue(res)
-        graph.save(c2_slice_2dims_1dims_optimize_onnx)
-
-        matrix_before_apply = inference(c2_slice_2dims_1dims_onnx, x)
-        matrix_after_apply = inference(c2_slice_2dims_1dims_optimize_onnx, x)
-        self.assertTrue(len(matrix_before_apply) == len(matrix_after_apply))
-        for lmatrix, rmatrix in zip(matrix_before_apply, matrix_after_apply):
-            self.assertTrue(np.allclose(lmatrix, rmatrix, atol=1e-4, rtol=1e-2))
-
-        result = optimize(graph, knowledge)
-        self.assertFalse(result)
+        graph = OnnxGraph.parse(onnx_ori)
+        cfg = OptimizationConfig(
+            graph=graph,
+            knowledge=KnowledgeMergeConsecutiveSlice(),
+            onnx_ori=onnx_ori,
+            onnx_opt=onnx_opt,
+        )
+        self.assertTrue(self.check_optimization(cfg=cfg, expect=True))
+        feeds = [{
+            'X': np.random.randn(*x.shape).astype(x.dtype)
+        } for _ in range(10)]
+        self.assertTrue(self.check_precision(onnx_ori, onnx_opt, feeds))
 
     def test_merge_c2_slice_2dims_1dims_same_axis(self):
-        x = np.random.rand(50, 50, 50, 30).astype(np.float32) + 0.5
+        x = np.random.randn(50, 50, 50, 30).astype(np.float32)
 
         onnx_name = "c2_slice_2dims_1dims_same"
-        c2_slice_2dims_1dims_onnx = f"./onnx/{onnx_name}.onnx"
+        onnx_ori = f"./onnx/{onnx_name}.onnx"
 
-        make_c2_slice_2dim_model(c2_slice_2dims_1dims_onnx, x, True)
+        make_c2_slice_2dim_model(onnx_ori, x, True)
 
-        graph = OnnxGraph.parse(c2_slice_2dims_1dims_onnx)
-        knowledge = KnowledgeMergeConsecutiveSlice()
-        res = optimize(graph, knowledge)
-        self.assertFalse(res)
+        graph = OnnxGraph.parse(onnx_ori)
+        cfg = OptimizationConfig(
+            graph=graph,
+            knowledge=KnowledgeMergeConsecutiveSlice(),
+        )
+        self.assertTrue(self.check_optimization(cfg=cfg, expect=False))
 
     def test_merge_c2_optional_args_slice(self):
-        x = np.random.rand(50, 50, 50).astype(np.float32) + 0.5
+        x = np.random.randn(50, 50, 50).astype(np.float32)
 
         onnx_name = "c2_slice_optional_args"
-        c2_slice_onnx = f"./onnx/{onnx_name}.onnx"
+        onnx_ori = f"./onnx/{onnx_name}.onnx"
 
-        make_c2_slice_optional_args_model(c2_slice_onnx, x)
-        _ = inference(c2_slice_onnx, x)
+        make_c2_slice_optional_args_model(onnx_ori, x)
 
-        graph = OnnxGraph.parse(c2_slice_onnx)
-        knowledge = KnowledgeMergeConsecutiveSlice()
-        res = optimize(graph, knowledge)
-        self.assertFalse(res)
+        graph = OnnxGraph.parse(onnx_ori)
+        cfg = OptimizationConfig(
+            graph=graph,
+            knowledge=KnowledgeMergeConsecutiveSlice(),
+        )
+        self.assertTrue(self.check_optimization(cfg=cfg, expect=False))
 
 
 if __name__ == "__main__":
