@@ -1,0 +1,89 @@
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<script language="JavaScript" type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script type="text/javascript">$('img').each(function(idx, ele) {
+        var modal = document.getElementById('img-modal');
+        var imgWrapper = document.getElementById('img-wrapper');
+
+        ele.onclick = function () {
+            modal.style.display = "block";
+            imgWrapper.src = ele.src;
+        };
+
+        // Get the <span> element that closes the modal
+        var closeBtn = document.getElementsByClassName("close")[0];
+
+        // When the user clicks on <span> (x), close the modal
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        };
+    });
+</script>
+<html align='left'>
+<h1> 训练通信算子优化推荐结果 </h1>
+    <body>
+    {% for item in body %}
+
+    <h2> {{ item.op_name }} </h2>
+    <h3> communication time analysis result: </h3>
+
+    {% for time_res in item.time_analysis_result %}
+    <p> {{ time_res }}</p>
+    {% endfor %}
+
+    <img src="{{ item.visualization.communication_time_analysis }}" width="700" height="700" />
+
+    <h3> communication bandwidth analysis result: </h3>
+    {% for bd_res in item.bandwidth_analysis_result %}
+    <p> {{ bd_res }}</p>
+    {% endfor %}
+
+    <table border="1" width = "80%" cellspacing='0' cellpadding='0'>
+        <caption> {{ item.detail_table_name }}</caption>
+        <tr>
+            <th> Transport Type </th>
+            <th> Transit Size(MB) </th>
+            <th> Transit Time(ms) </th>
+            <th> Bandwidth(G/s) </th>
+            <th> Bandwidth Utilization </th>
+        </tr>
+
+        {% for bandwidth_detail in item.bandwidth_details %}
+        <tr align="center">
+            <td> {{ bandwidth_detail[0] }} </td>
+            <td> {{ bandwidth_detail[1] }} </td>
+            <td> {{ bandwidth_detail[2] }} </td>
+            <td> {{ bandwidth_detail[3] }} </td>
+            <td> {{ bandwidth_detail[4] }} </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <img src="{{ item.visualization.bandwidth_utilization }}" width="500" height="500" />
+    <img src="{{ item.visualization.data_transmission_bandwidth }}" width="500" height="500" />
+    <img src="{{ item.visualization.data_transmission_size }}" width="500" height="500" />
+    <br>
+    <img src="{{ item.visualization.data_transmission_time }}" width="500" height="500" />
+    <img src="{{ item.visualization.link_transport_type }}" width="500" height="500" />
+    <img src="{{ item.visualization.packet_size }}" width="500" height="500" />
+
+
+    {% endfor%}
+    </body>
+</html>
+
+<style type="text/css">
+    h1 {
+        color: red;
+    }
+    h3 {
+        text-indent: 50px;
+    }
+    p {
+        color: blue;
+        text-indent: 70px;
+    }
+    body {
+        position: absolute;
+        white-space: nowrap;
+    }
+</style>

@@ -1,0 +1,17 @@
+{
+  "model_list": [
+    {
+      "model_name": "hcclanalysis",
+      "session_list": [
+        {
+          "python_model_path": "./",
+          "parameter":{
+              "rank_size": 24,
+              "step_num": null
+          }
+        }
+      ]
+    }
+
+  ]
+}
