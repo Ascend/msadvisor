@@ -11,7 +11,7 @@
 ./Ascend-cann-toolkit*.run --install  # 安装CANN包
 ./Ascend-cann-toolkit*.run --upgrade  # 更新CANN包
 # 配置环境变量
-source {CANN_INSTALL_PATH}/Ascend/ascend-toolkit/set_evn.sh
+source {CANN_INSTALL_PATH}/Ascend/ascend-toolkit/set_env.sh
 
 # 下载知识库&安装依赖
 git clone https://gitee.com/ascend/msadvisor.git

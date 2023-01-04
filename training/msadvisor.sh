@@ -12,7 +12,7 @@ function print_log() {
 }
 
 function reset_advisor_runtime() {
-    if [ -z ${ASCEND_TOOLKIT_HOME} ]; then
+    if [ -z "${ASCEND_TOOLKIT_HOME}" ]; then
         print_log $ERROR "Not set environment variables of CANN"
         exit 1
     fi
@@ -39,13 +39,13 @@ function collect_data() {
     local _rank=${rank_size}
     local _data_path=${bucket_name}
 
-    if [ -z ${_data_path} ]; then
+    if [ -z "${_data_path}" ]; then
         print_log $ERROR "bucket_name is empty"
         help_info
         exit 1
     fi
 
-    if [ -z ${_rank} ]; then
+    if [ -z "${_rank}" ]; then
         print_log $ERROR "rank_size is empty"
         help_info
         exit 1
@@ -66,19 +66,19 @@ function hcclanalysis() {
     
     reset_advisor_runtime 1800
 
-    if [ -z ${_data} ]; then
+    if [ -z "${_data}" ]; then
         print_log $ERROR "data path is empty"
         help_info
         exit 1
     fi
 
-    if [ -z ${_rank} ]; then
+    if [ -z "${_rank}" ]; then
         print_log $ERROR "rank_size is empty"
         help_info
         exit 1
     fi
 
-    if [ -n ${step_num} ]; then
+    if [ -n "${_step_num}" ]; then
         msadvisor -c "$SHELL_DIR/hccl_analysis_model/hcclanalysis.json" -d $_data -p "hcclanalysis.rank_size=$_rank;hcclanalysis.step_num=$_step_num"
     else
         msadvisor -c "$SHELL_DIR/hccl_analysis_model/hcclanalysis.json" -d $_data -p "hcclanalysis.rank_size=$_rank"
@@ -90,17 +90,17 @@ function main() {
 
     if [ -z "${data_path}" ]; then
         data_path="$(dirname $(dirname "$SHELL_DIR"))/profiler"
-        collect_data $data_path
+        collect_data "$data_path"
     fi
     
-    hcclanalysis $data_path
+    hcclanalysis "$data_path"
 }
 
 while true; do
     case "$1" in 
     --rank_size=*)
         rank_size=$(echo "$1" | cut -d"=" -f2)
-        if [ -z ${rank_size} ]; then
+        if [ -z "${rank_size}" ]; then
             print_log $ERROR "rank_size is empty."
             exit 1
         fi
@@ -129,7 +129,7 @@ while true; do
         ;;
     --step=*)
         step_num=$(echo "$1"|  cut -d"=" -f2)
-        expr ${step_num} + 1 $> /dev/null
+        expr "${step_num}" + 1 &> /dev/null
         if [ $? -ne 0 ]; then
             print_log $ERROR "step is invalid num."
             exit 1
@@ -141,7 +141,7 @@ while true; do
         exit 0
         ;;
     *)
-        if [ ! -z "$1" ]; then
+        if [ -n "$1" ]; then
             print_log $ERROR "Unrecognized parameters: $1."
             help_info
             exit 1
