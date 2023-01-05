@@ -11,7 +11,7 @@ function print_log() {
     echo "[$1] [${cur_date}]: $content"
 }
 
-function reset_advisor_runtime() {
+function set_msadvisor_max_run_time_config() {
     if [ -z "${ASCEND_TOOLKIT_HOME}" ]; then
         print_log $ERROR "Not set environment variables of CANN"
         exit 1
@@ -63,8 +63,6 @@ function hcclanalysis() {
     local _data=$1
     local _rank=${rank_size}
     local _step_num=${step_num}
-    
-    reset_advisor_runtime 1800
 
     if [ -z "${_data}" ]; then
         print_log $ERROR "data path is empty"
@@ -87,12 +85,13 @@ function hcclanalysis() {
 
 
 function main() {
+    set_msadvisor_max_run_time_config 1800
 
     if [ -z "${data_path}" ]; then
         data_path="$(dirname $(dirname "$SHELL_DIR"))/profiler"
         collect_data "$data_path"
     fi
-    
+
     hcclanalysis "$data_path"
 }
 
