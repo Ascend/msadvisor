@@ -54,8 +54,6 @@ pattern0 = Pattern() \
     .add_edge("Concat_0", "Concat_1") \
     .add_edge("Concat_1", "Concat_2") \
     .add_edge("Concat_2", "Concat_to_keep") \
-    .set_input("Concat_0") \
-    .set_output("Concat_to_keep") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 # continue 3 Concat op
@@ -82,8 +80,6 @@ pattern1 = Pattern() \
     .add_node("Concat_to_keep", ["Concat"]) \
     .add_edge("Concat_0", "Concat_1") \
     .add_edge("Concat_1", "Concat_to_keep") \
-    .set_input("Concat_0") \
-    .set_output("Concat_to_keep") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 # continue 2 Concat op
@@ -104,8 +100,6 @@ pattern2 = Pattern() \
     .add_node("Concat_0", ["Concat"], [NextNodeCount(1)]) \
     .add_node("Concat_to_keep", ["Concat"]) \
     .add_edge("Concat_0", "Concat_to_keep") \
-    .set_input("Concat_0") \
-    .set_output("Concat_to_keep") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 

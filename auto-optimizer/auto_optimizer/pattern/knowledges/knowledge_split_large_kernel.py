@@ -79,8 +79,6 @@ class KnowledgeSplitLargeKernelConv(KnowledgeBase):
         self.large_kernel_match = LargeKernelConv(self.threshold)
         self.large_kernel_pattern = Pattern() \
             .add_node("LargeKernelConv", ["Conv"], [self.large_kernel_match]) \
-            .set_input("LargeKernelConv") \
-            .set_output("LargeKernelConv") \
             .set_loop(MATCH_PATTERN.MATCH_ONCE)
         self._register_apply_funcs(self.large_kernel_pattern, [self._large_kernel_pattern_apply])
 

@@ -53,8 +53,6 @@ pattern = Pattern() \
     .add_node('Conv', ['Conv'], [Conv1dMatch()]) \
     .add_node('element_wise', ['Mul', 'Add', 'Sub', 'Div', 'BatchNormalization', 'LeakyRelu', 'Relu']) \
     .add_edge('Conv', 'element_wise') \
-    .set_input('Conv') \
-    .set_output('element_wise') \
     .set_node_loop('element_wise', MATCH_PATTERN.MATCH_ZERO_OR_MORE) \
     .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
 

@@ -29,17 +29,6 @@ class MATCH_PATTERN(Enum):
     MATCH_ZERO_OR_MORE = 3
 
 
-# 子图遍历方向
-@unique
-class DIRECTION(Enum):
-    # 从上往下遍历
-    UP_DOWN = 1
-    # 从下往上遍历
-    DOWN_UP = 2
-    # 方向不明确
-    UNKNOWN = 3
-
-
 class MatchBase(object):
     def __init__(self) -> None:
         pass
@@ -56,11 +45,24 @@ class PatternNode(object):
         op_types: Optional[List[str]],
         op_matchs: Optional[List[MatchBase]] = None
     ) -> None:
-        self.op_name: str = op_name
-        self.op_types: List[str] = [] if op_types is None else op_types
-        self.op_matchs: List[MatchBase] = [] if op_matchs is None else op_matchs
-        self.inputs: List['PatternNode'] = []
-        self.outputs: List['PatternNode'] = []
+        self._op_name: str = op_name
+        self._op_types: List[str] = [] if op_types is None else op_types
+        self._op_matchs: List[MatchBase] = [] if op_matchs is None else op_matchs
+        self._inputs: List['PatternNode'] = []
+        self._outputs: List['PatternNode'] = []
+        self._match_pattern: MATCH_PATTERN = MATCH_PATTERN.MATCH_ONCE
+
+    @property
+    def op_name(self) -> str:
+        return self._op_name
+
+    @property
+    def inputs(self) -> List:
+        return self._inputs
+
+    @property
+    def outputs(self) -> List:
+        return self._outputs
 
     def match(self, node: BaseNode, graph: BaseGraph) -> bool:
         """
@@ -71,37 +73,44 @@ class PatternNode(object):
         """
         if node is None:
             return False
-        if self.op_types and self.op_types.count(node.op_type) == 0:
+        if self._op_types and self._op_types.count(node.op_type) == 0:
             return False
-        if self.op_matchs is None:
+        if self._op_matchs is None:
             return True
-        for op_match in self.op_matchs:
+        for op_match in self._op_matchs:
             if not op_match.match(node, graph):
                 return False
         return True
 
-    def set_input(self, prev_node: 'PatternNode') -> None:
-        """
-        设置前置节点
-        :param prev_node: 前置节点
-        """
-        self.inputs.append(prev_node)
+    def add_parent(self, parent: 'PatternNode') -> None:
+        self._inputs.append(parent)
 
-    def set_output(self, next_node: 'PatternNode') -> None:
-        """
-        设置后置节点
-        :param next_node: 设置后置节点
-        """
-        self.outputs.append(next_node)
+    def add_child(self, child: 'PatternNode') -> None:
+        self._outputs.append(child)
+
+    def set_match_pattern(self, match_pattern: MATCH_PATTERN) -> None:
+        if isinstance(match_pattern, MATCH_PATTERN):
+            self._match_pattern = match_pattern
+
+    def can_match_more_time(self) -> bool:
+        return self._match_pattern == MATCH_PATTERN.MATCH_ONCE_OR_MORE or \
+            self._match_pattern == MATCH_PATTERN.MATCH_ZERO_OR_MORE
+
+    def can_match_zero_time(self) -> bool:
+        return self._match_pattern == MATCH_PATTERN.MATCH_ZERO_OR_MORE
 
 
 class Pattern(object):
     def __init__(self) -> None:
-        self.node_dict: Dict[str, PatternNode] = {}
-        self.in_nodes: List[PatternNode] = []
-        self.out_nodes: List[PatternNode] = []
-        self.node_match_pattern_dict: Dict[str, MATCH_PATTERN] = {}
-        self.graph_match_pattern = MATCH_PATTERN.MATCH_ONCE
+        self._nodes: Dict[str, PatternNode] = {}
+        self._inputs: List[PatternNode] = []
+        self._outputs: List[PatternNode] = []
+        self._match_pattern = MATCH_PATTERN.MATCH_ONCE
+        self._root: PatternNode = None
+
+    @property
+    def node_dict(self) -> Dict[str, PatternNode]:
+        return self._nodes
 
     def add_node(
         self,
@@ -116,48 +125,28 @@ class Pattern(object):
         :param op_matchs: 算子匹配规则列表
         :return: 返回实例
         """
-        if self.node_dict.get(op_name) is not None:
+        if self._nodes.get(op_name) is not None:
             raise RuntimeError(f'Operator({op_name}) already exists.')
-        self.node_dict[op_name] = PatternNode(op_name, op_types, op_matchs)
+        node = PatternNode(op_name, op_types, op_matchs)
+        self._nodes[op_name] = node
+        self._inputs.append(node)
+        self._outputs.append(node)
         return self
 
-    def add_edge(self, prev_op_name: str, next_op_name: str) -> 'Pattern':
-        prev_node = self.node_dict.get(prev_op_name)
-        if prev_node is None:
-            raise RuntimeError(f'Operator({prev_op_name}) not exists.')
-        next_node = self.node_dict.get(next_op_name)
+    def add_edge(self, op_name: str, next_op_name: str) -> 'Pattern':
+        cur_node = self._nodes.get(op_name)
+        if cur_node is None:
+            raise RuntimeError(f'Operator({op_name}) not exists.')
+        next_node = self._nodes.get(next_op_name)
         if next_node is None:
             raise RuntimeError(f'Operator({next_op_name}) not exists.')
-        next_node.set_input(prev_node)
-        prev_node.set_output(next_node)
-        return self
-
-    def set_input(self, op_name: str) -> 'Pattern':
-        """
-        设置子图的输入节点
-        :param op_name: 算子节点名
-        :return: 返回实例
-        """
-        in_node = self.node_dict.get(op_name)
-        if in_node is None:
-            raise RuntimeError(f'Operator({op_name}) not exists.')
-        if len(in_node.inputs) > 0:
-            raise RuntimeError(f'Operator({op_name}) is not an input node.')
-        self.in_nodes.append(in_node)
-        return self
-
-    def set_output(self, op_name: str) -> 'Pattern':
-        """
-        设置子图的输出节点
-        :param op_name: 输出节点名
-        :return: 返回实例
-        """
-        out_node = self.node_dict.get(op_name)
-        if out_node is None:
-            raise RuntimeError(f'Operator({op_name}) not exists.')
-        if len(out_node.outputs) > 0:
-            raise RuntimeError(f'Operator({op_name}) is not an output node.')
-        self.out_nodes.append(out_node)
+        next_node.add_parent(cur_node)
+        cur_node.add_child(next_node)
+        # update graph inputs and outputs
+        if next_node in self._inputs:
+            self._inputs.remove(next_node)
+        if cur_node in self._outputs:
+            self._outputs.remove(cur_node)
         return self
 
     def set_node_loop(
@@ -171,10 +160,11 @@ class Pattern(object):
         :param match_pattern: 匹配模式
         :return: 返回实例
         """
-        node = self.node_dict.get(op_name)
+        node = self._nodes.get(op_name)
         if node is None:
             raise RuntimeError(f'Operator({op_name}) not exists.')
-        self.node_match_pattern_dict[op_name] = match_pattern
+        if isinstance(match_pattern, MATCH_PATTERN):
+            node.set_match_pattern(match_pattern)
         return self
 
     def set_loop(self, match_pattern: MATCH_PATTERN) -> 'Pattern':
@@ -184,69 +174,47 @@ class Pattern(object):
         :param match_pattern: 子图匹配模式
         :return: 返回实例
         """
-        self.graph_match_pattern = match_pattern
-        if match_pattern == MATCH_PATTERN.MATCH_ONCE_OR_MORE:
-            if len(self.in_nodes) != len(self.out_nodes):
-                raise RuntimeError('if match sub graph continously, '
-                                   'input nodes size should be equal to output nodes size.')
+        if isinstance(match_pattern, MATCH_PATTERN):
+            self._match_pattern = match_pattern
         return self
-
-    def get_visit_direction(self) -> DIRECTION:
-        """
-        获取子图匹配的遍历方式：
-          1、多输入单输出，从下往上遍历
-          2、单输出多输出，从上往下遍历
-          3、单输入单输出，从上往下遍历
-          4、多输入多输出，当前没有出现这样场景，暂时不支持
-        """
-        if len(self.in_nodes) == 1:
-            # 单输入，则从上往下遍历
-            return DIRECTION.UP_DOWN
-        if len(self.out_nodes) == 1:
-            # 单输出，从下往上遍历
-            return DIRECTION.DOWN_UP
-        # 多输入多输出场景，没法确定遍历方向，暂时不支持
-        return DIRECTION.UNKNOWN
 
     def get_start_node(self) -> Optional[PatternNode]:
         """
         获取子图匹配遍历的起始节点
         :return: 返回子图遍历的起始节点
         """
-        if len(self.in_nodes) == 1:
-            # 单输入，从子图输入节点开始，从上往下遍历
-            return self.in_nodes[0]
-        if len(self.out_nodes) == 1:
-            # 单输出，从子图输出节点开始，从下往上遍历
-            return self.out_nodes[0]
-        # 多输入多输出不支持
-        return None
-
-    def node_can_match_more(self, op_name: str) -> bool:
-        """
-        节点是否支持匹配多个
-        :param op_name: 算子节点名称
-        :return: 能匹配则返回True，否则返回False
-        """
-        if op_name not in self.node_match_pattern_dict:
-            return False
-        return self.node_match_pattern_dict[op_name] == MATCH_PATTERN.MATCH_ONCE_OR_MORE or \
-            self.node_match_pattern_dict[op_name] == MATCH_PATTERN.MATCH_ZERO_OR_MORE
-
-    def node_can_match_zero(self, op_name: str) -> bool:
-        """
-        节点是否支持匹配0个
-        :param op_name: 算子节点名称
-        :return: 能匹配则返回True，否则返回False
-        """
-        if op_name not in self.node_match_pattern_dict:
-            return False
-        return self.node_match_pattern_dict[op_name] == MATCH_PATTERN.MATCH_ZERO_OR_MORE
+        if len(self._inputs) == 0:
+            raise RuntimeError('Graph is invalid, no input node.')
+        if len(self._inputs) == 1:
+            return self._inputs[0]
+        if len(self._outputs) == 1:
+            return self._outputs[0]
+        if self._root is not None:
+            return self._root
+        for node in self._nodes.values():
+            if len(node.inputs) <= 1:
+                continue
+            visited: Set[PatternNode] = set([node])
+            queue: List[PatternNode] = [node]
+            while len(queue) != 0:
+                node_ = queue.pop(0)
+                queue.extend(node_.inputs)
+                visited.add(node_)
+            queue.clear()
+            queue.append(node)
+            while len(queue) != 0:
+                node_ = queue.pop(0)
+                queue.extend(node_.outputs)
+                visited.add(node_)
+            if len(visited) == len(self._nodes):
+                self._root = node
+                return self._root
+        raise RuntimeError('Get root node failed from graph.')
 
     def can_match_more(self) -> bool:
         """
         判断子图是否可以循环匹配
         :return: 能匹配则返回True，否则返回False
         """
-        return self.graph_match_pattern == MATCH_PATTERN.MATCH_ONCE_OR_MORE or \
-            self.graph_match_pattern == MATCH_PATTERN.MATCH_ZERO_OR_MORE
+        return self._match_pattern == MATCH_PATTERN.MATCH_ONCE_OR_MORE or \
+            self._match_pattern == MATCH_PATTERN.MATCH_ZERO_OR_MORE

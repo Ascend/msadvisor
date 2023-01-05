@@ -46,34 +46,28 @@ class TestPattern(unittest.TestCase):
             .add_node('Conv', ['Conv'], None) \
             .add_node('Relu', ['Relu'], None) \
             .add_edge('Conv', 'Relu') \
-            .set_input('Conv') \
-            .set_output('Relu') \
             .set_node_loop('Conv', MATCH_PATTERN.MATCH_ONCE_OR_MORE) \
             .set_node_loop('Relu', MATCH_PATTERN.MATCH_ZERO_OR_MORE)
 
-        self.assertTrue(pattern.node_can_match_more('Conv'))
-        self.assertTrue(pattern.node_can_match_more('Relu'))
+        self.assertTrue(pattern.node_dict['Conv'].can_match_more_time())
+        self.assertTrue(pattern.node_dict['Relu'].can_match_more_time())
 
     def test_node_can_match_zero_func(self):
         pattern = Pattern() \
             .add_node('Conv', ['Conv'], None) \
             .add_node('Relu', ['Relu'], None) \
             .add_edge('Conv', 'Relu') \
-            .set_input('Conv') \
-            .set_output('Relu') \
             .set_node_loop('Conv', MATCH_PATTERN.MATCH_ONCE_OR_MORE) \
             .set_node_loop('Relu', MATCH_PATTERN.MATCH_ZERO_OR_MORE)
 
-        self.assertFalse(pattern.node_can_match_zero('Conv'))
-        self.assertTrue(pattern.node_can_match_zero('Relu'))
+        self.assertFalse(pattern.node_dict['Conv'].can_match_zero_time())
+        self.assertTrue(pattern.node_dict['Relu'].can_match_zero_time())
 
     def test_cann_match_more_func(self):
         pattern = Pattern() \
             .add_node('Conv', ['Conv'], None) \
             .add_node('Relu', ['Relu'], None) \
             .add_edge('Conv', 'Relu') \
-            .set_input('Conv') \
-            .set_output('Relu') \
             .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
 
         self.assertTrue(pattern.can_match_more())

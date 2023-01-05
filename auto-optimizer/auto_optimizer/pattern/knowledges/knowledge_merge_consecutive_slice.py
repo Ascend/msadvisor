@@ -68,8 +68,6 @@ pattern0 = Pattern() \
     .add_edge("Slice_0", "Slice_1") \
     .add_edge("Slice_1", "Slice_2") \
     .add_edge("Slice_2", "Slice_to_keep") \
-    .set_input("Slice_0") \
-    .set_output("Slice_to_keep") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 # continue 3 slice op
@@ -94,8 +92,6 @@ pattern1 = Pattern() \
     .add_node("Slice_to_keep", ["Slice"], [NonNegetiveAxes()]) \
     .add_edge("Slice_0", "Slice_1") \
     .add_edge("Slice_1", "Slice_to_keep") \
-    .set_input("Slice_0") \
-    .set_output("Slice_to_keep") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 # continue 2 slice op
@@ -114,8 +110,6 @@ pattern2 = Pattern() \
     .add_node("Slice_0", ["Slice"], [NonNegetiveAxes(), NextNodeCount(1)]) \
     .add_node("Slice_to_keep", ["Slice"], [NonNegetiveAxes()]) \
     .add_edge("Slice_0", "Slice_to_keep") \
-    .set_input("Slice_0") \
-    .set_output("Slice_to_keep") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 

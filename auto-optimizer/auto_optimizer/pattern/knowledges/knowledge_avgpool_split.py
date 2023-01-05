@@ -57,15 +57,13 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
 
         pattern = Pattern() \
             .add_node('AvgPool', ['AveragePool'], [OpMatch()]) \
-            .set_input('AvgPool') \
-            .set_output('AvgPool') \
             .set_node_loop('AvgPool', MATCH_PATTERN.MATCH_ONCE)
         self._register_apply_funcs(pattern, [self._optimize_apply])
 
     def _calculate_mini_factor(self, n):
         '''
         calculate mini factor which number divided, if number can not be divided, then the factor is 1
-        for example: 
+        for example:
             if n = 10, the mini factor is 2
             if n = 55, the mini factor is 5
             if n = 3, the mini factor is 1, because 3 cannot be divided

@@ -56,8 +56,6 @@ pattern_empty_slice = Pattern() \
     .add_node("Slice_0", ["Slice"], [EmptySlice()]) \
     .add_node("Concat_0", ["Concat"]) \
     .add_edge("Slice_0", "Concat_0") \
-    .set_input("Slice_0") \
-    .set_output("Concat_0") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
 

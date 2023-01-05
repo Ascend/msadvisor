@@ -52,8 +52,6 @@ pattern = Pattern() \
     .add_node('Conv', ['Conv'], [Conv1dMatch()]) \
     .add_node('element_wise', ['Mul', 'Add', 'Sub', 'Div', 'BatchNormalization', 'LeakyRelu', 'Relu']) \
     .add_edge('Conv', 'element_wise') \
-    .set_input('Conv') \
-    .set_output('element_wise') \
     .set_node_loop('element_wise', MATCH_PATTERN.MATCH_ZERO_OR_MORE) \
     .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
 
@@ -333,7 +331,7 @@ class TestMatcher(unittest.TestCase):
         self.assertEqual(len(result.node_dicts), 1)
         self.assertEqual(len(result.node_dicts[0]), 2)
         self.assertEqual(len(result.node_dicts[0].get('Conv')), 1)
-        self.assertEqual(len(result.node_dicts[0].get('element_wise')), 3)
+        self.assertEqual(len(result.node_dicts[0].get('element_wise')), 2)
         self.assertEqual(result.node_dicts[0]['Conv'][0].name, 'Conv_0')
         self.assertEqual(result.node_dicts[0]['element_wise'][0].name, 'Relu_0')
 
