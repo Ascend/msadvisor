@@ -107,5 +107,4 @@ class TestKnowledgeMergeCasts(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-    TestKnowledgeMergeCasts().test_merge_brother_casts()
-    print('aaa')
+    
