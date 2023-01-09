@@ -202,6 +202,7 @@ class GraphOptimizer:
             converter=cfg.converter,
             soc_version=cfg.soc,
         )
+        om_opt = om_ori
         for name, knowledge in self.knowledges.items():
             logger.info('Evaluating knowledge %s', name)
             graph_opt = deepcopy(graph)
@@ -232,6 +233,13 @@ class GraphOptimizer:
                     os.rename(om_opt, om_ori)
             except Exception as exc:
                 logger.warning("%s", exc)
+        try:
+            os.remove(onnx_ori)
+            os.remove(onnx_opt)
+            os.remove(om_ori)
+            os.remove(om_opt)
+        except FileNotFoundError:
+            pass
         return graph, applied_knowledges
 
 
