@@ -484,7 +484,7 @@ class BaseGraph(ABC):
                         # prev_node -> node -> placeholder
                         prev_node = self._prev_map.get(in_name, None)
                         if prev_node:
-                            for prev_next_node in self._next_map.get(in_name):
+                            for prev_next_node in self._next_map.get(in_name, []):
                                 prev_next_node_in_id = prev_next_node.get_input_id(in_name)
                                 prev_next_node.inputs[prev_next_node_in_id] = out_name
                             prev_node.outputs[prev_node.get_output_id(in_name)] = out_name
