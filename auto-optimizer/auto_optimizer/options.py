@@ -55,7 +55,7 @@ opt_processes = click.option(
     'processes',
     default=1,
     type=click.IntRange(1, 64),
-    help='use multiprocessing in evaluate mode, determine how many processes should be spawned.'
+    help='use multiprocessing in evaluate mode, determine how many processes should be spawned. Default to 1'
 )
 
 
@@ -65,7 +65,7 @@ opt_verbose = click.option(
     'verbose',
     is_flag=True,
     default=False,
-    help='show progress in evaluate mode.'
+    help='show progress in evaluate mode. Default to false.'
 )
 
 
@@ -75,7 +75,7 @@ opt_recursive = click.option(
     'recursive',
     is_flag=True,
     default=False,
-    help='Process onnx in a folder recursively if any folder provided as PATH.'
+    help='Process onnx in a folder recursively if any folder provided as PATH. Default to false.'
 )
 
 
@@ -163,12 +163,12 @@ opt_converter = click.option(
 opt_threshold = click.option(
     '--threshold',
     'threshold',
-    default=-0.02,
+    default=0,
     type=click.FloatRange(min=-1),
     help='Threshold of inference speed improvement,'
          'knowledges with less improvement won\'t be used.'
          'Can be a negative number, which means accept'
-         'negative optimization, default: -0.02'
+         'negative optimization, default: 0'
 )
 
 

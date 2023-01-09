@@ -250,7 +250,7 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
             'soc': get_default_soc(),
             'device': 0,
             'loop': 100,
-            'threshold': -0.02,
+            'threshold': 0,
             'is_static': is_onnx_static,
             'input_shape': '',
             'input_shape_range': '',
