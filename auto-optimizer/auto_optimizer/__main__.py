@@ -15,7 +15,7 @@
 import logging
 import pathlib
 from functools import partial
-from typing import List, Union
+from typing import List
 
 import click
 from click_aliases import ClickAliasedGroup
@@ -117,7 +117,7 @@ def command_list() -> None:
 @opt_recursive
 @opt_verbose
 def command_evaluate(
-    path: Union[pathlib.Path, bytes],
+    path: pathlib.Path,
     optimizer: GraphOptimizer,
     recursive: bool,
     verbose: bool
