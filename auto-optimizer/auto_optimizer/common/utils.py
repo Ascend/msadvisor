@@ -95,3 +95,18 @@ def cosine_similarity(mat0: NDArray, mat1: NDArray) -> float:
     m0 = np.ndarray.flatten(mat0) / norm(mat0)
     m1 = np.ndarray.flatten(mat1) / norm(mat1)
     return np.dot(m0, m1)
+
+
+def meet_precision(lmat: NDArray, rmat: NDArray, cos_th: float, atol: float, rtol: float) -> bool:
+    if (np.any(np.isinf(lmat)) or np.any(np.isinf(rmat))) \
+         or (np.isclose(norm(lmat), 0) and np.isclose(norm(rmat), 0)):
+        # if overflow happens or norm is close to 0, we fallback to allclose
+        return np.allclose(rmat, lmat, atol=atol, rtol=rtol, equal_nan=True)
+    # avoid norm overflow, this affects cosine_similarity
+    while norm(lmat) > 1e10 or norm(rmat) > 1e10:
+        lmat /= 2
+        rmat /= 2
+    lnorm, rnorm = norm(lmat), norm(rmat)
+    # normal cases we check cosine distance and norm closeness
+    return 1 - cosine_similarity(lmat, rmat) <= cos_th \
+        and bool(np.isclose(rnorm, lnorm, atol=atol, rtol=rtol))

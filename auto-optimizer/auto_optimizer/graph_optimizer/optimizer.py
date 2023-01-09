@@ -23,15 +23,22 @@ from typing import Callable, Dict, List, Tuple
 import multiprocessing
 
 import numpy as np
-from numpy.linalg import norm
-from auto_optimizer.common.utils import cosine_similarity
 
+from auto_optimizer.common.utils import meet_precision
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
 from auto_optimizer import KnowledgeFactory
 
 
 logger = logging.getLogger('GraphOptimizer')
+
+
+# This should be implemented in KnowledgeFactory or KnowledgeManager
+NONEQUIVALENT_KNOWLEDGES = [
+    'KnowledgeResizeModeToNearest',
+    'KnowledgeTopkFix',
+    'KnowledgeEmptySliceFix',
+]
 
 
 @dataclass
@@ -70,7 +77,8 @@ class GraphOptimizer:
         pass
 
     @staticmethod
-    def _effective(om_ori: str, om_opt: str, cfg: InferTestConfig, queue: multiprocessing.Queue) -> None:
+    def _effective(om_ori: str, om_opt: str, cfg: InferTestConfig, check_precision: bool,
+                   queue: multiprocessing.Queue) -> None:
         from auto_optimizer.inference_engine.inference.acl_inference \
                 import InferSession, tensor_type_to_numpy_type
 
@@ -108,10 +116,15 @@ class GraphOptimizer:
             queue.put(False)
             return
 
-        if not all(1 - cosine_similarity(mat0, mat1) < 1e-3 for mat0, mat1 in zip(out_ori, out_opt)):
-            logger.warning('Optimization failed: result not close enough.')
-            queue.put(False)
-            return
+        if check_precision:
+            # we use lowest standard here
+            if not all(
+                meet_precision(mat0, mat1, cos_th=1e-3, atol=1e-5, rtol=1e-3)
+                for mat0, mat1 in zip(out_ori, out_opt)
+            ):
+                logger.warning('Optimization failed: optimization did\'nt meet precision requirements.')
+                queue.put(False)
+                return
 
         logger.info('Origin inference time: %.2f ms', time_ori)
         logger.info('Optimized inference time: %.2f ms', time_opt)
@@ -218,15 +231,16 @@ class GraphOptimizer:
                 )
                 ctx = multiprocessing.get_context('spawn')
                 queue = ctx.Queue()
+                check_precision = name not in NONEQUIVALENT_KNOWLEDGES
                 if cfg.process_run_infer:
                     proc = ctx.Process(
                         target=self._effective,
-                        args=(om_ori, om_opt, cfg, queue)
+                        args=(om_ori, om_opt, cfg, check_precision, queue)
                     )
                     proc.start()
                     proc.join()
                 else:
-                    self._effective(om_ori, om_opt, cfg=cfg, queue=queue)
+                    self._effective(om_ori, om_opt, cfg=cfg, check_precision=check_precision, queue=queue)
                 if queue.qsize() > 0 and queue.get():
                     applied_knowledges.append(name)
                     graph = graph_opt
