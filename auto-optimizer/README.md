@@ -80,6 +80,7 @@ python -m auto_optimizer evaluate [OPTIONS] PATH
  - -k/--knowledges: 以英文逗号(,)分隔的知识库列表，可以是名称或者序号。默认启用除修复性质以外的所有知识库。
  - -r/--recursive: 在PATH为文件夹时是否递归搜索，默认关闭
  - -v/--verbose: 打印更多信息，目前只有搜索进度。默认关闭
+ - -p/--processes: 使用multiprocess并行搜索，指定进程数量。默认1
  - --help: 打印帮助信息。
 
 ### optimize命令

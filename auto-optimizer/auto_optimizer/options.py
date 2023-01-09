@@ -49,6 +49,16 @@ opt_optimizer = click.option(
 )
 
 
+opt_processes = click.option(
+    '-p',
+    '--processes',
+    'processes',
+    default=1,
+    type=click.IntRange(1, 64),
+    help='use multiprocessing in evaluate mode, determine how many processes should be spawned.'
+)
+
+
 opt_verbose = click.option(
     '-v',
     '--verbose',

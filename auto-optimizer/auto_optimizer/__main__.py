@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+from multiprocessing import Pool
 import pathlib
 from functools import partial
 from typing import List
@@ -37,7 +38,8 @@ from .options import (
     opt_input_shape,
     opt_input_shape_range,
     opt_dynamic_shape,
-    opt_output_size
+    opt_output_size,
+    opt_processes,
 )
 
 
@@ -84,9 +86,9 @@ def optimize_onnx(
 
 
 def evaluate_onnx(
+    model: pathlib.Path,
     optimizer: GraphOptimizer,
     verbose: bool,
-    model: pathlib.Path
 ) -> List[str]:
     '''Search knowledge pattern in a onnx model.'''
     try:
@@ -124,15 +126,29 @@ def command_list() -> None:
 @opt_optimizer
 @opt_recursive
 @opt_verbose
+@opt_processes
 def command_evaluate(
     path: pathlib.Path,
     optimizer: GraphOptimizer,
     recursive: bool,
-    verbose: bool
+    verbose: bool,
+    processes: int,
 ) -> None:
     path_ = pathlib.Path(path.decode()) if isinstance(path, bytes) else path
     onnx_files = list(path_.rglob('*.onnx') if recursive else path_.glob('*.onnx')) \
         if path_.is_dir() else [path_]
+
+    if processes > 1:
+        evaluate = partial(evaluate_onnx, optimizer=optimizer, verbose=verbose)
+        with Pool(processes) as p:
+            res = p.map(evaluate, onnx_files)
+        for file, knowledges in zip(onnx_files, res):
+            if not knowledges:
+                continue
+            summary = ','.join(knowledges)
+            print(f'{file}\t{summary}')
+        return
+
     for onnx_file in onnx_files:
         knowledges = evaluate_onnx(optimizer=optimizer, model=onnx_file, verbose=verbose)
         if not knowledges:
