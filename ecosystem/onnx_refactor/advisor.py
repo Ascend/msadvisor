@@ -62,6 +62,17 @@ error_code = {'success': '0', 'optimized': '1'}
 extend_type = {'list': '0', 'table': '1', 'sourcedata': '2'}
 extend_data_type = {'str': '0', 'int': '1', 'double': '2'}
 
+def is_graph_input_static(graph: OnnxGraph) -> bool:
+    for inp in graph.inputs:
+        for dim in inp.shape:
+            try:
+                dim = int(dim)
+                if dim <= 0:
+                    return False
+            except ValueError:
+                return False
+    return True
+
 def get_default_soc():
     try:
         import acl
@@ -223,7 +234,7 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
     else:
         # load source model
         onnx_graph = OnnxGraph.parse(onnx_path)
-    is_onnx_static = all(isinstance(x, int) and x > 0 for inp in onnx_graph.inputs for x in inp.shape)
+    is_onnx_static = is_graph_input_static(graph=onnx_graph)
     if len(onnx_graph.inputs) == 0 and len(onnx_graph.outputs) == 0:
         raise RuntimeError('The current model is invalid.')
     knowledge_name = knowledge.__class__.__name__

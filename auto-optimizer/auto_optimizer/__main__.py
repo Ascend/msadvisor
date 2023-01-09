@@ -42,7 +42,15 @@ from .options import (
 
 
 def is_graph_input_static(graph: BaseGraph) -> bool:
-    return all(isinstance(sh, int) and sh > 0 for inp in graph.inputs for sh in inp.shape)
+    for input_ in graph.inputs:
+        for dim in input_.shape:
+            try:
+                dim = int(dim)
+                if dim <= 0:
+                    return False
+            except ValueError:
+                return False
+    return True
 
 
 def optimize_onnx(
