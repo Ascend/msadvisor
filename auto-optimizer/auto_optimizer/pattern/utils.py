@@ -15,11 +15,12 @@
 from functools import wraps
 import time
 from typing import Callable
+import operator as op
 
 import numpy as np
 
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node
+from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Initializer, Node, PlaceHolder
 from auto_optimizer.pattern.pattern import MatchBase
 
 
@@ -36,7 +37,7 @@ def timing(func: Callable):
 
 class NextNodeCount(MatchBase):
     """
-    This class constraint matching node to has exactly N next node.
+    This class constraint matching node to have exactly N next node.
     In practice, this means this node can be merged/sliced/modified/removed without affects other nodes,
     which is a common requirement in computation graph optimization.
     """
@@ -52,6 +53,55 @@ class NextNodeCount(MatchBase):
             return False
         nodes = graph.get_next_nodes(node.outputs[0])
         return len(nodes) == self._count
+
+
+class HasInputShape(MatchBase):
+    '''This class constraint matching node to have shape info for the specified input.'''
+    def __init__(self, idx: int = 0) -> None:
+        super().__init__()
+        self._index = idx
+
+    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
+        if not isinstance(node, (Node, )):
+            return False
+        place_holder = graph.get_node(node.inputs[self._index], node_type=PlaceHolder)
+        return place_holder is not None and bool(place_holder.shape)
+
+
+class HasInputValue(MatchBase):
+    '''This class constraint matching node to have initializer for the specified input.'''
+    def __init__(self, idx: int = 0) -> None:
+        self._index = idx
+        super().__init__()
+
+    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
+        if not isinstance(node, (Node, )):
+            return False
+        ini = graph.get_node(node.inputs[self._index], node_type=Initializer)
+        return ini is not None and ini.value is not None
+
+
+class AllNextnodesAreGather(MatchBase):
+    '''限制节点的后置节点全部是Gather算子，且他们的axis属性都相同'''
+    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
+        if not isinstance(node, (Node, )):
+            return False
+        if len(node.outputs) != 1:
+            return False
+        nodes = graph.get_next_nodes(node.outputs[0])
+        if not nodes:
+            return False
+        for node_ in nodes:
+            if not isinstance(node_, (Node, )) \
+                    or op.ne(node_.op_type, 'Gather'):
+                return False
+        inputs = [node_.inputs[0] for node_ in nodes]
+        if len(set(inputs)) != 1:
+            return False
+        axes = [node_.attrs.get('axis', 0) for node_ in nodes]
+        if len(axes) < 2 or any(axis != axes[0] for axis in axes):
+            return False
+        return True
 
 
 def is_lower_onnx_version(graph: BaseGraph, limit_version = 13) -> bool:
