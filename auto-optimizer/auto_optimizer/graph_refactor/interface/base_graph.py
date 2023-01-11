@@ -470,14 +470,25 @@ class BaseGraph(ABC):
                 # out_id exists, do connection
                 if out_id is not None:
                     out_name = node.outputs[out_id]
-                    for next_node in self.get_next_nodes(out_name):
-                        next_node_in_id = next_node.get_input_id(out_name)
-                        next_node.inputs[next_node_in_id] = in_name
-                        # update next map, prev node has new next node
-                        if self._next_map.get(in_name) is None:
-                            self._next_map[in_name] = [next_node]
-                        else:
-                            self._next_map[in_name].append(next_node)
+                    next_nodes = self.get_next_nodes(out_name)
+                    if next_nodes:
+                        for next_node in next_nodes:
+                            next_node_in_id = next_node.get_input_id(out_name)
+                            next_node.inputs[next_node_in_id] = in_name
+                            # update next map, prev node has new next node
+                            if self._next_map.get(in_name) is None:
+                                self._next_map[in_name] = [next_node]
+                            else:
+                                self._next_map[in_name].append(next_node)
+                    elif self._node_map.get(out_name, None):
+                        # prev_node -> node -> placeholder
+                        prev_node = self._prev_map.get(in_name, None)
+                        if prev_node:
+                            for prev_next_node in self._next_map.get(in_name, []):
+                                prev_next_node_in_id = prev_next_node.get_input_id(in_name)
+                                prev_next_node.inputs[prev_next_node_in_id] = out_name
+                            prev_node.outputs[prev_node.get_output_id(in_name)] = out_name
+                            node.outputs.remove(out_name)
             # update prev and next map, outputs of node no long exist
             for out_name in node.outputs:
                 self._prev_map.pop(out_name, None)
