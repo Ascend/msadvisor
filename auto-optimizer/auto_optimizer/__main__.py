@@ -212,6 +212,8 @@ def command_optimize(
         infer_test=infer_test,
         config=config,
     )
+    if infer_test:
+        print('=' * 40)
     if applied_knowledges:
         print('Optimization success')
         print('Applied knowledges: ')
@@ -219,7 +221,9 @@ def command_optimize(
             print(f'  {knowledge}')
         print(f'Path: {input_model_} -> {output_model_}')
     else:
-        print('Optimization failed.')
+        print('Unable to optimize, no knowledges matched.')
+    if infer_test:
+        print('=' * 40)
 
 
 if __name__ == "__main__":

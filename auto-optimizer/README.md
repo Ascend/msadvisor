@@ -20,7 +20,7 @@
 
 ```shell
 git clone https://gitee.com/ascend/msadvisor.git
-cd auto-optimizer
+cd msadvisor/auto-optimizer
 pip install -r requirements.txt
 
 # without infer_test feature
