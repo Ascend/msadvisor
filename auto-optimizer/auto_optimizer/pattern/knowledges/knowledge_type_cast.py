@@ -127,7 +127,10 @@ class GenericOpMatch(MatchBase):
         'Gemm',
         'Split',
         'Slice',
-        'Transpose'
+        'Transpose',
+        'Neg',
+        'Range',
+        'Clip'
     ]
 
     # 半泛型节点，部分输入通道类型为泛型 T，剩余输入通道类型为固定类型，对于此类算子需
@@ -135,7 +138,7 @@ class GenericOpMatch(MatchBase):
     partial_generic_ops = {
         'Expand': GenericIO([0], [0]),
         'Less': GenericIO([0, 1], []),
-        'Gather': GenericIO([0], [0]),
+        'Gather': GenericIO([0, 1], [0]),
         'Shape': GenericIO([0], []),
         'Where': GenericIO([1, 2], [0]),
         'Equal': GenericIO([0, 1], []),
@@ -143,7 +146,8 @@ class GenericOpMatch(MatchBase):
         'Tile': GenericIO([0], [0]),
         'ScatterND': GenericIO([0, 2], [0]),
         'Unsqueeze': GenericIO([0], [0]),
-        'Squeeze': GenericIO([0], [0])
+        'Squeeze': GenericIO([0], [0]),
+        'ConstantOfShape': GenericIO([0], [0])
     }
 
     def __init__(self, strategy: TypeCastStrategy):
