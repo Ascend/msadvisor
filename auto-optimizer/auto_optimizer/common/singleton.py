@@ -1,4 +1,4 @@
-# Copyright 2022 Huawei Technologies Co., Ltd
+# Copyright 2023 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .register import Register
-from .config import Config
-from .utils import format_to_module, typeassert, check_file_exist
-from .log import setup_logging
-from .singleton import Singleton
 
-__all__ = ["Register", "Config", "format_to_module", "typeassert", "check_file_exist", "setup_logging", "Singleton"]
+class Singleton(object):
+    def __init__(self, cls) -> None:
+        self._cls = cls
+        self._instance = {}
+
+    def __call__(self):
+        if self._cls not in  self._instance:
+            self._instance[self._cls] = self._cls()
+        return self._instance[self._cls]
