@@ -211,9 +211,9 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
         :return: 返回按gather节点顺序排列的下标列表
         """
         indices = []
-        for n in nodes:
-            indice = graph.get_node(n.inputs[1], node_type=Initializer)
-            if indice is None or indice.value.size > 1:
+        for node in nodes:
+            indice = graph.get_node(node.inputs[1], node_type=Initializer)
+            if indice is None or indice.value.ndim != 0:
                 return []
             indices.append(int(indice.value))
         return indices
@@ -270,7 +270,7 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             return False
 
         indices = self._get_gather_nodes_indices(gather_nodes, graph)
-        if sorted(indices) != [i for i in range(split_num)]:
+        if sorted(indices) != list(range(split_num)):
             # 几个Gather算子的indices不重不漏的对应[0, n)，即平分首维度
             logging.info("The gather nodes does not split the first axis.")
             return False
