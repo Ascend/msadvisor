@@ -18,12 +18,10 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
-import numpy as np
-from numpy.linalg import norm
 from numpy.typing import NDArray
 import onnxruntime as ort
 
-from auto_optimizer.common.utils import cosine_similarity
+from auto_optimizer.common.utils import meet_precision
 from auto_optimizer.graph_optimizer.optimizer import GraphOptimizer
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
@@ -116,20 +114,9 @@ class KnowledgeTestHelper:
         for out_ori, out_opt in zip(outs_ori, outs_opt):
             if len(out_ori) != len(out_opt):
                 return False
-            for lmat, rmat in zip(out_ori, out_opt):
-                if (np.any(np.isinf(lmat)) or np.any(np.isinf(rmat))) \
-                     or (np.isclose(norm(lmat), 0) and np.isclose(norm(rmat), 0)):
-                    # if overflow happens or norm is close to 0, we fallback to allclose
-                    if not np.allclose(lmat, rmat, atol=atol, rtol=rtol, equal_nan=True):
-                        return False
-                    continue
-                # avoid norm overflow, this affects cosine_similarity
-                while norm(lmat) > 1e10 or norm(rmat) > 1e10:
-                    lmat /= 2
-                    rmat /= 2
-                lnorm, rnorm = norm(lmat), norm(rmat)
-                # normal cases we check cosine distance and norm closeness
-                if not ((1 - cosine_similarity(lmat, rmat) <= cos_th)
-                        and np.isclose(lnorm, rnorm, atol=atol, rtol=rtol)):
-                    return False
+            if not all(
+                meet_precision(lmat, rmat, cos_th=cos_th, rtol=rtol, atol=atol)
+                for lmat, rmat in zip(out_ori, out_opt)
+            ):
+                return False
         return True
