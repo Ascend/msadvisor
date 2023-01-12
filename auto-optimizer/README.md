@@ -20,7 +20,7 @@
 
 ```shell
 git clone https://gitee.com/ascend/msadvisor.git
-cd auto-optimizer
+cd msadvisor/auto-optimizer
 pip install -r requirements.txt
 
 # without infer_test feature
@@ -80,6 +80,7 @@ python -m auto_optimizer evaluate [OPTIONS] PATH
  - -k/--knowledges: 以英文逗号(,)分隔的知识库列表，可以是名称或者序号。默认启用除修复性质以外的所有知识库。
  - -r/--recursive: 在PATH为文件夹时是否递归搜索，默认关闭
  - -v/--verbose: 打印更多信息，目前只有搜索进度。默认关闭
+ - -p/--processes: 使用multiprocess并行搜索，指定进程数量。默认1
  - --help: 打印帮助信息。
 
 ### optimize命令
@@ -100,7 +101,7 @@ python -m auto_optimizer optimize [OPTIONS] INPUT_MODEL OUTPUT_MODEL
  - -s/--soc: 使用的SOC，仅当启用infer-test选项时有意义。默认为Ascend310P3。
  - -d/--device: NPU设备ID，仅当启用infer-test选项时有意义。默认为0。
  - -l/--loop: 测试推理速度时推理次数，仅当启用infer-test选项时有意义。默认为100。
- - --threshold: 推理速度提升阈值，仅当知识库的优化带来的提升超过这个值时才使用这个知识库，可以为负，负值表示接受负优化。默认为-0.02，即默认接受推理性能劣化2%以内的负优化。仅当启用infer-test选项时有意义。
+ - --threshold: 推理速度提升阈值，仅当知识库的优化带来的提升超过这个值时才使用这个知识库，可以为负，负值表示接受负优化。默认为0，即默认只接受推理性能有提升的优化。仅当启用infer-test选项时有意义。
  - --input-shape: 静态shape图输入形状，ATC转换参数，可以省略，仅当启用infer-test选项时有意义。
  - --input-shape-range: 动态shape图形状范围，ATC转换参数，仅当启用infer-test选项时有意义。
  - --dynamic-shape: 动态shape图推理输入形状，推理用参数，仅当启用infer-test选项时有意义。
