@@ -30,7 +30,8 @@ def make_dynamic_model(onnx_name, x, y, shape):
     graph.add_initializer('Shape_0', shape)
     graph.add_node('Reshape0', 'Reshape', ['Y', 'Shape_0'], ['Reshape0_out'])
     graph.add_node('Shape', 'Shape', ['Reshape0_out'], ['Shape_out'])
-    graph.add_node('Reshape1', 'Reshape', ['X', 'Shape_out'], ['OUT_0'])
+    graph.add_node('Add', 'Add', ['X', 'Y'], ['Add_out'])
+    graph.add_node('Reshape1', 'Reshape', ['Add_out', 'Shape_out'], ['OUT_0'])
     graph.update_map()
     return graph
 
@@ -44,7 +45,8 @@ def make_dynamic_model_and_squeeze(onnx_name, x, y, shape):
     graph.add_initializer('Shape_0', shape)
     graph.add_node('Reshape0', 'Reshape', ['Y', 'Shape_0'], ['Reshape0_out'])
     graph.add_node('Shape', 'Shape', ['Reshape0_out'], ['Shape_out'])
-    graph.add_node('Reshape1', 'Reshape', ['X', 'Shape_out'], ['OUT_0'])
+    graph.add_node('Add', 'Add', ['X', 'Y'], ['Add_out'])
+    graph.add_node('Reshape1', 'Reshape', ['Add_out', 'Shape_out'], ['OUT_0'])
     attrs = {'axes': [1]}
     insert_squeeze(graph, graph['Reshape0'], attrs, mode = 'after', refer_index = 0)
     graph.update_map()

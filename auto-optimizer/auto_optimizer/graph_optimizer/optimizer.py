@@ -148,7 +148,9 @@ class GraphOptimizer:
                 knowledge.next_apply()
                 for match_result in match_results:
                     if knowledge.apply(graph, match_result):
+                        knowledge.post_process(graph)
                         return True
+        knowledge.post_process(graph)
         return False
 
     @staticmethod
