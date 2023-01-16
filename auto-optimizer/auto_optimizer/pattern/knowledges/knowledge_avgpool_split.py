@@ -117,19 +117,13 @@ class KnowledgeAvgPoolSplit(KnowledgeBase):
         '''
         optimize AveragePool to multi little AveragePool by split kernel_shape and strides
         '''
-        prev_node = graph.get_prev_node(node.inputs[0])
         for i, split in enumerate(splits):
             attrs = copy.deepcopy(node.attrs)
             attrs['kernel_shape'] = list(split)
             attrs['strides'] = list(split)
             # add new AveragePool
             new_node = graph.add_node(f'{node.name}_{i}', 'AveragePool', attrs = attrs)
-            if not isinstance(prev_node, Node):
-                graph.insert_node(node.name, new_node, mode = 'before', refer_index = 0)
-            else:
-                graph.insert_node(prev_node.name, new_node, mode = 'after', refer_index = 0)
-            # old AveragePool --> AveragePool, AveragePool, ...
-            prev_node = new_node
+            graph.insert_node(node.name, new_node, mode = 'before', refer_index = 0)
         # remove old AveragePool
         graph.remove(node.name)
         return True
