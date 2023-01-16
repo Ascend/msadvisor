@@ -25,6 +25,48 @@ class MatchResult(object):
         self.pattern: Pattern = pattern
         self.node_dicts: List[Dict[str, List[Node]]] = []
 
+    def connected(self, match_result: 'MatchResult') -> bool:
+        """
+        判断两个子图之间是否可以连接，如果可以连接则返回True，否则返回False
+        """
+        l_node_inputs = set()
+        l_node_outputs = set()
+        r_node_inputs = set()
+        r_node_outputs = set()
+
+        for node_dict in self.node_dicts:
+            for nodes in node_dict.values():
+                for node in nodes:
+                    l_node_inputs.update(node.inputs)
+                    l_node_outputs.update(node.outputs)
+        for node_dict in match_result.node_dicts:
+            for nodes in node_dict.values():
+                for node in nodes:
+                    r_node_inputs.update(node.inputs)
+                    r_node_outputs.update(node.outputs)
+        return bool(l_node_inputs & r_node_outputs) or bool(l_node_outputs & r_node_inputs)
+
+    def merge(self, match_result: 'MatchResult') -> None:
+        """
+        合并子图，将不存在包含关系的子图合并到一个列表
+        """
+        cur_del_indexs = []
+        for node_dict in match_result.node_dicts:
+            can_insert = True
+            for i, cur_node_dict in enumerate(self.node_dicts):
+                if self._include(node_dict, cur_node_dict):
+                    cur_del_indexs.append(i)
+                    continue
+                if self._include(cur_node_dict, node_dict):
+                    can_insert = False
+                    break
+            cur_del_indexs.reverse()
+            for i in cur_del_indexs:
+                self.node_dicts.pop(i)
+            cur_del_indexs.clear()
+            if can_insert:
+                self.node_dicts.append(node_dict)
+
     def add_node_dict(self, node_dict: Dict[str, List[Node]]) -> None:
         """
         添加子图匹配到的节点数据
@@ -42,6 +84,29 @@ class MatchResult(object):
         for node_dict in self.node_dicts:
             if len(node_dict) != 0:
                 return False
+        return True
+
+    def _include(
+        self,
+        l_node_dict: Dict[str, List[Node]],
+        r_node_dict: Dict[str, List[Node]]
+    ) -> bool:
+        """
+        检查子图是否包含另一个子图，如果包含返回True，否则返回False
+        """
+        for name, r_nodes in r_node_dict.items():
+            if l_node_dict.get(name) is None:
+                return False
+            if len(r_nodes) > len(l_node_dict.get(name)):
+                return False
+            for r_node in r_nodes:
+                is_exist = False
+                for l_node in l_node_dict.get(name):
+                    if l_node.name == r_node.name:
+                        is_exist = True
+                        break
+                if not is_exist:
+                    return False
         return True
 
 
