@@ -27,8 +27,8 @@ ApplyFuncs = List[ApplyFunc]
 
 
 class UnionFind(object):
-    def __init__(self) -> None:
-        self.uf: List[int] = []
+    def __init__(self, size: int = 0) -> None:
+        self.uf: List[int] = [i for i in range(size)]
 
     def find(self, cur: int):
         if self.uf[cur] != cur:
@@ -38,12 +38,10 @@ class UnionFind(object):
     def union(self, pos0: int, pos1: int) -> None:
         u0 = self.find(pos0)
         u1 = self.find(pos1)
-        if u0 != u1:
-            self.uf[pos1] = u0
-
-    def expand(self) -> None:
-        last_index = len(self.uf)
-        self.uf.append(last_index)
+        if u0 < u1:
+            self.uf[u1] = u0
+        elif u0 > u1:
+            self.uf[u0] = u1
 
 
 class KnowledgeBase(object):
@@ -170,30 +168,6 @@ class KnowledgeBase(object):
         """
         return True
 
-    def __is_sub_graph_connection(self, l_match_result: MatchResult, r_match_result: MatchResult) -> bool:
-        """
-        判断两个子图之间是否存在连接
-        :param l_match_result: 左子图
-        :param r_match_result: 右子图
-        :return: 存在连接，则返回True，否则返回False
-        """
-        l_node_inputs = set()
-        l_node_outputs = set()
-        r_node_inputs = set()
-        r_node_outputs = set()
-
-        for node_dict in l_match_result.node_dicts:
-            for nodes in node_dict.values():
-                for node in nodes:
-                    l_node_inputs.update(node.inputs)
-                    l_node_outputs.update(node.outputs)
-        for node_dict in r_match_result.node_dicts:
-            for nodes in node_dict.values():
-                for node in nodes:
-                    r_node_inputs.update(node.inputs)
-                    r_node_outputs.update(node.outputs)
-        return bool(l_node_inputs & r_node_outputs) or bool(l_node_outputs & r_node_inputs)
-
     def match_pattern(self, graph: BaseGraph, top_ops_names: Optional[List[str]] = None) -> List[MatchResult]:
         """
         匹配所有子图
@@ -209,37 +183,33 @@ class KnowledgeBase(object):
         matcher = Matcher(graph, pattern)
         candidate_nodes = matcher.get_candidate_nodes()
 
-        uf = UnionFind()
-        all_match_result = []
+        match_results: List[MatchResult] = []
         for node in candidate_nodes:
             match_result = matcher.get_match_map(node)
             if match_result.is_empty():
                 continue
-            all_match_result.append(match_result)
-            uf.expand()
+            match_results.append(match_result)
+        if len(match_results) == 0:
+            return []
 
-            if not pattern.can_match_more():
-                continue
+        if not pattern.can_match_more():
+            return match_results
 
-            # 上下存在连接的子图，通过union-find建立关联
-            for index, match_res in enumerate(all_match_result):
-                if index == len(all_match_result) - 1:
+        uf = UnionFind(len(match_results))
+        for i, match_result in enumerate(match_results):
+            for j, other_match_result in enumerate(match_results[i + 1:]):
+                j += i + 1
+                if uf.find(i) == uf.find(j):
                     continue
-                if self.__is_sub_graph_connection(match_res, match_result):
-                    uf.union(index, len(all_match_result) - 1)
-
-        # 合并
-        for index, match_result in enumerate(all_match_result):
-            pindex = uf.find(index)
-            if pindex == index:
-                continue
-            all_match_result[pindex].add_node_dict(match_result.node_dicts[0])
-        # 拷贝结果
-        result = []
-        for index, match_result in enumerate(all_match_result):
-            if uf.find(index) == index:
-                result.append(copy.deepcopy(match_result))
-        return result
+                if match_result.connected(other_match_result):
+                    uf.union(i, j)
+        for i, match_result in enumerate(match_results):
+            pi = uf.find(i)
+            if pi != i:
+                match_results[pi].merge(match_result)
+        return [copy.deepcopy(match_result)
+            for i, match_result in enumerate(match_results)
+                if uf.find(i) == i]
 
     def apply(self, graph: BaseGraph, match_result: MatchResult) -> bool:
         """
