@@ -15,8 +15,9 @@
 import json
 import os
 import time
+import argparse
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
 
 from training.utils import log
 from hccl_analysis_tool.hccl_analysis_tool_v2 import HcclAnalysisTool
@@ -48,7 +49,6 @@ def evaluate(datapath, parameter):
     if cluster_rank is None or cluster_rank <= 0:
         log.ad_print_and_log(log.AD_ERROR, "Input rank size is invalid, please check")
         return INVALID_RESULT
-    
 
     # Critical path analysis and Hccl oprator analysis
     log.ad_print_and_log(log.AD_INFO, "Critical path analyzing...")
@@ -66,9 +66,28 @@ def evaluate(datapath, parameter):
             return INVALID_RESULT
     log.ad_log(log.AD_INFO, f"Critical path analysis time: {critical_analysis_time}, "
                             f"Hccl operator analysis time: {time.time() - hccl_start_time}")
-
     save_path = os.path.join(os.path.realpath(datapath), "recommendation", "visualization")
-    generate_html(body=hcclanalysistool.html_body, save_path=save_path)
+    html_result = generate_html(body=hcclanalysistool.html_body, save_path=save_path)
+    if html_result == Constant.HCCL_ANALYSIS_ERROR:
+        log.ad_print_and_log(log.AD_ERROR, "Generate html result failed")
+        return INVALID_RESULT
     log.ad_print_and_log(log.AD_INFO, f"visualization and hccl_analysis_result.html saved in {save_path}")
     log.ad_log(log.AD_INFO, f"Overall run time: {time.time() - start}")
     return hcclanalysistool.result.generate()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="parameters for collecting profiling data from obs")
+    parser.add_argument("--rank_size", type=int, default=None)
+    parser.add_argument("--bucket_name", type=str, default=None)
+    parser.add_argument("--data_path", type=str, default=None)
+    parser.add_argument("--step_num", type=str, default=None)
+    args = parser.parse_args()
+
+    para = {
+        "rank_size": args.rank_size,
+        "step_num": args.step_num
+    }
+    para = json.dumps(para)
+    result = evaluate(args.data_path, parameter=para)
+    print(result)
