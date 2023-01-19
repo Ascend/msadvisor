@@ -64,7 +64,7 @@ def optimize_onnx(
 ) -> List[str]:
     '''Optimize a onnx file and save as a new file.'''
     try:
-        graph = OnnxGraph.parse(input_model.as_posix(), add_name_suffix=True)
+        graph = OnnxGraph.parse(input_model.as_posix(), add_name_suffix=False)
         config.is_static = is_graph_input_static(graph)
         if infer_test:
             if not (config.is_static or (config.input_shape_range and config.dynamic_shape and config.output_size)):
@@ -94,7 +94,7 @@ def evaluate_onnx(
     try:
         if verbose:
             print(f'Evaluating {model.as_posix()}')
-        graph = OnnxGraph.parse(model.as_posix(), add_name_suffix=True)
+        graph = OnnxGraph.parse(model.as_posix(), add_name_suffix=False)
         graph, applied_knowledges = optimizer.evaluate_knowledges(graph)
         return applied_knowledges
     except Exception as exc:
