@@ -43,10 +43,15 @@ class AscendTimelineAnalysis:
                         f"{communication_num} communication op before critical path   analysis")
 
         critical_path_event = CriticalPathAnalysis.get_critical_path(categorized_step_event_list)
+        event_execution_type_analysis_time = time.time()
         event_execution_type_analysis_data = \
             self.event_execution_type_analysis(critical_path_event, categorized_step_event_list)
+        ad_log(AD_INFO, f"event execution type analysis success, "
+                        f"cost time: {time.time() - event_execution_type_analysis_time}")
 
+        event_type_analysis_time = time.time()
         op_type_analysis = self.event_type_analysis(event_execution_type_analysis_data, timeline_info["task_types"])
+        ad_log(AD_INFO, f"event_type_analysis cost time: {time.time() - event_type_analysis_time}")
 
         top_communication_op = {}
         for idx, communication_op in enumerate(op_type_analysis[Constant.COMMUNICATION]["topk_op"]):
@@ -126,10 +131,12 @@ class AscendTimelineAnalysis:
                 "op_time": op_time,
                 "topk_op": sorted_op_list[0:top_k]
             }
-        ad_log(AD_INFO, f"After critical path analysis, there are "
-                        f"{analysis_result[Constant.AICORE]['op_num']} aicore op, "
-                        f"{analysis_result[Constant.AICPU]['op_num']} aicpu op, "
-                        f"{analysis_result[Constant.COMMUNICATION]['op_num']} communication op ")
+        ad_log(
+            AD_INFO, f"After critical path analysis, there are "
+            f"{analysis_result[Constant.AICORE]['op_num']} aicore op, "
+            f"{analysis_result[Constant.AICPU]['op_num']} aicpu op, "
+            f"{analysis_result[Constant.COMMUNICATION]['op_num']} communication op "
+        )
 
         return analysis_result
 
@@ -215,6 +222,7 @@ class AscendTimelineAnalysis:
 def run_critical_path_analysis(profiling_dir, step_num=None):
     timeline_analysit_time = time.time()
     input_trace_file = get_critical_timeline(profiling_dir, step_num)
+    ad_log(AD_INFO, f"get_critical_timeline cost time: {time.time() - timeline_analysit_time}")
     # 需要针对寻找关键timeline失败的场景进行判断
     if input_trace_file == Constant.DATA_PARSE_ERROR:
         ad_print_and_log(AD_ERROR, "muti_timeline_analysis failed, please check profiling data")

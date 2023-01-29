@@ -77,9 +77,9 @@ function hcclanalysis() {
     fi
 
     if [ -n "${_step_num}" ]; then
-        msadvisor -c "$SHELL_DIR/hccl_analysis_model/hcclanalysis.json" -d $_data -p "hcclanalysis.rank_size=$_rank;hcclanalysis.step_num=$_step_num"
+      msadvisor -c "$SHELL_DIR/hccl_analysis_model/hcclanalysis.json" -d $_data -p "hcclanalysis.rank_size=$_rank;hcclanalysis.step_num=$_step_num"
     else
-        msadvisor -c "$SHELL_DIR/hccl_analysis_model/hcclanalysis.json" -d $_data -p "hcclanalysis.rank_size=$_rank"
+      msadvisor -c "$SHELL_DIR/hccl_analysis_model/hcclanalysis.json" -d $_data -p "hcclanalysis.rank_size=$_rank"
     fi
 }
 
@@ -89,6 +89,11 @@ function main() {
 
     if [ -z "${data_path}" ]; then
         data_path="$(dirname $(dirname "$SHELL_DIR"))/profiler"
+
+        if [ -d "$data_path" ]; then
+            rm -rf "$data_path"
+        fi
+
         collect_data "$data_path"
     fi
 

@@ -85,9 +85,10 @@ class ModelartsHandler:
 
         # download profiling data
         for rank_id in range(rank_size):
-            hccl_info_dir = os.path.join(bucket_name, f"hccl_info_{rank_id}")
-            step_trace = os.path.join(bucket_name, f"step_trace_raw_{rank_id}_detail_time.csv")
-            ascend_timeline = os.path.join(bucket_name, f"ascend_timeline_display_{rank_id}.json")
+            rank_bucket_name = os.path.join(bucket_name, str(rank_id), "profiler")
+            hccl_info_dir = os.path.join(rank_bucket_name, f"hccl_info_{rank_id}")
+            step_trace = os.path.join(rank_bucket_name, f"step_trace_raw_{rank_id}_detail_time.csv")
+            ascend_timeline = os.path.join(rank_bucket_name, f"ascend_timeline_display_{rank_id}.json")
             try:
                 local_dir = f"{datapath}/"
                 self.session.obs.download_dir(src_obs_dir=hccl_info_dir, dst_local_dir=local_dir)
