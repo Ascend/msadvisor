@@ -1,0 +1,11 @@
+{
+  "aligned": {
+  },
+  "misaligned": {
+  },
+  "mutialigned": [
+      "opt_level              : O2",
+      "opt_level              : O1",
+      "Use npu fused optimizer"
+    ]
+}

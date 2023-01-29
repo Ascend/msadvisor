@@ -1,0 +1,45 @@
+{
+    "aligned":{
+      "set_detect_anomaly": "建议关闭异常检测的开关",
+      "detect_anomaly": "建议关闭异常检测的开关",
+      "gradcheck": "建议关闭异常检测的开关",
+      ".cpu\\(\\)": "请删除.cpu()操作，减少CPU计算API",
+      ".item\\(\\)": "整网中使用item(),建议减少item()使用或者使用detach()",
+      "(((?<!self))((?<!model))\\.to\\(((?!non_blocking=True).)*\\))": "使用.to()操作时，建议使用non_blocking加速数据下沉来提升训练性能",
+      "Swish": "使用Swish函数时, 建议使用高性能算法torch.npu_silu(x)",
+      "Wish": "使用Wish函数时, 建议使用高性能算法torch.npu_mish(x)",
+      "SiLU": "使用SiLU函数时, 建议用户使用高性能算法torch.npu_silu(x)"
+    },
+    "misaligned":{
+    },
+    "mutialigned": [
+      "amp.initialize",
+      "Adam",
+      "SGD",
+      "Lamb",
+      "Adadelta",
+      "BertAdam",
+      "AdamW",
+      "AdamP",
+      "RMSprop",
+      "RMSpropTF",
+      "utils.data.DataLoader",
+      "drop_last=True",
+      "num_workers",
+      "num_workers=[1234567]\\D",
+      "DistributedDataParallel",
+      "combine_grad=True",
+      "init_process_group",
+      "mmdet",
+      "multiclass_nms",
+      "bucket_cap_mb",
+      "bucket_cap_mb=25",
+      ".*import.*distributed.*",
+      ".no_sync()",
+      "\\Wiou\\W",
+      "\\Wbbox\\W",
+      "npu_iou",
+      "npu_ptiou",
+      "npu_giou"
+    ]
+}

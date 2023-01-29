@@ -1,0 +1,19 @@
+{
+  "model_list": [
+    {
+      "model_name": "pytorch_training_optimizer",
+      "session_list": [
+        {
+          "python_model_path": "src",
+          "parameter":{
+                    "train": "",
+                    "log": "",
+                    "module": "",
+                    "profiling": ""
+          }
+        }
+      ]
+    }
+
+  ]
+}
