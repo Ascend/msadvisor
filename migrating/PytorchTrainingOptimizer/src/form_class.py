@@ -109,35 +109,6 @@ class TrainingForm:
         return result, mutialigned_list
 
 
-# class ModuleForm:
-#     def __init__(self, get_configuration):
-#         self.scr = None
-#         self.train_json = load_json(os.path.join(
-#             get_configuration[config.CONFIG_PATH_KEY], config.CONFIG_DICT[config.MODULE]))
-#
-#     def pretreat(self, filepath):
-#         with open(filepath, "r", encoding="UTF-8") as f:
-#             content = f.read()
-#         ori_text = text2dict(content)
-#         contents = python.remove_comments(content)
-#         remove_text = text2dict(contents)
-#         ori_text = get_linenum(ori_text, remove_text)
-#         return ori_text, contents
-#
-#     def run(self, filepath_list):
-#         result, mutialigned_list = [], []
-#         for filepath in filepath_list:
-#             read_lines, read = self.pretreat(filepath)
-#             if not read_lines:
-#                 ad_print_and_log(AD_WARN, "{} has no analyzable content".format(filepath))
-#                 continue
-#             sub_result, sub_mutialigned_list = Scanner().crawls(
-#                 [read_lines, read], self.train_json, filepath)
-#             result += sub_result
-#             mutialigned_list += sub_mutialigned_list
-#         return result, mutialigned_list
-
-
 class LogForm:
     def __init__(self, get_configuration):
         self.scr = None
