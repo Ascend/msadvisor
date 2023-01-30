@@ -18,7 +18,7 @@ class ExtendResult:
 class Result:
     def __init__(self):
         self.class_type = '0'
-        self.error_code = '0'
+        self.error_code = '1'
         self.summary = ""
         self.extend_result = []
 
@@ -35,7 +35,7 @@ class Result:
 
 
 class_type = {'op': '0', 'model': '1'}
-error_code = {'success': '0', 'optimized': '1'}
+error_code = {'match': '0', 'miss': '1'}
 extend_type = {'list': '0', 'table': '1', 'sourcedata': '2'}
 extend_data_type = {'str': '0', 'int': '1', 'double': '2'}
 
@@ -56,7 +56,7 @@ def evaluate(data_path, parameter):
     # fill result
     result = Result()
     result.class_type = class_type['model']
-    result.error_code = error_code['success']
+    result.error_code = error_code['match']
     result.summary = "Op operations need to be optimized"
     extend_result = ExtendResult()
     extend_result.type = extend_type['list']

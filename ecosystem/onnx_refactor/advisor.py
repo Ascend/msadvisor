@@ -42,7 +42,7 @@ class ExtendResult:
 class Result:
     def __init__(self):
         self.class_type = '1'
-        self.error_code = '0'
+        self.error_code = '1'
         self.summary = ""
         self.extend_result = []
 
@@ -58,7 +58,7 @@ class Result:
         return outputstr
 
 class_type = {'op': '0', 'model': '1'}
-error_code = {'success': '0', 'optimized': '1'}
+error_code = {'match': '0', 'miss': '1'}
 extend_type = {'list': '0', 'table': '1', 'sourcedata': '2'}
 extend_data_type = {'str': '0', 'int': '1', 'double': '2'}
 
@@ -153,7 +153,7 @@ def optimize_model(graph: OnnxGraph, knowledge: KnowledgeBase, result: Result, o
                 optimize_result |= knowledge.apply(graph, match_result)
     if optimize_result:
         # graph is optimized.
-        result.error_code = error_code['optimized']
+        result.error_code = error_code['match']
         result.summary = "The current model has already been optimized, the optimized model path is:%s" % out_path
     return optimize_result
 
@@ -180,7 +180,7 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
         # find onnx model in datapath
         model_file = find_one_model_file(os.path.join(datapath, sub_path)) # adapter for IDE
         if model_file is None:
-            ms.utils.log(LOG_WARN, 'There is no model file in {datapath}/project')
+            ms.utils.log(LOG_WARN, f'There is no model file in {datapath}/project')
             model_file = find_one_model_file(datapath)
             if model_file is None:
                 raise RuntimeError('model file not exist in datapath')
@@ -200,7 +200,7 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
     # fill result
     result = Result()
     result.class_type = class_type['model']
-    result.error_code = error_code['success']
+    result.error_code = error_code['miss']
     result.summary = "The current model is well optimized."
 
     # evaluate onnx model
@@ -270,9 +270,7 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
         onnx_graph, applied_knowledges = optimizer.apply_knowledges_with_infer_test(onnx_graph, cfg)
     else:
         onnx_graph, applied_knowledges = optimizer.apply_knowledges(onnx_graph)
-    if applied_knowledges:
-        result.error_code = error_code['optimized']
-        result.summary = "The current model has already been optimized, the optimized model path is:%s" % out_path
+
     if applied_knowledges:
         if params.get('extract'):
             input_names = [i.name for i in onnx_graph.inputs]
@@ -280,6 +278,10 @@ def evaluate_x(knowledge: KnowledgeBase, datapath, parameter):
             onnx_graph.extract(new_onnx_path, input_names, output_names)
         else:
             onnx_graph.save(new_onnx_path)
+
+        result.error_code = error_code['match']
+        result.summary = f"The current model has already been optimized, the optimized model path is:{new_onnx_path}"
+
         # replace result for IDE
         if sub_path == 'project': # adapter for IDE
             ide_out_path = os.path.join(datapath, '%s_optimize.onnx' % os.path.splitext(model_file)[0])
