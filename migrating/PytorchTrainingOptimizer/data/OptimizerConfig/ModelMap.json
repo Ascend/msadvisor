@@ -1,0 +1,155 @@
+{
+  "module": [
+    {
+      "name": "ResNet101_ID1595_for_PyTorch",
+      "module": ["resnet.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "ResNet152",
+      "module": ["models/resnet_0_6_0.py"],
+      "train": ["main.py"],
+      "log": "test/output/0/train_0.log"
+    },
+    {
+      "name": "EfficientNet-B1",
+      "module": ["pycls\\models\\blocks.py", "pycls\\models\\effnet.py"],
+      "train": ["tools\\train_net.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "Res2Net101_v1b",
+      "module": ["res2net_v1b.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "ResNeSt50_for_PyTorch",
+      "module": ["module\\loss.py", "module\\models\\resnest.py", "module\\models\\resnet.py"],
+      "train": ["train_npu.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "ResNeXt-50-32x4d_ID1624_for_PyTorch",
+      "module": ["models\\resnet_0_6_0.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "ResNeXt101_32x8d_for_PyTorch",
+      "module": ["models\\resnet_0_6_0.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "ResNet18_ID1593_for_PyTorch",
+      "module": ["resnet.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "ResNet34_ID1594_for_PyTorch",
+      "module": ["models\\resnet.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "SE-ResNet-50",
+      "module": ["senet.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "SE-ResNext-101-32x4d",
+      "module": ["models.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"  
+    },
+    {
+      "name": "Vgg16_ID1630_for_PyTorch",
+      "module": ["vgg.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "XWJ_Vgg16_ID1630_for_PyTorch",
+      "module": ["vgg.py"],
+      "train": ["main.py"],
+      "log": "test\/output\/0\/train_0.log"
+    },
+    {
+      "name": "Vgg19_ID1631_for_PyTorch",
+      "module": ["vgg.py"],
+      "train": ["main.py"],
+      "log": "test\/output\/0\/train_0.log"
+    },
+    {
+      "name": "MobileNet",
+      "module":["mobilenet.py"],
+      "train": ["mobilenet.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "EfficientNet-B3",
+      "module": ["pycls\\models\\blocks.py", "pycls\\models\\effnet.py"],
+      "train": ["tools\\train_net.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "Efficient-3DCNNs_ID1230_for_PyTorch",
+      "module": ["models\\mobilenetv2.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "EfficientNet-B5_ID1621_for_PyTorch",
+      "module": ["pycls\\models\\blocks.py", "pycls\\models\\effnet.py"],
+      "train": ["tools\\train_net.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "MobileNetV3_large_100_for_PyTorch",
+      "module": ["timm\\models\\mobilenetv3.py"],
+      "train": ["train_1p.py", "train_8p.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "Vgg16_ID1630_for_PyTorch_test_1",
+      "module": ["vgg.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "Vgg16_ID1630_for_PyTorch_test_2",
+      "module": ["vgg.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "Vgg16_ID1630_for_PyTorch_test_3",
+      "module": ["vgg.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "Vgg16_ID1630_for_PyTorch_test_4",
+      "module": ["vgg.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "Vgg16_ID1630_for_PyTorch_test_6",
+      "module": ["vgg.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    },
+    {
+      "name": "Vgg16_ID1630_for_PyTorch_test_7",
+      "module": ["vgg.py"],
+      "train": ["main.py"],
+      "log": "test\\output\\0\\train_0.log"
+    }
+
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "id_1": {
+    "log": {
+      "_1": "opt_level              : O2",
+      "_2": "opt_level              : O1"
+    },
+    "train": {
+      "_1": "amp.initialize"
+    },
+    "command": {
+      "_1": "网络已经支持AMP，但是没有使能，建议训练时使能混合精度模式",
+      "_2": "网络使用的是FP32精度模式，请添加混合精度AMP模式来提升性能"
+    }
+  },
+
+  "id_2": {
+    "train_1": {
+      "_1": "amp.initialize"
+    },
+    "train_2": {
+      "_1": "combine_grad=True"
+    },
+    "command": {
+      "_1": "建议用户开启AMP融合开关combine_grad=True来提升性能"
+    }
+  },
+
+  "id_3": {
+    "log": {
+      "_1": "Use npu fused optimizer"
+    },
+    "train": {
+      "_1": "amp.initialize",
+      "_2": "Adam",
+      "_3": "SGD",
+      "_4": "Lamb",
+      "_5": "Adadelta",
+      "_6": "BertAdam",
+      "_7": "AdamW",
+      "_8": "AdamP",
+      "_9": "RMSprop",
+      "_10": "RMSpropTF"
+    },
+    "command": {
+      "_1": "请使用华为亲和优化器接口NpuFusedXXX接口来提升性能"
+    }
+  },
+
+  "id_4": {
+    "train_1": {
+      "_1": "utils.data.DataLoader"
+    },
+    "train_2": {
+      "_1": "drop_last=True"
+    },
+    "command": {
+      "_1": "请在Dataloader中使用drop_last=True，减少动态shape编译耗时"
+    }
+  },
+
+  "id_5": {
+    "train_1": {
+      "_1": "utils.data.DataLoader"
+    },
+    "train_2": {
+      "_1": "num_workers"
+    },
+    "train_3": {
+      "_1": "num_workers=[1234567]\\D"
+    },
+    "command": {
+      "_1": "Dataloader未设置num_workers或num_workers < 8，建议增大num_workers"
+    }
+  },
+
+  "id_6": {
+    "train_1": {
+      "_1": ".*import.*distributed.*",
+      "_2": "DistributedDataParallel"
+    },
+    "train_2": {
+      "_1" : "init_process_group"
+    },
+     "command": {
+      "_1": "当进行分布式训练时, 建议用户使用DDP分布式改造"
+    }
+  },
+
+  "id_7": {
+    "train_1": {
+      "_1": "DistributedDataParallel",
+      "_2": ".*import.*distributed.*"
+    },
+    "train_2": {
+      "_1": "bucket_cap_mb"
+    },
+    "train_3":{
+      "_1": "bucket_cap_mb=25"
+    },
+    "command": {
+      "_1": "当使用分布式训练时, 建议用户调整分桶大小提升集群线性度"
+    }
+  },
+
+    "id_8": {
+    "module_1": {
+      "_1": "mmdet"
+    },
+    "module_2": {
+      "_1": "multiclass_nms"
+    },
+    "command": {
+      "_1": "建议使用华为亲和接口npu_multiclass_nms或者npu_batched_multiclass_nms"
+    }
+  },
+
+  "id_9": {
+    "module_1": {
+      "_1": "npu_iou",
+      "_2": "npu_ptiou",
+      "_3": "npu_giou"
+    },
+    "module_2": {
+      "_1": "\\Wiou\\W",
+      "_2": "\\Wbbox\\W"
+    },
+    "command": {
+      "_1": "使用iou计算交并比时，建议使用高性能算法npu_iou、npu_ptiou或者npu_giou"
+    }
+  },
+  
+  "id_10": {
+    "train_1": {
+      "_1": "DistributedDataParallel",
+      "_2": ".*import.*distributed.*",
+      "_3": "torch.distributed"
+    },
+    "train_2": {
+      "_1": ".no_sync()"
+    },
+    "command": {
+      "_1": "当进行分布式训练时, 建议用户使用梯度累计"
+    }
+  }
+
+}
