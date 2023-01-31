@@ -1,0 +1,77 @@
+{
+    "dir_1": {
+        "rule": {
+            "_1": "\\.SGD\\(",
+            "_2": "\\.Adam\\("
+        },
+        "advice": {
+            "_1": "建议使用NpuFusedSGD接口优化性能",
+            "_2": "建议使用NpuFusedAdam接口优化性能"
+        }
+    },
+    "dir_2": {
+        "rule": {
+            "_1": "\\bamp\\.initialize\\(*((?!combine_grad\\s*=\\s*True).)*$"
+        },
+        "advice": {
+            "_1": "建议打开amp融合开关combine_grad=True以提升性能"
+        }
+    },
+    "dir_3": {
+        "rule": {
+            "_1": "\\biou\\b",
+            "_2": "\\bptiou\\b",
+            "_3": "\\bnms\\b",
+            "_4": "\\bsingle_level_responsible_flags\\b",
+            "_5": "\\byolo_bbox_coder\\b",
+            "_6": "\\bdelta_xywh_bbox_coder\\b",
+            "_7": "\\bchannel_shuffle\\b",
+            "_8": "\\bPrefetcher\\b",
+            "_9": "\\bDropout\\b",
+            "_10": "\\bLabelSmoothingCrossEntropy\\b",
+            "_11": "\\bROIAlign\\b",
+            "_12": "\\bDCNv2\\b",
+            "_13": "\\bLSTM\\b"
+        },
+        "advice": {
+            "_1": "建议使用npu_iou来提高计算力",
+            "_2": "建议使用npu_ptiou来提高计算力",
+            "_3": "建议使用npu_multiclass_nms(单batch)/npu_batched_multiclass_nms(多batch)来提高计算力",
+            "_4": "建议使用npu_single_level_responsible_flags来提高计算力",
+            "_5": "建议使用npu_bbox_coder_encode_yolo来提高计算力",
+            "_6": "建议使用npu_bbox_coder_encode_xyxy2xywh/npu_bbox_coder_decode_xywh2xyxy来提高计算力",
+            "_7": "建议使用NPU亲和库中的ChannelShuffle函数，以提升模型训练性能",
+            "_8": "建议使用NPU亲和库中的Prefetcher函数，以提升模型训练性能",
+            "_9": "建议使用NPU亲和库中的DropoutV2函数，以提升模型训练性能",
+            "_10": "建议使用NPU亲和库中的LabelSmoothingCrossEntropy函数，以提升模型训练性能",
+            "_11": "建议使用NPU亲和库中的ROIAlign函数，以提升模型训练性能",
+            "_12": "建议使用NPU亲和库中的DCNv2函数，以提升模型训练性能",
+            "_13": "建议使用NPU亲和库中的BiLSTM函数，以提升模型训练性能"
+        }
+    },
+    "dir_4": {
+        "rule1": {
+            "_1": "lr=(.+)",
+            "_2": "learning_rate=(.+)",
+            "_3": "lr=(.+)",
+            "_4": "learning_rate=(.+)"
+        },
+        "rule2": {
+            "_1": "batch_size=(.*)",
+            "_2": "batch_size=(.*)",
+            "_3": "bs=(.*)",
+            "_4": "bs=(.*)"
+        },
+        "advice": {
+            "_1": "建议同比例增大Batch_Size与Learning_rate，以提升NPU资源的利用率"
+        }
+    },
+    "dir_5": {
+        "rule": {
+            "_1": "\\btaskset\\b"
+        },
+        "advice": {
+            "_1": "建议在运行模型时使用taskset绑核起任务"
+        }
+    }
+}
