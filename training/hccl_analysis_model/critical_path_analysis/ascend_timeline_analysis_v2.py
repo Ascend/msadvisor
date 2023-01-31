@@ -45,7 +45,8 @@ class AscendTimelineAnalysis:
         critical_path_event = CriticalPathAnalysis.get_critical_path(categorized_step_event_list)
         event_execution_type_analysis_time = time.time()
         event_execution_type_analysis_data = \
-            self.event_execution_type_analysis(critical_path_event, categorized_step_event_list)
+            self.event_execution_type_analysis(critical_path_event, categorized_step_event_list,
+                                               timeline_info["task_types"].get(Constant.COMMUNICATION))
         ad_log(AD_INFO, f"event execution type analysis success, "
                         f"cost time: {time.time() - event_execution_type_analysis_time}")
 
@@ -154,10 +155,12 @@ class AscendTimelineAnalysis:
             if v["op_num"] > 0:
                 AscendTimeAnalysisVisualization.hotspot_task_visualization(v["topk_op"], k, save_path)
 
-    def event_execution_type_analysis(self, critical_path, event_list):
+    def event_execution_type_analysis(self, critical_path, event_list, communication_type):
         """"get execution type of event in critical path """
         execution_type_analysis_result = []
         for event in critical_path:
+            if event.get(Constant.TASK_TYPE) != communication_type:
+                continue
             intersection_event_list = self.get_time_intersection_event(event, event_list)
             serial_time, parallel_time = self.get_event_serial_parallel_time(event, intersection_event_list)
             event["serial_time"] = serial_time
