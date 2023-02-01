@@ -1,4 +1,4 @@
-# Copyright 2022 Huawei Technologies Co., Ltd
+# Copyright (c) Huawei Technologies Co., Ltd. 2022. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ import os
 import sys
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
+
 
 def evaluate(data_path, param):
     knowledge = KnowledgeFactory.get_knowledge('KnowledgeResizeModeToNearest')

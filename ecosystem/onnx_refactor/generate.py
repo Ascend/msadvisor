@@ -45,9 +45,10 @@ def generate_ecosystem_json():
             'parameter': {
                 'mode': 'optimize',
                 'model_file': '',
-                'extract': 1 if knowledge in need_extract_knowledge else 0
             }
         }]
+        if knowledge in need_extract_knowledge:
+            knowledge_conf['session_list'][0]['parameter']['extract'] = 1
         model_list.append(knowledge_conf)
     if len(model_list) == 0:
         print('[warning] model list is empty.')

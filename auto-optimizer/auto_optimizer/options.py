@@ -31,6 +31,8 @@ def convert_to_graph_optimizer(ctx: click.Context, param: click.Option, value: s
 default_off_knowledges = [
     'KnowledgeEmptySliceFix',
     'KnowledgeTopkFix',
+    'KnowledgeGatherToSplit',
+    'KnowledgeSplitQKVMatmul',
     'KnowledgeDynamicReshape',
 ]
 
