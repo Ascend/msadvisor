@@ -30,7 +30,7 @@ setup(
         'Topic :: Software Development'
     ],
     extras_require={
-        'infer_test': [
+        'inference': [
             (
                 'aclruntime @ git+https://gitee.com/Ascend/tools.git'
                 '#egg=aclruntime&subdirectory=ais-bench_workload/tool/ais_bench/backend'
@@ -38,8 +38,12 @@ setup(
             (
                 'ais_bench @ git+https://gitee.com/Ascend/tools.git'
                 '#egg=ais_bench&subdirectory=ais-bench_workload/tool/ais_bench'
-            )
+            ),
+            'pyacl @ git+https://gitee.com/peng-ao/pyacl.git',
+            'pillow >= 9.0.0',
+            'tqdm >= 4.63.0',
         ],
+        'simplify': ['onnx-simplifier >= 0.3.6'],
     },
     python_requires='>=3.7'
 )

@@ -12,23 +12,42 @@
 
 ## 组件使用说明
 
-- [x]  [graph_refactor](auto_optimizer/graph_refactor/README.md)
-- [x]  [knowledge](docs/knowledge_optimizer/knowledge_optimizer_framework.md)
-- [x]  [inference_engine](auto_optimizer/inference_engine/README.md)
+- [x] [graph_refactor](auto_optimizer/graph_refactor/README.md)
+- [x] [knowledge](docs/knowledge_optimizer/knowledge_optimizer_framework.md)
+- [x] [inference_engine](auto_optimizer/inference_engine/README.md)
 
 ## 安装教程
+
+### 额外特性
+
+ - inference: 提供推理组件，如果需要使用infer test选项进行优化，需要该特性
+ - simplify: 提供onnx.simplify接口
 
 ```shell
 git clone https://gitee.com/ascend/msadvisor.git
 cd msadvisor/auto-optimizer
-pip install -r requirements.txt
 
-# without infer_test feature
-python setup.py install
+# it's recommended to upgrade pip and install wheel
 
-# with infer_test feature
-pip install .[infer_test]
+# is's also recommended to use conda/venv/... to manage python enviornments
+# for example: `python3 -m venv .venv && source .venv/bin/activate`
 
+# is's also recommended to use `python3 -m pip` to avoid python env issue
+
+python3 -m pip install --upgrade pip
+python3 -m pip install wheel
+
+# installation
+# optional features: inference, simplify
+
+# without any optional feature
+python3 -m pip install .
+
+# with inference feature
+python3 -m pip install .[inference]
+
+# with inference and simplify feature
+python3 -m pip install .[inference,simplify]
 ```
 
 ## 命令行使用
@@ -97,7 +116,7 @@ python -m auto_optimizer optimize [OPTIONS] INPUT_MODEL OUTPUT_MODEL
 
 额外参数(OPTIONS):
  - -k/--knowledges: 以英文逗号(,)分隔的知识库列表，可以是名称或者序号。默认启用除修复性质以外的所有知识库。
- - -t/--infer-test: 当启用这个选项时，通过对比优化前后的推理速度来决定是否使用某知识库。启用该选项需要安装额外依赖[infer_test]，并且需要安装CANN。
+ - -t/--infer-test: 当启用这个选项时，通过对比优化前后的推理速度来决定是否使用某知识库。启用该选项需要安装额外依赖[inference]，并且需要安装CANN。
  - -s/--soc: 使用的SOC，仅当启用infer-test选项时有意义。默认为Ascend310P3。
  - -d/--device: NPU设备ID，仅当启用infer-test选项时有意义。默认为0。
  - -l/--loop: 测试推理速度时推理次数，仅当启用infer-test选项时有意义。默认为100。
