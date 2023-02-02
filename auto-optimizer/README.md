@@ -39,6 +39,12 @@ auto-optimizer的命令行使用如下模式:
 python3 -m auto_optimizer <COMMAND> [OPTIONS]... [ARGS]...
 ```
 
+如果安装时python没有提示PATH变量问题，或者您已经将python安装可执行文件的目录加入PATH变量，那么您可以直接使用可执行文件运行，运行效果是完全一样的：
+
+```bash
+auto_optimizer <COMMAND> [OPTIONS]... [ARGS]...
+```
+
 其中COMMAND指定运行的命令或者说模式，目前支持以下三种命令:
 
 ### list命令
