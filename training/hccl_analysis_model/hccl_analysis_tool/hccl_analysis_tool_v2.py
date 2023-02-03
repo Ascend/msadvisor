@@ -73,7 +73,8 @@ class HcclAnalysisTool:
         get_op_info = self.record_op_info(op_info_record, analysis_op_name, valid_step_num, hccl_op_name)
         if get_op_info == Constant.DATA_PARSE_ERROR:
             return Constant.HCCL_ANALYSIS_ERROR
-        ad_log(AD_INFO, f"Operator {analysis_op_name} information recorded successfully")
+        ad_log(AD_INFO, f"Operator {analysis_op_name} information recorded from {hccl_op_name} successfully, ")
+        ad_log(AD_INFO, f"valid step_num: {valid_step_num}")
         if step_num is None:
             step_num = min(valid_step_num)
         op_info = op_info_record.get(analysis_op_name).get(step_num)
@@ -100,7 +101,7 @@ class HcclAnalysisTool:
                              f"There is not {Constant.STEP_TRACE_FILE} file in {os.path.realpath(self.step_trace_dir)}")
             return Constant.DATA_PARSE_ERROR
         for step_trace_file in step_trace_files:
-            if not step_trace_file_check(step_trace_file):
+            if step_trace_file_check(step_trace_file) == Constant.DATA_PARSE_ERROR:
                 return Constant.DATA_PARSE_ERROR
             cur_rank_id = os.path.basename(step_trace_file).split("_")[3]
             step_trace_info = get_step_trace_info(step_trace_file)
