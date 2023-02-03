@@ -213,17 +213,17 @@ def command_optimize(
         config=config,
     )
     if infer_test:
-        print('=' * 40)
+        print('\n' + '=' * 100)
     if applied_knowledges:
-        print('Optimization success')
+        print('Result: Success')
         print('Applied knowledges: ')
         for knowledge in applied_knowledges:
             print(f'  {knowledge}')
         print(f'Path: {input_model_} -> {output_model_}')
     else:
-        print('Unable to optimize, no knowledges matched.')
+        print('Result: Unable to optimize, no knowledges matched.')
     if infer_test:
-        print('=' * 40)
+        print('=' * 100 + '\n')
 
 
 if __name__ == "__main__":

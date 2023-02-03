@@ -40,6 +40,10 @@ NONEQUIVALENT_KNOWLEDGES = [
     'KnowledgeEmptySliceFix',
 ]
 
+COLOR_SUCCESS = '\033[92m'
+COLOR_FAIL = '\033[91m'
+COLOR_END = '\033[0m'
+
 
 @dataclass
 class InferTestConfig:
@@ -78,7 +82,7 @@ class GraphOptimizer:
 
     @staticmethod
     def _effective(om_ori: str, om_opt: str, cfg: InferTestConfig, check_precision: bool,
-                   queue: multiprocessing.Queue) -> None:
+                   knowledge_name: str, queue: multiprocessing.Queue) -> None:
         from auto_optimizer.inference_engine.inference.acl_inference \
                 import InferSession, tensor_type_to_numpy_type
 
@@ -112,7 +116,7 @@ class GraphOptimizer:
         time_opt = np.mean(sess_opt.sumary().exec_time_list)
 
         if out_ori is None or out_opt is None or len(out_ori) != len(out_opt):
-            logger.warning('Optimization failed: result is wrong.')
+            logger.warning(f'{knowledge_name} failed: {COLOR_FAIL}result is wrong.{COLOR_END}')
             queue.put(False)
             return
 
@@ -122,15 +126,27 @@ class GraphOptimizer:
                 meet_precision(mat0, mat1, cos_th=1e-3, atol=1e-5, rtol=1e-3)
                 for mat0, mat1 in zip(out_ori, out_opt)
             ):
-                logger.warning('Optimization failed: optimization did\'nt meet precision requirements.')
+                logger.warning(
+                    f'{knowledge_name} failed: {COLOR_FAIL}optimization'
+                    f' didn\'t meet precision requirements.{COLOR_END}'
+                )
                 queue.put(False)
                 return
 
-        logger.info('Origin inference time: %.2f ms', time_ori)
-        logger.info('Optimized inference time: %.2f ms', time_opt)
-        logger.info('Inference speed improved %.2s%%.', (time_ori / time_opt - 1) * 100)
-        if time_opt > time_ori * (1 - cfg.threshold):
-            logger.warning('Optimization cancaled: not enough improvement.')
+        color_s = COLOR_SUCCESS if time_opt < time_ori else COLOR_FAIL
+        speed_impr = time_ori / time_opt - 1
+        print('\n' + '=' * 100)
+        print(f'{knowledge_name} performance stats:')
+        print(f'Inference time before modification: {time_ori:.2f} ms')
+        print(f'Inference time after modification: {time_opt:.2f} ms')
+        print(f'Inference speed improved: {color_s}{speed_impr * 100:.2f}%{COLOR_END}')
+        print('=' * 100 + '\n')
+
+        if speed_impr < cfg.threshold:
+            logger.warning(
+                f'{knowledge_name} cancaled: {COLOR_FAIL}inference speed improvement '
+                f'didn\'t reach specified threshold({cfg.threshold * 100:.2f}).{COLOR_END}'
+            )
             queue.put(False)
             return
         queue.put(True)
@@ -211,49 +227,59 @@ class GraphOptimizer:
         graph.save(onnx_ori.as_posix())
         cvtr_stc = partial(onnx2om, input_shape=cfg.input_shape) if cfg.input_shape else onnx2om
         cvtr_dyn = partial(onnx2om, input_shape_range=cfg.input_shape_range)
-        cvtr = cvtr_stc if cfg.is_static else cvtr_dyn
-        om_ori = cvtr(
-            path_onnx=onnx_ori.as_posix(),
+        onnx_to_om_converter = partial(
+            cvtr_stc if cfg.is_static else cvtr_dyn,
             converter=cfg.converter,
-            soc_version=cfg.soc,
+            soc_version=cfg.soc
         )
-        om_opt = om_ori
+        om_ori, om_opt = None, None
         for name, knowledge in self.knowledges.items():
-            logger.info('Evaluating knowledge %s', name)
+            print(f'Applying {name}...')
             graph_opt = deepcopy(graph)
             knowledge.reset()
             try:
                 if not self._optimize(graph_opt, knowledge):
+                    print(f'No match found for {name}, skipping...\n')
                     continue
                 graph_opt.save(onnx_opt.as_posix())
-                om_opt = cvtr(
-                    path_onnx=onnx_opt.as_posix(),
-                    converter=cfg.converter,
-                    soc_version=cfg.soc,
-                )
+                if om_ori is None:
+                    print('Converting origin onnx to om...\n')
+                    om_ori = onnx_to_om_converter(path_onnx=onnx_ori.as_posix())
+                print(f'Converting onnx optimized with {name} to om...\n')
+                om_opt = onnx_to_om_converter(path_onnx=onnx_opt.as_posix())
                 ctx = multiprocessing.get_context('spawn')
                 queue = ctx.Queue()
                 check_precision = name not in NONEQUIVALENT_KNOWLEDGES
+                print('Inferencing origin and optimized om...\n')
                 if cfg.process_run_infer:
                     proc = ctx.Process(
                         target=self._effective,
-                        args=(om_ori, om_opt, cfg, check_precision, queue)
+                        args=(om_ori, om_opt, cfg, check_precision, name, queue)
                     )
                     proc.start()
                     proc.join()
                 else:
-                    self._effective(om_ori, om_opt, cfg=cfg, check_precision=check_precision, queue=queue)
+                    self._effective(
+                        om_ori,
+                        om_opt,
+                        cfg=cfg,
+                        check_precision=check_precision,
+                        knowledge_name=name,
+                        queue=queue
+                    )
                 if queue.qsize() > 0 and queue.get():
                     applied_knowledges.append(name)
                     graph = graph_opt
                     os.rename(om_opt, om_ori)
             except Exception as exc:
-                logger.warning("%s", exc)
+                logger.warning(f"{COLOR_FAIL}{exc}{COLOR_END}")
         try:
             os.remove(onnx_ori)
             os.remove(onnx_opt)
-            os.remove(om_ori)
-            os.remove(om_opt)
+            if om_ori is not None:
+                os.remove(om_ori)
+            if om_opt is not None:
+                os.remove(om_opt)
         except FileNotFoundError:
             pass
         return graph, applied_knowledges
