@@ -80,16 +80,15 @@ def step_trace_file_check(step_trace_file_path):
                                            f"The step trace file format is incorrect, please check")
                 return Constant.DATA_PARSE_ERROR
 
-            if communication_op_name not in Constant.COMMUNICATIONS_OPS:
-                ad_print_and_log(AD_ERROR, f"{communication_op_name} is a invalid communication operator name. "
-                                           f"The step trace file format is incorrect, please check")
-                return Constant.DATA_PARSE_ERROR
         for csv_row in csv_reader:
             if len(csv_row) != len(header):
+                ad_print_and_log(AD_ERROR, f"The format of {step_trace_file_path} is invalid!")
                 return Constant.DATA_PARSE_ERROR
 
-            is_data_valid = isinstance(csv_row[1], float) and isinstance(csv_row[2], float)
+            is_data_valid = csv_row[1].isdigit() and csv_row[2].isdigit()
             if not is_data_valid:
+                ad_print_and_log(AD_ERROR,
+                                 f"The value of start_point or end_point in {step_trace_file_path} is invalid")
                 return Constant.DATA_PARSE_ERROR
     return Constant.DATA_PARSE_OK
 

@@ -51,6 +51,10 @@ function collect_data() {
         exit 1
     fi
 
+    if [ -d "${_out_path}" ]; then
+        rm -rf "${_out_path}"
+    fi
+
     python3 ./utils/obs_data_collector.py --rank_size=${rank_size} --bucket_name=${bucket_name} --download_path=${_out_path}
 
     if [ $? -ne 0 ]; then
@@ -89,11 +93,6 @@ function main() {
 
     if [ -z "${data_path}" ]; then
         data_path="$(dirname $(dirname "$SHELL_DIR"))/profiler"
-
-        if [ -d "$data_path" ]; then
-            rm -rf "$data_path"
-        fi
-
         collect_data "$data_path"
     fi
 
