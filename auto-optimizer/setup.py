@@ -41,5 +41,8 @@ setup(
             )
         ],
     },
-    python_requires='>=3.7'
+    python_requires='>=3.7',
+    entry_points={
+        'console_scripts': ['auto_optimizer=auto_optimizer.__main__:cli'],
+    },
 )
