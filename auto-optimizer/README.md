@@ -60,7 +60,7 @@ Available knowledges:
   10 KnowledgeEmptySliceFix
 ```
 
-前面是知识库的序号，后面是知识库名称，在其他命令需要指定知识库时，可以使用序号或名称。
+前面是知识库的序号，后面是知识库名称，在其他命令需要指定知识库时，可以使用序号或名称。关于具体知识库的详细信息，请参见 [知识库文档](docs/knowledge_optimizer/knowledge_optimizer_rules.md)
 
 注意：序号是为了方便手动调用存在的，由于知识库可能存在被删除等情况，所以序号可能会变化，请不要依赖序号。
 
