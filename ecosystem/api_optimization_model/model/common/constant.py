@@ -1,6 +1,6 @@
 from enum import Enum
 
-#数据类型aclvencChannelDescParamType
+#数据类型
 class aclvencChannelDescParamType(Enum):
     ACL_VENC_THREAD_ID_UINT64=0,
     ACL_VENC_CALLBACK_PTR=1,
