@@ -28,7 +28,6 @@ def data_process(file_pathname, extend_result):
                 with open(path, encoding='UTF-8') as file:
                     for line in file.readlines():
                         line_num += 1
-                        # 0 copy
                         for k, r in knowledges.item(): #遍历知识库
                             if k in line:
                                 value = []

@@ -4,7 +4,10 @@
       "model_name": "api_optimization_model",
       "session_list": [
         {
-          "python_model_path": "src"
+          "python_model_path": "src",
+          "parameter":{
+            "s": "310B"
+          }
           
         }
       ]
