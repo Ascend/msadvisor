@@ -1,3 +1,5 @@
+
+
 import os
 import time
 import sys
@@ -38,7 +40,7 @@ class Result:
         res = {"classType": self.class_type, "errorCode": self.error_code,
                "summary": self.summary, "extendResult": extend_data}
         outputstr = json.dumps(res, indent='\t')
-        return output_str
+        return outputstr
 
 
 # define extend_result
@@ -63,19 +65,6 @@ def evaluate(dataPath, parameter):
 
     result = Result()
     return result_parse(result, extend_result)
-
-
-# define extend_result
-def init_extent_result():
-    extend_result = ExtendResult()
-    extend_result.type = extend_type['table']
-    extend_result.data_type.append(extend_data_type['str'])
-    extend_result.data_type.append(extend_data_type['str'])
-    extend_result.data_type.append(extend_data_type['str'])
-    extend_result.key.append("API Name")
-    extend_result.key.append("Optimization Suggestion")
-    extend_result.key.append("API Location")
-    return extend_result
 
 
 def result_parse(result, extend_result):
