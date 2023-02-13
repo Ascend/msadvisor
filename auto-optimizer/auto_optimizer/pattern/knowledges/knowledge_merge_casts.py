@@ -154,8 +154,12 @@ class KnowledgeMergeCasts(KnowledgeBase):
         """
         # node_output 后续的 Cast 节点中，每个类型的 Cast 节点都记录一个唯一的实例
         cast_node_map = {}
+        graph_output_names = [o.name for o in graph.outputs]
         for cast_node in filter(self._is_cast_node, graph.get_next_nodes(node_output)):
             to_type = cast_node['to']
+            # 如果当前 Cast 节点的输出也是图输出则不处理
+            if cast_node.outputs[0] in graph_output_names:
+                continue
             # cast_node_map 中已存在同类的 Cast 节点，则将两个 Cast 节点进行合并
             if to_type in cast_node_map:
                 for next_node in graph.get_next_nodes(cast_node.outputs[0]):
@@ -190,7 +194,11 @@ class KnowledgeMergeCasts(KnowledgeBase):
         :param graph: 整图
         :param node : Cast 节点
         """
+        # 如果父 Cast 节点的输出也是图输出则不能合并
+        if node.outputs[0] in [o.name for o in graph.outputs]:
+            return
         next_nodes = graph.get_next_nodes(node.outputs[0])
+        # 如果当前 Cast 节点的输出也是图输出则不处理
         if len(next_nodes) == 1 and next_nodes[0].op_type == 'Cast':
             graph.remove(node.name)
 
@@ -200,7 +208,11 @@ class KnowledgeMergeCasts(KnowledgeBase):
         :param root_output: 根节点输出
         :param output_type: 输出类型
         """
+        graph_output_names = [o.name for o in graph.outputs]
         for next_node in graph.get_next_nodes(root_output):
+            # 如果后续节点的输出是图输出则不能进行消除
+            if next_node.outputs[0] in graph_output_names:
+                continue
             if next_node.op_type == 'Cast' and next_node['to'] == output_type:
                 graph.remove(next_node.name)
 
