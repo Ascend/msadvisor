@@ -20,42 +20,12 @@ import numpy as np
 
 from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 from auto_optimizer.graph_refactor.interface.base_graph import BaseGraph
-from auto_optimizer.graph_refactor.interface.base_node import BaseNode, Node, Initializer
+from auto_optimizer.graph_refactor.interface.base_node import Node, Initializer
 from auto_optimizer.pattern.pattern import MATCH_PATTERN
-from auto_optimizer.pattern.pattern import MatchBase
 from auto_optimizer.pattern.pattern import Pattern
 from auto_optimizer.pattern.matcher import MatchResult
 from auto_optimizer.pattern.knowledges.knowledge_base import KnowledgeBase
-from auto_optimizer.pattern.utils import NextNodeCount
-
-
-class ConstSecondInput(MatchBase):
-    # 限制节点的第二个输入参数为常数
-    def __init__(self):
-        super().__init__()
-
-    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
-        if not isinstance(node, (Node, )):
-            return False
-        input1 = graph.get_node(node.inputs[1], node_type=Initializer)
-        return input1 is not None
-
-
-class AllOutputsAreGatherMatch(MatchBase):
-    # 限制节点的后置节点全部是Gather算子
-    def __init__(self):
-        super().__init__()
-
-    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
-        if not isinstance(node, (Node, )):
-            return False
-        nodes = graph.get_next_nodes(node.outputs[0])
-        if not nodes:
-            return False
-        for n in nodes:
-            if not (isinstance(n, (Node, )) and op.eq(n.op_type, 'Gather') and n.attrs.get('axis', None) == 0):
-                return False
-        return True
+from auto_optimizer.pattern.utils import HasInputValue, NextNodeCount, AllNextnodesAreGather
 
 
 # QKV Slice 改图的简单图示，将MatMul到Transpose0的算子拆分为若干份，去掉Gather算子
@@ -84,13 +54,13 @@ class AllOutputsAreGatherMatch(MatchBase):
 #
 # 尽量使用简单的pattern，将复杂的判断逻辑放在apply函数内
 pattern0 = Pattern() \
-    .add_node("MatMul_0", ["MatMul"], [NextNodeCount(1), ConstSecondInput()]) \
+    .add_node("MatMul_0", ["MatMul"], [NextNodeCount(1), HasInputValue(1)]) \
     .add_node('ElementWise_0', ['Mul', 'Add', 'Sub', 'Div'], [NextNodeCount(1)]) \
     .set_node_loop('ElementWise_0', MATCH_PATTERN.MATCH_ZERO_OR_MORE) \
     .add_edge("MatMul_0", "ElementWise_0") \
-    .add_node("Reshape_0", ["Reshape"], [NextNodeCount(1), ConstSecondInput()]) \
+    .add_node("Reshape_0", ["Reshape"], [NextNodeCount(1), HasInputValue(1)]) \
     .add_edge("ElementWise_0", "Reshape_0") \
-    .add_node("Transpose_0", ["Transpose"], [AllOutputsAreGatherMatch()]) \
+    .add_node("Transpose_0", ["Transpose"], [AllNextnodesAreGather()]) \
     .add_edge("Reshape_0", "Transpose_0") \
     .set_loop(MATCH_PATTERN.MATCH_ONCE)
 
@@ -241,9 +211,9 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
         :return: 返回按gather节点顺序排列的下标列表
         """
         indices = []
-        for n in nodes:
-            indice = graph.get_node(n.inputs[1], node_type=Initializer)
-            if indice is None or indice.value.size > 1:
+        for node in nodes:
+            indice = graph.get_node(node.inputs[1], node_type=Initializer)
+            if indice is None or indice.value.ndim != 0:
                 return []
             indices.append(int(indice.value))
         return indices
@@ -296,8 +266,11 @@ class KnowledgeSplitQKVMatmul(KnowledgeBase):
             logging.info(f"The number of Gather operators {split_num} is not equal to {new_shape[perm[0]]}.")
             return False
 
+        if gather_nodes[0].attrs.get('axis', 0) != 0:
+            return False
+
         indices = self._get_gather_nodes_indices(gather_nodes, graph)
-        if sorted(indices) != [i for i in range(split_num)]:
+        if sorted(indices) != list(range(split_num)):
             # 几个Gather算子的indices不重不漏的对应[0, n)，即平分首维度
             logging.info("The gather nodes does not split the first axis.")
             return False

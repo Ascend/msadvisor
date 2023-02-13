@@ -45,7 +45,7 @@ class HugeConv(MatchBase):
         if len(kernel_shape) != 2:
             return False
         ph = graph.get_node(node.inputs[0], node_type=PlaceHolder)
-        if ph is None or ph.shape is None or isinstance(ph.shape[-1], str):
+        if ph is None or not ph.shape or isinstance(ph.shape[-1], str):
             return False
         return ph.shape[-1] >= SHAPE_THRESHOLD
 
@@ -156,7 +156,7 @@ class KnowledgeTransposeLargeInputConv(KnowledgeBase):
         add_0 = graph.get_node(matchinfo['Add_0'][0].name, node_type=Node)
         convs = [graph.get_node(matchinfo[name][0].name, node_type=Node) for name in ('Conv_0', 'Conv_1', 'Conv_2')]
         ph = graph.get_node(selu_0.inputs[0], node_type=PlaceHolder)
-        if ph is None or ph.shape is None:
+        if ph is None or not ph.shape:
             logging.info("Failed to get input shape of subgraph.")
             return False
         perm = [i for i in range(len(ph.shape))]

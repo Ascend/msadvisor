@@ -61,18 +61,6 @@
             ]
         },
         {
-            "model_name": "KnowledgeSplitQKVMatmul",
-            "session_list": [
-                {
-                    "python_model_path": "",
-                    "parameter": {
-                        "mode": "optimize",
-                        "model_file": ""
-                    }
-                }
-            ]
-        },
-        {
             "model_name": "KnowledgeSplitLargeKernelConv",
             "session_list": [
                 {
@@ -109,7 +97,7 @@
             ]
         },
         {
-            "model_name": "KnowledgeGatherToSplit",
+            "model_name": "KnowledgeAvgPoolSplit",
             "session_list": [
                 {
                     "python_model_path": "",
@@ -121,7 +109,7 @@
             ]
         },
         {
-            "model_name": "KnowledgeAvgPoolSplit",
+            "model_name": "KnowledgeBNFolding",
             "session_list": [
                 {
                     "python_model_path": "",

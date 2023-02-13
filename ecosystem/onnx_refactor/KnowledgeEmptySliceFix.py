@@ -19,7 +19,7 @@ from auto_optimizer.pattern.knowledge_factory import KnowledgeFactory
 
 
 def evaluate(data_path, param):
-    knowledge = KnowledgeFactory.get_knowledge('KnowledgeMergeCasts')
+    knowledge = KnowledgeFactory.get_knowledge('KnowledgeEmptySliceFix')
     sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
     from advisor import evaluate_x
     return evaluate_x(knowledge, data_path, param)
