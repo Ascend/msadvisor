@@ -27,7 +27,7 @@ def data_process(file_pathname, extend_result):
                                 value = []
                                 value.append(k)
                                 value.append(r)
-                                value.append(str(file) + ' Line:' + str(line_num))
+                                value.append(str(file.name) + ' Line:' + str(line_num))
                                 extend_result.value.append(value)
 
     return extend_result
