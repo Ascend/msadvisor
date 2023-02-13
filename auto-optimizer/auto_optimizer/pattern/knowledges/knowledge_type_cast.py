@@ -127,7 +127,10 @@ class GenericOpMatch(MatchBase):
         'Gemm',
         'Split',
         'Slice',
-        'Transpose'
+        'Transpose',
+        'Neg',
+        'Range',
+        'Clip'
     ]
 
     # 半泛型节点，部分输入通道类型为泛型 T，剩余输入通道类型为固定类型，对于此类算子需
@@ -135,7 +138,7 @@ class GenericOpMatch(MatchBase):
     partial_generic_ops = {
         'Expand': GenericIO([0], [0]),
         'Less': GenericIO([0, 1], []),
-        'Gather': GenericIO([0], [0]),
+        'Gather': GenericIO([0, 1], [0]),
         'Shape': GenericIO([0], []),
         'Where': GenericIO([1, 2], [0]),
         'Equal': GenericIO([0, 1], []),
@@ -143,7 +146,8 @@ class GenericOpMatch(MatchBase):
         'Tile': GenericIO([0], [0]),
         'ScatterND': GenericIO([0, 2], [0]),
         'Unsqueeze': GenericIO([0], [0]),
-        'Squeeze': GenericIO([0], [0])
+        'Squeeze': GenericIO([0], [0]),
+        'ConstantOfShape': GenericIO([0], [0])
     }
 
     def __init__(self, strategy: TypeCastStrategy):
@@ -442,6 +446,52 @@ class TypeCastApply(object):
         graph.update_map()
 
 
+class ConstantOfShapeMatch(MatchBase):
+    def __init__(self, strategy: TypeCastStrategy):
+        """
+        :param strategy: 类型转换策略
+        """
+        super().__init__()
+        self._strategy = strategy
+
+    def match(self, node: BaseNode, graph: BaseGraph) -> bool:
+        if node.op_type != 'ConstantOfShape':
+            return False
+        elem_type = numpy_onnx_type_map.get(self._strategy.cast_from, 0)
+        return node.attrs['value'].data_type == elem_type.value
+
+
+class ConstantOfShapePattern(Pattern):
+    def __init__(self, strategy: TypeCastStrategy):
+        super().__init__()
+        self.add_node('ConstantOfShape_operator', ['ConstantOfShape'], [ConstantOfShapeMatch(strategy)]) \
+            .set_node_loop('ConstantOfShape_operator', MATCH_PATTERN.MATCH_ONCE_OR_MORE) \
+            .set_loop(MATCH_PATTERN.MATCH_ONCE_OR_MORE)
+
+
+class ConstantOfShapeApply(object):
+    def __init__(self, strategy: TypeCastStrategy):
+        self._strategy = strategy
+
+    def __call__(self, graph: BaseGraph, match_result: MatchResult) -> bool:
+        """ 类型转换应用方法
+        :param graph       : 整图
+        :param match_result: 子图匹配结果
+        :return            : 类型转换是否应用成功
+        """
+        for node_dict in match_result.node_dicts:
+            for nodes in node_dict.values():
+                for node in nodes:
+                    if node.op_type != 'ConstantOfShape':
+                        continue
+                    _node = graph[node.name]
+                    if not _node:
+                        continue
+                    elem_type = numpy_onnx_type_map.get(self._strategy.cast_to, 0)
+                    _node.attrs['value'].data_type = elem_type.value
+        return True
+
+
 @KnowledgeFactory.register()
 class KnowledgeTypeCast(KnowledgeBase):
     def __init__(self):
@@ -453,6 +503,7 @@ class KnowledgeTypeCast(KnowledgeBase):
         ]
         for strategy in self._type_cast_strategies:
             self._register_apply_funcs(TypeCastPattern(strategy), [TypeCastApply(strategy)])
+            self._register_apply_funcs(ConstantOfShapePattern(strategy), [ConstantOfShapeApply(strategy)])
 
     def pre_process(self, graph: BaseGraph) -> bool:
         try:
