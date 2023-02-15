@@ -127,11 +127,20 @@ class AscendTimelineAnalysis:
         analysis_result = {}
         for op_type in op_list.keys():
             sorted_op_list, op_num, op_time = AscendTimelineAnalysis.parse_op_list(op_list[op_type], top_type)
+
+            # Filter out Receive and Send operators
+            if op_type == Constant.COMMUNICATION:
+                topk_op = \
+                    [op for i, op in zip(range(top_k), filter(AscendTimelineAnalysis.filter_method, sorted_op_list))]
+            else:
+                topk_op = sorted_op_list[0:top_k]
+
             analysis_result[op_type] = {
                 "op_num": op_num,
                 "op_time": op_time,
-                "topk_op": sorted_op_list[0:top_k]
+                "topk_op": topk_op
             }
+
         ad_log(
             AD_INFO, f"After critical path analysis, there are "
             f"{analysis_result[Constant.AICORE]['op_num']} aicore op, "
@@ -140,6 +149,11 @@ class AscendTimelineAnalysis:
         )
 
         return analysis_result
+
+    @staticmethod
+    def filter_method(op):
+        filtered_op_names = ['Receive', 'Send']
+        return all([name not in op.get(Constant.NAME) for name in filtered_op_names])
 
     @staticmethod
     def parse_op_list(op_list, topk_type):
@@ -225,7 +239,7 @@ class AscendTimelineAnalysis:
 def run_critical_path_analysis(profiling_dir, step_num=None):
     timeline_analysit_time = time.time()
     input_trace_file = get_critical_timeline(profiling_dir, step_num)
-    ad_log(AD_INFO, f"get_critical_timeline cost time: {time.time() - timeline_analysit_time}")
+    ad_log(AD_INFO, f"get_critical_timeline {input_trace_file}, cost time: {time.time() - timeline_analysit_time}")
     # 需要针对寻找关键timeline失败的场景进行判断
     if input_trace_file == Constant.DATA_PARSE_ERROR:
         ad_print_and_log(AD_ERROR, "muti_timeline_analysis failed, please check profiling data")

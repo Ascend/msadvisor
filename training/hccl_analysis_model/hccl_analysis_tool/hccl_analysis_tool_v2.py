@@ -130,6 +130,11 @@ class HcclAnalysisTool:
     def record_op_info(self, op_info_record, analysis_op_name, valid_step_num, hccl_op_name):
         for cur_rank_id in self.rank_id_list:
             hccl_op_dir = f"{os.path.join(self.hccl_profile_dir, Constant.HCCL_DIR_FORMAT)}{cur_rank_id}/{hccl_op_name}"
+
+            # The communication operator may not exist on the current card
+            if not os.path.exists(hccl_op_dir):
+                continue
+
             hccl_analysis_file_format = "{}/iter*.trace".format(hccl_op_dir)
             hccl_trace_files = glob.glob(hccl_analysis_file_format)
 
@@ -159,6 +164,7 @@ class HcclAnalysisTool:
         if iteration_num is None:
             iter_list = list(sorted_op_info[0][1].keys())
             iteration_num = min(iter_list)
+        ad_log(AD_INFO, f"analysis iteration_num: {iteration_num}")
 
         iteration_num, op_time_analysis_result = op_communication_time_analysis(sorted_op_info, iteration_num)
         if iteration_num == Constant.DATA_PARSE_ERROR:
