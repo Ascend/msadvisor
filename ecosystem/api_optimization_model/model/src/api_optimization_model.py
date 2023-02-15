@@ -59,6 +59,15 @@ def init_extent_result():
 
 
 def evaluate(dataPath, parameter):
+    """
+    interface function called by msadvisor
+    Args:
+        dataPath: string data_path
+        parameter: input parameter
+    Returns:
+        json string of result info
+        result must be ad_result
+    """
     extend_result = init_extent_result()
     if os.path.isdir(dataPath):
         extend_result = data_process.data_process(dataPath, extend_result)
