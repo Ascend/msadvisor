@@ -23,11 +23,11 @@ def data_process(file_pathname, extend_result):
                 with open(path, encoding='UTF-8') as file:
                     for line in file.readlines():
                         line_num += 1
-                        for k, r in knowledges.knowledges.items(): #遍历知识库
-                            if k in line:
+                        for api, knowledge in knowledges.knowledges.items(): # 遍历知识库
+                            if api in line:
                                 value = []
-                                value.append(k)
-                                value.append(r)
+                                value.append(api)
+                                value.append(knowledge)
                                 value.append(str(file.name) + ' Line:' + str(line_num))
                                 extend_result.value.append(value)
     log.ad_log(log.ad_info, "Finish scanning file.")
