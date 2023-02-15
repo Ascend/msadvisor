@@ -5,7 +5,7 @@ import time
 import sys
 import json
 import data_process
-from util import log
+from ../util import log
 # define datatype
 
 class_type = {'op': '0', 'model': '1'}

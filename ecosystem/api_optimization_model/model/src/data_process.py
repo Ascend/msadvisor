@@ -55,7 +55,7 @@ def data_process(file_pathname, extend_result):
                 with open(path, encoding='UTF-8') as file:
                     for line in file.readlines():
                         line_num += 1
-                        for k, r in knowledges.item(): #遍历知识库
+                        for k, r in knowledges.items(): #遍历知识库
                             if k in line:
                                 value = []
                                 value.append(k)
