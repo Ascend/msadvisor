@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-# coding=utf-8
-"""
-Copyright Huawei Technologies Co., Ltd. 2022-2022. All rights reserved.
-"""
+# _*_ coding: utf-8 _*_
+# Copyright (c) Huawei Technologies Co., Ltd. 2023-2023. All rights reserved.
 
 import msadvisor as m
 import sys
