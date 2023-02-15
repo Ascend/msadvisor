@@ -72,7 +72,7 @@ def evaluate(dataPath, parameter):
     if os.path.isdir(dataPath):
         extend_result = data_process.data_process(dataPath, extend_result)
     else:
-        log.ad_log(log.AD_ERROR, "The input dataPath is incorrect. Please check -d path.")
+        log.ad_log(log.ad_error, "The input dataPath is incorrect. Please check -d path.")
 
     result = Result()
     return result_parse(result, extend_result)
