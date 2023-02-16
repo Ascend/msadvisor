@@ -5,10 +5,6 @@ import time
 import sys
 import json
 import data_process
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(os.path.dirname(__file__))
-from util import log
-
 
 class_type = {'op': '0', 'model': '1'}
 error_code = {'success': '0', 'optimized': '1'}
@@ -68,9 +64,18 @@ def evaluate(dataPath, parameter):
         json string of result info
         result must be ad_result
     """
+
     extend_result = init_extent_result()
     if os.path.isdir(dataPath):
-        extend_result = data_process.data_process(dataPath, extend_result)
+        environment_data = utils.get_data('api_optimization_model.json')  # 获取系统配置文件的数据api_optimization_model.json
+        environment = environment_data.get('s')
+
+        if environment == '310P':
+            log.ad_log(log.ad_info, "The knowledge is 310P.")
+            extend_result = data_process.data_process(dataPath, extend_result)
+        else:
+            log.ad_log(log.ad_info, "The knowledge is 310B.")
+            extend_result = data_process.data_process_310B(dataPath, extend_result)
     else:
         log.ad_log(log.ad_error, "The input dataPath is incorrect. Please check -d path.")
 

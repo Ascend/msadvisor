@@ -8,8 +8,9 @@ import knowledges
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(__file__))
 from util import log
+from util import utils
 
-def data_process(file_pathname, extend_result):
+def data_process_310B(file_pathname, extend_result):
     if not os.path.isdir(file_pathname):
         log.ad_log(log.AD_ERROR, "The file_pathname is incorrect. Please check file_pathname path.")
         return extend_result
