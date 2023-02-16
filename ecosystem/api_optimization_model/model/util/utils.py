@@ -5,11 +5,15 @@
 import os
 import sys
 import json
+import log
 
 def get_data(filename):
     file_path = os.path.dirname(os.path.dirname(__file__))
     file_path = os.path.join(file_path, filename)
     real_file_path = os.path.realpath(file_path)
+    if not os.path.isfile(real_file_path):
+        log.ad_log(log.ad_error, "The json file path error.")
+        return
     with open(real_file_path, 'r', encoding='UTF-8') as task_json_file:
         task_data = json.load(task_json_file)
     return task_data
