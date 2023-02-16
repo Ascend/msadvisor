@@ -8,6 +8,8 @@ import knowledges
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(__file__))
 from util import log
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(os.path.dirname(__file__))
 from util import utils
 
 def data_process_310B(file_pathname, extend_result):

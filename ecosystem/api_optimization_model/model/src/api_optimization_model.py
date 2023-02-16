@@ -5,6 +5,12 @@ import time
 import sys
 import json
 import data_process
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(os.path.dirname(__file__))
+from util import log
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(os.path.dirname(__file__))
+from util import utils
 
 class_type = {'op': '0', 'model': '1'}
 error_code = {'success': '0', 'optimized': '1'}
