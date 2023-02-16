@@ -1,4 +1,16 @@
+# Copyright 2023 Huawei Technologies Co., Ltd
 #
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import os
 import time
@@ -89,15 +101,21 @@ def evaluate(dataPath, parameter):
     return result_parse(result, extend_result)
 
 
-def result_parse(result, extend_result):
+def result_parse(result, extend_result, environment):
     if not extend_result.value:
         result.class_type = class_type['op']
         result.error_code = error_code['optimized']
-        result.summary = "310B API operations are well optimized"
+        if environment == '310P':
+            result.summary = "310P API operations are well optimized"
+        else:
+            result.summary = "310B API operations are well optimized"
         return result.generate()
     result.class_type = class_type['op']
     result.error_code = error_code['success']
-    result.summary = "310B API operations need to be optimized"
+    if environment == '310P':
+        result.summary = "310P API operations need to be optimized"
+    else:
+        result.summary = "310B API operations need to be optimized"
     result.extend_result.append(extend_result)
     return result.generate()
 
