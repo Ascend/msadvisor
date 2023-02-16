@@ -34,6 +34,7 @@ default_off_knowledges = [
     'KnowledgeGatherToSplit',
     'KnowledgeSplitQKVMatmul',
     'KnowledgeDynamicReshape',
+    'KnowledgeResizeModeToNearest'
 ]
 
 
