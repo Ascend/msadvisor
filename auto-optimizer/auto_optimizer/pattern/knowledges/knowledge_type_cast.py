@@ -110,7 +110,7 @@ class OpTypeConstraint(object):
             max_size = self._max_output
         if io_index < 0 or io_index >= max_size:
             return set()
-        io_index = min(io_index, min_size - 1)
+        io_index = min(io_index, len(io_constraints) - 1)
         return io_constraints[io_index]
 
 
