@@ -152,24 +152,6 @@ class GraphOptimizer:
         queue.put(True)
 
     @staticmethod
-    def _evaluate(graph: BaseGraph, knowledge: KnowledgeBase) -> bool:
-        if not knowledge.pre_process(graph):
-            return False
-        while knowledge.has_next_pattern():
-            knowledge.next_pattern()
-            match_results = knowledge.match_pattern(graph)
-            if match_results is None or len(match_results) == 0:
-                continue
-            while knowledge.has_next_apply():
-                knowledge.next_apply()
-                for match_result in match_results:
-                    if knowledge.apply(graph, match_result):
-                        knowledge.post_process(graph)
-                        return True
-        knowledge.post_process(graph)
-        return False
-
-    @staticmethod
     def _optimize(graph: BaseGraph, knowledge: KnowledgeBase) -> bool:
         res = False
         if not knowledge.pre_process(graph):
@@ -202,10 +184,6 @@ class GraphOptimizer:
                 logger.warning('Error applying knowledge: %s!', name)
                 logger.warning(exc)
         return graph, applied_knowledges
-
-    def evaluate_knowledges(self, graph: BaseGraph) -> Tuple[BaseGraph, List[str]]:
-        '''Test graph for applicable knowledges.'''
-        return self._exec_action(graph, GraphOptimizer._evaluate)
 
     def apply_knowledges(self, graph: BaseGraph) -> Tuple[BaseGraph, List[str]]:
         '''Optimize graph using optimizer.'''
