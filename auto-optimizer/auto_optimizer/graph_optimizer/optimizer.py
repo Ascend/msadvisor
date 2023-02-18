@@ -67,7 +67,10 @@ class GraphOptimizer:
         registered_knowledges = KnowledgeFactory.get_knowledge_pool()
         for idx, name in enumerate(registered_knowledges):
             knowledges_ = [name if v == str(idx) else v for v in knowledges_]
-        knowledges_ = list(dict.fromkeys(knowledges_))
+        knowledges_ = sorted(
+            list(dict.fromkeys(knowledges_)),
+            key=lambda x: 'fix' in x.lower()
+        )
         knowledge_dict = {
             name: registered_knowledges.get(name, KnowledgeBase())
             for name in knowledges_
