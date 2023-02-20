@@ -86,9 +86,9 @@ def evaluate(dataPath, parameter):
     extend_result = init_extent_result()
     if os.path.isdir(dataPath):
         environment_data = utils.get_data('api_optimization_model.json')  # 获取系统配置文件的数据api_optimization_model.json
-        environment = environment_data.get('env')
+        environment = environment_data['model_list'][0]['session_list'][0]['parameter']['env']
         mode_data = utils.get_data('api_optimization_model.json')  # 获取系统配置文件的数据api_optimization_model.json
-        mode = mode_data.get('mode')
+        mode = mode_data['model_list'][0]['session_list'][0]['parameter']['mode']
         if environment == '310P':
             log.ad_log(log.ad_info, "The knowledge is 310P.")
             extend_result = data_process.data_process(dataPath, extend_result)
