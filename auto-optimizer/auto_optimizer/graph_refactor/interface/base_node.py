@@ -107,6 +107,9 @@ class Node(BaseNode):
                 f'Name of input should be one of {self._inputs}')
         return self._inputs.index(node_input)
 
+    def get_input_ids(self, node_input: str) -> List[int]:
+        return [idx for idx, name in enumerate(self._inputs) if name == node_input]
+
     @property
     def outputs(self) -> List[str]:
         return self._outputs
