@@ -87,18 +87,21 @@ def evaluate(dataPath, parameter):
     if os.path.isdir(dataPath):
         environment_data = utils.get_data('api_optimization_model.json')  # 获取系统配置文件的数据api_optimization_model.json
         environment = environment_data.get('env')
-
+        mode_data = utils.get_data('api_optimization_model.json')  # 获取系统配置文件的数据api_optimization_model.json
+        mode = mode_data.get('mode')
         if environment == '310P':
             log.ad_log(log.ad_info, "The knowledge is 310P.")
             extend_result = data_process.data_process(dataPath, extend_result)
         else:
             log.ad_log(log.ad_info, "The knowledge is 310B.")
             extend_result = data_process.data_process_310B(dataPath, extend_result)
+            if mode == 'RC':
+                extend_result = data_process.data_process_310B_mode(dataPath, extend_result)
     else:
         log.ad_log(log.ad_error, "The input dataPath is incorrect. Please check -d path.")
 
     result = Result()
-    return result_parse(result, extend_result)
+    return result_parse(result, extend_result, environment)
 
 
 def result_parse(result, extend_result, environment):
