@@ -63,7 +63,7 @@ def data_process_310B_mode(file_pathname, extend_result):
                     for line in file.readlines():
                         line_num += 1
                         for api, knowledge in knowledges.knowledges_zero_memory_copy.items(): # 遍历API变更迁移分析知识库
-                            if api in line and API_INPUT_MARCO in line:
+                            if api in line and (API_INPUT_MARCO[0] in line or API_INPUT_MARCO[1] in line):
                                 value = []
                                 value.append(api)
                                 value.append(knowledge)
