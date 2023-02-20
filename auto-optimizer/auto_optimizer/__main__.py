@@ -95,7 +95,7 @@ def evaluate_onnx(
         if verbose:
             print(f'Evaluating {model.as_posix()}')
         graph = OnnxGraph.parse(model.as_posix(), add_name_suffix=False)
-        graph, applied_knowledges = optimizer.evaluate_knowledges(graph)
+        graph, applied_knowledges = optimizer.apply_knowledges(graph)
         return applied_knowledges
     except Exception as exc:
         logging.warning('%s match failed.', model.as_posix())
