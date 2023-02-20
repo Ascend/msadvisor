@@ -45,7 +45,7 @@ def data_process_310B(file_pathname, extend_result):
                                 value.append(knowledge)
                                 value.append(str(file.name) + ' Line:' + str(line_num))
                                 extend_result.value.append(value)
-                        if  utils.get_data('api_optimization_model.json').get('mode') == 'RC':
+                        if  utils.get_data('api_optimization_model.json').get('mode') == 'RC': # 如果为RC形态
                             for api, knowledge in knowledges.knowledges_zero_memory_copy.items():  # 遍历内存操作模式迁移分析知识库
                                 if api in line and API_INPUT_MARCO in line:
                                     value = []
