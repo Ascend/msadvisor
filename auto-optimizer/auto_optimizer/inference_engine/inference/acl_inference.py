@@ -40,7 +40,7 @@ try:
         aclruntime.dtype.bool: np.bool_,
     }
 except ImportError as exc:
-    logging.warning('Failed to import InferSession, please install extra infer_test requirements.')
+    logging.warning('Failed to import InferSession, please install extra [inference] feature.')
 
 logging = logging.getLogger("auto-optimizer")
 
