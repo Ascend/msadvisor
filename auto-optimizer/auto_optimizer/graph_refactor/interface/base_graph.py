@@ -473,8 +473,8 @@ class BaseGraph(ABC):
                     next_nodes = self.get_next_nodes(out_name)
                     if next_nodes:
                         for next_node in next_nodes:
-                            next_node_in_id = next_node.get_input_id(out_name)
-                            next_node.inputs[next_node_in_id] = in_name
+                            for next_node_in_id in next_node.get_input_ids(out_name):
+                                next_node.inputs[next_node_in_id] = in_name
                             # update next map, prev node has new next node
                             if self._next_map.get(in_name) is None:
                                 self._next_map[in_name] = [next_node]
