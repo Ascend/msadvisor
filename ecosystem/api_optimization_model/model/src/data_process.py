@@ -22,6 +22,8 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(__file__))
 from util import utils
 
+API_INPUT_MARCO = ['ACL_MEMCPY_HOST_TO_DEVICE', 'ACL_MEMCPY_DEVICE_TO_HOST']
+
 def data_process_310B(file_pathname, extend_result):
     if not os.path.isdir(file_pathname):
         log.ad_log(log.AD_ERROR, "The file_pathname is incorrect. Please check file_pathname path.")
@@ -45,7 +47,7 @@ def data_process_310B(file_pathname, extend_result):
                                 extend_result.value.append(value)
                         if  utils.get_data('api_optimization_model.json').get('mode') == 'RC':
                             for api, knowledge in knowledges.knowledges_zero_memory_copy.items():  # 遍历内存操作模式迁移分析知识库
-                                if api in line:
+                                if api in line and API_INPUT_MARCO in line:
                                     value = []
                                     value.append(api)
                                     value.append(knowledge)

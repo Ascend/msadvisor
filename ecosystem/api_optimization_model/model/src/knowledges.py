@@ -69,6 +69,7 @@ knowledges_api_change = {
 
 knowledges_zero_memory_copy = {
     "aclrtMallocHost": "使用了aclrtMallocHost，在RC模型下需要替换成aclrtMalloc",
-    "aclrtMemcpyAsync": "使用了aclrtMemcpyAsync接口，其中ACL_MEMCPY_HOST_TO_DEVICE宏，在RC模型下需要替换成ACL_MEMCPY_DEVICE_TO_DEVICE宏",
+    "aclrtMemcpyAsync": "使用了aclrtMemcpyAsync接口，在RC模型下kind输入需要替换成ACL_MEMCPY_DEVICE_TO_DEVICE宏",
+    "aclrtMemcpy": "使用了aclrtMemcpyAsync接口，在RC模型下kind输入需要替换成ACL_MEMCPY_DEVICE_TO_DEVICE宏",
     "aclrtFreeHost": "使用了aclrtFreeHost，在RC模型下需要替换成aclrtFree",
 }
