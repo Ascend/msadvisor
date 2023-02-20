@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-knowledges = {
+knowledges_api_change = {
     "aclopCreateKernel": "检查aclopCreateKernel接口是否用到了aclEngineType枚举，如果使用请修改代码并重新编译",
     "aclmdlGetOutputNameByIndex": "代码使用了aclmdlGetOutputNameByIndex接口，请重新进行atc模型转换，"
                                   "如果模型包含top名称则还需要适配返回值并重新编译",
@@ -65,4 +65,10 @@ knowledges = {
                                     "接口的numpy输入可以替换成list输入",
     "acl.util.set_attr_list_list_int ": "如果使用了该接口，若不想修改代码，则需要升级运行环境为python>=3.8及numpy>=1.22.0，若要修改代码，"
                                         "接口的numpy输入可以替换成list输入",
+}
+
+knowledges_zero_memory_copy = {
+    "aclrtMallocHost": "使用了aclrtMallocHost，在RC模型下需要替换成aclrtMalloc",
+    "aclrtMemcpyAsync": "使用了aclrtMemcpyAsync接口，其中ACL_MEMCPY_HOST_TO_DEVICE宏，在RC模型下需要替换成ACL_MEMCPY_DEVICE_TO_DEVICE宏",
+    "aclrtFreeHost": "使用了aclrtFreeHost，在RC模型下需要替换成aclrtFree",
 }

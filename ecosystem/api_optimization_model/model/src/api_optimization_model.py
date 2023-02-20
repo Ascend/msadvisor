@@ -86,7 +86,7 @@ def evaluate(dataPath, parameter):
     extend_result = init_extent_result()
     if os.path.isdir(dataPath):
         environment_data = utils.get_data('api_optimization_model.json')  # 获取系统配置文件的数据api_optimization_model.json
-        environment = environment_data.get('s')
+        environment = environment_data.get('env')
 
         if environment == '310P':
             log.ad_log(log.ad_info, "The knowledge is 310P.")

@@ -6,9 +6,9 @@
         {
           "python_model_path": "src",
           "parameter":{
-            "s": "310B"
+            "env": "310B",
+            "mode": "EP"
           }
-          
         }
       ]
     }
