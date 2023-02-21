@@ -18,6 +18,7 @@ from util import log
 from util import utils
 
 def para_parser(parameter, environment, mode):
+    parameter = eval(parameter) # 将字符串类型parameter转为字典类型
     if parameter['env'] == '310P' or parameter['env'] == '310B':
         environment = parameter['env']
     else:
