@@ -15,11 +15,7 @@
 import os
 import sys
 import knowledges
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(os.path.dirname(__file__))
 from util import log
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(os.path.dirname(__file__))
 from util import utils
 
 API_INPUT_MARCO = ['ACL_MEMCPY_HOST_TO_DEVICE', 'ACL_MEMCPY_DEVICE_TO_HOST']
