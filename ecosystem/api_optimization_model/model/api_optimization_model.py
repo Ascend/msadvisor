@@ -16,7 +16,7 @@ import os
 import time
 import sys
 import json
-from util import data_process
+from src import data_process
 from util import log
 from util import utils
 
