@@ -17,6 +17,7 @@ import time
 import sys
 import json
 from src import data_process
+from src import config_parser
 from util import log
 from util import utils
 
@@ -85,6 +86,7 @@ def evaluate(dataPath, parameter):
         environment = environment_data['model_list'][0]['session_list'][0]['parameter']['env']
         mode_data = utils.get_data('api_optimization_model.json')  # 获取系统配置文件的数据api_optimization_model.json
         mode = mode_data['model_list'][0]['session_list'][0]['parameter']['mode']
+        config_parser(parameter, environment, mode)
         if environment == '310P':
             log.ad_log(log.ad_info, "The knowledge is 310P.")
             extend_result = data_process.data_process(dataPath, extend_result)

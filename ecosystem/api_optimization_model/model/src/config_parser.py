@@ -11,3 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import os
+import sys
+from util import log
+from util import utils
+
+def config_parser(parameter, environment, mode):
+    if parameter['env'] == '310P' or parameter['env'] == '310B':
+        environment = parameter['env']
+    else:
+        log.ad_log(log.ad_error, "The env parameter is invalid.")
+    if parameter['mode'] == 'EP' or parameter['mode'] == 'RC':
+        mode = parameter['mode']
+    else:
+        log.ad_log(log.ad_error, "The mode parameter is invalid.")
