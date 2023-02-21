@@ -17,12 +17,13 @@ import sys
 from util import log
 from util import utils
 
-def config_parser(parameter, environment, mode):
+def para_parser(parameter, environment, mode):
     if parameter['env'] == '310P' or parameter['env'] == '310B':
         environment = parameter['env']
     else:
-        log.ad_log(log.ad_error, "The env parameter is invalid.")
+        log.ad_log(log.ad_error, "The input env parameter is invalid, using default env.")
     if parameter['mode'] == 'EP' or parameter['mode'] == 'RC':
         mode = parameter['mode']
     else:
-        log.ad_log(log.ad_error, "The mode parameter is invalid.")
+        log.ad_log(log.ad_error, "The input mode parameter is invalid, using default mode.")
+    return environment, mode
