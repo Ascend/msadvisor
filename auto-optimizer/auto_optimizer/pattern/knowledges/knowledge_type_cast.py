@@ -182,8 +182,6 @@ class TypeConstraintQuery(object):
         :param constraint_map: 原始算子类型约束映射表
         :return              : 定制算子类型约束映射表
         """
-        if 'ConstantOfShape' in constraint_map:
-            constraint_map['ConstantOfShape'].get_constraint(IOType.NODE_INPUT, 0).add(ElemType.INT32)
         return constraint_map
 
 
@@ -262,10 +260,14 @@ class GenericOpMatch(MatchBase):
         for initializer in graph.initializers:
             edge_type_dict[initializer.name] = initializer.value.dtype
 
-        # 至少要有一个泛型输入是转换原始类型才能匹配成功
+        # 至少要有一个泛型输入或输出是转换原始类型才能匹配成功
         for index, node_input in enumerate(node.inputs):
             if self.is_generic_io(node, IOType.NODE_INPUT, index) \
                     and edge_type_dict.get(node_input, 0) == self._strategy.cast_from:
+                return True
+        for index, node_output in enumerate(node.outputs):
+            if self.is_generic_io(node, IOType.NODE_OUTPUT, index) \
+                    and edge_type_dict.get(node_output, 0) == self._strategy.cast_from:
                 return True
         return False
 
@@ -533,6 +535,7 @@ class ConstantOfShapePattern(Pattern):
 class ConstantOfShapeApply(object):
     def __init__(self, strategy: TypeCastStrategy):
         self._strategy = strategy
+        self._match = GenericOpMatch(strategy)
 
     def __call__(self, graph: BaseGraph, match_result: MatchResult) -> bool:
         """ 类型转换应用方法
@@ -548,8 +551,21 @@ class ConstantOfShapeApply(object):
                     _node = graph[node.name]
                     if not _node:
                         continue
+
+                    generic_nodes : List[BaseNode] = []
+                    for next_node in graph.get_next_nodes(node.outputs[0]):
+                        next_input_index = next_node.inputs.index(node.outputs[0])
+                        if self._match.is_generic_io(next_node, IOType.NODE_INPUT, next_input_index):
+                            generic_nodes.append(next_node)
+
+                    # ConstantOfShape 算子的输出是泛型的，后续节点在处理输入类型时会将 ConstantOfShape 算子的
+                    # 输出作为目标类型处理，从而不插入 Cast 节点。因此需要激进地将 ConstantOfShape 算子的类型
+                    # 转换为目标类型来保证后续泛型节点的输入为目标类型
+                    if len(generic_nodes) == 0:
+                        continue
                     elem_type = numpy_onnx_type_map.get(self._strategy.cast_to, ElemType.UNDEFINED)
                     _node.attrs['value'].data_type = elem_type.value
+
         return True
 
 
