@@ -1,7 +1,7 @@
 {
   "model_list": [
     {
-      "model_name": "model",
+      "model_name": "memory_bound_identification",
       "session_list": [
         {
           "python_model_path": "src",

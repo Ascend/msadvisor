@@ -1,7 +1,7 @@
 {
   "model_list": [
     {
-      "model_name": "model",
+      "model_name": "model_structure_tuning",
       "session_list": [
         {
           "python_model_path": "src"
