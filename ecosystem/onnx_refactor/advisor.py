@@ -132,6 +132,7 @@ def analyze_model(graph: OnnxGraph, knowledge: KnowledgeBase, result: Result):
             result_str = convert_to_str(match_result)
             extend_result.value.append([result_str])
     if len(extend_result.value) != 0:
+        result.error_code = error_code['match']
         result.summary = "Exist optimized nodes, please view details."
         extend_result.type = extend_type['table']
         extend_result.extend_title = 'Optimized subgraph'
