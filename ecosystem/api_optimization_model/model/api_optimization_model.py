@@ -89,7 +89,7 @@ def evaluate(dataPath, parameter):
         environment, mode = config_parser.para_parser(parameter, environment, mode)
         if environment == '310P':
             log.ad_log(log.ad_info, "The knowledge is 310P.")
-            extend_result = data_process.data_process(dataPath, extend_result)
+            extend_result = data_process.data_process_310P(dataPath, extend_result)
         else:
             log.ad_log(log.ad_info, "The knowledge is 310B.")
             extend_result = data_process.data_process_310B(dataPath, extend_result)
