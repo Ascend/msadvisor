@@ -90,11 +90,15 @@ def evaluate(dataPath, parameter):
         if environment == '310P':
             log.ad_log(log.ad_info, "The knowledge is 310P.")
             extend_result = data_process.data_process_310P(dataPath, extend_result)
+            if mode == 'RC':
+                extend_result = data_process.data_process_310B_mode(dataPath, extend_result)
+                log.ad_log(log.ad_info, "The knowledge is zero memory copy.")
         else:
             log.ad_log(log.ad_info, "The knowledge is 310B.")
             extend_result = data_process.data_process_310B(dataPath, extend_result)
             if mode == 'RC':
                 extend_result = data_process.data_process_310B_mode(dataPath, extend_result)
+                log.ad_log(log.ad_info, "The knowledge is zero memory copy.")
     else:
         log.ad_log(log.ad_error, "The input dataPath is incorrect. Please check -d path.")
 

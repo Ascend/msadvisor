@@ -69,4 +69,4 @@ def data_process_310B_mode(file_pathname, extend_result):
     return extend_result
 
 def data_process_310P(file_pathname, extend_result):
-    log.ad_log(log.ad_info, "330 version of api optimization model dose not support 310P.")
+    log.ad_print_and_log(log.ad_info, "330 version of api optimization model dose not support 310P.")
