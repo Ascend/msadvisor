@@ -229,14 +229,14 @@ class CannLoader(Loader):
         else:
             path_ = os.path.join(os.environ['HOME'], install_info_path)
         if not os.path.exists(path_):
-            print(f'[error] cann package has not bean installed.')
+            print(f'[error] cann package has not been installed.')
             return False
         self._install_path = read_param(path_, key='Install_Path')
         if self._install_path is None:
             print(f'[error] no Install_Path param in {path_}.')
             return False
         if not os.path.exists(os.path.join(self._install_path, 'ascend-toolkit')):
-            print('[error] cann package has not bean installed.')
+            print('[error] cann package has not been installed.')
             return False
         return True
 
@@ -325,7 +325,7 @@ class DriverLoader(Loader):
             print(f'[info] use default driver install path: {self._default_install_path}.')
             self._install_path = self._default_install_path
         if not os.path.exists(os.path.join(self._install_path, 'driver')):
-            print(f'[error] driver has not bean installed.')
+            print(f'[error] driver has not been installed.')
             return False
         return True
 
@@ -416,7 +416,7 @@ class Checker(object):
 
         if torch_npu_version is None and torch_version.startswith('1.5'):
             if not torch_version.startswith('1.5'):
-                print(f'[error] torch_npu has not bean installed.')
+                print(f'[error] torch_npu has not been installed.')
                 return False
             return self._check_torch_and_cann_version(torch_version, cann_version) and \
                 self._check_cann_and_driver_version(cann_version, driver_version)
@@ -440,7 +440,7 @@ class Checker(object):
                     loss_environ += f'{name}={v}\n'
         loss_environ = loss_environ.rstrip()
         if len(loss_environ) != 0:
-            print(f'[error] some environs has not bean setted:')
+            print(f'[error] some environs has not been setted:')
             print(f'{loss_environ}')
             print('please configure these environment vriables, or ' \
                 'execute the command \'source set_env.sh\'')
