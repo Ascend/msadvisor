@@ -22,7 +22,7 @@ from training.hccl_analysis_model.hcclanalysis import evaluate
 
 def run_hcclanalysis(rank_size, bucket_name, data_path):
     pra = {
-        "step_num": 1,
+        "step_num": None,
     }
     pra.update({"rank_size": rank_size})
     pra = json.dumps(pra)
