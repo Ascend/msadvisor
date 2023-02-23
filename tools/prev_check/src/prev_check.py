@@ -75,7 +75,7 @@ CANN_AND_DRIVER_VERSION_MAP = {
 }
 
 
-''' common functions '''
+# common functions
 def split_(msg: str, split: str = '='):
     if msg.count(split) == 0:
         return '', ''
@@ -168,7 +168,7 @@ class TorchLoader(Loader):
         except ImportError as e:
             # if torch version is 1.5, no need to install torch_npu
             if not self._torch_version.startswith('1.5'):
-                print(f'[error] {e}, torch_npu import failed.')
+                print(f'[error] {e}.')
                 return False
             return True
         except AttributeError as e:
@@ -300,7 +300,6 @@ class DriverLoader(Loader):
     def __init__(self) -> None:
         super().__init__()
         self._version: str = None
-        self._is_inner_version: bool = True
 
         self._install_path: str = None
         self._default_install_path = '/usr/local/Ascend'
@@ -308,10 +307,6 @@ class DriverLoader(Loader):
     @property
     def version(self) -> str:
         return self._version
-
-    @property
-    def is_inner_version(self) -> bool:
-        return self._is_inner_version
 
     def load(self, data_type: DataType) -> bool:
         if data_type is DataType.VERSION:
@@ -347,7 +342,6 @@ class DriverLoader(Loader):
             return False
         version = CANN_AND_TUSCANCY_VERSION_MAP[version][0]
         self._version = version
-        self._is_inner_version = False
         return True
 
     def _query_version_fun1(self, version_path: str) -> bool:
@@ -402,8 +396,8 @@ class DriverLoader(Loader):
         return False
 
 
-''' check the version matching status and environment variables '''
 class Checker(object):
+    ''' check the version matching status and environment variables '''
     def __init__(self) -> None:
         self._torch_loader: Loader = TorchLoader()
         self._cann_loader: Loader = CannLoader()
@@ -453,7 +447,7 @@ class Checker(object):
             return False
         print('[info] environment variable check succeed.')
         return True
-    
+
     def _get_keys_by_match_value(self, msg: str, dict_: Dict[str, list]) -> list:
         results = []
         max_match_ = ''
