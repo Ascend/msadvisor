@@ -74,7 +74,7 @@ def get_subgraph(onnxpath: str, pattern: Pattern) -> None:
     for i, match_result in enumerate(match_results):
         try:
             # 指定截取后模型onnx文件的保存路径
-            new_model_path = f'new_model_{i}.onnx'
+            new_model_path = f'{os.path.splitext(onnxpath)[0]}_subgraph_{i}.onnx'
             # 模型截取的输入边
             input_name_list: List[str] = []
             for input_op_name in input_op_name_list:
