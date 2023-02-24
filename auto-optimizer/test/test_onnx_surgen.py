@@ -63,7 +63,7 @@ def get_subgraph(onnxpath: str, pattern: Pattern) -> None:
     d = D()
     graph = OnnxGraph.parse(onnxpath)
     # 根据定义的子图，在graph中查找匹配，返回一组MatchResult实例
-    match_results = d.match_pattern(graph, pattern)
+    match_results = d.match_pattern(graph)
     if match_results is None or len(match_results) == 0:
         print('No subgraph is matched.')
         return
