@@ -96,12 +96,12 @@ if __name__ == '__main__':
 
     # 定义子图
     pattern = Pattern() \
-        .add_node('Unsqueeze_0', 'Unsqueeze', [ConvMatch()]) \
-        .add_node('Expand_0', 'Expand') \
-        .add_node('Transpose_0', 'Transpose') \
-        .add_node('Mul_0', 'Mul') \
-        .add_node('MatMul_0', 'MatMul') \
-        .add_node('Add_0', 'Add') \
+        .add_node('Unsqueeze_0', ['Unsqueeze'], [ConvMatch()]) \
+        .add_node('Expand_0', ['Expand']) \
+        .add_node('Transpose_0', ['Transpose']) \
+        .add_node('Mul_0', ['Mul']) \
+        .add_node('MatMul_0', ['MatMul']) \
+        .add_node('Add_0', ['Add']) \
         .add_edge('Unsqueeze_0', 'Expand_0') \
         .add_edge('Expand_0', 'Transpose_0') \
         .add_edge('Expand_0', 'Mul_0') \
