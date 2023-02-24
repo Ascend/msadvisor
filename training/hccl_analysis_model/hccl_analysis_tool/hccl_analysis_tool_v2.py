@@ -73,10 +73,14 @@ class HcclAnalysisTool:
         get_op_info = self.record_op_info(op_info_record, analysis_op_name, valid_step_num, hccl_op_name)
         if get_op_info == Constant.DATA_PARSE_ERROR:
             return Constant.HCCL_ANALYSIS_ERROR
-        ad_log(AD_INFO, f"Operator {analysis_op_name} information recorded from {hccl_op_name} successfully, ")
-        ad_log(AD_INFO, f"valid step_num: {valid_step_num}")
-        if step_num is None:
-            step_num = min(valid_step_num)
+        if valid_step_num:
+            step_num = step_num if step_num else min(valid_step_num)
+        ad_log(
+            AD_INFO,
+            f"Operator {analysis_op_name} information recorded from {hccl_op_name} successfully, "
+            f"valid step_num: {valid_step_num}. "
+            f"Analysing the data of step {step_num}."
+        )
         op_info = op_info_record.get(analysis_op_name).get(step_num)
         if op_info is None:
             ad_print_and_log(AD_ERROR, f"There is not step_num like {step_num}, please check")

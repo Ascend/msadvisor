@@ -23,26 +23,32 @@ def collect_data(src_url, dst_url, data="ALL"):
     """Collect all data to OBS or filter redundant data"""
     if data == "All":
         mox.file.copy_parallel(src_url, dst_url)
-    else:
+    elif data == "HCCL":
         src_url = os.path.join(src_url, "profiler")
         dst_url = os.path.join(dst_url, "profiler")
-
-        data_list = PROFILER_DATA_DICT.get(data)
-        for name in data_list:
-            file_names = glob.glob(os.path.join(src_url, name))
-            for file_name in file_names:
-                if os.path.isdir(file_name):
-                    dir_basename = os.path.basename(file_name)
-                    if "PROF_" in dir_basename:
-                        slim_pro_data(file_name, dst_url)
+        if os.path.exists(src_url):
+            data_list = PROFILER_DATA_DICT.get(data)
+            for name in data_list:
+                file_names = glob.glob(os.path.join(src_url, name))
+                if not file_names:
+                    print(f"Failed copy {name}, there is not {name} in {src_url}")
+                for file_name in file_names:
+                    if os.path.isdir(file_name):
+                        dir_basename = os.path.basename(file_name)
+                        if "PROF_" in dir_basename:
+                            slim_pro_data(file_name, dst_url)
+                        else:
+                            dst_path = os.path.join(dst_url, dir_basename)
+                            mox.file.copy_parallel(file_name, dst_path)
+                    elif os.path.isfile(file_name):
+                        dir_basename = os.path.basename(file_name)
+                        mox.file.copy(file_name, os.path.join(dst_url, dir_basename))
                     else:
-                        dst_path = os.path.join(dst_url, dir_basename)
-                        mox.file.copy_parallel(file_name, dst_path)
-                elif os.path.isfile(file_name):
-                    dir_basename = os.path.basename(file_name)
-                    mox.file.copy(file_name, os.path.join(dst_url, dir_basename))
-                else:
-                    continue
+                        continue
+        else:
+            print(f"src_url: {src_url} not exist, please check!")
+    else:
+        print(f"data is invalid, expected one of ['HCCL', 'ALL'], but get {data}")
 
 
 def slim_pro_data(pro_dir, dst_url):
