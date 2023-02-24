@@ -1,0 +1,16 @@
+{
+  "model_list": [
+    {
+      "model_name": "api_optimization_model",
+      "session_list": [
+        {
+          "python_model_path": "./",
+          "parameter":{
+            "env": "310B",
+            "mode": "EP"
+          }
+        }
+      ]
+    }
+  ]
+}
