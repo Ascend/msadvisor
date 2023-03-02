@@ -71,9 +71,14 @@ class TestNode(unittest.TestCase):
         node['kernel_shape'] = 5
         self.assertEqual(node['kernel_shape'], 5)
 
-    def test_node_domain(self):
+    def test_node_get_domain(self):
         node = create_node('OnnxNode')
         self.assertEqual(node.domain, '')
+    
+    def test_node_set_domain(self):
+        node = create_node('OnnxNode')
+        node.domain = '11'
+        self.assertEqual(node.domain, '11')
 
 
 if __name__ == "__main__":
