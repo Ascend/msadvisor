@@ -330,19 +330,19 @@ def datatype_process(file_pathname, extend_result):
                         value = []
                         value.append("ACL_VENC_BUF_SIZE_UINT32")
                         value.append("The parameter value defaults to 8m")
-                        value.append(str(f.name) + ' Line:' + str(line_num))
+                        value.append(str(f.name) + ' Line:-')
                         extend_result.value.append(value)
                     if ACL_VENC_MAX_BITRATE_UINT32_flag == 0:
                         value = []
                         value.append("ACL_VENC_MAX_BITRATE_UINT32")
                         value.append("The parameter value defaults to 2000")
-                        value.append(str(f.name) + ' Line:' + str(line_num))
+                        value.append(str(f.name) + ' Line:-')
                         extend_result.value.append(value)
                     if ACL_VENC_RC_MODE_UINT32_flag == 0:
                         value = []
                         value.append("ACL_VENC_RC_MODE_UINT32")
                         value.append("The default value of 0 indicates VBR mode")
-                        value.append(str(f.name) + ' Line:' + str(line_num))
+                        value.append(str(f.name) + ' Line:-')
                         extend_result.value.append(value)
 
     return extend_result
