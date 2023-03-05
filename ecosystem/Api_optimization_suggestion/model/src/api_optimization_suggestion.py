@@ -210,139 +210,140 @@ def datatype_process(file_pathname, extend_result):
     if not os.path.isdir(file_pathname):
         return extend_result
 
-    for filename in os.listdir(file_pathname):
-        if filename.endswith('.cpp') or filename.endswith('.py') or filename.endswith('.h'):
-            line_num = 0
-            path = os.path.join(file_pathname, filename)
-            with open(path, encoding='UTF-8') as f:
-                contents = f.readlines()
-                ACL_VENC_BUF_SIZE_UINT32_flag = 0
-                ACL_VENC_MAX_BITRATE_UINT32_flag = 0
-                ACL_VENC_RC_MODE_UINT32_flag = 0
-                for line in contents:
-                    line_num += 1
+    for root, dirs, files in os.walk(file_pathname):
+        for file in files:
+            if file.endswith('.cpp') or file.endswith('.py') or file.endswith('.h'):
+                line_num = 0
+                path = os.path.join(root, file)
+                with open(path, encoding='UTF-8') as f:
+                    contents = f.readlines()
+                    ACL_VENC_BUF_SIZE_UINT32_flag = 0
+                    ACL_VENC_MAX_BITRATE_UINT32_flag = 0
+                    ACL_VENC_RC_MODE_UINT32_flag = 0
+                    for line in contents:
+                        line_num += 1
 
-                    # 0 copy
-                    if line.count('acldvppMalloc'):
-                        para = line.split('(')[1]
-                        para = para.split(',')[0]
-                        para = para.split(')')[0]
-                        dvppmem.append(para.strip())
-                    if line.count('aclrtMemcpy') and dvppmem != []:
-                        para = line.split('aclrtMemcpy')[1]
-                        para = para.split(',')[2].strip()
-                        if para in dvppmem:
+                        # 0 copy
+                        if line.count('acldvppMalloc'):
+                            para = line.split('(')[1]
+                            para = para.split(',')[0]
+                            para = para.split(')')[0]
+                            dvppmem.append(para.strip())
+                        if line.count('aclrtMemcpy') and dvppmem != []:
+                            para = line.split('aclrtMemcpy')[1]
+                            para = para.split(',')[2].strip()
+                            if para in dvppmem:
+                                value = []
+                                value.append('aclrtMemcpy')
+                                value.append(
+                                    'There is not need to copy the data on the dvpp output memory to the non dvpp device memory')
+                                value.append(str(f.name) + ' Line:' + str(line_num))
+                                extend_result.value.append(value)
+
+                        #V1 transform
+                        if line.count('acldvppSetResizeConfigInterpolation'):
+                            interpolation = line.split('(')[1]
+                            interpolation = interpolation.split(')')[0]
+                            interpolation= interpolation.split(',')[1]
+                            if int(interpolation)==0:
+                                value = []
+                                value.append('acldvppSetResizeConfigInterpolation')
+                                value.append('Ascend 310P 0:(default)Bilinear algorithm.1:Bilinear algorithm')
+                                value.append(str(f.name) + ' Line:' + str(line_num))
+                                extend_result.value.append(value)
+                            if int(interpolation)==3 or int(interpolation)==4 :
+                                value = []
+                                value.append('acldvppSetResizeConfigInterpolation')
+                                value.append('Ascend 310P only support 0:(default)Bilinear algorithm. 1:Bilinear algorithm  2:Nearest neighbor algorithm')
+                                value.append(str(f.name) + ' Line:' + str(line_num))
+                                extend_result.value.append(value)
+                        if line.count('aclvencSetChannelDescParam'):
                             value = []
-                            value.append('aclrtMemcpy')
+                            value.append('aclvencSetChannelDescParam')
                             value.append(
-                                'There is not need to copy the data on the dvpp output memory to the non dvpp device memory')
-                            value.append(filename + ' Line:' + str(line_num))
+                                'Ascend 310P:cannot use the set IP ratio function,needs to set the output buffer, and there is no need to copy the encoded output results again. Set the output code rate to 300, otherwise the default value of 2000 will be used on ascend 310P.')
+                            value.append(str(f.name) + ' Line:' + str(line_num))
                             extend_result.value.append(value)
 
-                    #V1 transform
-                    if line.count('acldvppSetResizeConfigInterpolation'):
-                        interpolation = line.split('(')[1]
-                        interpolation = interpolation.split(')')[0]
-                        interpolation= interpolation.split(',')[1]
-                        if int(interpolation)==0:
-                            value = []
-                            value.append('acldvppSetResizeConfigInterpolation')
-                            value.append('Ascend 310P 0:(default)Bilinear algorithm.1:Bilinear algorithm')
-                            value.append(filename + ' Line:' + str(line_num))
-                            extend_result.value.append(value)
-                        if int(interpolation)==3 or int(interpolation)==4 :
-                            value = []
-                            value.append('acldvppSetResizeConfigInterpolation')
-                            value.append('Ascend 310P only support 0:(default)Bilinear algorithm. 1:Bilinear algorithm  2:Nearest neighbor algorithm')
-                            value.append(filename + ' Line:' + str(line_num))
-                            extend_result.value.append(value)
-                    if line.count('aclvencSetChannelDescParam'):
-                        value = []
-                        value.append('aclvencSetChannelDescParam')
-                        value.append(
-                            'Ascend 310P:cannot use the set IP ratio function,needs to set the output buffer, and there is no need to copy the encoded output results again. Set the output code rate to 300, otherwise the default value of 2000 will be used on ascend 310P.')
-                        value.append(filename + ' Line:' + str(line_num))
-                        extend_result.value.append(value)
-
-                    for datatypeparam in task_data.keys():
-                        if datatypeparam in line:
-                            if datatypeparam == "ACL_VENC_BUF_SIZE_UINT32":
-                                ACL_VENC_BUF_SIZE_UINT32_flag = 1
-                                ACL_VENC_BUF_SIZE_UINT32_para = line.split('=')[1]
-                                ACL_VENC_BUF_SIZE_UINT32_para = int(ACL_VENC_BUF_SIZE_UINT32_para.split(',')[0])
-                                if ACL_VENC_BUF_SIZE_UINT32_para < 5:
-                                    value = []
-                                    value.append(datatypeparam)
-                                    value.append(task_data[datatypeparam])
-                                    value.append(filename + ' Line:' + str(line_num))
-                                    extend_result.value.append(value)
-
-                            elif datatypeparam == "ACL_VENC_MAX_BITRATE_UINT32":
-                                ACL_VENC_MAX_BITRATE_UINT32_flag = 1
-                                ACL_VENC_MAX_BITRATE_UINT32_para = line.split('=')[1]
-                                ACL_VENC_MAX_BITRATE_UINT32_para = int(ACL_VENC_MAX_BITRATE_UINT32_para.split(',')[0])
-                                if ACL_VENC_MAX_BITRATE_UINT32_para > 614400 or ACL_VENC_MAX_BITRATE_UINT32_para < 2:
-                                    if ACL_VENC_MAX_BITRATE_UINT32_para == 0:
-                                        value = []
-                                        value.append(datatypeparam)
-                                        value.append("The parameter value defaults to 2000")
-                                        value.append(filename + ' Line:' + str(line_num))
-                                        extend_result.value.append(value)
-                                    else:
+                        for datatypeparam in task_data.keys():
+                            if datatypeparam in line:
+                                if datatypeparam == "ACL_VENC_BUF_SIZE_UINT32":
+                                    ACL_VENC_BUF_SIZE_UINT32_flag = 1
+                                    ACL_VENC_BUF_SIZE_UINT32_para = line.split('=')[1]
+                                    ACL_VENC_BUF_SIZE_UINT32_para = int(ACL_VENC_BUF_SIZE_UINT32_para.split(',')[0])
+                                    if ACL_VENC_BUF_SIZE_UINT32_para < 5:
                                         value = []
                                         value.append(datatypeparam)
                                         value.append(task_data[datatypeparam])
-                                        value.append(filename + ' Line:' + str(line_num))
+                                        value.append(str(f.name) + ' Line:' + str(line_num))
                                         extend_result.value.append(value)
 
-                            elif datatypeparam == "ACL_VENC_SRC_RATE_UINT32":
+                                elif datatypeparam == "ACL_VENC_MAX_BITRATE_UINT32":
+                                    ACL_VENC_MAX_BITRATE_UINT32_flag = 1
+                                    ACL_VENC_MAX_BITRATE_UINT32_para = line.split('=')[1]
+                                    ACL_VENC_MAX_BITRATE_UINT32_para = int(ACL_VENC_MAX_BITRATE_UINT32_para.split(',')[0])
+                                    if ACL_VENC_MAX_BITRATE_UINT32_para > 614400 or ACL_VENC_MAX_BITRATE_UINT32_para < 2:
+                                        if ACL_VENC_MAX_BITRATE_UINT32_para == 0:
+                                            value = []
+                                            value.append(datatypeparam)
+                                            value.append("The parameter value defaults to 2000")
+                                            value.append(str(f.name) + ' Line:' + str(line_num))
+                                            extend_result.value.append(value)
+                                        else:
+                                            value = []
+                                            value.append(datatypeparam)
+                                            value.append(task_data[datatypeparam])
+                                            value.append(str(f.name) + ' Line:' + str(line_num))
+                                            extend_result.value.append(value)
 
-                                ACL_VENC_SRC_RATE_UINT32_para = line.split('=')[1]
-                                ACL_VENC_SRC_RATE_UINT32_para = int(ACL_VENC_SRC_RATE_UINT32_para.split(',')[0])
-                                if (ACL_VENC_SRC_RATE_UINT32_para > 240 or ACL_VENC_SRC_RATE_UINT32_para < 1) and (
-                                        ACL_VENC_SRC_RATE_UINT32_para != 0):
-                                    value = []
+                                elif datatypeparam == "ACL_VENC_SRC_RATE_UINT32":
+
+                                    ACL_VENC_SRC_RATE_UINT32_para = line.split('=')[1]
+                                    ACL_VENC_SRC_RATE_UINT32_para = int(ACL_VENC_SRC_RATE_UINT32_para.split(',')[0])
+                                    if (ACL_VENC_SRC_RATE_UINT32_para > 240 or ACL_VENC_SRC_RATE_UINT32_para < 1) and (
+                                            ACL_VENC_SRC_RATE_UINT32_para != 0):
+                                        value = []
+                                        value.append(datatypeparam)
+                                        value.append(task_data[datatypeparam])
+                                        value.append(str(f.name) + ' Line:' + str(line_num))
+                                        extend_result.value.append(value)
+
+
+                                elif datatypeparam == "ACL_VENC_RC_MODE_UINT32":
+                                    ACL_VENC_RC_MODE_UINT32_flag = 1
+                                    ACL_VENC_RC_MODE_UINT32_para = line.split('=')[1]
+                                    ACL_VENC_RC_MODE_UINT32_para = int(ACL_VENC_RC_MODE_UINT32_para.split(',')[0])
+                                    if ACL_VENC_RC_MODE_UINT32_para == 0:
+                                        value = []
+                                        value.append(datatypeparam)
+                                        value.append("The default value of 0 indicates VBR mode")
+                                        value.append(str(f.name) + ' Line:' + str(line_num))
+                                        extend_result.value.append(value)
+
+                                elif datatypeparam == "ACL_VENC_RC_MODE_UINT32":
                                     value.append(datatypeparam)
                                     value.append(task_data[datatypeparam])
-                                    value.append(filename + ' Line:' + str(line_num))
+                                    value.append(str(f.name) + ' Line:' + str(line_num))
                                     extend_result.value.append(value)
 
-
-                            elif datatypeparam == "ACL_VENC_RC_MODE_UINT32":
-                                ACL_VENC_RC_MODE_UINT32_flag = 1
-                                ACL_VENC_RC_MODE_UINT32_para = line.split('=')[1]
-                                ACL_VENC_RC_MODE_UINT32_para = int(ACL_VENC_RC_MODE_UINT32_para.split(',')[0])
-                                if ACL_VENC_RC_MODE_UINT32_para == 0:
-                                    value = []
-                                    value.append(datatypeparam)
-                                    value.append("The default value of 0 indicates VBR mode")
-                                    value.append(filename + ' Line:' + str(line_num))
-                                    extend_result.value.append(value)
-
-                            elif datatypeparam == "ACL_VENC_RC_MODE_UINT32":
-                                value.append(datatypeparam)
-                                value.append(task_data[datatypeparam])
-                                value.append(filename + ' Line:' + str(line_num))
-                                extend_result.value.append(value)
-
-                if ACL_VENC_BUF_SIZE_UINT32_flag == 0:
-                    value = []
-                    value.append("ACL_VENC_BUF_SIZE_UINT32")
-                    value.append("The parameter value defaults to 8m")
-                    value.append(str(filename.name) + ' Line:' + str(line_num))
-                    extend_result.value.append(value)
-                if ACL_VENC_MAX_BITRATE_UINT32_flag == 0:
-                    value = []
-                    value.append("ACL_VENC_MAX_BITRATE_UINT32")
-                    value.append("The parameter value defaults to 2000")
-                    value.append(str(filename.name) + ' Line:' + str(line_num))
-                    extend_result.value.append(value)
-                if ACL_VENC_RC_MODE_UINT32_flag == 0:
-                    value = []
-                    value.append("ACL_VENC_RC_MODE_UINT32")
-                    value.append("The default value of 0 indicates VBR mode")
-                    value.append(str(filename.name) + ' Line:' + str(line_num))
-                    extend_result.value.append(value)
+                    if ACL_VENC_BUF_SIZE_UINT32_flag == 0:
+                        value = []
+                        value.append("ACL_VENC_BUF_SIZE_UINT32")
+                        value.append("The parameter value defaults to 8m")
+                        value.append(str(f.name) + ' Line:' + str(line_num))
+                        extend_result.value.append(value)
+                    if ACL_VENC_MAX_BITRATE_UINT32_flag == 0:
+                        value = []
+                        value.append("ACL_VENC_MAX_BITRATE_UINT32")
+                        value.append("The parameter value defaults to 2000")
+                        value.append(str(f.name) + ' Line:' + str(line_num))
+                        extend_result.value.append(value)
+                    if ACL_VENC_RC_MODE_UINT32_flag == 0:
+                        value = []
+                        value.append("ACL_VENC_RC_MODE_UINT32")
+                        value.append("The default value of 0 indicates VBR mode")
+                        value.append(str(f.name) + ' Line:' + str(line_num))
+                        extend_result.value.append(value)
 
     return extend_result
 
