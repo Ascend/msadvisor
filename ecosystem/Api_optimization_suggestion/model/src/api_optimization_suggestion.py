@@ -14,28 +14,28 @@ extend_data_type = {'str': '0', 'int': '1', 'double': '2'}
 V1_transformer = {
     "acldvppSetPicDescWidth": "For yuv420sp format, both width and height need 2 alignment, and for yuv422sp or yuv422packed format,the width needs 2 alignment",
     "acldvppSetPicDescHeight": "For yuv420sp format, both width and height need 2 alignment, and for yuv440sp format, the height needs 2 alignment",
-    "acldvppSetPicDescSize": "Ascend 710:Support yuv400 format image processing, directly set the format of the input image to yuv400,and the memory size to widthstripe*heightslide. VPC will verify the memory size according to the image format",
-    "aclvdecSetChannelDescOutPicWidth": "Input code stream buffer size: maximum width of decoded code stream * maximum height of decoded code stream *2,Ascend 710:calculate the cache size of the input code stream using the formula, needs to modify the code and call the aclvdecsetchanneldescoutpicwidth and aclvdecsetchanneldescoutpicheight interfaces to set the correct width and height.",
-    "aclvdecSetChannelDescOutPicHeight": "Input code stream buffer size: maximum width of decoded code stream * maximum height of decoded code stream *2,Ascend 710:calculate the cache size of the input code stream using the formula, needs to modify the code and call the aclvdecsetchanneldescoutpicwidth and aclvdecsetchanneldescoutpicheight interfaces to set the correct width and height.",
+    "acldvppSetPicDescSize": "Ascend 310P:Support yuv400 format image processing, directly set the format of the input image to yuv400,and the memory size to widthstripe*heightslide. VPC will verify the memory size according to the image format",
+    "aclvdecSetChannelDescOutPicWidth": "Input code stream buffer size: maximum width of decoded code stream * maximum height of decoded code stream *2,Ascend 310P:calculate the cache size of the input code stream using the formula, needs to modify the code and call the aclvdecsetchanneldescoutpicwidth and aclvdecsetchanneldescoutpicheight interfaces to set the correct width and height.",
+    "aclvdecSetChannelDescOutPicHeight": "Input code stream buffer size: maximum width of decoded code stream * maximum height of decoded code stream *2,Ascend 310P:calculate the cache size of the input code stream using the formula, needs to modify the code and call the aclvdecsetchanneldescoutpicwidth and aclvdecsetchanneldescoutpicheight interfaces to set the correct width and height.",
     "aclvdecSetChannelDescRefFrameNum": "The default value of reference frame is 8, which is compatible with decoding most code streams, but for code streams with a large number of reference frames, decoding may fail.",
     "aclvdecSetChannelDescBitDepth": "For a 10bit code stream, if it is not set, decoding may fail. You need to call the aclvdecsetchanneldescbitdepth interface to set the bit width to 10bit",
     "aclvencSetChannelDescBufAddr": "The user needs to set the output buffer, and there is no need to copy the encoded output results again.",
-    "aclvencSetChannelDescMaxBitRate": "If the user does not explicitly call the aclvencsetchanneldescmaxbitrate interface or aclvencsetchanneldescparam interface, the encoder will use the default output code rate for encoding. After migrating to ascend 710, you need to explicitly call the aclvencsetchanneldescmaxbitrate interface or aclvencsetchanneldescparam interface to set the output code rate to 300, otherwise the default value of 2000 will be used on ascend 710.",
+    "aclvencSetChannelDescMaxBitRate": "If the user does not explicitly call the aclvencsetchanneldescmaxbitrate interface or aclvencsetchanneldescparam interface, the encoder will use the default output code rate for encoding. After migrating to ascend 310P, you need to explicitly call the aclvencsetchanneldescmaxbitrate interface or aclvencsetchanneldescparam interface to set the output code rate to 300, otherwise the default value of 2000 will be used on ascend 310P.",
     "acldvppSetChannelDescMode": "It supports setting the channel mode. If the channel mode is not set, the channel of vpc+jpegd+jpege+pngd will be created by default when creating the channel, which may occupy resources.",
-    "acldvppCreateChannel": "710: vdec and jpegd share the channel number and support 256 channels at most. VPC supports 256 channels at most. Jpege and Venc share the same channel and the maximum number of channels is 128.",
-    "aclvdecCreateChanne": "710: vdec and jpegd share the channel number and support 256 channels at most. VPC supports 256 channels at most. Jpege and Venc share the same channel and the maximum number of channels is 128.",
-    "aclvencCreateChannel": "710: vdec and jpegd share the channel number and support 256 channels at most. VPC supports 256 channels at most. Jpege and Venc share the same channel and the maximum number of channels is 128."
+    "acldvppCreateChannel": "310P: vdec and jpegd share the channel number and support 256 channels at most. VPC supports 256 channels at most. Jpege and Venc share the same channel and the maximum number of channels is 128.",
+    "aclvdecCreateChanne": "310P: vdec and jpegd share the channel number and support 256 channels at most. VPC supports 256 channels at most. Jpege and Venc share the same channel and the maximum number of channels is 128.",
+    "aclvencCreateChannel": "310P: vdec and jpegd share the channel number and support 256 channels at most. VPC supports 256 channels at most. Jpege and Venc share the same channel and the maximum number of channels is 128."
 }
 
 
 
 
 task_data={
-"ACL_VENC_MAX_BITRATE_UINT32": "310:range 0 or [10,30000] default 300,if set 0,means use default value 300.910:range 0 or [10,30000] default 300,if set 0,means use default value 300.710:range [2,614400] default 2000,if set 0,means use default value 2000.",
+"ACL_VENC_MAX_BITRATE_UINT32": "310:range 0 or [10,30000] default 300,if set 0,means use default value 300.910:range 0 or [10,30000] default 300,if set 0,means use default value 300.310P:range [2,614400] default 2000,if set 0,means use default value 2000.",
 "ACL_VENC_MAX_IP_PROP_UINT32":"Ratio of the number of bits of a single I frame to the number of bits of a single P frame in a GOP,range 0 or [1,100] .If this parameter is not set,VBR mode default 80, CBR mode default 70.If set 0,use default value.",
-"ACL_VENC_BUF_SIZE_UINT32": "710:Default=8M,Min=5M.310 and 910:not support to set this parameter,default 3686400 Byte.",
-"ACL_VENC_RC_MODE_UINT32": "default 0.310:value 0 equal CBR mode.910:value 0 equal CBR mode.710:value 0 means VBR mode",
-"ACL_VENC_SRC_RATE_UINT32": "310:range 0 or [1,120].910:range 0 or [1,120].710:range 0 or [1,240].If this parameter is not set,default is 30.If set 0,use default 30.If the difference between this value and the actual input bitstream frame rate is too large, the output bitrate will be affected."}
+"ACL_VENC_BUF_SIZE_UINT32": "310P:Default=8M,Min=5M.310 and 910:not support to set this parameter,default 3686400 Byte.",
+"ACL_VENC_RC_MODE_UINT32": "default 0.310:value 0 equal CBR mode.910:value 0 equal CBR mode.310P:value 0 means VBR mode",
+"ACL_VENC_SRC_RATE_UINT32": "310:range 0 or [1,120].910:range 0 or [1,120].310P:range 0 or [1,240].If this parameter is not set,default is 30.If set 0,use default 30.If the difference between this value and the actual input bitstream frame rate is too large, the output bitrate will be affected."}
 
 
 def evaluate(dataPath, parameter):
@@ -247,20 +247,20 @@ def datatype_process(file_pathname, extend_result):
                         if int(interpolation)==0:
                             value = []
                             value.append('acldvppSetResizeConfigInterpolation')
-                            value.append('Ascend 710 0:(default)Bilinear algorithm.1:Bilinear algorithm')
+                            value.append('Ascend 310P 0:(default)Bilinear algorithm.1:Bilinear algorithm')
                             value.append(filename + ' Line:' + str(line_num))
                             extend_result.value.append(value)
                         if int(interpolation)==3 or int(interpolation)==4 :
                             value = []
                             value.append('acldvppSetResizeConfigInterpolation')
-                            value.append('Ascend 710 only support 0:(default)Bilinear algorithm. 1:Bilinear algorithm  2:Nearest neighbor algorithm')
+                            value.append('Ascend 310P only support 0:(default)Bilinear algorithm. 1:Bilinear algorithm  2:Nearest neighbor algorithm')
                             value.append(filename + ' Line:' + str(line_num))
                             extend_result.value.append(value)
                     if line.count('aclvencSetChannelDescParam'):
                         value = []
                         value.append('aclvencSetChannelDescParam')
                         value.append(
-                            'Ascend 710:cannot use the set IP ratio function,needs to set the output buffer, and there is no need to copy the encoded output results again. Set the output code rate to 300, otherwise the default value of 2000 will be used on ascend 710.')
+                            'Ascend 310P:cannot use the set IP ratio function,needs to set the output buffer, and there is no need to copy the encoded output results again. Set the output code rate to 300, otherwise the default value of 2000 will be used on ascend 310P.')
                         value.append(filename + ' Line:' + str(line_num))
                         extend_result.value.append(value)
 
@@ -329,19 +329,19 @@ def datatype_process(file_pathname, extend_result):
                     value = []
                     value.append("ACL_VENC_BUF_SIZE_UINT32")
                     value.append("The parameter value defaults to 8m")
-                    value.append(f'{filename} Line:-')
+                    value.append(str(filename.name) + ' Line:' + str(line_num))
                     extend_result.value.append(value)
                 if ACL_VENC_MAX_BITRATE_UINT32_flag == 0:
                     value = []
                     value.append("ACL_VENC_MAX_BITRATE_UINT32")
                     value.append("The parameter value defaults to 2000")
-                    value.append(f'{filename} Line:-')
+                    value.append(str(filename.name) + ' Line:' + str(line_num))
                     extend_result.value.append(value)
                 if ACL_VENC_RC_MODE_UINT32_flag == 0:
                     value = []
                     value.append("ACL_VENC_RC_MODE_UINT32")
                     value.append("The default value of 0 indicates VBR mode")
-                    value.append(f'{filename} Line:-')
+                    value.append(str(filename.name) + ' Line:' + str(line_num))
                     extend_result.value.append(value)
 
     return extend_result
@@ -351,11 +351,11 @@ def result_parse(result, extend_result):
     if not extend_result.value:
         result.class_type = class_type['op']
         result.error_code = error_code['optimized']
-        result.summary = "710 API operations are well optimized"
+        result.summary = "310P API operations are well optimized"
         return result.generate()
     result.class_type = class_type['op']
     result.error_code = error_code['success']
-    result.summary = "710 API operations need to be optimized"
+    result.summary = "310P API operations need to be optimized"
     result.extend_result.append(extend_result)
     return result.generate()
 
