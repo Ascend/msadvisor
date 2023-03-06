@@ -36,7 +36,7 @@ g.update_map() # 手动连边后需更新连边关系
 # 在 add 算子节点前插入一个 argmax 节点
 argmax = g.add_node('dummy_ArgMax',
                       'ArgMax',
-                      {'axis': 0, 'keepdims': 1, 'select_last_index': 0})
+                      attrs={'axis': 0, 'keepdims': 1, 'select_last_index': 0})
 g.insert_node('dummy_add', argmax, mode='before') # 由于 argmax 为单输入单输出节点，可以不手动连边而是使用 insert 函数
 
 # 保存修改好的 onnx 模型
