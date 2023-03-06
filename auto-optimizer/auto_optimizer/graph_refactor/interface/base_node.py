@@ -143,6 +143,10 @@ class Node(BaseNode):
     @property
     def domain(self) -> str:
         return self._domain
+    
+    @domain.setter
+    def domain(self, domain: str) -> None:
+        self._domain = domain
 
     def __str__(self) -> str:
         return f'Node({self.name}): \n\tinputs={self.inputs}\n\toutputs={self.outputs}\n\tattrs = {self.attrs}\n'
