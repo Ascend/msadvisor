@@ -317,7 +317,7 @@ def direction4_1_process(environment_data, user_parameter, datapath, target_path
                 continue
         if er1.value:
             er1.data_type = [EXTEND_DATA_TYPE['str'] * 3]
-        c
+            optimizedsummary = "There are relevant transfer suggestions from 310_v1 to 310p_v1"
         return er1, optimizedsummary
     elif transfer_version == '310pV2':  # flag为False且转移的版本为V2版本的话说明迁移到310p_v2_hi_mpi版本可以实现
         er2.extend_title = 'Relevant interface recommendations for transferring to 310p_v2:'
