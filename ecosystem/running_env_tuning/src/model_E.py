@@ -254,6 +254,9 @@ def direction4_1_process(environment_data, user_parameter, datapath, target_path
         'transfer_V2_file')  # 转化为310pV2的接口信息310_Transfer_v2
     # 获取目标文件下的所有文件内容
     target_file_address = user_parameter.get('target_file_address')  # 转化为310pV2的接口信息310_Transfer_v2
+    if (len(target_file_address) == 0):
+        optimizedsummary = "There are not relevant transfer suggestions from 310_v1 to 310p_v1"
+        return er2, optimizedsummary
     target_file_address_list = list(str.split(target_file_address, ','))
     target_file_content = function.GetFileContent(target_file_address_list)
 
@@ -314,7 +317,7 @@ def direction4_1_process(environment_data, user_parameter, datapath, target_path
                 continue
         if er1.value:
             er1.data_type = [EXTEND_DATA_TYPE['str'] * 3]
-        optimizedsummary = "There are relevant transfer suggestions from 310_v1 to 310p_v1"
+        c
         return er1, optimizedsummary
     elif transfer_version == '310pV2':  # flag为False且转移的版本为V2版本的话说明迁移到310p_v2_hi_mpi版本可以实现
         er2.extend_title = 'Relevant interface recommendations for transferring to 310p_v2:'
