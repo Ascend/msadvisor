@@ -101,7 +101,6 @@ def evaluate(dataPath, parameter):
                 log.ad_log(log.ad_info, "The knowledge is zero memory copy.")
     else:
         log.ad_log(log.ad_error, "The input dataPath is incorrect. Please check -d path.")
-
     result = Result()
     return result_parse(result, extend_result, environment)
 
