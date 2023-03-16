@@ -108,14 +108,14 @@ class KnowledgeTransposeLargeInputConv(KnowledgeBase):
         try:
             graph.infershape()
         except onnx.onnx_cpp2py_export.shape_inference.InferenceError:
-            logging.info('infershape failed before optimization.')
+            return False
         return super().pre_process(graph)
 
     def post_process(self, graph: BaseGraph) -> bool:
         try:
             graph.infershape()
         except onnx.onnx_cpp2py_export.shape_inference.InferenceError:
-            logging.info('infershape failed after optimization.')
+            return False
         return super().post_process(graph)
 
     def _transpose_conv(self, graph: BaseGraph, conv: Node):
