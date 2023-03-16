@@ -199,7 +199,7 @@ graph TD
 
 ---
 
-## TopK的indices输出类型修复(KnowledgeTopkIndicesTypeFix)
+## TopK算子输入输出类型修复(KnowledgeTopkFix)
 
 ### 原理
 
