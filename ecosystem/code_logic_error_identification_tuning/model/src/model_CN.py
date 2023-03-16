@@ -76,6 +76,7 @@ def Evaluate(datapath, API):
     os.chdir(sys.path[0])
     result = Result()
     sequence = 0
+    summary = ""
     result.class_type = CLASS_TYPE['model']
     result.summary = "经过本知识库调优分析可得:"
     # 获取各个方向的ExtendResult,并处理各个方向的er
@@ -86,7 +87,6 @@ def Evaluate(datapath, API):
         sequence) + "." + "在用户迁移应用中，内存ECC使能状态以及AI CPU与Ctrl CPU配比方面状况较好，该方面暂无调优意见。"
     OptimizedSummary_1 = str(sequence) + "." + \
         "在用户迁移应用中，内存ECC使能状态以及AI CPU与Ctrl CPU配比方面需要调整优化。"
-    result = result_generate(SuccessSummary_1, er1, result, OptimizedSummary_1)
     # 方向2
     sequence += 1
     er2 = direction3_1_process(datapath, API)
@@ -94,11 +94,7 @@ def Evaluate(datapath, API):
         "在用户迁移应用中，DVPP VPC接口的选择和使用状况较好，该方面暂无调优意见。"
     OptimizedSummary_2 = str(sequence) + "." + \
         "在用户迁移应用中，DVPP VPC接口的选择和使用方面需要调整优化。"
-    result = result_generate(
-        SuccessSummary_2,
-        er2,
-        result,
-        OptimizedSummary_2)
+
     # 方向3
     sequence += 1
     er3 = direction3_2_process(datapath, API)
@@ -106,7 +102,7 @@ def Evaluate(datapath, API):
         "在用户迁移应用中，DVPP Vdec接口的选择和使用状况较好，该方面暂无调优意见。"
     OptimizedSummary_3 = str(sequence) + "." + \
         "在用户迁移应用中，DVPP VPC接口的选择和使用方面需要调整优化。"
-    result = result_generate(SuccessSummary_3, er3, result, OptimizedSummary_3)
+
     # 方向4
     sequence += 1
     er4 = direction3_3_process(datapath)
@@ -114,7 +110,7 @@ def Evaluate(datapath, API):
         "在用户迁移应用中，AI CPU自定义算子开发方面状况较好，该方面暂无调优意见。"
     OptimizedSummary_4 = str(sequence) + "." + \
         "在用户迁移应用中，AI CPU自定义算子开发方面需要调整优化。"
-    result = result_generate(SuccessSummary_4, er4, result, OptimizedSummary_4)
+
     # 方向5
     sequence += 1
     er5 = direction3_4_process(datapath, API)
@@ -122,16 +118,22 @@ def Evaluate(datapath, API):
         "在用户迁移应用中，DVPP VPC输出YUV 400格式方面状况较好，该方面暂无调优意见。"
     OptimizedSummary_5 = str(sequence) + "." + \
         "在用户迁移应用中，DVPP VPC输出YUV 400格式方面需要调整优化。"
+
+    summary += (OptimizedSummary_1 + OptimizedSummary_2 + OptimizedSummary_3 + OptimizedSummary_4 + OptimizedSummary_5)
+    er_summary = summary_output(summary)
+    result = result_generate(SuccessSummary_5, er_summary, result, OptimizedSummary_5)
+    result = result_generate(SuccessSummary_1, er1, result, OptimizedSummary_1)
+    result = result_generate(SuccessSummary_2, er2, result, OptimizedSummary_2)
+    result = result_generate(SuccessSummary_3, er3, result, OptimizedSummary_3)
+    result = result_generate(SuccessSummary_4, er4, result, OptimizedSummary_4)
     result = result_generate(SuccessSummary_5, er5, result, OptimizedSummary_5)
     return result.generate()
 
 
 def result_generate(SuccessSummary, er, result, OptimizedSummary):
     if er.data_type != []:
-        result.summary += OptimizedSummary
         result.extend_result.append(er)
     else:
-        result.summary += SuccessSummary
         result.extend_result.append(er)
     return result
 
@@ -335,6 +337,14 @@ def direction3_1_process(profiling_path, API):
         return ER
     return ER
 
+
+def summary_output(summary):
+    ER = ExtendResult()
+    ER.type = EXTEND_TYPE["list"]
+    ER.extend_title = "经过本知识库调优分析可得:"
+    ER.data_type = [EXTEND_DATA_TYPE["str"]]
+    ER.value.append(summary)
+    return ER
 
 def direction3_2_process(profiling_path, API):
     ER = ExtendResult()
