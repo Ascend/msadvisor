@@ -94,7 +94,6 @@ def Evaluate(datapath, API):
         "There is no tuning suggestion for this aspect."
     OptimizedSummary_1 = str(sequence) + "." + "In user migration applications, the memory ECC enable status " \
         "and the ratio of AI CPU to Ctrl CPU""need to be adjusted and optimized."
-    result = result_generate(SuccessSummary_1, er1, result, OptimizedSummary_1)
     # 方向2
     sequence += 1
     er2 = direction3_1_process(datapath, API)
@@ -103,11 +102,6 @@ def Evaluate(datapath, API):
         "and there is no optimization suggestion in this aspect."
     OptimizedSummary_2 = str(sequence) + "." + "In user migration applications, " \
         "the selection and use of DVPP VPC interfaces need to be adjusted and optimized."
-    result = result_generate(
-        SuccessSummary_2,
-        er2,
-        result,
-        OptimizedSummary_2)
     # 方向3
     sequence += 1
     er3 = direction3_2_process(datapath, API)
@@ -139,8 +133,8 @@ def Evaluate(datapath, API):
     summary += (OptimizedSummary_1 + OptimizedSummary_2 + OptimizedSummary_3 + OptimizedSummary_4 + OptimizedSummary_5)
     er_summary = summary_output(summary)
     result = result_generate(SuccessSummary_5, er_summary, result, OptimizedSummary_5)
-    result = result_generate(SuccessSummary_1, er3, result, OptimizedSummary_1)
-    result = result_generate(SuccessSummary_2, er3, result, OptimizedSummary_2)
+    result = result_generate(SuccessSummary_1, er1, result, OptimizedSummary_1)
+    result = result_generate(SuccessSummary_2, er2, result, OptimizedSummary_2)
     result = result_generate(SuccessSummary_3, er3, result, OptimizedSummary_3)
     result = result_generate(SuccessSummary_4, er4, result, OptimizedSummary_4)
     result = result_generate(SuccessSummary_5, er5, result, OptimizedSummary_5)
@@ -676,7 +670,6 @@ def direction3_3_process(profiling_path):
 
 def summary_output(summary):
     ER = ExtendResult()
-
     ER.type = EXTEND_TYPE["list"]
     ER.extend_title = "After the optimization analysis of this knowledge base, we can get:"
     ER.data_type = [EXTEND_DATA_TYPE["str"]]
