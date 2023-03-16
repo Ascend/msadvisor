@@ -67,33 +67,33 @@ def Evaluate(datapath, API):
         result must be ad_result
     """
     tyTitle = (
-        "在视图解析业务中，本晟腾310p应用迁移知识库将根据用户应用中所获取的反馈数据从以下几个方面给出调优意见:\n"
-        "1、内存ECC使能状态以及AI CPU与Ctrl CPU配比方面可优化;\n"
-        "2、DVPP VPC接口的选择和使用可优化，如：抠图缩放贴图等业务在目标密集型场景下可应用对应的批处理接口功能;\n"
-        "3、DVPP VDEC接口的选择和使用可优化，如：VDEC抽帧功能的应用可使得大部分场景应用性能获得极大的提升;\n"
-        "4、AI CPU自定义算子开发可优化，针对可能成为阻塞业务流性能的算子提出调优建议;\n"
+        "在视图解析业务中，本晟腾310p应用迁移知识库将根据用户应用中所获取的反馈数据从以下几个方面给出调优意见:"
+        "1、内存ECC使能状态以及AI CPU与Ctrl CPU配比方面可优化;"
+        "2、DVPP VPC接口的选择和使用可优化，如：抠图缩放贴图等业务在目标密集型场景下可应用对应的批处理接口功能;"
+        "3、DVPP VDEC接口的选择和使用可优化，如：VDEC抽帧功能的应用可使得大部分场景应用性能获得极大的提升;"
+        "4、AI CPU自定义算子开发可优化，针对可能成为阻塞业务流性能的算子提出调优建议;"
         "5、DVPP VPC输出YUV 400格式可优化，晟腾310p已经对该方面的业务进行了较好的封装，用户可根据调优建议做出修改。")
     os.chdir(sys.path[0])
     result = Result()
     sequence = 0
     result.class_type = CLASS_TYPE['model']
-    result.summary = "经过本知识库调优分析可得:\n"
+    result.summary = "经过本知识库调优分析可得:"
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # 方向1
     sequence += 1
     er1 = direction2_1_process(datapath)
     SuccessSummary_1 = str(
-        sequence) + "." + "在用户迁移应用中，内存ECC使能状态以及AI CPU与Ctrl CPU配比方面状况较好，该方面暂无调优意见。\n"
+        sequence) + "." + "在用户迁移应用中，内存ECC使能状态以及AI CPU与Ctrl CPU配比方面状况较好，该方面暂无调优意见。"
     OptimizedSummary_1 = str(sequence) + "." + \
-        "在用户迁移应用中，内存ECC使能状态以及AI CPU与Ctrl CPU配比方面需要调整优化。\n"
+        "在用户迁移应用中，内存ECC使能状态以及AI CPU与Ctrl CPU配比方面需要调整优化。"
     result = result_generate(SuccessSummary_1, er1, result, OptimizedSummary_1)
     # 方向2
     sequence += 1
     er2 = direction3_1_process(datapath, API)
     SuccessSummary_2 = str(sequence) + "." + \
-        "在用户迁移应用中，DVPP VPC接口的选择和使用状况较好，该方面暂无调优意见。\n"
+        "在用户迁移应用中，DVPP VPC接口的选择和使用状况较好，该方面暂无调优意见。"
     OptimizedSummary_2 = str(sequence) + "." + \
-        "在用户迁移应用中，DVPP VPC接口的选择和使用方面需要调整优化。\n"
+        "在用户迁移应用中，DVPP VPC接口的选择和使用方面需要调整优化。"
     result = result_generate(
         SuccessSummary_2,
         er2,
@@ -103,17 +103,17 @@ def Evaluate(datapath, API):
     sequence += 1
     er3 = direction3_2_process(datapath, API)
     SuccessSummary_3 = str(sequence) + "." + \
-        "在用户迁移应用中，DVPP Vdec接口的选择和使用状况较好，该方面暂无调优意见。\n"
+        "在用户迁移应用中，DVPP Vdec接口的选择和使用状况较好，该方面暂无调优意见。"
     OptimizedSummary_3 = str(sequence) + "." + \
-        "在用户迁移应用中，DVPP VPC接口的选择和使用方面需要调整优化。\n"
+        "在用户迁移应用中，DVPP VPC接口的选择和使用方面需要调整优化。"
     result = result_generate(SuccessSummary_3, er3, result, OptimizedSummary_3)
     # 方向4
     sequence += 1
     er4 = direction3_3_process(datapath)
     SuccessSummary_4 = str(sequence) + "." + \
-        "在用户迁移应用中，AI CPU自定义算子开发方面状况较好，该方面暂无调优意见。\n"
+        "在用户迁移应用中，AI CPU自定义算子开发方面状况较好，该方面暂无调优意见。"
     OptimizedSummary_4 = str(sequence) + "." + \
-        "在用户迁移应用中，AI CPU自定义算子开发方面需要调整优化。\n"
+        "在用户迁移应用中，AI CPU自定义算子开发方面需要调整优化。"
     result = result_generate(SuccessSummary_4, er4, result, OptimizedSummary_4)
     # 方向5
     sequence += 1
@@ -153,7 +153,7 @@ def direction2_1_process(profiling_path):
     f.close()
     # 开始分析
     usage_list = []
-    data_list = read_txt.split("end\n")
+    data_list = read_txt.split("end")
     if data_list[-1] == '0':  # 若为0,采集数据不成功,另做处理！
         ER.type = EXTEND_TYPE['list']
         ER.extend_title = "内存ECC使能状态以及AI CPU与Ctrl CPU配比"

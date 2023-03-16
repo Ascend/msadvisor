@@ -74,17 +74,17 @@ p6 = subprocess.Popen(r"npu-smi info -t usages -i 0",
                       encoding='utf-8',
                       preexec_fn=os.setsid
                       )
-f.write(p1.stdout.read() + 'end\n')
+f.write(p1.stdout.read() + 'end')
 
-f.write(p2.stdout.read() + 'end\n')
+f.write(p2.stdout.read() + 'end')
 
-f.write(p3.stdout.read() + 'end\n')
+f.write(p3.stdout.read() + 'end')
 
-f.write(p4.stdout.read() + 'end\n')
+f.write(p4.stdout.read() + 'end')
 
-f.write(p5.stdout.read() + 'end\n')
+f.write(p5.stdout.read() + 'end')
 
-f.write(p6.stdout.read() + 'end\n')
+f.write(p6.stdout.read() + 'end')
 
 p1.kill()
 p1.terminate()
@@ -147,17 +147,17 @@ while p.poll() is None:
                           encoding='utf-8',
                           preexec_fn=os.setsid
                           )
-    f.write(p1.stdout.read() + 'end\n')
+    f.write(p1.stdout.read() + 'end')
 
-    f.write(p2.stdout.read() + 'end\n')
+    f.write(p2.stdout.read() + 'end')
 
-    f.write(p3.stdout.read() + 'end\n')
+    f.write(p3.stdout.read() + 'end')
 
-    f.write(p4.stdout.read() + 'end\n')
+    f.write(p4.stdout.read() + 'end')
 
-    f.write(p5.stdout.read() + 'end\n')
+    f.write(p5.stdout.read() + 'end')
 
-    f.write(p6.stdout.read() + 'end\n')
+    f.write(p6.stdout.read() + 'end')
 
     p1.kill()
     p1.terminate()

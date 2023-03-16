@@ -68,40 +68,40 @@ def Evaluate(datapath, API):
     """
     tyTitle = (
         "In the view parsing business, ShengTeng 310p application migration knowledgebase will give tuning suggestions"
-        "from the following aspects based on the feedback data obtained from the user application\n"
-        "1. The memory ECC enable state and the ratio of AI CPU and Ctrl CPU can be optimized\n"
+        "from the following aspects based on the feedback data obtained from the user application"
+        "1. The memory ECC enable state and the ratio of AI CPU and Ctrl CPU can be optimized"
         "2. The selection and use of the DVPP VPC interface can be optimized."
         "For example, the corresponding batch interface functions can be applied in the target-intensive scenarios "
-        "for services such as crop,resize,and paste\n"
+        "for services such as crop,resize,and paste"
         "3. The selection and use of the DVPP VDEC interface can be optimized. For example, the application of "
-        "the VDEC frame extraction function can greatly improve the application performance of most scenarios\n"
+        "the VDEC frame extraction function can greatly improve the application performance of most scenarios"
         "4. The development of AI CPU custom operators can be optimized, and optimization suggestions are provided "
-        "for operators that may block service flow performance\n"
+        "for operators that may block service flow performance"
         "5. DVPP VPC output YUV 400 format can be optimized, ShengTeng 310p has carried out a good encapsulation of "
         "this aspect of the business, users can make changes according to the optimization suggestions")
     os.chdir(sys.path[0])
     result = Result()
     sequence = 0
     result.class_type = CLASS_TYPE['model']
-    result.summary = "After the optimization analysis of this knowledge base, we can get:\n"
+    result.summary = "After the optimization analysis of this knowledge base, we can get:"
     # 获取各个方向的ExtendResult,并处理各个方向的er
     # 方向1
     sequence += 1
     er1 = direction2_1_process(datapath)
     SuccessSummary_1 = str(sequence) + "." + "In the user migration applications, the memory ECC enabled status " \
         "and the ratio of AI CPU and Ctrl CPU are in good condition."\
-        "There is no tuning suggestion for this aspect.\n"
+        "There is no tuning suggestion for this aspect."
     OptimizedSummary_1 = str(sequence) + "." + "In user migration applications, the memory ECC enable status " \
-        "and the ratio of AI CPU to Ctrl CPU""need to be adjusted and optimized.\n"
+        "and the ratio of AI CPU to Ctrl CPU""need to be adjusted and optimized."
     result = result_generate(SuccessSummary_1, er1, result, OptimizedSummary_1)
     # 方向2
     sequence += 1
     er2 = direction3_1_process(datapath, API)
     SuccessSummary_2 = str(sequence) + "." + "In the user migration applications, " \
         "the selection and usage of the DVPP VPC interface is relatively good, " \
-        "and there is no optimization suggestion in this aspect.\n"
+        "and there is no optimization suggestion in this aspect."
     OptimizedSummary_2 = str(sequence) + "." + "In user migration applications, " \
-        "the selection and use of DVPP VPC interfaces need to be adjusted and optimized.\n"
+        "the selection and use of DVPP VPC interfaces need to be adjusted and optimized."
     result = result_generate(
         SuccessSummary_2,
         er2,
@@ -112,18 +112,18 @@ def Evaluate(datapath, API):
     er3 = direction3_2_process(datapath, API)
     SuccessSummary_3 = str(sequence) + "." + "In the user migration applications, the selection and usage of " \
         "the DVPP Vdec interface is relatively good, there is no tuning suggestion " \
-        "for this aspect.\n"
+        "for this aspect."
     OptimizedSummary_3 = str(sequence) + "." + "In user migration applications, the selection and use of DVPP " \
-        "VPC interfaces need to be adjusted and optimized.\n"
+        "VPC interfaces need to be adjusted and optimized."
     result = result_generate(SuccessSummary_3, er3, result, OptimizedSummary_3)
     # 方向4
     sequence += 1
     er4 = direction3_3_process(datapath)
     SuccessSummary_4 = str(sequence) + "." + "In the user migration applications," \
         " the development of AI CPU custom operators is in good condition," \
-        "and there is no tuning suggestion for this aspect.\n"
+        "and there is no tuning suggestion for this aspect."
     OptimizedSummary_4 = str(sequence) + "." + "In user migration applications, " \
-        "the development of AI CPU custom operators need to be adjusted and optimized.\n"
+        "the development of AI CPU custom operators need to be adjusted and optimized."
     result = result_generate(SuccessSummary_4, er4, result, OptimizedSummary_4)
     # 方向5
     sequence += 1
