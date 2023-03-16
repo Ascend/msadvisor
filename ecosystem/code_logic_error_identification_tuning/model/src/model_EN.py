@@ -161,7 +161,7 @@ def direction2_1_process(profiling_path):
             "Warning! CTRL CPU and memory utilization data have not failed or collected.")
         ER.value.append(
             "Please note that if you need to optimize the CPU ratio and memory enable application in the migration business, "
-            "you should use the script file provided by the knowledge base to collect ctrlCpuAndMemoryData.txt文件")
+            "you should use the script file provided by the knowledge base to collect ctrlCpuAndMemoryData.txt")
         return ER
     read_txt = f.read()
     f.close()
