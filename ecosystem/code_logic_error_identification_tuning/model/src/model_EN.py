@@ -82,6 +82,7 @@ def Evaluate(datapath, API):
     os.chdir(sys.path[0])
     result = Result()
     sequence = 0
+    summary = ""
     result.class_type = CLASS_TYPE['model']
     result.summary = "After the optimization analysis of this knowledge base, we can get:"
     # 获取各个方向的ExtendResult,并处理各个方向的er
@@ -115,7 +116,7 @@ def Evaluate(datapath, API):
         "for this aspect."
     OptimizedSummary_3 = str(sequence) + "." + "In user migration applications, the selection and use of DVPP " \
         "VPC interfaces need to be adjusted and optimized."
-    result = result_generate(SuccessSummary_3, er3, result, OptimizedSummary_3)
+
     # 方向4
     sequence += 1
     er4 = direction3_3_process(datapath)
@@ -124,7 +125,7 @@ def Evaluate(datapath, API):
         "and there is no tuning suggestion for this aspect."
     OptimizedSummary_4 = str(sequence) + "." + "In user migration applications, " \
         "the development of AI CPU custom operators need to be adjusted and optimized."
-    result = result_generate(SuccessSummary_4, er4, result, OptimizedSummary_4)
+
     # 方向5
     sequence += 1
     er5 = direction3_4_process(datapath, API)
@@ -133,16 +134,22 @@ def Evaluate(datapath, API):
         "for this aspect."
     OptimizedSummary_5 = str(sequence) + "." + "In user migration applications, DVPP VPC output YUV " \
         "400 format needs to be adjusted and optimized."
+
+
+    summary += (OptimizedSummary_1 + OptimizedSummary_2 + OptimizedSummary_3 + OptimizedSummary_4 + OptimizedSummary_5)
+    er_summary = summary_output(summary)
+    result = result_generate(SuccessSummary_5, er_summary, result, OptimizedSummary_5)
+    result = result_generate(SuccessSummary_1, er3, result, OptimizedSummary_1)
+    result = result_generate(SuccessSummary_2, er3, result, OptimizedSummary_2)
+    result = result_generate(SuccessSummary_3, er3, result, OptimizedSummary_3)
+    result = result_generate(SuccessSummary_4, er4, result, OptimizedSummary_4)
     result = result_generate(SuccessSummary_5, er5, result, OptimizedSummary_5)
     return result.generate()
 
-
 def result_generate(SuccessSummary, er, result, OptimizedSummary):
     if er.data_type != []:
-        result.summary += OptimizedSummary
         result.extend_result.append(er)
     else:
-        result.summary += SuccessSummary
         result.extend_result.append(er)
     return result
 
@@ -665,6 +672,15 @@ def direction3_3_process(profiling_path):
             str(aicpu_custom_block_op) +
             " ai CPU custom operators in parallel execution of multi-processor")
         return ER
+    return ER
+
+def summary_output(summary):
+    ER = ExtendResult()
+
+    ER.type = EXTEND_TYPE["list"]
+    ER.extend_title = "After the optimization analysis of this knowledge base, we can get:"
+    ER.data_type = [EXTEND_DATA_TYPE["str"]]
+    ER.value.append(summary)
     return ER
 
 
