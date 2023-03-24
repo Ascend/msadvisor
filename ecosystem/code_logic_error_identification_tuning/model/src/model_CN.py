@@ -360,7 +360,7 @@ def direction3_2_process(profiling_path, API):
     if (countVpcCCA != 0 or countVdecSF != 0):
         ER.type = EXTEND_TYPE["list"]
         ER.extend_title = "DVPP VDEC接口的选择和使用"
-        ER.data_type = [EXTEND_DATA_TYPE["str"] * 5]
+        ER.data_type = [EXTEND_DATA_TYPE["str"]] * 5
         ER.value.append("在这个 AI 处理器上，已经使用了 VDECAPI")
         if (countVpcCCA >= 1 & countVdecSF == 0):
             ER.value.append(

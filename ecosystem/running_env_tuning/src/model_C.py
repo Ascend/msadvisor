@@ -202,7 +202,7 @@ def direction2_process(user_parameter, datapath, target_path):
             er.type = EXTEND_TYPE['table']
 
             er.extend_title = '以下是推荐的推理服务器：'
-            er.data_type = [EXTEND_DATA_TYPE['str'] * 8]
+            er.data_type = [EXTEND_DATA_TYPE['str']] * 8
             er.key = ['合作伙伴', '服务器型号', '昇腾AI处理器',
                       '每节点最大AI处理器数',
                       'CPU系列', '每节点最大CPU数', '服务器形态', '有效期']
@@ -310,13 +310,13 @@ def direction4_1_process(environment_data, user_parameter, datapath, target_path
             else:
                 continue
         if er1.value:
-            er1.data_type = [EXTEND_DATA_TYPE['str'] * 3]
+            er1.data_type = [EXTEND_DATA_TYPE['str']] * 3
         optimizedsummary = "存在从310_v1到310p_v1的相关迁移建议"
         return er1, optimizedsummary
     elif transfer_version == '310pV2':  # flag为False且转移的版本为V2版本的话说明迁移到310p_v2_hi_mpi版本可以实现
         er2.extend_title = '迁移到310p_v2的相关接口建议：'
         er2.type = EXTEND_TYPE['table']
-        er2.data_type = [EXTEND_DATA_TYPE['str'] * 3]
+        er2.data_type = [EXTEND_DATA_TYPE['str']] * 3
         er2.key = ['从310_v1到310p_v2的迁移建议', 'AscendCL接口名称', '模块']
         # 对必须处理的头文件进行单独处理
         temps = transfer_V2_json['v2_library file']
@@ -369,7 +369,7 @@ def direction4_2_process(environment_data, datapath, target_path):
     if chip_type == '310' or chip_type == '710' or chip_type == '910':
         er1.extend_title = "ATC工具目标芯片选项："
         er1.type = EXTEND_TYPE['table']
-        er1.data_type = [EXTEND_DATA_TYPE['str'] * 2]
+        er1.data_type = [EXTEND_DATA_TYPE['str']] * 2
         er1.key = ['选项', '格式']
         for chip in chip_option_list:
             if chip[chip_type] == 0:
@@ -401,7 +401,7 @@ def direction5_process(environment_data, datapath, target_path):
     elif status == 1:
         er.type = EXTEND_TYPE['table']
         er.extend_title = "操作系统内核版本的推荐："
-        er.data_type = [EXTEND_DATA_TYPE['str'] * 4]
+        er.data_type = [EXTEND_DATA_TYPE['str']] * 4
         er.key = ['操作系统版本', '操作系统内核默认版本', '操作系统架构',
                   '安装方式']
         er.value.append([version.get(er.key[0]),
@@ -414,7 +414,7 @@ def direction5_process(environment_data, datapath, target_path):
         data = innerCore_data.get(version)  # 获取知识库当前推理卡下的所有操作系统、操作系统架构和默认内核版本的对应关系
         er.type = EXTEND_TYPE['table']
         er.extend_title = "操作系统和和其架构版本的推荐："
-        er.data_type = [EXTEND_DATA_TYPE['str'] * 2]
+        er.data_type = [EXTEND_DATA_TYPE['str']] * 2
         er.key = ['操作系统版本', '操作系统架构']
         for tmp in data:
             er.value.append([tmp.get(er.key[0]),
