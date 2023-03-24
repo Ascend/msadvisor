@@ -325,13 +325,23 @@ def datatype_process(file_pathname, extend_result):
                                 value.append(filename + ' Line:' + str(line_num))
                                 extend_result.value.append(value)
 
+                if ACL_VENC_BUF_SIZE_UINT32_flag == 0:
+                    value = []
+                    extend_result.value.append(value)
+                if ACL_VENC_MAX_BITRATE_UINT32_flag == 0:
+                    value = []
+                    extend_result.value.append(value)
+                if ACL_VENC_RC_MODE_UINT32_flag == 0:
+                    value = []
+                    extend_result.value.append(value)
+
     return extend_result
 
 
 def result_parse(result, extend_result):
     if not extend_result.value:
         result.class_type = class_type['op']
-        result.error_code = error_code['optimized']
+        result.error_code = error_code['success']
         result.summary = "310P API operations are well optimized"
         return result.generate()
     result.class_type = class_type['op']
