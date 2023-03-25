@@ -339,7 +339,7 @@ def datatype_process(file_pathname, extend_result):
 
 
 def result_parse(result, extend_result):
-    if not extend_result or len(extend_result.value[0] == 0):
+    if not extend_result or len(extend_result.value[0]) == 0:
         result.class_type = class_type['op']
         result.error_code = error_code['success']
         result.summary = "310P API operations are well optimized"
